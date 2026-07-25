@@ -19,7 +19,7 @@
       "main"
     ],
     [
-      "github:PyDevices/pydisplay/packages/spibus.json",
+      "github:PyDevices/micropython-hardware/packages/spibus.json",
       "main"
     ]
   ],

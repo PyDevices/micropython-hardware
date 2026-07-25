@@ -23,11 +23,11 @@
       "main"
     ],
     [
-      "github:PyDevices/pydisplay/packages/epaper_chip.json",
+      "github:PyDevices/micropython-hardware/packages/epaper_chip.json",
       "main"
     ],
     [
-      "github:PyDevices/pydisplay/packages/spibus.json",
+      "github:PyDevices/micropython-hardware/packages/spibus.json",
       "main"
     ]
   ],

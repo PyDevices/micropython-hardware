@@ -15,11 +15,11 @@
       "main"
     ],
     [
-      "github:PyDevices/pydisplay/packages/i2cbus.json",
+      "github:PyDevices/micropython-hardware/packages/i2cbus.json",
       "main"
     ],
     [
-      "github:PyDevices/pydisplay/packages/i2cbus.json",
+      "github:PyDevices/micropython-hardware/packages/i2cbus.json",
       "main"
     ]
   ],
