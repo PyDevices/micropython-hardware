@@ -164,8 +164,9 @@ serial panel interface). <strong>RP2350 has no MIPI DSI</strong> — use
 <tbody>
 <tr class="odd">
 <td>BusDisplay</td>
-<td><code>board_configs/busdisplay/{spi,i80,i2c}/</code></td>
-<td><code>cp_pyportal</code>,
+<td><code>board_configs/busdisplay/{spi,i80,i2c}/</code> (+
+<code>cp/…</code>)</td>
+<td><code>cp/busdisplay/spi/pyportal</code>,
 <code>ili9341_eyespi_qtpy_esp32s3</code></td>
 </tr>
 <tr class="even">
@@ -177,20 +178,21 @@ serial panel interface). <strong>RP2350 has no MIPI DSI</strong> — use
 </tr>
 <tr class="odd">
 <td>PixelDisplay</td>
-<td><code>board_configs/pixeldisplay/</code></td>
-<td><code>cp_neopixel_8x4</code>, <code>cp_dotstar_12x6</code></td>
+<td><code>board_configs/pixeldisplay/</code> (+ <code>cp/…</code>)</td>
+<td><code>cp/pixeldisplay/neopixel_8x4</code>, …</td>
 </tr>
 <tr class="even">
 <td>EPaperDisplay</td>
-<td><code>board_configs/epaperdisplay/</code></td>
-<td><code>cp_magtag</code></td>
+<td><code>board_configs/epaperdisplay/</code> (+ <code>cp/…</code>)</td>
+<td><code>cp/epaperdisplay/magtag</code></td>
 </tr>
 </tbody>
 </table>
 <p>MicroPython RGB/HUB75/DSI/DVI drivers live in
 <strong>pydevices/displayif</strong>, wired from board configs and
-drivers vendored here in pydisplay. CircuitPython configs use
-<code>cp_*</code> prefixes and CP native modules.</p>
+drivers vendored here. CircuitPython configs live under
+<code>board_configs/cp/</code> (same directory names as MicroPython) and
+use CP native modules.</p>
 <h2 id="touch">Touch</h2>
 <p>Touch controllers live in <code>drivers/touch/</code>. CircuitPython
 shims are under <code>drivers/touch/circuitpython/</code>. Every

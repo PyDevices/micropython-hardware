@@ -97,8 +97,8 @@ in inventory fixture #1).</p>
 </tr>
 <tr class="even">
 <td>Adafruit Qualia S3 + TL040HDS20</td>
-<td><code>qualia_tl040hds20</code> (+ CP
-<code>cp_qualia_tl040hds20</code>)</td>
+<td><code>qualia_tl040hds20</code> (+ CP under
+<code>cp/fbdisplay/qualia_tl040hds20</code>)</td>
 <td>720×720</td>
 <td>RGB-666→565 <strong>DotClock</strong></td>
 <td>FT6x36 @ <code>0x48</code></td>
@@ -152,8 +152,8 @@ in inventory fixture #1).</p>
 </tr>
 <tr class="even">
 <td>Waveshare RP2040-Touch-LCD-1.28</td>
-<td><code>busdisplay/spi/rp2040-touch-lcd-1.28</code> (+ CP
-<code>cp_rp2040-touch-lcd-1.28</code>)</td>
+<td><code>busdisplay/spi/rp2040-touch-lcd-1.28</code> (+ CP under
+<code>cp/busdisplay/spi/rp2040-touch-lcd-1.28</code>)</td>
 <td>240×240 round</td>
 <td>GC9A01A <strong>SPI</strong> (<code>spibus</code> / FourWire)</td>
 <td>CST816 (<code>cst8xx</code> / <code>cst816</code>)</td>
@@ -190,7 +190,8 @@ ESP32-P4-WIFI6-Touch-LCD-4B</h3>
 <li><strong>board_config title:</strong>
 <code>Waveshare ESP32-P4-WIFI6-Touch-LCD-4B - MicroPython</code></li>
 <li><strong>Dir:</strong> <code>esp32-p4-wifi6-touch-lcd-4b</code> (CP
-sibling: <code>cp_esp32-p4-wifi6-touch-lcd-4b</code>)</li>
+sibling under
+<code>cp/fbdisplay/esp32-p4-wifi6-touch-lcd-4b</code>)</li>
 <li><strong>Resolution:</strong> 720×720</li>
 <li><strong>Display:</strong> <code>mipidsi.Bus</code> +
 <code>mipidsi.Display</code>, ST7703 init sequence, 2-lane DSI, pixel
@@ -208,7 +209,7 @@ reference for displayif</li>
 <code>Qualia S3 RGB-666 with TL040HDS20 4.0" 720x720 Square Display</code></li>
 <li><strong>Dirs:</strong> <code>qualia_tl040hds20</code> (MicroPython /
 <code>displayif.DotClockFramebuffer</code>);
-<code>cp_qualia_tl040hds20</code> (CircuitPython
+<code>cp/fbdisplay/qualia_tl040hds20</code> (CircuitPython
 <code>dotclockframebuffer</code> +
 <code>FramebufferDisplay(auto_refresh=True)</code> +
 <code>displayio.Bitmap</code>)</li>
@@ -311,8 +312,8 @@ put the origin wrong on this panel).</li>
 Octal PSRAM pads)</li>
 <li><strong>Power / BL:</strong> GPIO46 <code>PIN_POWER_ON</code> (must
 be high), backlight GPIO15</li>
-<li><strong>Input:</strong> <code>RotaryIRQ</code> A=2, B=1, button=0
-(<code>half_step=True</code>); no touch panel</li>
+<li><strong>Input:</strong> <code>machine.Encoder</code> A=2, B=1,
+button=0 (<code>phases=2</code>); no touch panel</li>
 <li><strong>Flash / USB:</strong> Native USB-Serial/JTAG;
 <strong>BOOT+RESET</strong> → ROM, flash <code>ESP32_GENERIC_S3</code> +
 <code>SPIRAM_OCT</code>, plain <strong>RESET</strong> for CDC. Example
@@ -392,7 +393,7 @@ RP2040-Touch-LCD-1.28 (round GC9A01A)</h3>
 (MicroPython); same board under CircuitPython</li>
 <li><strong>Dirs:</strong>
 <code>board_configs/busdisplay/spi/rp2040-touch-lcd-1.28</code> (MP);
-<code>board_configs/busdisplay/spi/cp_rp2040-touch-lcd-1.28</code>
+<code>board_configs/cp/busdisplay/spi/rp2040-touch-lcd-1.28</code>
 (CP)</li>
 <li><strong>Resolution:</strong> 240×240 round GC9A01A,
 <code>bgr=True</code>, <code>reverse_bytes_in_word=True</code>,

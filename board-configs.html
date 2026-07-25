@@ -77,6 +77,11 @@ href="https://github.com/PyDevices/micropython-hardware"><code>PyDevices/micropy
 <code>package.json</code> can be installed via MIP:</p>
 <div class="sourceCode" id="cb1"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>mip.install(<span class="st">&quot;github:PyDevices/micropython-hardware/board_configs/busdisplay/i80/t-display-s3&quot;</span>)</span></code></pre></div>
+<p>CircuitPython configs live under <code>board_configs/cp/</code> with
+the same bus layout and directory names as MicroPython (no
+<code>cp_</code> prefix, no <code>package.json</code> / MIP).
+MicroPython configs stay at the top level of <code>board_configs/</code>
+(not under an <code>mp/</code> folder).</p>
 <h2 id="picking-a-config">Picking a config</h2>
 <p>Match in priority order:</p>
 <ol type="1">
@@ -225,15 +230,15 @@ usually enough to adapt.</p>
 pydevices/displayif)</td>
 </tr>
 <tr class="odd">
-<td><code>fbdisplay/cp_qualia_tl040hds20</code></td>
+<td><code>cp/fbdisplay/qualia_tl040hds20</code></td>
 <td>CircuitPython Qualia</td>
 </tr>
 <tr class="even">
-<td><code>fbdisplay/cp_usb_video</code></td>
+<td><code>cp/fbdisplay/usb_video</code></td>
 <td>CircuitPython USB Video</td>
 </tr>
 <tr class="odd">
-<td><code>fbdisplay/cp_matrixportal_s3_64x64</code></td>
+<td><code>cp/fbdisplay/matrixportal_s3_64x64</code></td>
 <td>MatrixPortal S3 HUB75 64×64</td>
 </tr>
 <tr class="even">
@@ -253,7 +258,7 @@ configs</h2>
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>pixeldisplay/cp_neopixel_8x4</code></td>
+<td><code>cp/pixeldisplay/neopixel_8x4</code></td>
 <td>NeoPixel 8×4 grid (CircuitPython)</td>
 </tr>
 <tr class="even">
@@ -261,7 +266,7 @@ configs</h2>
 <td>NeoPixel 8×4 grid (MicroPython)</td>
 </tr>
 <tr class="odd">
-<td><code>pixeldisplay/cp_dotstar_12x6</code></td>
+<td><code>cp/pixeldisplay/dotstar_12x6</code></td>
 <td>DotStar 12×6 grid (CircuitPython)</td>
 </tr>
 <tr class="even">
@@ -282,7 +287,7 @@ configs</h2>
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>epaperdisplay/cp_magtag</code></td>
+<td><code>cp/epaperdisplay/magtag</code></td>
 <td>Adafruit MagTag SSD1680 + KEYPAD</td>
 </tr>
 <tr class="even">
@@ -290,7 +295,7 @@ configs</h2>
 <td>MagTag SSD1680 + KEYPAD (MP)</td>
 </tr>
 <tr class="odd">
-<td><code>epaperdisplay/cp_ssd1680_213_featherwing</code></td>
+<td><code>cp/epaperdisplay/ssd1680_213_featherwing</code></td>
 <td>2.13" E-Ink FeatherWing</td>
 </tr>
 <tr class="even">
@@ -298,7 +303,7 @@ configs</h2>
 <td>2.13" E-Ink FeatherWing (MP)</td>
 </tr>
 <tr class="odd">
-<td><code>epaperdisplay/cp_acep7in_73</code></td>
+<td><code>cp/epaperdisplay/acep7in_73</code></td>
 <td>ACeP 7.3" 7-color E-Ink</td>
 </tr>
 <tr class="even">
@@ -306,7 +311,7 @@ configs</h2>
 <td>ACeP 7.3" (MP)</td>
 </tr>
 <tr class="odd">
-<td><code>epaperdisplay/cp_ssd1675_213_featherwing</code></td>
+<td><code>cp/epaperdisplay/ssd1675_213_featherwing</code></td>
 <td>SSD1675 2.13" monochrome FeatherWing</td>
 </tr>
 <tr class="even">
@@ -314,7 +319,7 @@ configs</h2>
 <td>SSD1675 2.13" FeatherWing (MP)</td>
 </tr>
 <tr class="odd">
-<td><code>epaperdisplay/cp_uc8151d_29_breakout</code></td>
+<td><code>cp/epaperdisplay/uc8151d_29_breakout</code></td>
 <td>UC8151D 2.9" flexible breakout</td>
 </tr>
 <tr class="even">
@@ -323,14 +328,15 @@ configs</h2>
 </tr>
 </tbody>
 </table>
-<p>Additional vendored chip drivers (each has <code>cp_*</code>
-sibling): <code>ssd1681_154_tricolor</code>,
-<code>ssd1683_213_featherwing</code>, <code>ssd1677_583_mono</code>,
-<code>ssd1608_154_mono</code>, <code>il0373_213_tricolor</code>,
-<code>il0398_42_mono</code>, <code>il91874_27_tricolor</code>,
-<code>uc8179_583_mono</code>, <code>uc8253_37_mono</code>,
-<code>ek79686_27_tricolor</code>, <code>jd79661_213_4gray</code>,
-<code>jd79667_391_4gray</code>, <code>spd1656_154_acep</code>.</p>
+<p>Additional vendored chip drivers (each has a CircuitPython sibling
+under <code>cp/epaperdisplay/</code>):
+<code>ssd1681_154_tricolor</code>, <code>ssd1683_213_featherwing</code>,
+<code>ssd1677_583_mono</code>, <code>ssd1608_154_mono</code>,
+<code>il0373_213_tricolor</code>, <code>il0398_42_mono</code>,
+<code>il91874_27_tricolor</code>, <code>uc8179_583_mono</code>,
+<code>uc8253_37_mono</code>, <code>ek79686_27_tricolor</code>,
+<code>jd79661_213_4gray</code>, <code>jd79667_391_4gray</code>,
+<code>spd1656_154_acep</code>.</p>
 <p>Tri-color / 4-gray configs use <code>color_depth=2</code> (0=white,
 1=black, 2=accent). ACeP configs use <code>color_depth=4</code>.</p>
 <table>
@@ -342,23 +348,23 @@ sibling): <code>ssd1681_154_tricolor</code>,
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>fbdisplay/cp_matrixportal_m4_64x32</code></td>
+<td><code>cp/fbdisplay/matrixportal_m4_64x32</code></td>
 <td>MatrixPortal M4 HUB75 64×32</td>
 </tr>
 <tr class="even">
-<td><code>busdisplay/spi/cp_hallowing_m4</code></td>
+<td><code>cp/busdisplay/spi/hallowing_m4</code></td>
 <td>HalloWing M4</td>
 </tr>
 <tr class="odd">
-<td><code>busdisplay/spi/cp_pyportal_titano</code></td>
+<td><code>cp/busdisplay/spi/pyportal_titano</code></td>
 <td>PyPortal Titano + touch</td>
 </tr>
 <tr class="even">
-<td><code>busdisplay/i2c/cp_sh1107_oled_128x64</code></td>
+<td><code>cp/busdisplay/i2c/sh1107_oled_128x64</code></td>
 <td>SH1107 OLED</td>
 </tr>
 <tr class="odd">
-<td><code>busdisplay/spi/cp_ssd1351_128_oled</code></td>
+<td><code>cp/busdisplay/spi/ssd1351_128_oled</code></td>
 <td>SSD1351 color OLED</td>
 </tr>
 </tbody>
@@ -373,7 +379,7 @@ sibling): <code>ssd1681_154_tricolor</code>,
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>busdisplay/i2c/cp_ssd1306_oled_featherwing</code></td>
+<td><code>cp/busdisplay/i2c/ssd1306_oled_featherwing</code></td>
 <td>FeatherWing OLED 128×32</td>
 </tr>
 <tr class="even">
@@ -397,7 +403,7 @@ sibling): <code>ssd1681_154_tricolor</code>,
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>busdisplay/spi/cp_pyportal</code></td>
+<td><code>cp/busdisplay/spi/pyportal</code></td>
 <td>PyPortal + TT21100 touch</td>
 </tr>
 <tr class="even">
@@ -405,7 +411,7 @@ sibling): <code>ssd1681_154_tricolor</code>,
 <td>PyPortal + TT21100 (MP SAMD51)</td>
 </tr>
 <tr class="odd">
-<td><code>busdisplay/spi/cp_pyportal_titano</code></td>
+<td><code>cp/busdisplay/spi/pyportal_titano</code></td>
 <td>PyPortal Titano + touch</td>
 </tr>
 <tr class="even">
@@ -413,7 +419,7 @@ sibling): <code>ssd1681_154_tricolor</code>,
 <td>PyPortal Titano (MP SAMD51)</td>
 </tr>
 <tr class="odd">
-<td><code>busdisplay/spi/cp_funhouse</code></td>
+<td><code>cp/busdisplay/spi/funhouse</code></td>
 <td>FunHouse ST7789 + touch</td>
 </tr>
 <tr class="even">
@@ -421,7 +427,7 @@ sibling): <code>ssd1681_154_tricolor</code>,
 <td>FunHouse ST7789 + TT21100 (MP ESP32-S2)</td>
 </tr>
 <tr class="odd">
-<td><code>busdisplay/spi/cp_pybadge</code></td>
+<td><code>cp/busdisplay/spi/pybadge</code></td>
 <td>PyBadge LC + buttons</td>
 </tr>
 <tr class="even">
@@ -429,7 +435,7 @@ sibling): <code>ssd1681_154_tricolor</code>,
 <td>PyBadge LC + shift-register KEYPAD (MP)</td>
 </tr>
 <tr class="odd">
-<td><code>busdisplay/spi/cp_hallowing_m4</code></td>
+<td><code>cp/busdisplay/spi/hallowing_m4</code></td>
 <td>HalloWing M4</td>
 </tr>
 <tr class="even">
@@ -437,7 +443,7 @@ sibling): <code>ssd1681_154_tricolor</code>,
 <td>HalloWing M4 ST7735 (MP)</td>
 </tr>
 <tr class="odd">
-<td><code>busdisplay/spi/cp_pitft_ili9341_featherwing</code></td>
+<td><code>cp/busdisplay/spi/pitft_ili9341_featherwing</code></td>
 <td>PiTFT FeatherWing + STMPE610</td>
 </tr>
 <tr class="even">
@@ -449,15 +455,15 @@ sibling): <code>ssd1681_154_tricolor</code>,
 <td>CLUE ST7789 (MP nRF52840)</td>
 </tr>
 <tr class="even">
-<td><code>busdisplay/spi/cp_clue</code></td>
+<td><code>cp/busdisplay/spi/clue</code></td>
 <td>CLUE ST7789 (CircuitPython)</td>
 </tr>
 <tr class="odd">
-<td><code>busdisplay/spi/cp_funhouse</code></td>
+<td><code>cp/busdisplay/spi/funhouse</code></td>
 <td>FunHouse ST7789 + touch</td>
 </tr>
 <tr class="even">
-<td><code>busdisplay/spi/cp_pygamer</code></td>
+<td><code>cp/busdisplay/spi/pygamer</code></td>
 <td>PyGamer ST7789</td>
 </tr>
 <tr class="odd">
@@ -465,11 +471,11 @@ sibling): <code>ssd1681_154_tricolor</code>,
 <td>PyGamer ST7789 (MP SAMD51)</td>
 </tr>
 <tr class="even">
-<td><code>busdisplay/spi/cp_pitft_ili9341_featherwing</code></td>
+<td><code>cp/busdisplay/spi/pitft_ili9341_featherwing</code></td>
 <td>PiTFT FeatherWing + STMPE610</td>
 </tr>
 <tr class="odd">
-<td><code>busdisplay/spi/cp_ssd1331_096_oled</code></td>
+<td><code>cp/busdisplay/spi/ssd1331_096_oled</code></td>
 <td>SSD1331 color OLED</td>
 </tr>
 <tr class="even">
@@ -477,7 +483,7 @@ sibling): <code>ssd1681_154_tricolor</code>,
 <td>SSD1331 color OLED (MP)</td>
 </tr>
 <tr class="odd">
-<td><code>busdisplay/spi/cp_ssd1351_128_oled</code></td>
+<td><code>cp/busdisplay/spi/ssd1351_128_oled</code></td>
 <td>SSD1351 color OLED</td>
 </tr>
 <tr class="even">
@@ -485,19 +491,19 @@ sibling): <code>ssd1681_154_tricolor</code>,
 <td>SSD1351 color OLED (MP)</td>
 </tr>
 <tr class="odd">
-<td><code>busdisplay/i80/cp_t-display-s3</code></td>
+<td><code>cp/busdisplay/i80/t-display-s3</code></td>
 <td>LilyGO T-Display S3 I80</td>
 </tr>
 <tr class="even">
-<td><code>busdisplay/i80/cp_t-hmi</code></td>
+<td><code>cp/busdisplay/i80/t-hmi</code></td>
 <td>LilyGO T-HMI I80 + touch</td>
 </tr>
 <tr class="odd">
-<td><code>busdisplay/i80/cp_wt32sc01-plus</code></td>
+<td><code>cp/busdisplay/i80/wt32sc01-plus</code></td>
 <td>WT32-SC01 Plus I80</td>
 </tr>
 <tr class="even">
-<td><code>busdisplay/spi/cp_*</code></td>
+<td><code>cp/busdisplay/spi/*</code></td>
 <td>CircuitPython variants of MP configs</td>
 </tr>
 </tbody>
