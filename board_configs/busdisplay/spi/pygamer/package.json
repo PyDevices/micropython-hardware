@@ -5,8 +5,36 @@
       "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/pygamer/board_config.py"
     ],
     [
+      "board_devices.py",
+      "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/pygamer/board_devices.py"
+    ],
+    [
+      "boarddev.py",
+      "github:PyDevices/pydisplay/src/lib/boarddev.py"
+    ],
+    [
       "st7789.py",
       "github:PyDevices/micropython-hardware/drivers/display/st7789.py"
+    ],
+    [
+      "keypad_shift.py",
+      "github:PyDevices/micropython-hardware/drivers/input/keypad_shift.py"
+    ],
+    [
+      "gpiojoystick.py",
+      "github:PyDevices/micropython-hardware/drivers/joystick/gpiojoystick.py"
+    ],
+    [
+      "lis3dh.py",
+      "github:PyDevices/micropython-hardware/drivers/imu/lis3dh.py"
+    ],
+    [
+      "sdcard.py",
+      "github:PyDevices/micropython-hardware/drivers/storage/sdcard.py"
+    ],
+    [
+      "battery_adc.py",
+      "github:PyDevices/micropython-hardware/drivers/power/battery_adc.py"
     ]
   ],
   "deps": [
@@ -15,9 +43,14 @@
       "main"
     ],
     [
+      "github:PyDevices/pydisplay/packages/eventsys.json",
+      "main"
+    ],
+    [
       "github:PyDevices/micropython-hardware/packages/spibus.json",
       "main"
     ]
   ],
-  "version": "0.1"
+  "version": "0.2",
+  "notes": "keypad+joystick eager; lazy pixels/accel/sd/battery/audio/i2c."
 }

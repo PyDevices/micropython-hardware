@@ -5,12 +5,24 @@
       "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/pybadge/board_config.py"
     ],
     [
+      "board_devices.py",
+      "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/pybadge/board_devices.py"
+    ],
+    [
+      "boarddev.py",
+      "github:PyDevices/pydisplay/src/lib/boarddev.py"
+    ],
+    [
       "st7789.py",
       "github:PyDevices/micropython-hardware/drivers/display/st7789.py"
     ],
     [
       "keypad_shift.py",
       "github:PyDevices/micropython-hardware/drivers/input/keypad_shift.py"
+    ],
+    [
+      "lis3dh.py",
+      "github:PyDevices/micropython-hardware/drivers/imu/lis3dh.py"
     ]
   ],
   "deps": [
@@ -19,9 +31,14 @@
       "main"
     ],
     [
+      "github:PyDevices/pydisplay/packages/eventsys.json",
+      "main"
+    ],
+    [
       "github:PyDevices/micropython-hardware/packages/spibus.json",
       "main"
     ]
   ],
-  "version": "0.1"
+  "version": "0.2",
+  "notes": "Split board_devices; keypad + LIS3DH/NeoPixel/audio/i2c."
 }

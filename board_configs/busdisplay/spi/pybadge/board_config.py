@@ -1,7 +1,7 @@
 """Adafruit PyBadge LC ST7789 + shift-register buttons — MicroPython (SAMD51)"""
 
 from keypad_shift import PYBADGE_BUTTON_MAP, ShiftRegisterButtons
-from machine import Pin
+from machine import I2C, Pin
 from spibus import SPIBus
 from st7789 import ST7789
 
@@ -41,13 +41,22 @@ display_drv = ST7789(
         "reverse_bytes_in_word": True,
     },
 )
-buttons = ShiftRegisterButtons(
+keypad = ShiftRegisterButtons(
     clock=63,
     latch=32,
     data=62,
     mapping=PYBADGE_BUTTON_MAP,
 )
 
+# STEMMA / LIS3DH (PA12/PA13 — board pin names when firmware exposes them)
+try:
+    i2c = I2C(1, sda=Pin("SDA"), scl=Pin("SCL"), freq=400_000)
+except ValueError:
+    i2c = I2C(1, sda=Pin(12), scl=Pin(13), freq=400_000)
 
 runtime = eventsys.Runtime(display=display_drv)
-runtime.add_keypad(read=buttons.read)
+runtime.add_keypad(read=keypad.read)
+
+from board_devices import DEVICES, setup_devices
+
+setup_devices(globals())

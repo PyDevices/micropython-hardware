@@ -1,11 +1,17 @@
 """Adafruit FunHouse ST7789 + TT21100 — MicroPython (ESP32-S2)"""
 
+from keypad_gpio import GPIOButtons
 from machine import I2C, Pin
 from spibus import SPIBus
 from st7789 import ST7789
 from tt21100 import TT21100
 
 import eventsys
+
+try:
+    from eventsys.keys import Keys
+except ImportError:
+    from keys import Keys
 
 display_bus = SPIBus(
     id=1,
@@ -30,6 +36,7 @@ display_drv = ST7789(
     bgr=False,
     reverse_bytes_in_word=True,
 )
+# Shared UI I2C: touch + AHT20 + BMP280 + STEMMA
 i2c = I2C(0, sda=Pin(34), scl=Pin(33), freq=400_000)
 touch = TT21100(i2c)
 
@@ -43,8 +50,22 @@ def _touch_points():
 
 touch_rotation_table = (0, 0, 0, 0)
 
+# BUTTON_DOWN=3, BUTTON_SELECT=4, BUTTON_UP=5
+keypad = GPIOButtons(
+    {
+        "down": (Pin(3, Pin.IN, Pin.PULL_UP), Keys.K_DOWN),
+        "select": (Pin(4, Pin.IN, Pin.PULL_UP), Keys.K_RETURN),
+        "up": (Pin(5, Pin.IN, Pin.PULL_UP), Keys.K_UP),
+    }
+)
+
 runtime = eventsys.Runtime(
     display=display_drv,
     touch_read=_touch_points,
     touch_rotation_table=touch_rotation_table,
 )
+runtime.add_keypad(read=keypad.read)
+
+from board_devices import DEVICES, setup_devices
+
+setup_devices(globals())

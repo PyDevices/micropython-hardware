@@ -1,5 +1,8 @@
 """Adafruit PyGamer ST7789 — MicroPython (SAMD51)"""
 
+from keypad_shift import PYGAMER_BUTTON_MAP, ShiftRegisterButtons
+from machine import ADC, I2C, Pin
+from gpiojoystick import GPIOJoystick
 from spibus import SPIBus
 from st7789 import ST7789
 
@@ -28,4 +31,33 @@ display_drv = ST7789(
     bgr=False,
     reverse_bytes_in_word=True,
 )
-runtime = None
+
+# Same 74HC165 wiring family as PyBadge (CLOCK/LATCH/OUT)
+keypad = ShiftRegisterButtons(
+    clock=63,
+    latch=32,
+    data=62,
+    mapping=PYGAMER_BUTTON_MAP,
+)
+
+try:
+    _jx = ADC(Pin("JOYSTICK_X"))
+    _jy = ADC(Pin("JOYSTICK_Y"))
+except ValueError:
+    _jx = ADC(Pin(7))
+    _jy = ADC(Pin(6))
+
+joystick = GPIOJoystick(instance_id=0, axes=[_jx, _jy])
+
+try:
+    i2c = I2C(1, sda=Pin("SDA"), scl=Pin("SCL"), freq=400_000)
+except ValueError:
+    i2c = I2C(1, sda=Pin(12), scl=Pin(13), freq=400_000)
+
+runtime = eventsys.Runtime(display=display_drv)
+runtime.add_keypad(read=keypad.read)
+runtime.add_joystick(joystick_driver=joystick, emulate_digital=[[0, 1]])
+
+from board_devices import DEVICES, setup_devices
+
+setup_devices(globals())

@@ -1,0 +1,9 @@
+{
+  "urls": [
+    [
+      "ahtx0.py",
+      "github:PyDevices/micropython-hardware/drivers/env/ahtx0.py"
+    ]
+  ],
+  "version": "1.0.0"
+}

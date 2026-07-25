@@ -7,6 +7,9 @@ board configs. Prefer single-file modules; MIP manifests live under `../packages
 |------|------|
 | `storage/sdcard.py` | SPI SD block device ([micropython-lib](https://github.com/micropython/micropython-lib)) |
 | `imu/qmi8658.py` | 6-axis IMU |
+| `imu/lis3dh.py` | ST LIS3DH accelerometer (PyGamer / PyBadge) |
+| `env/ahtx0.py` | AHT10/AHT20 humidity + temperature |
+| `env/bmp280.py` | BMP280 pressure + temperature ([dafvid/micropython-bmp280](https://github.com/dafvid/micropython-bmp280)) |
 | `led/dotstar.py` | APA102 / DotStar ([mattytrentini/micropython-dotstar](https://github.com/mattytrentini/micropython-dotstar)) |
 | `codec/es8311.py` | ES8311 DAC/ADC init for I2S |
 | `codec/es7210.py` | Minimal ES7210 ADC init for I2S mics |

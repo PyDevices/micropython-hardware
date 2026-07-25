@@ -5,12 +5,24 @@
       "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/pyportal_titano/board_config.py"
     ],
     [
+      "board_devices.py",
+      "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/pyportal_titano/board_devices.py"
+    ],
+    [
+      "boarddev.py",
+      "github:PyDevices/pydisplay/src/lib/boarddev.py"
+    ],
+    [
       "ili9341.py",
       "github:PyDevices/micropython-hardware/drivers/display/ili9341.py"
     ],
     [
       "tt21100.py",
       "github:PyDevices/micropython-hardware/drivers/touch/tt21100.py"
+    ],
+    [
+      "sdcard.py",
+      "github:PyDevices/micropython-hardware/drivers/storage/sdcard.py"
     ]
   ],
   "deps": [
@@ -19,9 +31,14 @@
       "main"
     ],
     [
+      "github:PyDevices/pydisplay/packages/eventsys.json",
+      "main"
+    ],
+    [
       "github:PyDevices/micropython-hardware/packages/spibus.json",
       "main"
     ]
   ],
-  "version": "0.1"
+  "version": "0.2",
+  "notes": "Split board_devices; same lazy surface as PyPortal."
 }

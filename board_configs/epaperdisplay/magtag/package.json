@@ -5,6 +5,14 @@
       "github:PyDevices/micropython-hardware/board_configs/epaperdisplay/magtag/board_config.py"
     ],
     [
+      "board_devices.py",
+      "github:PyDevices/micropython-hardware/board_configs/epaperdisplay/magtag/board_devices.py"
+    ],
+    [
+      "boarddev.py",
+      "github:PyDevices/pydisplay/src/lib/boarddev.py"
+    ],
+    [
       "ssd1680.py",
       "github:PyDevices/micropython-hardware/drivers/display/ssd1680.py"
     ],
@@ -23,6 +31,10 @@
       "main"
     ],
     [
+      "github:PyDevices/pydisplay/packages/eventsys.json",
+      "main"
+    ],
+    [
       "github:PyDevices/micropython-hardware/packages/epaper_chip.json",
       "main"
     ],
@@ -31,5 +43,6 @@
       "main"
     ]
   ],
-  "version": "0.1"
+  "version": "0.2",
+  "notes": "keypad rename; lazy pixels/audio/i2c/wlan."
 }

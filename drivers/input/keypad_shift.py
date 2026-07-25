@@ -68,3 +68,11 @@ PYBADGE_BUTTON_MAP = {
     "c": (2, Keys.K_c),
     "d": (3, Keys.K_d),
 }
+
+# PyGamer / PyBadge LC shift-register layout (Adafruit): A/B + Start/Select.
+PYGAMER_BUTTON_MAP = {
+    "b": (0, Keys.K_b),
+    "a": (1, Keys.K_a),
+    "start": (2, Keys.K_RETURN),
+    "select": (3, Keys.K_SPACE),
+}

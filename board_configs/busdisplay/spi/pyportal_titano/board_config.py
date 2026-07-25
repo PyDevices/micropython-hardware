@@ -46,3 +46,8 @@ runtime = eventsys.Runtime(
     touch_read=_touch_points,
     touch_rotation_table=touch_rotation_table,
 )
+
+from board_devices import DEVICES, setup_devices
+
+setup_devices(globals())
+
