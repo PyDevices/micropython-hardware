@@ -7,9 +7,9 @@ Related inventories (keep concerns separate):
 
 | Doc | Role |
 |-----|------|
-| [board-inventory.md](https://github.com/PyDevices/.github/blob/main/board-inventory.md) | Physical Detect fixtures (#) — chip, flash, runtime |
-| [firmware-fixtures.md](https://github.com/PyDevices/.github/blob/main/firmware-fixtures.md) | Detect probe notes / esptool details |
-| [pydisplay-display-boards.md](https://github.com/PyDevices/.github/blob/main/pydisplay-display-boards.md) | Display bring-up quirks (panel, touch, soft-reset) |
+| [board-inventory.md](docs/board-inventory.md) | Physical Detect fixtures (#) — chip, flash, runtime |
+| [firmware-fixtures.md](docs/firmware-fixtures.md) | Detect probe notes / esptool details |
+| [pydisplay-display-boards.md](docs/pydisplay-display-boards.md) | Display bring-up quirks (panel, touch, soft-reset) |
 | **This file** | Fixture # ↔ product ↔ `board_config` ↔ eager / lazy roles |
 
 Paths below are relative to `board_configs/`.
@@ -20,8 +20,8 @@ Paths below are relative to `board_configs/`.
 
 | Product | Inventory # | `board_config` path | Eager UI | Lazy `DEVICES` |
 |---------|-------------|---------------------|----------|----------------|
-| Waveshare ESP32-P4-WIFI6-Touch-LCD-4B | [#1](https://github.com/PyDevices/.github/blob/main/board-inventory.md) | `fbdisplay/esp32-p4-wifi6-touch-lcd-4b` | `touch` | `audio`, `microphone`, `sdcard`, `camera`, `ethernet`, `radio`, `wlan`, `ble`, `usb_device` |
-| Adafruit Qualia S3 + TL040HDS20 | [#8](https://github.com/PyDevices/.github/blob/main/board-inventory.md) | `fbdisplay/qualia_tl040hds20` | `touch`, `keypad`, `io_expander` | `wlan`, `ble` |
+| Waveshare ESP32-P4-WIFI6-Touch-LCD-4B | [#1](docs/board-inventory.md) | `fbdisplay/esp32-p4-wifi6-touch-lcd-4b` | `touch` | `audio`, `microphone`, `sdcard`, `camera`, `ethernet`, `radio`, `wlan`, `ble`, `usb_device` |
+| Adafruit Qualia S3 + TL040HDS20 | [#8](docs/board-inventory.md) | `fbdisplay/qualia_tl040hds20` | `touch`, `keypad`, `io_expander` | `wlan`, `ble` |
 | Waveshare ESP32-S3-Touch-LCD-4.3 | — | `fbdisplay/esp32-s3-touch-lcd-4_3` | `touch`, `io_expander` | `sdcard`, `can`, `rs485`, `usb_device`, `wlan`, `ble` |
 | Waveshare ESP32-S3-Touch-LCD-7 | — | `fbdisplay/esp32-s3-touch-lcd-7` | `touch`, `io_expander` | `sdcard`, `can`, `rs485`, `usb_device`, `wlan`, `ble` |
 | LILYGO T-RGB 2.1″ | — | `fbdisplay/t-rgb_480` | `touch` | `sdcard`, `battery`, `wlan`, `ble` |
@@ -29,7 +29,7 @@ Paths below are relative to `board_configs/`.
 | LILYGO T-HMI | — | `busdisplay/i80/t-hmi` | `touch` | `sdcard`, `i2c`, `wlan`, `ble` |
 | Waveshare RP2040-Touch-LCD-1.28 | — | `busdisplay/spi/rp2040-touch-lcd-1.28` | `touch` | `accelerometer`, `gyroscope`, `battery` |
 | Adafruit Metro M7 + TFT shield 1947 | — | `busdisplay/spi/metro_m7_tft_touch_shield_1947` | `touch` | `pixels`, `led`, `sdcard`, `radio`, `wlan`, `i2c` |
-| ST NUCLEO-H743ZI2 + TFT shield 1947 | [#25](https://github.com/PyDevices/.github/blob/main/board-inventory.md) | `busdisplay/spi/nucleo_h743zi2_tft_touch_shield_1947` | `touch` | `led`, `sdcard`, `ethernet` |
+| ST NUCLEO-H743ZI2 + TFT shield 1947 | [#25](docs/board-inventory.md) | `busdisplay/spi/nucleo_h743zi2_tft_touch_shield_1947` | `touch` | `led`, `sdcard`, `ethernet` |
 
 `display_drv` / `runtime` / `display_bus` are always part of the board surface
 when present; they are omitted from the Eager column for brevity.

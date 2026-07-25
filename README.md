@@ -15,6 +15,7 @@ This repo holds what used to live under pydisplay’s `board_configs/`,
 | `board_configs/` | Per-board `board_config.py` (+ `board_devices.py` on graduated boards) and MIP `package.json` |
 | `drivers/` | Display, touch, bus, encoder, joystick, IO expander helpers |
 | `packages/` | Shared MIP manifests for bus/touch/chip helpers (`spibus`, `i80bus`, …) |
+| `docs/` | Detect inventory, firmware fixtures, display bring-up notes |
 
 Graduated campaign boards use the
 [board devices contract](https://pydisplay.readthedocs.io/en/latest/hardware/board-devices.html):
