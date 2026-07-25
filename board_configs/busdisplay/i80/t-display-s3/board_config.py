@@ -44,3 +44,7 @@ display_drv = ST7789(
     power_on_high=True,
 )
 runtime = None
+
+from board_devices import DEVICES, setup_devices
+
+setup_devices(globals())

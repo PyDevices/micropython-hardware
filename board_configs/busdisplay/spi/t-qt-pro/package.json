@@ -7,6 +7,18 @@
     [
       "gc9a01.py",
       "github:PyDevices/micropython-hardware/drivers/display/gc9a01.py"
+    ],
+    [
+      "board_devices.py",
+      "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/t-qt-pro/board_devices.py"
+    ],
+    [
+      "boarddev.py",
+      "github:PyDevices/pydisplay/src/lib/boarddev.py"
+    ],
+    [
+      "battery_adc.py",
+      "github:PyDevices/micropython-hardware/drivers/power/battery_adc.py"
     ]
   ],
   "deps": [
@@ -17,7 +29,11 @@
     [
       "github:PyDevices/micropython-hardware/packages/spibus.json",
       "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/eventsys.json",
+      "main"
     ]
   ],
-  "version": "0.1"
+  "version": "0.2"
 }

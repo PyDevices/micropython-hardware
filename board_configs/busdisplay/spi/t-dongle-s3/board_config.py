@@ -52,3 +52,7 @@ display_drv = ST7735(
     },
 )
 runtime = None
+
+from board_devices import DEVICES, setup_devices
+
+setup_devices(globals())

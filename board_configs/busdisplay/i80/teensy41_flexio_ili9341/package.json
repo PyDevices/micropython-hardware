@@ -3,6 +3,14 @@
     [
       "board_config.py",
       "github:PyDevices/micropython-hardware/board_configs/busdisplay/i80/teensy41_flexio_ili9341/board_config.py"
+    ],
+    [
+      "board_devices.py",
+      "github:PyDevices/micropython-hardware/board_configs/busdisplay/i80/teensy41_flexio_ili9341/board_devices.py"
+    ],
+    [
+      "boarddev.py",
+      "github:PyDevices/pydisplay/src/lib/boarddev.py"
     ]
   ],
   "deps": [
@@ -13,7 +21,11 @@
     [
       "github:PyDevices/micropython-hardware/packages/i80bus.json",
       "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/eventsys.json",
+      "main"
     ]
   ],
-  "version": "0.1"
+  "version": "0.2"
 }

@@ -7,6 +7,18 @@
     [
       "st7789.py",
       "github:PyDevices/micropython-hardware/drivers/display/st7789.py"
+    ],
+    [
+      "board_devices.py",
+      "github:PyDevices/micropython-hardware/board_configs/busdisplay/i80/t-display-s3/board_devices.py"
+    ],
+    [
+      "boarddev.py",
+      "github:PyDevices/pydisplay/src/lib/boarddev.py"
+    ],
+    [
+      "battery_adc.py",
+      "github:PyDevices/micropython-hardware/drivers/power/battery_adc.py"
     ]
   ],
   "deps": [
@@ -21,7 +33,11 @@
     [
       "github:PyDevices/micropython-hardware/packages/i80bus.json",
       "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/eventsys.json",
+      "main"
     ]
   ],
-  "version": "0.1"
+  "version": "0.2"
 }

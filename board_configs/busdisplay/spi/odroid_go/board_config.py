@@ -1,9 +1,17 @@
 """ODROID GO with ILI9341 2.4" display"""
 
+from gpiojoystick import GPIOJoystick
 from ili9341 import ILI9341
+from keypad_gpio import GPIOButtons
+from machine import ADC, Pin
 from spibus import SPIBus
 
 import eventsys
+
+try:
+    from eventsys.keys import Keys
+except ImportError:
+    from keys import Keys
 
 display_bus = SPIBus(
     id=2,
@@ -50,4 +58,29 @@ display_drv = ILI9341(
         "backlight_on_high": True,
     },
 )
-runtime = None
+
+# Hardkernel ODROID-GO button / joystick map
+keypad = GPIOButtons(
+    {
+        "a": (Pin(32, Pin.IN, Pin.PULL_UP), Keys.K_a),
+        "b": (Pin(33, Pin.IN, Pin.PULL_UP), Keys.K_b),
+        "menu": (Pin(13, Pin.IN, Pin.PULL_UP), Keys.K_ESCAPE),
+        "select": (Pin(27, Pin.IN, Pin.PULL_UP), Keys.K_SPACE),
+        "start": (Pin(39, Pin.IN, Pin.PULL_UP), Keys.K_RETURN),
+    }
+)
+joystick = GPIOJoystick(
+    instance_id=0,
+    axes=[
+        ADC(Pin(34), atten=ADC.ATTN_11DB),
+        ADC(Pin(35), atten=ADC.ATTN_11DB),
+    ],
+)
+
+runtime = eventsys.Runtime(display=display_drv)
+runtime.add_keypad(read=keypad.read)
+runtime.add_joystick(joystick_driver=joystick, emulate_digital=[[0, 1]])
+
+from board_devices import DEVICES, setup_devices
+
+setup_devices(globals())

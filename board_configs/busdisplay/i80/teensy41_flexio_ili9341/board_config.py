@@ -61,3 +61,7 @@ display_drv = ILI9341(
 )
 
 runtime = None
+
+from board_devices import DEVICES, setup_devices
+
+setup_devices(globals())

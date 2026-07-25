@@ -11,6 +11,14 @@
     [
       "gpiojoystick.py",
       "github:PyDevices/micropython-hardware/drivers/joystick/gpiojoystick.py"
+    ],
+    [
+      "board_devices.py",
+      "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/esp32_wrover_e_st7789_joystick/board_devices.py"
+    ],
+    [
+      "boarddev.py",
+      "github:PyDevices/pydisplay/src/lib/boarddev.py"
     ]
   ],
   "deps": [
@@ -19,5 +27,5 @@
       "main"
     ]
   ],
-  "version": "0.1"
+  "version": "0.2"
 }

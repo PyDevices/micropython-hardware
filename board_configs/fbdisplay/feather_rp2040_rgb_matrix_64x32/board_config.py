@@ -20,3 +20,7 @@ matrix = rgbmatrix.RGBMatrix(
 display_drv = FBDisplay(matrix, width=64, height=32)
 
 runtime = None
+
+from board_devices import DEVICES, setup_devices
+
+setup_devices(globals())

@@ -7,6 +7,14 @@
     [
       "st7789.py",
       "github:PyDevices/micropython-hardware/drivers/display/st7789.py"
+    ],
+    [
+      "board_devices.py",
+      "github:PyDevices/micropython-hardware/board_configs/busdisplay/i80/bpi-centi-s3/board_devices.py"
+    ],
+    [
+      "boarddev.py",
+      "github:PyDevices/pydisplay/src/lib/boarddev.py"
     ]
   ],
   "deps": [
@@ -20,5 +28,5 @@
     ]
   ],
   "version": "0.2",
-  "notes": "Encoder via machine.Encoder (MP ≥ 1.26)."
+  "notes": "Encoder via machine.Encoder (MP \u2265 1.26)."
 }

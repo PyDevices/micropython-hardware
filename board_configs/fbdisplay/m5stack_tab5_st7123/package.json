@@ -15,6 +15,14 @@
     [
       "tab5_st7123_init.py",
       "github:PyDevices/micropython-hardware/drivers/display/tab5_st7123_init.py"
+    ],
+    [
+      "board_devices.py",
+      "github:PyDevices/micropython-hardware/board_configs/fbdisplay/m5stack_tab5_st7123/board_devices.py"
+    ],
+    [
+      "boarddev.py",
+      "github:PyDevices/pydisplay/src/lib/boarddev.py"
     ]
   ],
   "deps": [
@@ -25,7 +33,11 @@
     [
       "github:PyDevices/pydisplay/packages/mipidsi.json",
       "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/eventsys.json",
+      "main"
     ]
   ],
-  "version": "0.1"
+  "version": "0.2"
 }

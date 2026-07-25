@@ -7,6 +7,30 @@
     [
       "ili9341.py",
       "github:PyDevices/micropython-hardware/drivers/display/ili9341.py"
+    ],
+    [
+      "board_devices.py",
+      "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/odroid_go/board_devices.py"
+    ],
+    [
+      "boarddev.py",
+      "github:PyDevices/pydisplay/src/lib/boarddev.py"
+    ],
+    [
+      "battery_adc.py",
+      "github:PyDevices/micropython-hardware/drivers/power/battery_adc.py"
+    ],
+    [
+      "sdcard.py",
+      "github:PyDevices/micropython-hardware/drivers/storage/sdcard.py"
+    ],
+    [
+      "keypad_gpio.py",
+      "github:PyDevices/micropython-hardware/drivers/input/keypad_gpio.py"
+    ],
+    [
+      "gpiojoystick.py",
+      "github:PyDevices/micropython-hardware/drivers/joystick/gpiojoystick.py"
     ]
   ],
   "deps": [
@@ -17,7 +41,11 @@
     [
       "github:PyDevices/micropython-hardware/packages/spibus.json",
       "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/eventsys.json",
+      "main"
     ]
   ],
-  "version": "0.1"
+  "version": "0.2"
 }

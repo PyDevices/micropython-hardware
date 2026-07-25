@@ -50,3 +50,7 @@ display_drv = GC9A01(
     },
 )
 runtime = None
+
+from board_devices import DEVICES, setup_devices
+
+setup_devices(globals())

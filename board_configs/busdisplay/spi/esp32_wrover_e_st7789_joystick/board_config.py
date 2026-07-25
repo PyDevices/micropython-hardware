@@ -43,7 +43,7 @@ display_drv = ST7789(
         "invert": False,
     },
 )
-joystick_driver = GPIOJoystick(
+joystick = GPIOJoystick(
     instance_id=1,
     axes=[
         ADC(Pin(39), atten=ADC.ATTN_11DB),
@@ -58,4 +58,8 @@ joystick_driver = GPIOJoystick(
 
 
 runtime = eventsys.Runtime(display=display_drv)
-runtime.add_joystick(joystick_driver=joystick_driver, emulate_digital=[[0, 1]])
+runtime.add_joystick(joystick_driver=joystick, emulate_digital=[[0, 1]])
+
+from board_devices import DEVICES, setup_devices
+
+setup_devices(globals())

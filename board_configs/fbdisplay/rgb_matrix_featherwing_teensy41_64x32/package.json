@@ -3,13 +3,25 @@
     [
       "board_config.py",
       "github:PyDevices/micropython-hardware/board_configs/fbdisplay/rgb_matrix_featherwing_teensy41_64x32/board_config.py"
+    ],
+    [
+      "board_devices.py",
+      "github:PyDevices/micropython-hardware/board_configs/fbdisplay/rgb_matrix_featherwing_teensy41_64x32/board_devices.py"
+    ],
+    [
+      "boarddev.py",
+      "github:PyDevices/pydisplay/src/lib/boarddev.py"
     ]
   ],
   "deps": [
     [
       "github:PyDevices/pydisplay/packages/displaysys.json",
       "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/eventsys.json",
+      "main"
     ]
   ],
-  "version": "0.1"
+  "version": "0.2"
 }

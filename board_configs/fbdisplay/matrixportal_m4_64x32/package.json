@@ -3,13 +3,29 @@
     [
       "board_config.py",
       "github:PyDevices/micropython-hardware/board_configs/fbdisplay/matrixportal_m4_64x32/board_config.py"
+    ],
+    [
+      "board_devices.py",
+      "github:PyDevices/micropython-hardware/board_configs/fbdisplay/matrixportal_m4_64x32/board_devices.py"
+    ],
+    [
+      "boarddev.py",
+      "github:PyDevices/pydisplay/src/lib/boarddev.py"
+    ],
+    [
+      "lis3dh.py",
+      "github:PyDevices/micropython-hardware/drivers/imu/lis3dh.py"
     ]
   ],
   "deps": [
     [
       "github:PyDevices/pydisplay/packages/displaysys.json",
       "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/eventsys.json",
+      "main"
     ]
   ],
-  "version": "0.1"
+  "version": "0.2"
 }
