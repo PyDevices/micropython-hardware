@@ -64,16 +64,16 @@ href="board-devices.html">board devices contract</a>: eager UI in
 </thead>
 <tbody>
 <tr class="odd">
-<td><a href="docs/board-inventory.html">board-inventory.md</a></td>
+<td><a href="board-inventory.html">board-inventory.md</a></td>
 <td>Physical Detect fixtures (#) — chip, flash, runtime</td>
 </tr>
 <tr class="even">
-<td><a href="docs/firmware-fixtures.html">firmware-fixtures.md</a></td>
+<td><a href="firmware-fixtures.html">firmware-fixtures.md</a></td>
 <td>Detect probe notes / esptool details</td>
 </tr>
 <tr class="odd">
 <td><a
-href="docs/pydisplay-display-boards.html">pydisplay-display-boards.md</a></td>
+href="pydisplay-display-boards.html">pydisplay-display-boards.md</a></td>
 <td>Display bring-up quirks (panel, touch, soft-reset)</td>
 </tr>
 <tr class="even">
@@ -83,9 +83,13 @@ roles</td>
 </tr>
 </tbody>
 </table>
-<p>Paths below are relative to <code>board_configs/</code>.</p>
+<p>Paths below are relative to <code>board_configs/</code> and are
+<strong>MicroPython</strong> trees only. CircuitPython twins under
+<code>cp/</code> are deferred (not listed here).</p>
 <hr />
 <h2 id="campaign-matrix">Campaign matrix</h2>
+<p>Wired split layout (<code>board_devices.py</code> present). Lazy
+column is the live <code>DEVICES</code> set.</p>
 <table>
 <thead>
 <tr class="header">
@@ -99,7 +103,7 @@ roles</td>
 <tbody>
 <tr class="odd">
 <td>Waveshare ESP32-P4-WIFI6-Touch-LCD-4B</td>
-<td><a href="docs/board-inventory.html">#1</a></td>
+<td><a href="board-inventory.html">#1</a></td>
 <td><code>fbdisplay/esp32-p4-wifi6-touch-lcd-4b</code></td>
 <td><code>touch</code></td>
 <td><code>audio</code>, <code>microphone</code>, <code>sdcard</code>,
@@ -108,7 +112,7 @@ roles</td>
 </tr>
 <tr class="even">
 <td>Adafruit Qualia S3 + TL040HDS20</td>
-<td><a href="docs/board-inventory.html">#8</a></td>
+<td><a href="board-inventory.html">#8</a></td>
 <td><code>fbdisplay/qualia_tl040hds20</code></td>
 <td><code>touch</code>, <code>keypad</code>,
 <code>io_expander</code></td>
@@ -165,7 +169,7 @@ roles</td>
 </tr>
 <tr class="odd">
 <td>Adafruit Metro M7 + TFT shield 1947</td>
-<td>—</td>
+<td><a href="board-inventory.html">#5</a> host</td>
 <td><code>busdisplay/spi/metro_m7_tft_touch_shield_1947</code></td>
 <td><code>touch</code></td>
 <td><code>pixels</code>, <code>led</code>, <code>sdcard</code>,
@@ -173,7 +177,7 @@ roles</td>
 </tr>
 <tr class="even">
 <td>ST NUCLEO-H743ZI2 + TFT shield 1947</td>
-<td><a href="docs/board-inventory.html">#25</a></td>
+<td><a href="board-inventory.html">#25</a></td>
 <td><code>busdisplay/spi/nucleo_h743zi2_tft_touch_shield_1947</code></td>
 <td><code>touch</code></td>
 <td><code>led</code>, <code>sdcard</code>, <code>ethernet</code></td>
@@ -184,26 +188,361 @@ roles</td>
 <code>display_bus</code> are always part of the board surface when
 present; they are omitted from the Eager column for brevity.</p>
 <hr />
+<h2 id="planned-research--not-wired">Planned (research — not wired)</h2>
+<p>Intended surface for a future <strong>MicroPython-only</strong>
+retrofit. No <code>board_devices.py</code> yet unless noted. Roles use
+the locked contract symbols from <a
+href="board-devices.html">board-devices.md</a>; factories may still
+raise once added until filled. CircuitPython <code>cp/</code> twins are
+out of scope for this wave.</p>
+<p><strong>Eager UI (today / target)</strong> — what the config
+constructs now vs the contract name after retrofit. <strong>Planned lazy
+<code>DEVICES</code></strong> — product hardware worth exporting
+(datasheet / Adafruit pinouts); not a completeness guarantee.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Product</th>
+<th>Inventory #</th>
+<th><code>board_config</code> path (MP)</th>
+<th>Eager UI (today / target)</th>
+<th>Planned lazy <code>DEVICES</code></th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Adafruit FunHouse</td>
+<td><a href="board-inventory.html">#13</a></td>
+<td><code>busdisplay/spi/funhouse</code></td>
+<td><code>touch</code>, <code>keypad</code></td>
+<td><code>temperature</code>, <code>humidity</code>,
+<code>pressure</code>, <code>pixels</code>, <code>audio</code>,
+<code>wlan</code></td>
+<td><strong>wired</strong> — no BLE on ESP32-S2; speaker as
+<code>audio</code> (no PDM mic)</td>
+</tr>
+<tr class="even">
+<td>Adafruit PyGamer</td>
+<td><a href="board-inventory.html">#27</a></td>
+<td><code>busdisplay/spi/pygamer</code></td>
+<td><code>joystick</code>, <code>keypad</code></td>
+<td><code>pixels</code>, <code>accelerometer</code>,
+<code>sdcard</code>, <code>battery</code>, <code>audio</code>,
+<code>i2c</code></td>
+<td><strong>wired</strong></td>
+</tr>
+<tr class="odd">
+<td>Adafruit Feather RP2040 + RGB matrix wing</td>
+<td><a href="board-inventory.html">#7</a> host</td>
+<td><code>fbdisplay/feather_rp2040_rgb_matrix_64x32</code></td>
+<td>—</td>
+<td><code>i2c</code></td>
+<td>display-only today (matrix is <code>display_drv</code>)</td>
+</tr>
+<tr class="even">
+<td>Adafruit Feather RP2040 DVI</td>
+<td><a href="board-inventory.html">#21</a></td>
+<td><code>fbdisplay/cp_adafruit_feather_rp2040_dvi_320x240</code></td>
+<td>—</td>
+<td><code>i2c</code></td>
+<td>display-only today; directory still carries a leftover
+<code>cp_</code> name</td>
+</tr>
+<tr class="odd">
+<td>Teensy 4.1 + FlexIO ILI9341</td>
+<td><a href="board-inventory.html">#23</a></td>
+<td><code>busdisplay/i80/teensy41_flexio_ili9341</code></td>
+<td>—</td>
+<td>—</td>
+<td>display-only today</td>
+</tr>
+<tr class="even">
+<td>Teensy 4.1 + RGB matrix featherwing</td>
+<td><a href="board-inventory.html">#23</a></td>
+<td><code>fbdisplay/rgb_matrix_featherwing_teensy41_64x32</code></td>
+<td>—</td>
+<td>—</td>
+<td>display-only today</td>
+</tr>
+<tr class="odd">
+<td>Adafruit MagTag</td>
+<td>—</td>
+<td><code>epaperdisplay/magtag</code></td>
+<td><code>keypad</code></td>
+<td><code>pixels</code>, <code>audio</code>, <code>i2c</code>,
+<code>wlan</code></td>
+<td><strong>wired</strong> — no contract role for ALS</td>
+</tr>
+<tr class="even">
+<td>Adafruit CLUE</td>
+<td>—</td>
+<td><code>busdisplay/spi/clue</code></td>
+<td><code>keypad</code></td>
+<td><code>accelerometer</code>, <code>gyroscope</code>,
+<code>magnetometer</code>, <code>temperature</code>,
+<code>humidity</code>, <code>pressure</code>, <code>microphone</code>,
+<code>pixels</code>, <code>led</code>, <code>i2c</code>,
+<code>ble</code></td>
+<td><strong>wired</strong> (BMP280/pixels/led/i2c/ble); IMU/humidity/mic
+factories raise until drivers land</td>
+</tr>
+<tr class="odd">
+<td>Adafruit PyBadge</td>
+<td>—</td>
+<td><code>busdisplay/spi/pybadge</code></td>
+<td><code>keypad</code></td>
+<td><code>pixels</code>, <code>accelerometer</code>, <code>audio</code>,
+<code>i2c</code></td>
+<td><strong>wired</strong></td>
+</tr>
+<tr class="even">
+<td>Adafruit PyPortal</td>
+<td>—</td>
+<td><code>busdisplay/spi/pyportal</code></td>
+<td><code>touch</code></td>
+<td><code>sdcard</code>, <code>radio</code>, <code>audio</code>,
+<code>i2c</code>, <code>wlan</code></td>
+<td><strong>wired</strong> — AirLift as
+<code>radio</code>/<code>wlan</code></td>
+</tr>
+<tr class="odd">
+<td>Adafruit PyPortal Titano</td>
+<td>—</td>
+<td><code>busdisplay/spi/pyportal_titano</code></td>
+<td><code>touch</code></td>
+<td><code>sdcard</code>, <code>radio</code>, <code>audio</code>,
+<code>i2c</code>, <code>wlan</code></td>
+<td><strong>wired</strong></td>
+</tr>
+<tr class="even">
+<td>Adafruit HalloWing M4</td>
+<td>—</td>
+<td><code>busdisplay/spi/hallowing_m4</code></td>
+<td>today none / target —</td>
+<td><code>pixels</code>, <code>accelerometer</code>, <code>audio</code>,
+<code>i2c</code></td>
+<td>display-only today</td>
+</tr>
+<tr class="odd">
+<td>ODROID-GO</td>
+<td>—</td>
+<td><code>busdisplay/spi/odroid_go</code></td>
+<td>today none / target <code>joystick</code>, <code>keypad</code></td>
+<td><code>battery</code>, <code>sdcard</code>, <code>audio</code>,
+<code>wlan</code></td>
+<td>display-only today</td>
+</tr>
+<tr class="even">
+<td>M5Stack CoreS3</td>
+<td>—</td>
+<td><code>busdisplay/spi/m5stack-cores3</code></td>
+<td>today <code>touch</code> / target <code>touch</code></td>
+<td><code>microphone</code>, <code>audio</code>, <code>sdcard</code>,
+<code>camera</code>, <code>accelerometer</code>, <code>gyroscope</code>,
+<code>i2c</code>, <code>wlan</code>, <code>ble</code></td>
+<td>partial UI</td>
+</tr>
+<tr class="odd">
+<td>M5Stack Tab5 (ILI9881C)</td>
+<td>—</td>
+<td><code>fbdisplay/m5stack_tab5_ili9881c</code></td>
+<td>today <code>touch</code> / target <code>touch</code></td>
+<td><code>microphone</code>, <code>audio</code>, <code>sdcard</code>,
+<code>camera</code>, <code>i2c</code>, <code>wlan</code>,
+<code>ble</code></td>
+<td>partial UI — confirm SKU extras at retrofit</td>
+</tr>
+<tr class="even">
+<td>M5Stack Tab5 (ST7123)</td>
+<td>—</td>
+<td><code>fbdisplay/m5stack_tab5_st7123</code></td>
+<td>today <code>touch</code> / target <code>touch</code></td>
+<td><code>microphone</code>, <code>audio</code>, <code>sdcard</code>,
+<code>camera</code>, <code>i2c</code>, <code>wlan</code>,
+<code>ble</code></td>
+<td>partial UI — same family as ILI9881C; confirm SKU extras at
+retrofit</td>
+</tr>
+<tr class="odd">
+<td>LILYGO T-Display-S3</td>
+<td>—</td>
+<td><code>busdisplay/i80/t-display-s3</code></td>
+<td>—</td>
+<td><code>battery</code>, <code>wlan</code>, <code>ble</code></td>
+<td>display-only today</td>
+</tr>
+<tr class="even">
+<td>LILYGO T-Display-S3 Pro</td>
+<td>—</td>
+<td><code>busdisplay/spi/t-display-s3-pro</code></td>
+<td>today <code>touch</code> / target <code>touch</code></td>
+<td><code>sdcard</code>, <code>battery</code>, <code>wlan</code>,
+<code>ble</code></td>
+<td>partial UI</td>
+</tr>
+<tr class="odd">
+<td>LILYGO T-QT Pro</td>
+<td>—</td>
+<td><code>busdisplay/spi/t-qt-pro</code></td>
+<td>—</td>
+<td><code>battery</code>, <code>wlan</code>, <code>ble</code></td>
+<td>display-only today</td>
+</tr>
+<tr class="even">
+<td>LILYGO T-Dongle-S3</td>
+<td>—</td>
+<td><code>busdisplay/spi/t-dongle-s3</code></td>
+<td>—</td>
+<td><code>pixels</code>, <code>wlan</code>, <code>ble</code></td>
+<td>display-only today</td>
+</tr>
+<tr class="odd">
+<td>Adafruit MatrixPortal M4</td>
+<td>—</td>
+<td><code>fbdisplay/matrixportal_m4_64x32</code></td>
+<td>—</td>
+<td><code>accelerometer</code>, <code>i2c</code></td>
+<td>display-only today (HUB75 is <code>display_drv</code>)</td>
+</tr>
+<tr class="even">
+<td>Adafruit MatrixPortal S3</td>
+<td>—</td>
+<td><code>fbdisplay/matrixportal_s3_64x64</code></td>
+<td>—</td>
+<td><code>accelerometer</code>, <code>i2c</code>, <code>wlan</code>,
+<code>ble</code></td>
+<td>display-only today</td>
+</tr>
+<tr class="odd">
+<td>BPI-Centi-S3</td>
+<td>—</td>
+<td><code>busdisplay/i80/bpi-centi-s3</code></td>
+<td>today <code>encoder</code> / target <code>encoder</code></td>
+<td><code>wlan</code>, <code>ble</code></td>
+<td>partial UI</td>
+</tr>
+<tr class="even">
+<td>WT32-SC01 Plus</td>
+<td>—</td>
+<td><code>busdisplay/i80/wt32sc01-plus</code></td>
+<td>today <code>touch</code> / target <code>touch</code></td>
+<td><code>sdcard</code>, <code>wlan</code>, <code>ble</code></td>
+<td>partial UI</td>
+</tr>
+<tr class="odd">
+<td>ESP32-WROVER-E ST7789 + joystick</td>
+<td>—</td>
+<td><code>busdisplay/spi/esp32_wrover_e_st7789_joystick</code></td>
+<td>today <code>joystick</code> / target <code>joystick</code></td>
+<td><code>wlan</code></td>
+<td>partial UI</td>
+</tr>
+<tr class="even">
+<td>PiTFT ILI9341 FeatherWing</td>
+<td>—</td>
+<td><code>busdisplay/spi/pitft_ili9341_featherwing</code></td>
+<td>today <code>touch</code> if present / target <code>touch</code></td>
+<td><code>i2c</code></td>
+<td>host-dependent (Feather stack)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="inventory-fixtures-without-a-product-board_config">Inventory
+fixtures without a product <code>board_config</code></h3>
+<p>Detect capture only — no dedicated pydisplay product config to
+retrofit. Shield / host rows above already cover Metro M7 (#5) and
+Nucleo (#25) with display shields.</p>
+<table>
+<thead>
+<tr class="header">
+<th>#</th>
+<th>Board / model</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2–4, 6, 9–10, 12, 14–15, 22</td>
+<td>Generic ESP32-S3 modules</td>
+<td>No product display config</td>
+</tr>
+<tr class="even">
+<td>11</td>
+<td>Waveshare RP2040-Plus</td>
+<td>No product display config (distinct from RP2040-Touch-LCD-1.28)</td>
+</tr>
+<tr class="odd">
+<td>16</td>
+<td>Raspberry Pi Pico</td>
+<td>Host only; use sock / shield configs when applicable</td>
+</tr>
+<tr class="even">
+<td>17, 20, 28</td>
+<td>ESP32-PICO-V3-02 boards</td>
+<td>No product display config</td>
+</tr>
+<tr class="odd">
+<td>18</td>
+<td>Adafruit QT Py M0</td>
+<td>No onboard display config (EyeSPI stacks are separate)</td>
+</tr>
+<tr class="even">
+<td>19</td>
+<td>Seeed XIAO nRF52840 Sense</td>
+<td>Sensors on-hand; no display <code>board_config</code></td>
+</tr>
+<tr class="odd">
+<td>24</td>
+<td>SparkFun Thing Plus SAMD51</td>
+<td>No product display config</td>
+</tr>
+<tr class="even">
+<td>26</td>
+<td>Adafruit PyRuler</td>
+<td>No display</td>
+</tr>
+<tr class="odd">
+<td>29</td>
+<td>Adafruit Feather nRF52840 Express</td>
+<td>Host only</td>
+</tr>
+<tr class="even">
+<td>30</td>
+<td>Adafruit Trinket M0</td>
+<td>No display</td>
+</tr>
+</tbody>
+</table>
+<hr />
 <h2 id="mip-install">MIP install</h2>
 <div class="sourceCode" id="cb1"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mip</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>mip.install(</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github:PyDevices/micropython-hardware/board_configs/&lt;path&gt;&quot;</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
-<p>Replace <code>&lt;path&gt;</code> with a directory from the table
+<p>Replace <code>&lt;path&gt;</code> with a directory from the tables
 (for example <code>fbdisplay/esp32-p4-wifi6-touch-lcd-4b</code>). Also
 install pydisplay core packages listed in that board’s
 <code>package.json</code> <code>deps</code>.</p>
 <hr />
 <h2 id="notes">Notes</h2>
 <ul>
-<li>Lazy roles listed in <code>DEVICES</code> may still raise
-<code>NotImplementedError</code> until factories are filled in — the set
-is the contract surface, not a completeness guarantee.</li>
-<li>Boards without an Inventory # are on-hand for display bring-up but
-were not part of the 2026-07-18 Detect fixture capture.</li>
-<li><code>bt</code> (Classic) is omitted; none of these campaign boards
-expose it.</li>
+<li><strong>Campaign</strong> lazy roles are live <code>DEVICES</code>
+sets; factories may still raise <code>NotImplementedError</code> until
+filled — the set is the contract surface, not a completeness
+guarantee.</li>
+<li><strong>Planned</strong> rows are research only until an MP retrofit
+adds <code>board_devices.py</code>.</li>
+<li>Boards without an Inventory # were not part of the 2026-07-18 Detect
+fixture capture (or are common products kept for retrofit
+planning).</li>
+<li><code>bt</code> (Classic) is omitted unless a product is known to
+expose BR/EDR.</li>
+<li>Light / ALS sensors have no contract role yet — omit from
+<code>DEVICES</code>.</li>
+<li>Metro M7 inventory <a href="board-inventory.html">#5</a> is the
+host; the campaign path is the host + Adafruit TFT shield 1947.</li>
 </ul>
   </main>
 </body>
