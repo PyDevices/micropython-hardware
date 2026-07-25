@@ -19,7 +19,9 @@ This repo holds what used to live under pydisplay’s `board_configs/`,
 Graduated campaign boards use the
 [board devices contract](https://pydisplay.readthedocs.io/en/latest/hardware/board-devices.html):
 eager UI in `board_config.py`, lazy extras in `board_devices.py` via
-pydisplay’s `boarddev`.
+pydisplay’s `boarddev`. Device matrix:
+[Pages](https://pydevices.github.io/micropython-hardware/) /
+[`device-matrix.md`](device-matrix.md).
 
 ## Install (MIP)
 

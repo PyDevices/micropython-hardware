@@ -2,6 +2,8 @@
 
 Sibling of [pydisplay](https://github.com/PyDevices/pydisplay). Owns
 **board configs**, **hardware drivers**, and their **MIP package manifests**.
+Pages site: [pydevices.github.io/micropython-hardware](https://pydevices.github.io/micropython-hardware/)
+(`web/` + `device-matrix.md`).
 
 ## Do
 
