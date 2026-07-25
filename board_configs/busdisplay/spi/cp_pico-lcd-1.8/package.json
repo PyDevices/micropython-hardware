@@ -1,0 +1,19 @@
+{
+  "urls": [
+    [
+      "board_config.py",
+      "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/cp_pico-lcd-1.8/board_config.py"
+    ],
+    [
+      "st7735r_1.py",
+      "github:PyDevices/micropython-hardware/drivers/display/st7735r_1.py"
+    ]
+  ],
+  "deps": [
+    [
+      "github:PyDevices/pydisplay/packages/displaysys.json",
+      "main"
+    ]
+  ],
+  "version": "0.1"
+}

@@ -1,0 +1,23 @@
+{
+  "urls": [
+    [
+      "board_config.py",
+      "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/cp_pybadge/board_config.py"
+    ],
+    [
+      "st7789.py",
+      "github:PyDevices/micropython-hardware/drivers/display/st7789.py"
+    ],
+    [
+      "keypad_gpio.py",
+      "github:PyDevices/micropython-hardware/drivers/input/keypad_gpio.py"
+    ]
+  ],
+  "deps": [
+    [
+      "github:PyDevices/pydisplay/packages/displaysys.json",
+      "main"
+    ]
+  ],
+  "version": "0.1"
+}

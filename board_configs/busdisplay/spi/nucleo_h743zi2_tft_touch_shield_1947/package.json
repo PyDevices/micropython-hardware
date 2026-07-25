@@ -1,0 +1,56 @@
+{
+  "urls": [
+    [
+      "board_config.py",
+      "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/nucleo_h743zi2_tft_touch_shield_1947/board_config.py"
+    ],
+    [
+      "board_devices.py",
+      "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/nucleo_h743zi2_tft_touch_shield_1947/board_devices.py"
+    ],
+    [
+      "boarddev.py",
+      "github:PyDevices/pydisplay/src/lib/boarddev.py"
+    ],
+    [
+      "main.py",
+      "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/nucleo_h743zi2_tft_touch_shield_1947/main.py"
+    ],
+    [
+      "ili9341.py",
+      "github:PyDevices/micropython-hardware/drivers/display/ili9341.py"
+    ],
+    [
+      "ft6x36.py",
+      "github:PyDevices/micropython-hardware/drivers/touch/ft6x36.py"
+    ],
+    [
+      "displaysys/__init__.py",
+      "github:PyDevices/micropython-hardware/src/lib/displaysys/__init__.py"
+    ],
+    [
+      "displaysys/busdisplay.py",
+      "github:PyDevices/micropython-hardware/src/lib/displaysys/busdisplay.py"
+    ],
+    [
+      "display_driver.py",
+      "github:PyDevices/micropython-hardware/src/add_ons/display_driver.py"
+    ],
+    [
+      "lvgl_test.py",
+      "github:PyDevices/micropython-hardware/src/examples/lvgl_test.py"
+    ]
+  ],
+  "deps": [
+    [
+      "github:PyDevices/pydisplay/packages/eventsys.json",
+      "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/multimer.json",
+      "main"
+    ]
+  ],
+  "version": "0.3",
+  "notes": "Split board_config + board_devices (board devices contract). boarddev from pydisplay."
+}

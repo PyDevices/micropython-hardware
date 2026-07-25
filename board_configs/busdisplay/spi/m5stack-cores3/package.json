@@ -1,0 +1,27 @@
+{
+  "urls": [
+    [
+      "board_config.py",
+      "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/m5stack-cores3/board_config.py"
+    ],
+    [
+      "ili9341.py",
+      "github:PyDevices/micropython-hardware/drivers/display/ili9341.py"
+    ],
+    [
+      "ft6x36.py",
+      "github:PyDevices/micropython-hardware/drivers/touch/ft6x36.py"
+    ]
+  ],
+  "deps": [
+    [
+      "github:PyDevices/pydisplay/packages/displaysys.json",
+      "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/spibus.json",
+      "main"
+    ]
+  ],
+  "version": "0.1"
+}

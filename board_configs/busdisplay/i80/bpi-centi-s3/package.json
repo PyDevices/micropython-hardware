@@ -1,0 +1,31 @@
+{
+  "urls": [
+    [
+      "board_config.py",
+      "github:PyDevices/micropython-hardware/board_configs/busdisplay/i80/bpi-centi-s3/board_config.py"
+    ],
+    [
+      "st7789.py",
+      "github:PyDevices/micropython-hardware/drivers/display/st7789.py"
+    ],
+    [
+      "rotary.py",
+      "github:miketeachman/micropython-rotary/rotary.py"
+    ],
+    [
+      "rotary_irq_esp.py",
+      "github:miketeachman/micropython-rotary/rotary_irq_esp.py"
+    ]
+  ],
+  "deps": [
+    [
+      "github:PyDevices/pydisplay/packages/i80bus.json",
+      "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/i80bus.json",
+      "main"
+    ]
+  ],
+  "version": "0.1"
+}

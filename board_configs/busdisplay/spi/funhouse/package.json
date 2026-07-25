@@ -1,0 +1,27 @@
+{
+  "urls": [
+    [
+      "board_config.py",
+      "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/funhouse/board_config.py"
+    ],
+    [
+      "st7789.py",
+      "github:PyDevices/micropython-hardware/drivers/display/st7789.py"
+    ],
+    [
+      "tt21100.py",
+      "github:PyDevices/micropython-hardware/drivers/touch/tt21100.py"
+    ]
+  ],
+  "deps": [
+    [
+      "github:PyDevices/pydisplay/packages/displaysys.json",
+      "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/spibus.json",
+      "main"
+    ]
+  ],
+  "version": "0.1"
+}

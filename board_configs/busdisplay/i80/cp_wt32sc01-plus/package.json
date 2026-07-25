@@ -1,0 +1,18 @@
+{
+  "urls": [
+    [
+      "board_config.py",
+      "github:PyDevices/micropython-hardware/board_configs/busdisplay/i80/cp_wt32sc01-plus/board_config.py"
+    ],
+    [
+      "st7796.py",
+      "github:PyDevices/micropython-hardware/drivers/display/st7796.py"
+    ],
+    [
+      "adafruit_focaltouch.py",
+      "github:PyDevices/micropython-hardware/drivers/touch/circuitpython/adafruit_focaltouch.py"
+    ]
+  ],
+  "deps": [],
+  "version": "0.1"
+}

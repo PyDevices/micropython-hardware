@@ -1,0 +1,19 @@
+{
+  "urls": [
+    [
+      "board_config.py",
+      "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/cp_ssd1331_096_oled/board_config.py"
+    ],
+    [
+      "ssd1331.py",
+      "github:PyDevices/micropython-hardware/drivers/display/ssd1331.py"
+    ]
+  ],
+  "deps": [
+    [
+      "github:PyDevices/pydisplay/packages/displaysys.json",
+      "main"
+    ]
+  ],
+  "version": "0.1"
+}

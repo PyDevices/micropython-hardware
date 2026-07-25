@@ -1,0 +1,44 @@
+{
+  "urls": [
+    [
+      "board_config.py",
+      "github:PyDevices/micropython-hardware/board_configs/fbdisplay/esp32-s3-touch-lcd-7/board_config.py"
+    ],
+    [
+      "board_devices.py",
+      "github:PyDevices/micropython-hardware/board_configs/fbdisplay/esp32-s3-touch-lcd-7/board_devices.py"
+    ],
+    [
+      "boarddev.py",
+      "github:PyDevices/pydisplay/src/lib/boarddev.py"
+    ],
+    [
+      "ch422g.py",
+      "github:PyDevices/micropython-hardware/drivers/io_expander/ch422g.py"
+    ],
+    [
+      "gt911.py",
+      "github:PyDevices/micropython-hardware/drivers/touch/gt911.py"
+    ]
+  ],
+  "deps": [
+    [
+      "github:PyDevices/pydisplay/packages/displaysys.json",
+      "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/displayif.json",
+      "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/eventsys.json",
+      "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/multimer.json",
+      "main"
+    ]
+  ],
+  "version": "0.1",
+  "notes": "Split board_config + board_devices (board devices contract). boarddev from pydisplay."
+}

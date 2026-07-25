@@ -1,0 +1,23 @@
+{
+  "urls": [
+    [
+      "board_config.py",
+      "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/cp_t-display-s3-pro/board_config.py"
+    ],
+    [
+      "st7796.py",
+      "github:PyDevices/micropython-hardware/drivers/display/st7796.py"
+    ],
+    [
+      "adafruit_focaltouch.py",
+      "github:PyDevices/micropython-hardware/drivers/touch/circuitpython/adafruit_focaltouch.py"
+    ]
+  ],
+  "deps": [
+    [
+      "github:PyDevices/pydisplay/packages/displaysys.json",
+      "main"
+    ]
+  ],
+  "version": "0.1"
+}

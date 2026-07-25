@@ -1,0 +1,27 @@
+{
+  "urls": [
+    [
+      "board_config.py",
+      "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/diy_esp32_ili9341_xpt2046/board_config.py"
+    ],
+    [
+      "ili9341.py",
+      "github:PyDevices/micropython-hardware/drivers/display/ili9341.py"
+    ],
+    [
+      "xpt2046.py",
+      "github:PyDevices/micropython-hardware/drivers/touch/xpt2046.py"
+    ]
+  ],
+  "deps": [
+    [
+      "github:PyDevices/pydisplay/packages/displaysys.json",
+      "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/spibus.json",
+      "main"
+    ]
+  ],
+  "version": "0.1"
+}

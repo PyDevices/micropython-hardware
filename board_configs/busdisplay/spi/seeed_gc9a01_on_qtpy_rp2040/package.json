@@ -1,0 +1,27 @@
+{
+  "urls": [
+    [
+      "board_config.py",
+      "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/seeed_gc9a01_on_qtpy_rp2040/board_config.py"
+    ],
+    [
+      "gc9a01.py",
+      "github:PyDevices/micropython-hardware/drivers/display/gc9a01.py"
+    ],
+    [
+      "chsc6x.py",
+      "github:PyDevices/micropython-hardware/drivers/touch/chsc6x.py"
+    ]
+  ],
+  "deps": [
+    [
+      "github:PyDevices/pydisplay/packages/displaysys.json",
+      "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/spibus.json",
+      "main"
+    ]
+  ],
+  "version": "0.1"
+}

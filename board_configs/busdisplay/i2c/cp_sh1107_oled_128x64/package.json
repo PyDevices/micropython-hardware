@@ -1,0 +1,19 @@
+{
+  "urls": [
+    [
+      "board_config.py",
+      "github:PyDevices/micropython-hardware/board_configs/busdisplay/i2c/cp_sh1107_oled_128x64/board_config.py"
+    ],
+    [
+      "sh1107.py",
+      "github:PyDevices/micropython-hardware/drivers/display/sh1107.py"
+    ]
+  ],
+  "deps": [
+    [
+      "github:PyDevices/pydisplay/packages/displaysys.json",
+      "main"
+    ]
+  ],
+  "version": "0.1"
+}

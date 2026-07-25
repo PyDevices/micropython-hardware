@@ -1,0 +1,36 @@
+{
+  "urls": [
+    [
+      "board_config.py",
+      "github:PyDevices/micropython-hardware/board_configs/fbdisplay/qualia_tl040hds20/board_config.py"
+    ],
+    [
+      "board_devices.py",
+      "github:PyDevices/micropython-hardware/board_configs/fbdisplay/qualia_tl040hds20/board_devices.py"
+    ],
+    [
+      "boarddev.py",
+      "github:PyDevices/pydisplay/src/lib/boarddev.py"
+    ],
+    [
+      "ft6x36.py",
+      "github:PyDevices/micropython-hardware/drivers/touch/ft6x36.py"
+    ],
+    [
+      "pca9554.py",
+      "github:PyDevices/micropython-hardware/drivers/io_expander/pca9554.py"
+    ]
+  ],
+  "deps": [
+    [
+      "github:PyDevices/pydisplay/packages/displaysys.json",
+      "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/displayif.json",
+      "main"
+    ]
+  ],
+  "version": "0.1",
+  "notes": "Split board_config + board_devices (board devices contract). boarddev from pydisplay."
+}
