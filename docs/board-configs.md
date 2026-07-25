@@ -148,8 +148,6 @@ Tri-color / 4-gray configs use `color_depth=2` (0=white, 1=black, 2=accent). ACe
 | `busdisplay/spi/hallowing_m4` | HalloWing M4 ST7735 (MP) |
 | `cp/busdisplay/spi/pitft_ili9341_featherwing` | PiTFT FeatherWing + STMPE610 |
 | `busdisplay/spi/pitft_ili9341_featherwing` | PiTFT FeatherWing (MP Feather + STMPE610) |
-| `busdisplay/spi/clue` | CLUE ST7789 (MP nRF52840) |
-| `cp/busdisplay/spi/clue` | CLUE ST7789 (CircuitPython) |
 | `cp/busdisplay/spi/funhouse` | FunHouse ST7789 + touch |
 | `cp/busdisplay/spi/pygamer` | PyGamer ST7789 |
 | `busdisplay/spi/pygamer` | PyGamer ST7789 (MP SAMD51) |
