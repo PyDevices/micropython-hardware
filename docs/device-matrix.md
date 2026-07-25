@@ -54,7 +54,7 @@ contract surface.
 | Adafruit FunHouse | [#13](board-inventory.md) | `busdisplay/spi/funhouse` | `touch`, `keypad` | `temperature`, `humidity`, `pressure`, `pixels`, `audio`, `wlan` | no BLE on ESP32-S2 |
 | Adafruit PyGamer | [#27](board-inventory.md) | `busdisplay/spi/pygamer` | `joystick`, `keypad` | `pixels`, `accelerometer`, `sdcard`, `battery`, `audio`, `i2c` | |
 | Adafruit Feather RP2040 + RGB matrix wing | [#7](board-inventory.md) host | `fbdisplay/feather_rp2040_rgb_matrix_64x32` | — | `i2c` | matrix is `display_drv` |
-| Adafruit Feather RP2040 DVI | [#21](board-inventory.md) | — (CP only) | — | — | CP POC under `cp/fbdisplay/adafruit_feather_rp2040_dvi_320x240`; no MP `board_config` yet |
+| Adafruit Feather RP2040 DVI | [#21](board-inventory.md) | `fbdisplay/adafruit_feather_rp2040_dvi_320x240` | — | — | MP stub raises `NotImplementedError` (SRAM); CP POC under `cp/fbdisplay/adafruit_feather_rp2040_dvi_320x240` |
 | Teensy 4.1 + FlexIO ILI9341 | [#23](board-inventory.md) | `busdisplay/i80/teensy41_flexio_ili9341` | — | *(empty)* | split layout; no onboard lazy extras |
 | Teensy 4.1 + RGB matrix featherwing | [#23](board-inventory.md) | `fbdisplay/rgb_matrix_featherwing_teensy41_64x32` | — | *(empty)* | |
 | Adafruit MagTag | — | `epaperdisplay/magtag` | `keypad` | `pixels`, `audio`, `i2c`, `wlan` | no contract role for ALS |
