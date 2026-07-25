@@ -26,7 +26,7 @@ First-wave display campaign. Lazy column is the live `DEVICES` set.
 
 | Product | Inventory # | `board_config` path | Eager UI | Lazy `DEVICES` |
 |---------|-------------|---------------------|----------|----------------|
-| Waveshare ESP32-P4-WIFI6-Touch-LCD-4B | [#1](board-inventory.md) | `fbdisplay/esp32-p4-wifi6-touch-lcd-4b` | `touch` | `audio`, `microphone`, `sdcard`, `camera`, `ethernet`, `radio`, `wlan`, `ble`, `usb_device` |
+| Waveshare ESP32-P4-WIFI6-Touch-LCD-4B | [#1](board-inventory.md) | `fbdisplay/esp32-p4-wifi6-touch-lcd-4b` | `touch` | `audio`, `microphone`, `sdcard`, `camera`, `radio`, `wlan`, `ble`, `usb_device` |
 | Adafruit Qualia S3 + TL040HDS20 | [#8](board-inventory.md) | `fbdisplay/qualia_tl040hds20` | `touch`, `keypad`, `io_expander` | `wlan`, `ble` |
 | Waveshare ESP32-S3-Touch-LCD-4.3 | — | `fbdisplay/esp32-s3-touch-lcd-4_3` | `touch`, `io_expander` | `sdcard`, `can`, `rs485`, `usb_device`, `wlan`, `ble` |
 | Waveshare ESP32-S3-Touch-LCD-7 | — | `fbdisplay/esp32-s3-touch-lcd-7` | `touch`, `io_expander` | `sdcard`, `can`, `rs485`, `usb_device`, `wlan`, `ble` |
@@ -39,6 +39,9 @@ First-wave display campaign. Lazy column is the live `DEVICES` set.
 
 `display_drv` / `runtime` / `display_bus` are always part of the board surface
 when present; they are omitted from the Eager column for brevity.
+
+P4 WIFI6-Touch-LCD-4B has no ethernet PHY (ETH is a different SKU); `camera`
+stays in `DEVICES` as a CSI stub.
 
 ---
 
@@ -58,14 +61,13 @@ contract surface.
 | Teensy 4.1 + FlexIO ILI9341 | [#23](board-inventory.md) | `busdisplay/i80/teensy41_flexio_ili9341` | — | *(empty)* | split layout; no onboard lazy extras |
 | Teensy 4.1 + RGB matrix featherwing | [#23](board-inventory.md) | `fbdisplay/rgb_matrix_featherwing_teensy41_64x32` | — | *(empty)* | |
 | Adafruit MagTag | — | `epaperdisplay/magtag` | `keypad` | `pixels`, `audio`, `i2c`, `wlan` | no contract role for ALS |
-| Adafruit CLUE | — | `busdisplay/spi/clue` | `keypad` | `accelerometer`, `gyroscope`, `magnetometer`, `temperature`, `humidity`, `pressure`, `microphone`, `pixels`, `led`, `i2c`, `ble` | BMP280/pixels/led/i2c/ble live; IMU/humidity/mic raise |
 | Adafruit PyBadge | — | `busdisplay/spi/pybadge` | `keypad` | `pixels`, `accelerometer`, `audio`, `i2c` | |
 | Adafruit PyPortal | — | `busdisplay/spi/pyportal` | `touch` | `sdcard`, `radio`, `audio`, `i2c`, `wlan` | AirLift as `radio`/`wlan` |
 | Adafruit PyPortal Titano | — | `busdisplay/spi/pyportal_titano` | `touch` | `sdcard`, `radio`, `audio`, `i2c`, `wlan` | |
 | Adafruit HalloWing M4 | — | `busdisplay/spi/hallowing_m4` | — | `pixels`, `accelerometer`, `audio`, `i2c` | |
 | ODROID-GO | — | `busdisplay/spi/odroid_go` | `joystick`, `keypad` | `battery`, `sdcard`, `audio`, `wlan` | |
-| M5Stack CoreS3 | — | `busdisplay/spi/m5stack-cores3` | `touch` | `microphone`, `audio`, `sdcard`, `camera`, `accelerometer`, `gyroscope`, `i2c`, `wlan`, `ble` | several factories raise until codecs/IMU land |
-| M5Stack Tab5 (ILI9881C) | — | `fbdisplay/m5stack_tab5_ili9881c` | `touch` | `microphone`, `audio`, `sdcard`, `camera`, `i2c`, `wlan`, `ble` | same |
+| M5Stack CoreS3 | — | `busdisplay/spi/m5stack-cores3` | `touch` | `microphone`, `audio`, `sdcard`, `camera`, `accelerometer`, `gyroscope`, `i2c`, `wlan`, `ble` | AW88298/ES7210/BMI270 wired; camera stub |
+| M5Stack Tab5 (ILI9881C) | — | `fbdisplay/m5stack_tab5_ili9881c` | `touch` | `microphone`, `audio`, `sdcard`, `camera`, `i2c`, `wlan`, `ble` | ES8388/ES7210 wired; camera stub |
 | M5Stack Tab5 (ST7123) | — | `fbdisplay/m5stack_tab5_st7123` | `touch` | `microphone`, `audio`, `sdcard`, `camera`, `i2c`, `wlan`, `ble` | same |
 | LILYGO T-Display-S3 | — | `busdisplay/i80/t-display-s3` | — | `battery`, `wlan`, `ble` | |
 | LILYGO T-Display-S3 Pro | — | `busdisplay/spi/t-display-s3-pro` | `touch` | `sdcard`, `battery`, `wlan`, `ble` | |

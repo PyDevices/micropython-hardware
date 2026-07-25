@@ -40,5 +40,5 @@
     ]
   ],
   "version": "0.2",
-  "notes": "ES8311 audio; SDIO sdcard; C6 radio=wlan."
+  "notes": "ES8311 audio; SDIO sdcard; C6 radio=wlan; no ethernet on this SKU."
 }
