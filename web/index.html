@@ -5,7 +5,7 @@
   <script>try{if(localStorage.getItem('pydevices-theme')==='light'){document.documentElement.setAttribute('data-theme','light');}}catch(e){}</script>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>micropython-hardware — PyDevices</title>
-  <meta name="description" content="MicroPython/CircuitPython board configs and drivers for PyDevices — campaign device matrix, MIP install, and source.">
+  <meta name="description" content="Board configs, drivers, and hardware docs for PyDevices on MicroPython and CircuitPython.">
   <link rel="icon" type="image/svg+xml" href="https://pydevices.github.io/assets/img/logo.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,31 +13,13 @@
   <link rel="stylesheet" href="https://pydevices.github.io/assets/css/site.css">
   <script src="https://pydevices.github.io/assets/js/theme-toggle.js" defer></script>
   <style>
-    .matrix-wrap { overflow-x: auto; margin: 1.5rem 0 2.5rem; }
-    table.matrix {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.92rem;
+    .doc-list { list-style: none; padding: 0; margin: 0 0 2.5rem; }
+    .doc-list li {
+      border-bottom: 1px solid color-mix(in srgb, currentColor 14%, transparent);
+      padding: 0.85rem 0;
     }
-    table.matrix th,
-    table.matrix td {
-      border-bottom: 1px solid color-mix(in srgb, currentColor 18%, transparent);
-      padding: 0.65rem 0.75rem;
-      text-align: left;
-      vertical-align: top;
-    }
-    table.matrix th {
-      font-family: "Space Grotesk", system-ui, sans-serif;
-      font-weight: 600;
-      white-space: nowrap;
-    }
-    table.matrix code {
-      font-size: 0.85em;
-      word-break: break-word;
-    }
-    .roles { color: color-mix(in srgb, currentColor 78%, transparent); }
-    .doc-links { display: flex; flex-wrap: wrap; gap: 0.75rem; margin: 1rem 0 0; }
-    .doc-links a.btn { text-decoration: none; }
+    .doc-list a { font-family: "Space Grotesk", system-ui, sans-serif; font-weight: 600; }
+    .doc-list p { margin: 0.25rem 0 0; opacity: 0.8; font-size: 0.95rem; }
   </style>
 </head>
 <body>
@@ -48,8 +30,7 @@
         PyDevices
       </a>
       <nav class="nav">
-        <a href="https://pydevices.github.io/pydisplay/">pydisplay</a>
-        <a href="https://pydevices.github.io/pydisplay/">pydisplay</a>
+        <a href="https://pydisplay.readthedocs.io">pydisplay docs</a>
         <a href="https://github.com/PyDevices/micropython-hardware">Source</a>
       </nav>
       <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle color theme" title="Toggle color theme">
@@ -64,123 +45,72 @@
     <h1>micropython-hardware</h1>
     <p>
       Board configs and hardware drivers for MicroPython and CircuitPython.
-      Campaign boards below use the board devices contract: eager UI in
-      <code>board_config.py</code>, lazy extras in <code>board_devices.py</code>
-      (<code>DEVICES</code>). Detect fixture numbers link to <a href="https://github.com/PyDevices/micropython-hardware/blob/main/docs/board-inventory.md">docs/board-inventory.md</a>.
+      Documentation is markdown in this repo, published here on GitHub Pages
+      (not Read the Docs). pydisplay core API docs stay on
+      <a href="https://pydisplay.readthedocs.io">pydisplay.readthedocs.io</a>.
     </p>
     <div class="cta">
       <a class="btn primary" href="https://github.com/PyDevices/micropython-hardware">Source on GitHub</a>
-      <a class="btn" href="https://github.com/PyDevices/micropython-hardware/blob/main/device-matrix.md">Device matrix (md)</a>
-      <a class="btn" href="https://pydisplay.readthedocs.io/en/latest/hardware/board-devices.html">Board devices contract</a>
+      <a class="btn" href="device-matrix.html">Device matrix</a>
+      <a class="btn" href="board-devices.html">Board devices contract</a>
     </div>
   </section>
 
   <main class="wrap">
     <div class="section-head">
-      <h2>Campaign boards</h2>
-      <span class="hint">Paths under <code>micropython-hardware/board_configs/</code></span>
+      <h2>📚 Documentation</h2>
+      <span class="hint">Source under <code>docs/</code></span>
     </div>
-
-    <div class="matrix-wrap">
-      <table class="matrix">
-        <thead>
-          <tr>
-            <th>Product</th>
-            <th>#</th>
-            <th>board_config</th>
-            <th>Eager UI</th>
-            <th>Lazy DEVICES</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Waveshare ESP32-P4-WIFI6-Touch-LCD-4B</td>
-            <td><a href="https://github.com/PyDevices/micropython-hardware/blob/main/docs/board-inventory.md">1</a></td>
-            <td><a href="https://github.com/PyDevices/micropython-hardware/tree/main/board_configs/fbdisplay/esp32-p4-wifi6-touch-lcd-4b"><code>fbdisplay/esp32-p4-wifi6-touch-lcd-4b</code></a></td>
-            <td><code>touch</code></td>
-            <td class="roles"><code>audio</code> <code>microphone</code> <code>sdcard</code> <code>camera</code> <code>ethernet</code> <code>radio</code> <code>wlan</code> <code>ble</code> <code>usb_device</code></td>
-          </tr>
-          <tr>
-            <td>Adafruit Qualia S3 + TL040HDS20</td>
-            <td><a href="https://github.com/PyDevices/micropython-hardware/blob/main/docs/board-inventory.md">8</a></td>
-            <td><a href="https://github.com/PyDevices/micropython-hardware/tree/main/board_configs/fbdisplay/qualia_tl040hds20"><code>fbdisplay/qualia_tl040hds20</code></a></td>
-            <td><code>touch</code> <code>keypad</code> <code>io_expander</code></td>
-            <td class="roles"><code>wlan</code> <code>ble</code></td>
-          </tr>
-          <tr>
-            <td>Waveshare ESP32-S3-Touch-LCD-4.3</td>
-            <td>—</td>
-            <td><a href="https://github.com/PyDevices/micropython-hardware/tree/main/board_configs/fbdisplay/esp32-s3-touch-lcd-4_3"><code>fbdisplay/esp32-s3-touch-lcd-4_3</code></a></td>
-            <td><code>touch</code> <code>io_expander</code></td>
-            <td class="roles"><code>sdcard</code> <code>can</code> <code>rs485</code> <code>usb_device</code> <code>wlan</code> <code>ble</code></td>
-          </tr>
-          <tr>
-            <td>Waveshare ESP32-S3-Touch-LCD-7</td>
-            <td>—</td>
-            <td><a href="https://github.com/PyDevices/micropython-hardware/tree/main/board_configs/fbdisplay/esp32-s3-touch-lcd-7"><code>fbdisplay/esp32-s3-touch-lcd-7</code></a></td>
-            <td><code>touch</code> <code>io_expander</code></td>
-            <td class="roles"><code>sdcard</code> <code>can</code> <code>rs485</code> <code>usb_device</code> <code>wlan</code> <code>ble</code></td>
-          </tr>
-          <tr>
-            <td>LILYGO T-RGB 2.1″</td>
-            <td>—</td>
-            <td><a href="https://github.com/PyDevices/micropython-hardware/tree/main/board_configs/fbdisplay/t-rgb_480"><code>fbdisplay/t-rgb_480</code></a></td>
-            <td><code>touch</code></td>
-            <td class="roles"><code>sdcard</code> <code>battery</code> <code>wlan</code> <code>ble</code></td>
-          </tr>
-          <tr>
-            <td>LILYGO T-Embed</td>
-            <td>—</td>
-            <td><a href="https://github.com/PyDevices/micropython-hardware/tree/main/board_configs/busdisplay/spi/t-embed"><code>busdisplay/spi/t-embed</code></a></td>
-            <td><code>encoder</code></td>
-            <td class="roles"><code>pixels</code> <code>audio</code> <code>microphone</code> <code>sdcard</code> <code>battery</code> <code>i2c</code> <code>wlan</code> <code>ble</code></td>
-          </tr>
-          <tr>
-            <td>LILYGO T-HMI</td>
-            <td>—</td>
-            <td><a href="https://github.com/PyDevices/micropython-hardware/tree/main/board_configs/busdisplay/i80/t-hmi"><code>busdisplay/i80/t-hmi</code></a></td>
-            <td><code>touch</code></td>
-            <td class="roles"><code>sdcard</code> <code>i2c</code> <code>wlan</code> <code>ble</code></td>
-          </tr>
-          <tr>
-            <td>Waveshare RP2040-Touch-LCD-1.28</td>
-            <td>—</td>
-            <td><a href="https://github.com/PyDevices/micropython-hardware/tree/main/board_configs/busdisplay/spi/rp2040-touch-lcd-1.28"><code>busdisplay/spi/rp2040-touch-lcd-1.28</code></a></td>
-            <td><code>touch</code></td>
-            <td class="roles"><code>accelerometer</code> <code>gyroscope</code> <code>battery</code></td>
-          </tr>
-          <tr>
-            <td>Adafruit Metro M7 + TFT shield 1947</td>
-            <td>—</td>
-            <td><a href="https://github.com/PyDevices/micropython-hardware/tree/main/board_configs/busdisplay/spi/metro_m7_tft_touch_shield_1947"><code>busdisplay/spi/metro_m7_tft_touch_shield_1947</code></a></td>
-            <td><code>touch</code></td>
-            <td class="roles"><code>pixels</code> <code>led</code> <code>sdcard</code> <code>radio</code> <code>wlan</code> <code>i2c</code></td>
-          </tr>
-          <tr>
-            <td>ST NUCLEO-H743ZI2 + TFT shield 1947</td>
-            <td><a href="https://github.com/PyDevices/micropython-hardware/blob/main/docs/board-inventory.md">25</a></td>
-            <td><a href="https://github.com/PyDevices/micropython-hardware/tree/main/board_configs/busdisplay/spi/nucleo_h743zi2_tft_touch_shield_1947"><code>busdisplay/spi/nucleo_h743zi2_tft_touch_shield_1947</code></a></td>
-            <td><code>touch</code></td>
-            <td class="roles"><code>led</code> <code>sdcard</code> <code>ethernet</code></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="section-head">
-      <h2>📚 Related inventories</h2>
-      <span class="hint">Same repo — different jobs</span>
-    </div>
-    <div class="doc-links">
-      <a class="btn" href="https://github.com/PyDevices/micropython-hardware/blob/main/docs/board-inventory.md">board-inventory.md</a>
-      <a class="btn" href="https://github.com/PyDevices/micropython-hardware/blob/main/docs/firmware-fixtures.md">firmware-fixtures.md</a>
-      <a class="btn" href="https://github.com/PyDevices/micropython-hardware/blob/main/docs/pydisplay-display-boards.md">pydisplay-display-boards.md</a>
-      <a class="btn" href="https://github.com/PyDevices/micropython-hardware/blob/main/device-matrix.md">device-matrix.md</a>
-    </div>
-    <p style="margin: 2rem 0 3rem; opacity: 0.8;">
-      MIP:
-      <code>mip.install("github:PyDevices/micropython-hardware/board_configs/&lt;path&gt;")</code>
-    </p>
+    <ul class="doc-list">
+      <li>
+        <a href="board-configs.html">Board configs</a>
+        <p>Pick and MIP-install a <code>board_config</code> for your hardware.</p>
+      </li>
+      <li>
+        <a href="board-devices.html">Board devices</a>
+        <p>Eager UI / lazy <code>DEVICES</code> contract and touch duck-type.</p>
+      </li>
+      <li>
+        <a href="device-matrix.html">Device matrix</a>
+        <p>Campaign boards: fixture #, path, eager roles, lazy <code>DEVICES</code>.</p>
+      </li>
+      <li>
+        <a href="display-drivers.html">Display drivers</a>
+        <p>Chip init helpers for BusDisplay.</p>
+      </li>
+      <li>
+        <a href="touch-drivers.html">Touch drivers</a>
+        <p>Touch controllers and install notes.</p>
+      </li>
+      <li>
+        <a href="display-interfaces.html">Display interfaces</a>
+        <p>SPI / I80 / RGB / DSI taxonomy and native modules.</p>
+      </li>
+      <li>
+        <a href="driver-inventory.html">Driver inventory</a>
+        <p>What’s under <code>drivers/</code>.</p>
+      </li>
+      <li>
+        <a href="board-inventory.html">Board inventory</a>
+        <p>Detect fixtures — chip, flash, runtime.</p>
+      </li>
+      <li>
+        <a href="firmware-fixtures.html">Firmware fixtures</a>
+        <p>Raw Detect campaign probe notes.</p>
+      </li>
+      <li>
+        <a href="pydisplay-display-boards.html">Display board bring-up</a>
+        <p>Panel / touch / soft-reset notes for campaign boards.</p>
+      </li>
+      <li>
+        <a href="wokwi.html">Wokwi</a>
+        <p>Simulator pin map and MIP install.</p>
+      </li>
+      <li>
+        <a href="tft-espi-parity.html">TFT_eSPI parity</a>
+        <p>How pydisplay / displayif map to TFT_eSPI buses.</p>
+      </li>
+    </ul>
   </main>
 </body>
 </html>

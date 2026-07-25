@@ -8,7 +8,7 @@ Paths are under
 [`micropython-hardware`](https://github.com/PyDevices/micropython-hardware)
 `board_configs/fbdisplay/<name>/` unless a `busdisplay/…` path is given.
 Device roles (eager / lazy):
-[`device-matrix.md`](../device-matrix.md)
+[`device-matrix.md`](device-matrix.md)
 ([Pages](https://pydevices.github.io/micropython-hardware/)).
 Native drivers live in pydevices **displayif** (`displayif.DotClockFramebuffer`
 or `mipidsi`). Soft-reset / scanout lessons:

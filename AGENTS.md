@@ -2,9 +2,10 @@
 
 Sibling of [pydisplay](https://github.com/PyDevices/pydisplay). Owns
 **board configs**, **hardware drivers**, and their **MIP package manifests**.
-Pages site: [pydevices.github.io/micropython-hardware](https://pydevices.github.io/micropython-hardware/)
-(`web/` + `device-matrix.md`). Inventory / fixture / bring-up notes live under
-`docs/`.
+Docs are markdown under `docs/`, published only via GitHub Pages
+([pydevices.github.io/micropython-hardware](https://pydevices.github.io/micropython-hardware/))
+— not Read the Docs. Build locally with `./scripts/build_pages.sh` (needs
+`pandoc`).
 
 ## Do
 

@@ -6,7 +6,8 @@ on:
       - main
     paths:
       - 'web/**'
-      - 'device-matrix.md'
+      - 'docs/**'
+      - 'scripts/build_pages.sh'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
 
@@ -19,11 +20,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install pandoc
+        run: sudo apt-get update && sudo apt-get install -y pandoc
+
       - name: Assemble GitHub Pages site
-        run: |
-          mkdir -p _site
-          cp -r web/* _site/
-          touch _site/.nojekyll
+        run: ./scripts/build_pages.sh
 
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v4

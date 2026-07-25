@@ -1,6 +1,6 @@
 # Device matrix
 
-Campaign boards in this repo use the [board devices contract](https://pydisplay.readthedocs.io/en/latest/hardware/board-devices.html):
+Campaign boards in this repo use the [board devices contract](board-devices.md):
 eager UI in `board_config.py`, lazy extras in `board_devices.py` (`DEVICES`).
 
 Related inventories (keep concerns separate):

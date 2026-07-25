@@ -15,14 +15,16 @@ This repo holds what used to live under pydisplay’s `board_configs/`,
 | `board_configs/` | Per-board `board_config.py` (+ `board_devices.py` on graduated boards) and MIP `package.json` |
 | `drivers/` | Display, touch, bus, encoder, joystick, IO expander helpers |
 | `packages/` | Shared MIP manifests for bus/touch/chip helpers (`spibus`, `i80bus`, …) |
-| `docs/` | Detect inventory, firmware fixtures, display bring-up notes |
+| `docs/` | Hardware documentation (markdown; published on GitHub Pages, not RTD) |
+
+Documentation:
+[pydevices.github.io/micropython-hardware](https://pydevices.github.io/micropython-hardware/)
+(board configs, board-devices contract, drivers, inventories, device matrix).
 
 Graduated campaign boards use the
-[board devices contract](https://pydisplay.readthedocs.io/en/latest/hardware/board-devices.html):
+[board devices contract](https://pydevices.github.io/micropython-hardware/board-devices.html):
 eager UI in `board_config.py`, lazy extras in `board_devices.py` via
-pydisplay’s `boarddev`. Device matrix:
-[Pages](https://pydevices.github.io/micropython-hardware/) /
-[`device-matrix.md`](device-matrix.md).
+pydisplay’s `boarddev`.
 
 ## Install (MIP)
 
