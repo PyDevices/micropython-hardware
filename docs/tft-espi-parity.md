@@ -66,11 +66,11 @@ TFT_eSPI bundles dozens of controller init tables. pydisplay **vendors CircuitPy
 
 | Board | MP | CP |
 |-------|----|----|
-| M5 Tab5 ILI9881C (early) | `m5stack_tab5_ili9881c` | `cp_m5stack_tab5_ili9881c` |
+| M5 Tab5 ILI9881C (early) | `m5stack_tab5_ili9881c` | `cp/fbdisplay/m5stack_tab5_ili9881c` |
 | M5 Tab5 ST7123 (current) | `m5stack_tab5_st7123` | — |
-| Pico 2 DVI Sock (HSTX) | `pico2_dvi_sock_640x480` | `cp_pico2_dvi_sock_640x480` |
-| Metro RP2350 HSTX | `adafruit_metro_rp2350_hstx_640x480` | `cp_adafruit_metro_rp2350_hstx_640x480` |
-| Pimoroni Pico DV (RP2040 PIO) | `pimoroni_pico_dv_base_640x480` | `cp_pimoroni_pico_dv_base_640x480` |
+| Pico 2 DVI Sock (HSTX) | `pico2_dvi_sock_640x480` | `cp/fbdisplay/pico2_dvi_sock_640x480` |
+| Metro RP2350 HSTX | `adafruit_metro_rp2350_hstx_640x480` | `cp/fbdisplay/adafruit_metro_rp2350_hstx_640x480` |
+| Pimoroni Pico DV (RP2040 PIO) | `pimoroni_pico_dv_base_640x480` | `cp/fbdisplay/pimoroni_pico_dv_base_640x480` |
 | LilyGO T-RGB | `t-rgb_480` | — (MP-focused) |
 
 ## When not to port TFT_eSPI features

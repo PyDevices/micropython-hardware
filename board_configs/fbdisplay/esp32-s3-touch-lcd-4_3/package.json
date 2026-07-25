@@ -19,6 +19,18 @@
     [
       "gt911.py",
       "github:PyDevices/micropython-hardware/drivers/touch/gt911.py"
+    ],
+    [
+      "sdcard.py",
+      "github:PyDevices/micropython-hardware/drivers/storage/sdcard.py"
+    ],
+    [
+      "rs485.py",
+      "github:PyDevices/micropython-hardware/drivers/bus/rs485.py"
+    ],
+    [
+      "canbus.py",
+      "github:PyDevices/micropython-hardware/drivers/bus/canbus.py"
     ]
   ],
   "deps": [
@@ -39,6 +51,6 @@
       "main"
     ]
   ],
-  "version": "0.1",
+  "version": "0.2",
   "notes": "Split board_config + board_devices (board devices contract). boarddev from pydisplay."
 }

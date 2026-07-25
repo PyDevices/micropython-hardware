@@ -1,8 +1,7 @@
 """BPI-Centi-S3 170x320 ST7789 display"""
 
 from i80bus import I80Bus
-from machine import Pin
-from rotary_irq_esp import RotaryIRQ
+from machine import Encoder, Pin
 from st7789 import ST7789
 
 import eventsys
@@ -36,7 +35,13 @@ display_drv = ST7789(
     power_pin=None,
     power_on_high=True,
 )
-encoder = RotaryIRQ(37, 47, pull_up=True, half_step=True)
+# machine.Encoder (MP ≥ 1.26): PCNT unit 0; phases=2 ≈ former half_step.
+encoder = Encoder(
+    0,
+    Pin(37, Pin.IN, Pin.PULL_UP),
+    Pin(47, Pin.IN, Pin.PULL_UP),
+    phases=2,
+)
 encoder_read_func = encoder.value
 encoder_button = Pin(35, Pin.IN, Pin.PULL_UP)
 

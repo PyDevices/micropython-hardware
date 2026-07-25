@@ -77,17 +77,25 @@ class CH422G:
 
 
 class _CH422GPin:
+    """Pin-like wrapper; supports ``machine.Pin``-style ``init`` for sdcard.py."""
+
+    OUT = Pin.OUT
+    IN = Pin.IN
+
     def __init__(self, chip, pin, mode, value):
         self._chip = chip
         self._pin = pin
-        if mode == Pin.OUT:
-            chip.enable_all_io_output()
-            if value is not None:
-                chip.digital_write(pin, value)
+        self.init(mode, value=value)
+
+    def init(self, mode=-1, pull=-1, *, value=None, drive=-1, alt=-1):
+        if mode == Pin.OUT or mode == -1:
+            self._chip.enable_all_io_output()
         elif mode == Pin.IN:
-            chip.enable_all_io_input()
+            self._chip.enable_all_io_input()
         else:
             raise ValueError("mode must be Pin.OUT or Pin.IN")
+        if value is not None:
+            self._chip.digital_write(self._pin, value)
 
     def value(self, v=None):
         if v is None:

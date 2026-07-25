@@ -17,12 +17,20 @@
       "github:PyDevices/micropython-hardware/drivers/display/st7789.py"
     ],
     [
-      "rotary.py",
-      "github:miketeachman/micropython-rotary/rotary.py"
+      "dotstar.py",
+      "github:PyDevices/micropython-hardware/drivers/led/dotstar.py"
     ],
     [
-      "rotary_irq_esp.py",
-      "github:miketeachman/micropython-rotary/rotary_irq_esp.py"
+      "es7210.py",
+      "github:PyDevices/micropython-hardware/drivers/codec/es7210.py"
+    ],
+    [
+      "sdcard.py",
+      "github:PyDevices/micropython-hardware/drivers/storage/sdcard.py"
+    ],
+    [
+      "battery_adc.py",
+      "github:PyDevices/micropython-hardware/drivers/power/battery_adc.py"
     ]
   ],
   "deps": [
@@ -39,6 +47,6 @@
       "main"
     ]
   ],
-  "version": "0.2",
-  "notes": "Split board_config + board_devices (board devices contract). boarddev from pydisplay."
+  "version": "0.4",
+  "notes": "machine.Encoder; pixels/audio/mic/sd/battery via drivers."
 }

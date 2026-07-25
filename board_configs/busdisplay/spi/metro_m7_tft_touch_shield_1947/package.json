@@ -19,6 +19,10 @@
     [
       "ft6x36.py",
       "github:PyDevices/micropython-hardware/drivers/touch/ft6x36.py"
+    ],
+    [
+      "sdcard.py",
+      "github:PyDevices/micropython-hardware/drivers/storage/sdcard.py"
     ]
   ],
   "deps": [

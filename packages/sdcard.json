@@ -1,0 +1,9 @@
+{
+  "urls": [
+    [
+      "sdcard.py",
+      "github:PyDevices/micropython-hardware/drivers/storage/sdcard.py"
+    ]
+  ],
+  "version": "0.1"
+}

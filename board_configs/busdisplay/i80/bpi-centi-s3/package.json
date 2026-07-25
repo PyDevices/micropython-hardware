@@ -7,14 +7,6 @@
     [
       "st7789.py",
       "github:PyDevices/micropython-hardware/drivers/display/st7789.py"
-    ],
-    [
-      "rotary.py",
-      "github:miketeachman/micropython-rotary/rotary.py"
-    ],
-    [
-      "rotary_irq_esp.py",
-      "github:miketeachman/micropython-rotary/rotary_irq_esp.py"
     ]
   ],
   "deps": [
@@ -23,9 +15,10 @@
       "main"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/i80bus.json",
+      "github:PyDevices/pydisplay/packages/eventsys.json",
       "main"
     ]
   ],
-  "version": "0.1"
+  "version": "0.2",
+  "notes": "Encoder via machine.Encoder (MP ≥ 1.26)."
 }

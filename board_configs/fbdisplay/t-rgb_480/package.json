@@ -23,6 +23,10 @@
     [
       "cst8xx.py",
       "github:PyDevices/micropython-hardware/drivers/touch/cst8xx.py"
+    ],
+    [
+      "battery_adc.py",
+      "github:PyDevices/micropython-hardware/drivers/power/battery_adc.py"
     ]
   ],
   "deps": [
@@ -43,6 +47,6 @@
       "main"
     ]
   ],
-  "version": "0.1",
+  "version": "0.2",
   "notes": "Split board_config + board_devices (board devices contract). boarddev from pydisplay."
 }

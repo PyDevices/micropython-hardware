@@ -1,0 +1,18 @@
+# Drivers
+
+Hardware helpers for [micropython-hardware](https://github.com/PyDevices/micropython-hardware)
+board configs. Prefer single-file modules; MIP manifests live under `../packages/`.
+
+| Path | Role |
+|------|------|
+| `storage/sdcard.py` | SPI SD block device ([micropython-lib](https://github.com/micropython/micropython-lib)) |
+| `imu/qmi8658.py` | 6-axis IMU |
+| `led/dotstar.py` | APA102 / DotStar ([mattytrentini/micropython-dotstar](https://github.com/mattytrentini/micropython-dotstar)) |
+| `codec/es8311.py` | ES8311 DAC/ADC init for I2S |
+| `codec/es7210.py` | Minimal ES7210 ADC init for I2S mics |
+| `power/battery_adc.py` | ADC + divider → volts |
+| `bus/rs485.py` | UART (+ optional DE) |
+| `bus/canbus.py` | `machine.CAN` helper when firmware exposes TWAI |
+| `bus/`, `touch/`, `display/`, `io_expander/`, `input/`, `joystick/` | Existing display/touch/bus helpers |
+
+Use `machine.SDCard` for SDMMC/SDIO slots; use `sdcard.py` for SPI CS paths.

@@ -23,12 +23,12 @@ Maps hardware interface types to pydisplay `displaysys` backends and pydevices/d
 
 | Backend | Path | Example |
 |---------|------|---------|
-| BusDisplay | `board_configs/busdisplay/{spi,i80,i2c}/` | `cp_pyportal`, `ili9341_eyespi_qtpy_esp32s3` |
+| BusDisplay | `board_configs/busdisplay/{spi,i80,i2c}/` (+ `cp/…`) | `cp/busdisplay/spi/pyportal`, `ili9341_eyespi_qtpy_esp32s3` |
 | FBDisplay | `board_configs/fbdisplay/` | `qualia_tl040hds20`, `t-rgb_480`, `esp32-s3-touch-lcd-4_3`, `esp32-s3-touch-lcd-7`, `esp32-p4-wifi6-touch-lcd-4b` |
-| PixelDisplay | `board_configs/pixeldisplay/` | `cp_neopixel_8x4`, `cp_dotstar_12x6` |
-| EPaperDisplay | `board_configs/epaperdisplay/` | `cp_magtag` |
+| PixelDisplay | `board_configs/pixeldisplay/` (+ `cp/…`) | `cp/pixeldisplay/neopixel_8x4`, … |
+| EPaperDisplay | `board_configs/epaperdisplay/` (+ `cp/…`) | `cp/epaperdisplay/magtag` |
 
-MicroPython RGB/HUB75/DSI/DVI drivers live in **pydevices/displayif**, wired from board configs and drivers vendored here in pydisplay. CircuitPython configs use `cp_*` prefixes and CP native modules.
+MicroPython RGB/HUB75/DSI/DVI drivers live in **pydevices/displayif**, wired from board configs and drivers vendored here. CircuitPython configs live under `board_configs/cp/` (same directory names as MicroPython) and use CP native modules.
 
 ## Touch
 

@@ -12,8 +12,8 @@ This repo holds what used to live under pydisplay’s `board_configs/`,
 
 | Path | Contents |
 |------|----------|
-| `board_configs/` | Per-board `board_config.py` (+ `board_devices.py` on graduated boards) and MIP `package.json` |
-| `drivers/` | Display, touch, bus, encoder, joystick, IO expander helpers |
+| `board_configs/` | MicroPython boards (top level); CircuitPython under `board_configs/cp/` |
+| `drivers/` | Display, touch, bus, joystick, IO expander, input helpers |
 | `packages/` | Shared MIP manifests for bus/touch/chip helpers (`spibus`, `i80bus`, …) |
 | `docs/` | Hardware documentation (markdown; published on GitHub Pages, not RTD) |
 

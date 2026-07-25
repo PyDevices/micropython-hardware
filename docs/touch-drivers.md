@@ -70,5 +70,5 @@ _PITFT_CALIBRATION = ((357, 3812), (390, 3555))
 ```
 
 MicroPython (`pitft_ili9341_featherwing`) passes this to `STMPE610(..., calibration=...)`.
-CircuitPython (`cp_pitft_ili9341_featherwing`) passes the same tuple to
+CircuitPython (`cp/busdisplay/spi/pitft_ili9341_featherwing`) passes the same tuple to
 `Adafruit_STMPE610_SPI`.

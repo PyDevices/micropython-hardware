@@ -36,5 +36,6 @@
     ]
   ],
   "version": "0.2",
-  "notes": "Split board_config + board_devices (board devices contract). boarddev from pydisplay."
+  "notes": "SDMMC 1-bit sdcard (SCLK=12 CMD=11 DAT0=13)."
 }
+

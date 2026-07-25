@@ -25,13 +25,13 @@ variant (`C6_WIFI` in inventory fixture #1).
 | Product / nickname | `board_config` dir | Resolution | Panel / bus | Touch | Expander / IO | Inventory # |
 |--------------------|--------------------|------------|-------------|-------|---------------|-------------|
 | Waveshare ESP32-P4-WIFI6-Touch-LCD-4B | `esp32-p4-wifi6-touch-lcd-4b` | 720×720 | ST7703 **MIPI DSI** (`mipidsi`) | GT911 | — | #1 |
-| Adafruit Qualia S3 + TL040HDS20 | `qualia_tl040hds20` (+ CP `cp_qualia_tl040hds20`) | 720×720 | RGB-666→565 **DotClock** | FT6x36 @ `0x48` | PCA9554 @ `0x3f` | #8 |
+| Adafruit Qualia S3 + TL040HDS20 | `qualia_tl040hds20` (+ CP under `cp/fbdisplay/qualia_tl040hds20`) | 720×720 | RGB-666→565 **DotClock** | FT6x36 @ `0x48` | PCA9554 @ `0x3f` | #8 |
 | Waveshare ESP32-S3-Touch-LCD-4.3 | `esp32-s3-touch-lcd-4_3` | 800×480 | ST7262 RGB **DotClock** | GT911 @ `0x5D` | CH422G | *(not yet a Detect fixture)* |
 | LILYGO T-RGB 2.1″ round | `t-rgb_480` | 480×480 | ST7701 RGB **DotClock** | CST820 (`cst8xx`) | XL9535 | *(not yet a Detect fixture)* |
 | Waveshare ESP32-S3-Touch-LCD-7 (sku 27078) | `esp32-s3-touch-lcd-7` | 800×480 | ST7262 RGB **DotClock** | GT911 @ `0x5D` | CH422G | *(not yet a Detect fixture)* |
 | LILYGO T-Embed | `busdisplay/spi/t-embed` | 170×320 | ST7789 **SPI** (`spibus`) | — (rotary) | GPIO46 power | *(not yet a Detect fixture)* |
 | LILYGO T-HMI | `busdisplay/i80/t-hmi` | 240×320 | ST7789 **I80** (`i80bus`) | XPT2046 SPI | GPIO14/10 power | *(not yet a Detect fixture)* |
-| Waveshare RP2040-Touch-LCD-1.28 | `busdisplay/spi/rp2040-touch-lcd-1.28` (+ CP `cp_rp2040-touch-lcd-1.28`) | 240×240 round | GC9A01A **SPI** (`spibus` / FourWire) | CST816 (`cst8xx` / `cst816`) | — | *(not yet a Detect fixture)* |
+| Waveshare RP2040-Touch-LCD-1.28 | `busdisplay/spi/rp2040-touch-lcd-1.28` (+ CP under `cp/busdisplay/spi/rp2040-touch-lcd-1.28`) | 240×240 round | GC9A01A **SPI** (`spibus` / FourWire) | CST816 (`cst8xx` / `cst816`) | — | *(not yet a Detect fixture)* |
 | Adafruit Metro M7 + 2.8″ TFT Touch Shield (1947) | `busdisplay/spi/metro_m7_tft_touch_shield_1947` | 240×320 | ILI9341 **SPI** (`spibus` SoftSPI or SPI0) | FT6206 @ `0x38` | Onboard AirLift (NINA) | *(not yet a Detect fixture)* |
 | ST NUCLEO-H743ZI2 + Adafruit 2.8″ TFT Touch Shield (1947) | `busdisplay/spi/nucleo_h743zi2_tft_touch_shield_1947` | 240×320 | ILI9341 **SPI** (`spibus` SPI1 / SoftSPI) | FT6206 @ `0x38` | — | [#25](board-inventory.md) |
 
@@ -42,7 +42,7 @@ variant (`C6_WIFI` in inventory fixture #1).
 ### Waveshare ESP32-P4-WIFI6-Touch-LCD-4B
 
 - **board_config title:** `Waveshare ESP32-P4-WIFI6-Touch-LCD-4B - MicroPython`
-- **Dir:** `esp32-p4-wifi6-touch-lcd-4b` (CP sibling: `cp_esp32-p4-wifi6-touch-lcd-4b`)
+- **Dir:** `esp32-p4-wifi6-touch-lcd-4b` (CP sibling under `cp/fbdisplay/esp32-p4-wifi6-touch-lcd-4b`)
 - **Resolution:** 720×720
 - **Display:** `mipidsi.Bus` + `mipidsi.Display`, ST7703 init sequence, 2-lane DSI,
   pixel clock 46 MHz
@@ -55,7 +55,7 @@ variant (`C6_WIFI` in inventory fixture #1).
 
 - **board_config title:** `Qualia S3 RGB-666 with TL040HDS20 4.0" 720x720 Square Display`
 - **Dirs:** `qualia_tl040hds20` (MicroPython / `displayif.DotClockFramebuffer`);
-  `cp_qualia_tl040hds20` (CircuitPython `dotclockframebuffer` +
+  `cp/fbdisplay/qualia_tl040hds20` (CircuitPython `dotclockframebuffer` +
   `FramebufferDisplay(auto_refresh=True)` + `displayio.Bitmap`)
 - **Resolution:** 720×720 @ 16 MHz PCLK
 - **Display:** Parallel RGB DotClock; Qualia needs **BGR** 5/6/5 data-pin order
@@ -123,7 +123,7 @@ variant (`C6_WIFI` in inventory fixture #1).
 - **Bus:** `SPIBus(id=2, sck=12, mosi=11, miso=-1, dc=13, cs=10, reset=9)` @
   40 MHz — always pass explicit pins (`SPI(2)` defaults hit Octal PSRAM pads)
 - **Power / BL:** GPIO46 `PIN_POWER_ON` (must be high), backlight GPIO15
-- **Input:** `RotaryIRQ` A=2, B=1, button=0 (`half_step=True`); no touch panel
+- **Input:** `machine.Encoder` A=2, B=1, button=0 (`phases=2`); no touch panel
 - **Flash / USB:** Native USB-Serial/JTAG; **BOOT+RESET** → ROM, flash
   `ESP32_GENERIC_S3` + `SPIRAM_OCT`, plain **RESET** for CDC. Example unit
   serial `3485186BFCAC0000` (Windows `COM55` in one WSL session).
@@ -178,7 +178,7 @@ variant (`C6_WIFI` in inventory fixture #1).
 - **board_config titles:** `Waveshare RP2040-Touch-LCD-1.28 GC9A01 240x240`
   (MicroPython); same board under CircuitPython
 - **Dirs:** `board_configs/busdisplay/spi/rp2040-touch-lcd-1.28` (MP);
-  `board_configs/busdisplay/spi/cp_rp2040-touch-lcd-1.28` (CP)
+  `board_configs/cp/busdisplay/spi/rp2040-touch-lcd-1.28` (CP)
 - **Resolution:** 240×240 round GC9A01A, `bgr=True`,
   `reverse_bytes_in_word=True`, `invert=True`
 - **Bus (MP):** `SPIBus(id=1, sck=10, mosi=11, dc=8, cs=9)` @ **10 MHz**

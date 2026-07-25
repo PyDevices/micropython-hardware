@@ -2,22 +2,58 @@
 import boarddev
 import sys
 
-DEVICES = frozenset({'sdcard', 'battery', 'wlan', 'ble'})
+DEVICES = frozenset({"sdcard", "battery", "wlan", "ble"})
+
+# LilyGO utilities.h
+_SDMMC_EN = 7  # XL9535
+_SDMMC_SCK = 39
+_SDMMC_CMD = 40
+_SDMMC_DAT = 38
+_ADC_DET = 4
+
 
 def setup_devices(ns):
     boarddev.bind_lazy(ns, sys.modules[__name__])
 
+
 def sdcard():
-    raise NotImplementedError("sdcard factory not wired for this proof board yet")
+    """TF via SDMMC 1-bit; power enable on XL9535 IO7."""
+    import board_config as bc
+    from machine import SDCard
+
+    bc.xl.digitalWrite(_SDMMC_EN, 1)
+    try:
+        return SDCard(
+            slot=1,
+            width=1,
+            sck=_SDMMC_SCK,
+            cmd=_SDMMC_CMD,
+            data=(_SDMMC_DAT,),
+        )
+    except TypeError:
+        # Fallback SPI naming on some ports
+        return SDCard(
+            slot=2,
+            sck=_SDMMC_SCK,
+            mosi=_SDMMC_CMD,
+            miso=_SDMMC_DAT,
+            cs=_SDMMC_DAT,
+        )
+
 
 def battery():
-    raise NotImplementedError("battery factory not wired for this proof board yet")
+    from battery_adc import BatteryADC
+
+    return BatteryADC(_ADC_DET, scale=2.0)
+
 
 def wlan():
     import network
+
     return network.WLAN(network.STA_IF)
+
 
 def ble():
     import bluetooth
-    return bluetooth.BLE()
 
+    return bluetooth.BLE()

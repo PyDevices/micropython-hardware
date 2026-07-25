@@ -9,8 +9,15 @@ Docs are markdown under `docs/`, published only via GitHub Pages
 
 ## Do
 
-- Add/edit boards under `board_configs/` and chip helpers under `drivers/`.
-- Keep shared bus/touch/chip MIP manifests under `packages/` (`spibus.json`, …).
+- Add/edit MicroPython boards under `board_configs/` and CircuitPython under
+  `board_configs/cp/` (same directory names as MicroPython; do not add an `mp/`
+  mirror). Chip helpers under `drivers/` (see `drivers/README.md`).
+- Keep shared bus/touch/chip MIP manifests under `packages/` (`spibus.json`,
+  `sdcard.json`, …). MicroPython board dirs get a `package.json`; do **not**
+  add `package.json` under `board_configs/cp/`.
+- Prefer vendored single-file drivers (micropython-lib / reputable GitHub) for
+  shared chips; keep board pin wiring in `board_devices.py` factories. Use
+  `machine.SDCard` for SDMMC/SDIO and `sdcard.py` for SPI CS paths.
 - Prefer the board devices contract for new or graduating boards:
   `board_config.py` (eager UI) + `board_devices.py` (`DEVICES`, lazy factories)
   + `setup_devices(globals())` using pydisplay `boarddev`.

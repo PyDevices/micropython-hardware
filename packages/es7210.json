@@ -1,0 +1,9 @@
+{
+  "urls": [
+    [
+      "es7210.py",
+      "github:PyDevices/micropython-hardware/drivers/codec/es7210.py"
+    ]
+  ],
+  "version": "0.1"
+}

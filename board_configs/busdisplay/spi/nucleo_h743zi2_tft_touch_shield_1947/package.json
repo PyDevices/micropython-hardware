@@ -39,6 +39,10 @@
     [
       "lvgl_test.py",
       "github:PyDevices/micropython-hardware/src/examples/lvgl_test.py"
+    ],
+    [
+      "sdcard.py",
+      "github:PyDevices/micropython-hardware/drivers/storage/sdcard.py"
     ]
   ],
   "deps": [
@@ -51,6 +55,6 @@
       "main"
     ]
   ],
-  "version": "0.3",
+  "version": "0.2",
   "notes": "Split board_config + board_devices (board devices contract). boarddev from pydisplay."
 }
