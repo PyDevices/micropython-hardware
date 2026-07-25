@@ -3,7 +3,7 @@ import boarddev
 import sys
 
 DEVICES = frozenset(
-    {"audio", "microphone", "sdcard", "camera", "ethernet", "radio", "wlan", "ble", "usb_device"}
+    {"audio", "microphone", "sdcard", "camera", "radio", "wlan", "ble", "usb_device"}
 )
 
 # Waveshare wiki I2S / ES8311 pin map (P4 panel family)
@@ -80,20 +80,6 @@ def camera():
     raise NotImplementedError(
         "MIPI CSI camera needs a native camera module in firmware; no single-file driver"
     )
-
-
-def ethernet():
-    """IP101 RMII — only on 86-Panel-ETH SKU, not the CSI LCD-4B."""
-    try:
-        import network
-
-        lan = network.LAN()
-        return lan
-    except (ImportError, AttributeError, OSError, ValueError) as exc:
-        raise NotImplementedError(
-            "ethernet PHY not present on WIFI6-Touch-LCD-4B (use 86-Panel-ETH SKU) "
-            "or machine.LAN unavailable"
-        ) from exc
 
 
 def radio():
