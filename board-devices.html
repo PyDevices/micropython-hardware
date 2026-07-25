@@ -53,12 +53,18 @@
 <p>Normative end-device surface for <code>board_config</code> —
 CircuitPython-like discovery, stable role names, and a clear split
 between eager UI devices and lazy extras.</p>
-<p>This is the <strong>target</strong> contract. Board configs and
-drivers live in <a
-href="https://github.com/PyDevices/micropython-hardware"><code>micropython-hardware</code></a>;
-campaign boards there use the split layout, while many others are still
-single-file. Prefer graduating new split boards in that repo rather than
-adding <code>board_devices.py</code> ad hoc.</p>
+<p>This is the <strong>target</strong> contract for
+<strong>MicroPython</strong> boards. Board configs and drivers live in
+<a
+href="https://github.com/PyDevices/micropython-hardware"><code>micropython-hardware</code></a>.</p>
+<p><strong>CircuitPython</strong> (<code>board_configs/cp/</code>) does
+<strong>not</strong> use <code>board_devices.py</code> or lazy
+<code>DEVICES</code>. CP already exposes pins/buses via the native
+<code>board</code> module. CP <code>board_config.py</code> only
+constructs <code>display_drv</code>, <code>runtime</code>, and eager UI
+inputs wired into <code>runtime</code> (<code>touch</code>,
+<code>keypad</code>, <code>encoder</code>, <code>joystick</code>). Do
+not <code>from board_config import …</code> inside CP configs.</p>
 <p>Planning notes (agent/internal) remain in the pydisplay repo: <a
 href="https://github.com/PyDevices/pydisplay/blob/main/.cursor/board-device-contract.md"><code>.cursor/board-device-contract.md</code></a>.</p>
 <h2 id="specials-always-these-names">Specials (always these names)</h2>
@@ -345,10 +351,10 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a hr
 <h2 id="rollout">Rollout</h2>
 <p>Board configs and drivers live in <a
 href="https://github.com/PyDevices/micropython-hardware"><code>PyDevices/micropython-hardware</code></a>.
-Ten campaign boards are <strong>graduated</strong> there to the split
-layout (<code>board_config.py</code> + <code>board_devices.py</code>).
-Remaining boards still use the single-file <code>board_config.py</code>
-until retrofitted.</p>
+MicroPython campaign + product boards use the split layout
+(<code>board_config.py</code> + <code>board_devices.py</code>).
+CircuitPython twins under <code>cp/</code> stay single-file (eager UI
+only).</p>
 <table>
 <thead>
 <tr class="header">
@@ -358,17 +364,19 @@ until retrofitted.</p>
 </thead>
 <tbody>
 <tr class="odd">
-<td>End-device names <code>touch</code> / <code>encoder</code>; infra
-buses</td>
-<td>Split layout for non-campaign boards</td>
+<td>MP split layout for matrix product boards</td>
+<td>Fill remaining lazy factories
+(<code>NotImplementedError</code>)</td>
 </tr>
 <tr class="even">
-<td>Campaign boards: <code>DEVICES</code> + lazy factories</td>
-<td>Fill remaining lazy factories</td>
+<td>CP eager UI parity (<code>touch</code> / <code>keypad</code> /
+<code>encoder</code> / <code>joystick</code>)</td>
+<td>Optional MP Feather DVI config; CP non-UI stays on
+<code>board</code></td>
 </tr>
 <tr class="odd">
 <td>Sequence-preserving <code>touch_read</code></td>
-<td>Mass retrofit of remaining configs</td>
+<td></td>
 </tr>
 </tbody>
 </table>

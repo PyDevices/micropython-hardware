@@ -66,22 +66,27 @@ PGDisplay, FBDisplay, etc.)</li>
 when the display needs periodic present or input dispatch;
 <code>None</code> on MCU display-only boards</li>
 <li>Optional input devices wired into <code>runtime</code> (e.g.
-<code>touch</code>, <code>encoder</code>)</li>
-<li>Optional setup (backlight pins, buses); lazy extras move to
+<code>touch</code>, <code>keypad</code>, <code>encoder</code>,
+<code>joystick</code>)</li>
+<li>Optional setup (backlight pins, buses). On
+<strong>MicroPython</strong>, lazy extras move to
 <code>board_devices</code> under the <a href="board-devices.html">board
-devices contract</a></li>
+devices contract</a>. On <strong>CircuitPython</strong>, there is no
+<code>board_devices</code> — use the native <code>board</code> module
+for non-UI peripherals.</li>
 </ul>
 <p>Configs live in <a
 href="https://github.com/PyDevices/micropython-hardware"><code>PyDevices/micropython-hardware</code></a>
-(<code>board_configs/</code>). Each directory with a
+(<code>board_configs/</code>). Each MicroPython directory with a
 <code>package.json</code> can be installed via MIP:</p>
 <div class="sourceCode" id="cb1"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>mip.install(<span class="st">&quot;github:PyDevices/micropython-hardware/board_configs/busdisplay/i80/t-display-s3&quot;</span>)</span></code></pre></div>
 <p>CircuitPython configs live under <code>board_configs/cp/</code> with
 the same bus layout and directory names as MicroPython (no
-<code>cp_</code> prefix, no <code>package.json</code> / MIP).
-MicroPython configs stay at the top level of <code>board_configs/</code>
-(not under an <code>mp/</code> folder).</p>
+<code>cp_</code> prefix, no <code>package.json</code> / MIP, no
+<code>board_devices.py</code>). MicroPython configs stay at the top
+level of <code>board_configs/</code> (not under an <code>mp/</code>
+folder).</p>
 <h2 id="picking-a-config">Picking a config</h2>
 <p>Match in priority order:</p>
 <ol type="1">

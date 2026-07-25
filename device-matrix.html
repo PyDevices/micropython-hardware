@@ -84,8 +84,12 @@ roles</td>
 </tbody>
 </table>
 <p>Paths below are relative to <code>board_configs/</code> and are
-<strong>MicroPython</strong> trees only. CircuitPython twins under
-<code>cp/</code> are deferred (not listed as retrofit targets).</p>
+<strong>MicroPython</strong> trees (with <code>board_devices</code>).
+CircuitPython twins under <code>cp/</code> are eager-UI only
+(<code>display_drv</code> / <code>runtime</code> / <code>touch</code> /
+<code>keypad</code> / <code>encoder</code> / <code>joystick</code>) — no
+lazy <code>DEVICES</code> (use native <code>board</code> for the
+rest).</p>
 <hr />
 <h2 id="campaign-matrix">Campaign matrix</h2>
 <p>First-wave display campaign. Lazy column is the live
