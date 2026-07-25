@@ -2,11 +2,11 @@
   "urls": [
     [
       "board_config.py",
-      "github:PyDevices/micropython-hardware/board_configs/fbdisplay/pico2_dvi_sock_640x480/board_config.py"
+      "github:PyDevices/micropython-hardware/board_configs/fbdisplay/olimex_rp2350pc_640x480/board_config.py"
     ],
     [
       "board_devices.py",
-      "github:PyDevices/micropython-hardware/board_configs/fbdisplay/pico2_dvi_sock_640x480/board_devices.py"
+      "github:PyDevices/micropython-hardware/board_configs/fbdisplay/olimex_rp2350pc_640x480/board_devices.py"
     ],
     [
       "boarddev.py",
@@ -27,6 +27,6 @@
       "main"
     ]
   ],
-  "version": "0.2",
-  "notes": "Pico 2 + Adafruit DVI Sock or PiCowbell HSTX; same pins. No CYW43."
+  "version": "0.1",
+  "notes": "Olimex RP2350pc onboard HSTX HDMI; no FPC adapter."
 }

@@ -1,6 +1,6 @@
-"""Raspberry Pi Pico 2 + Adafruit DVI Sock or PiCowbell HSTX — CircuitPython.
+"""Olimex RP2350pc onboard mini-HDMI (HSTX) — CircuitPython.
 
-Sock and PiCowbell HSTX share GP12–19. Non-UI peripherals use native ``board``.
+Sock-compatible HSTX mapping. Non-UI peripherals use native ``board``.
 """
 
 import board

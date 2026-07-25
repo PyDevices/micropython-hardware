@@ -1,6 +1,6 @@
-"""Raspberry Pi Pico 2 + Adafruit DVI Sock or PiCowbell HSTX — CircuitPython.
+"""Raspberry Pi Pico 2 W + Adafruit DVI Sock or PiCowbell HSTX — CircuitPython.
 
-Sock and PiCowbell HSTX share GP12–19. Non-UI peripherals use native ``board``.
+Same HSTX pinout as Pico 2 sock/PiCowbell. Wireless via native ``board`` / wifi.
 """
 
 import board

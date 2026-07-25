@@ -23,7 +23,7 @@ This document states what is **implemented**, what uses **Python fallbacks**, an
 | 8-bit I80 (Python) | **Done** — `i80bus.py` + `gpio_pin` (RP2040 SIO); RP2350 uses same SIO base |
 | RGB parallel | **N/A** — no RP DPI peripheral; use SPI/I80 or **picodvi** (DVI) |
 | MIPI DSI | **N/A** — RP2350 has **HSTX (DVI)**, not DSI; use `picodvi` + HSTX board configs |
-| DVI / HSTX | **Done** — `picodvi` (RP2040 PIO libdvi, RP2350 HSTX); configs: `pico2_dvi_sock`, `pimoroni_pico_dv_base`, `adafruit_metro_rp2350_hstx_640x480` |
+| DVI / HSTX | **Done** — `picodvi` (RP2040 PIO libdvi, RP2350 HSTX); configs: `pico2_dvi_sock`, `pico2w_dvi_sock`, `olimex_rp2350pc`, `sparkfun_iot_redboard_rp2350_hstx`, `pimoroni_pico_dv_base`, `adafruit_metro_rp2350_hstx_640x480` |
 
 `drivers/bus/_rp2_wip.py` was an early PIO experiment — **superseded** by displayif `i80bus`; not wired from board configs.
 
@@ -68,7 +68,10 @@ TFT_eSPI bundles dozens of controller init tables. pydisplay **vendors CircuitPy
 |-------|----|----|
 | M5 Tab5 ILI9881C (early) | `m5stack_tab5_ili9881c` | `cp/fbdisplay/m5stack_tab5_ili9881c` |
 | M5 Tab5 ST7123 (current) | `m5stack_tab5_st7123` | — |
-| Pico 2 DVI Sock (HSTX) | `pico2_dvi_sock_640x480` | `cp/fbdisplay/pico2_dvi_sock_640x480` |
+| Pico 2 + DVI Sock / PiCowbell HSTX | `pico2_dvi_sock_640x480` | `cp/fbdisplay/pico2_dvi_sock_640x480` |
+| Pico 2 W + DVI Sock / PiCowbell HSTX | `pico2w_dvi_sock_640x480` | `cp/fbdisplay/pico2w_dvi_sock_640x480` |
+| Olimex RP2350pc (onboard HDMI) | `olimex_rp2350pc_640x480` | `cp/fbdisplay/olimex_rp2350pc_640x480` |
+| SparkFun IoT RedBoard + HSTX→DVI | `sparkfun_iot_redboard_rp2350_hstx_640x480` | `cp/fbdisplay/sparkfun_iot_redboard_rp2350_hstx_640x480` |
 | Metro RP2350 HSTX | `adafruit_metro_rp2350_hstx_640x480` | `cp/fbdisplay/adafruit_metro_rp2350_hstx_640x480` |
 | Pimoroni Pico DV (RP2040 PIO) | `pimoroni_pico_dv_base_640x480` | `cp/fbdisplay/pimoroni_pico_dv_base_640x480` |
 | LilyGO T-RGB | `t-rgb_480` | — (MP-focused) |

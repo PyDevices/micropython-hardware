@@ -79,6 +79,10 @@ contract surface.
 | WT32-SC01 Plus | — | `busdisplay/i80/wt32sc01-plus` | `touch` | `sdcard`, `wlan`, `ble` | |
 | ESP32-WROVER-E ST7789 + joystick | — | `busdisplay/spi/esp32_wrover_e_st7789_joystick` | `joystick` | `wlan` | |
 | PiTFT ILI9341 FeatherWing | — | `busdisplay/spi/pitft_ili9341_featherwing` | `touch` | `i2c` | host-dependent STEMMA |
+| Pico 2 + DVI Sock / PiCowbell HSTX | — | `fbdisplay/pico2_dvi_sock_640x480` | — | *(empty)* | Sock and PiCowbell share GP12–19 |
+| Pico 2 W + DVI Sock / PiCowbell HSTX | — | `fbdisplay/pico2w_dvi_sock_640x480` | — | `wlan`, `ble` | same HSTX pins + CYW43 |
+| Olimex RP2350pc | — | `fbdisplay/olimex_rp2350pc_640x480` | — | `sdcard`, `led`, `i2c` | onboard HDMI (HSTX); no adapter |
+| SparkFun IoT RedBoard RP2350 + HSTX→DVI | — | `fbdisplay/sparkfun_iot_redboard_rp2350_hstx_640x480` | — | `sdcard`, `led`, `i2c`, `wlan`, `ble` | needs FPC + SparkFun HSTX→DVI breakout |
 
 ### Inventory fixtures without a product `board_config`
 

@@ -81,6 +81,11 @@ An exact match for all four is rare; bus + display controller is usually enough 
 |-----------|----------|
 | `fbdisplay/qualia_tl040hds20` | MicroPython Qualia RGB |
 | `fbdisplay/t-rgb_480` | LilyGO T-RGB 480×480 ST7701 (ESP32-S3; RGB via pydevices/displayif) |
+| `fbdisplay/pico2_dvi_sock_640x480` | Pico 2 + Adafruit DVI Sock or PiCowbell HSTX |
+| `fbdisplay/pico2w_dvi_sock_640x480` | Pico 2 W + Sock / PiCowbell HSTX |
+| `fbdisplay/olimex_rp2350pc_640x480` | Olimex RP2350pc onboard HDMI (HSTX) |
+| `fbdisplay/sparkfun_iot_redboard_rp2350_hstx_640x480` | SparkFun IoT RedBoard + HSTX→DVI breakout + FPC |
+| `fbdisplay/adafruit_metro_rp2350_hstx_640x480` | Metro RP2350 + Adafruit HSTX→DVI adapter |
 | `cp/fbdisplay/qualia_tl040hds20` | CircuitPython Qualia |
 | `cp/fbdisplay/usb_video` | CircuitPython USB Video |
 | `cp/fbdisplay/matrixportal_s3_64x64` | MatrixPortal S3 HUB75 64×64 |

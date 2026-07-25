@@ -1,8 +1,7 @@
-"""Raspberry Pi Pico 2 + Adafruit DVI Sock or PiCowbell HSTX (640x480).
+"""Raspberry Pi Pico 2 W + Adafruit DVI Sock or PiCowbell HSTX (640x480).
 
 Sock and PiCowbell HSTX share the pico-examples sock pinout (GP12–19).
-Requires displayif ``picodvi`` (RP2350 HSTX). Same display wiring as Pico 2 W
-(``pico2w_dvi_sock_640x480``); this board has no CYW43 radio.
+Requires displayif ``picodvi`` (RP2350 HSTX). Wireless via onboard CYW43.
 """
 
 from machine import Pin

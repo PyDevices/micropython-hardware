@@ -1,8 +1,7 @@
-"""Raspberry Pi Pico 2 + Adafruit DVI Sock or PiCowbell HSTX (640x480).
+"""Olimex RP2350pc onboard mini-HDMI (HSTX) 640x480 - MicroPython.
 
-Sock and PiCowbell HSTX share the pico-examples sock pinout (GP12–19).
-Requires displayif ``picodvi`` (RP2350 HSTX). Same display wiring as Pico 2 W
-(``pico2w_dvi_sock_640x480``); this board has no CYW43 radio.
+Schematic: GPIO12/13=D0, 14/15=CK, 16/17=D2, 18/19=D1 (sock-compatible).
+Requires displayif ``picodvi`` (RP2350 HSTX). No adapter — HDMI on the PCB.
 """
 
 from machine import Pin
@@ -17,7 +16,6 @@ except ImportError as exc:
         "DVI output requires displayif picodvi cmod (rp2350 HSTX)"
     ) from exc
 
-# pico_sock_cfg / adafruit_hstxdvibell_cfg: D0=12, CK=14, D1=18, D2=16
 fb = Framebuffer(
     width=640,
     height=480,
