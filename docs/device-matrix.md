@@ -13,8 +13,10 @@ Related inventories (keep concerns separate):
 | [pydisplay-display-boards.md](pydisplay-display-boards.md) | Display bring-up quirks (panel, touch, soft-reset) |
 | **This file** | Fixture # ↔ product ↔ `board_config` ↔ eager / lazy roles |
 
-Paths below are relative to `board_configs/` and are **MicroPython** trees only.
-CircuitPython twins under `cp/` are deferred (not listed as retrofit targets).
+Paths below are relative to `board_configs/` and are **MicroPython** trees
+(with `board_devices`). CircuitPython twins under `cp/` are eager-UI only
+(`display_drv` / `runtime` / `touch` / `keypad` / `encoder` / `joystick`) —
+no lazy `DEVICES` (use native `board` for the rest).
 
 ---
 

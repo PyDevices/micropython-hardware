@@ -1,8 +1,12 @@
 """Adafruit PyGamer ST7789 — CircuitPython"""
 
+import analogio
 import board
+import digitalio
 from displayio import release_displays
 from fourwire import FourWire
+from gpiojoystick import GPIOJoystick
+from keypad_shift import PYGAMER_BUTTON_MAP, ShiftRegisterButtons
 from st7789 import ST7789
 
 import eventsys
@@ -29,4 +33,22 @@ display_drv = ST7789(
     bgr=False,
     reverse_bytes_in_word=True,
 )
-runtime = None
+
+keypad = ShiftRegisterButtons(
+    clock=digitalio.DigitalInOut(board.BUTTON_CLOCK),
+    latch=digitalio.DigitalInOut(board.BUTTON_LATCH),
+    data=digitalio.DigitalInOut(board.BUTTON_OUT),
+    mapping=PYGAMER_BUTTON_MAP,
+)
+
+joystick = GPIOJoystick(
+    instance_id=0,
+    axes=[
+        analogio.AnalogIn(board.JOYSTICK_X),
+        analogio.AnalogIn(board.JOYSTICK_Y),
+    ],
+)
+
+runtime = eventsys.Runtime(display=display_drv)
+runtime.add_keypad(read=keypad.read)
+runtime.add_joystick(joystick_driver=joystick, emulate_digital=[[0, 1]])

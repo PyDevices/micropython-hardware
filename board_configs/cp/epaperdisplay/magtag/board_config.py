@@ -30,7 +30,7 @@ _epaper = SSD1680(
 
 display_drv = EPaperDisplay(_epaper, width=296, height=128, color_depth=1)
 
-buttons = GPIOButtons(
+keypad = GPIOButtons(
     {
         "a": (board.BUTTON_A, MAGTAG_BUTTON_KEYS[0]),
         "b": (board.BUTTON_B, MAGTAG_BUTTON_KEYS[1]),
@@ -40,4 +40,4 @@ buttons = GPIOButtons(
 )
 
 runtime = eventsys.Runtime(display=display_drv)
-runtime.add_keypad(read=buttons.read)
+runtime.add_keypad(read=keypad.read)

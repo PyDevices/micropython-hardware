@@ -11,21 +11,24 @@ Typically:
 
 - A `display_drv` object (BusDisplay, SDLDisplay, PGDisplay, FBDisplay, etc.)
 - A `runtime` object (`eventsys.Runtime(...)`) when the display needs periodic present or input dispatch; `None` on MCU display-only boards
-- Optional input devices wired into `runtime` (e.g. `touch`, `encoder`)
-- Optional setup (backlight pins, buses); lazy extras move to `board_devices` under the [board devices contract](board-devices.md)
+- Optional input devices wired into `runtime` (e.g. `touch`, `keypad`, `encoder`, `joystick`)
+- Optional setup (backlight pins, buses). On **MicroPython**, lazy extras move
+  to `board_devices` under the [board devices contract](board-devices.md). On
+  **CircuitPython**, there is no `board_devices` — use the native `board`
+  module for non-UI peripherals.
 
 Configs live in
 [`PyDevices/micropython-hardware`](https://github.com/PyDevices/micropython-hardware)
-(`board_configs/`). Each directory with a `package.json` can be installed via MIP:
+(`board_configs/`). Each MicroPython directory with a `package.json` can be installed via MIP:
 
 ```python
 mip.install("github:PyDevices/micropython-hardware/board_configs/busdisplay/i80/t-display-s3")
 ```
 
 CircuitPython configs live under `board_configs/cp/` with the same bus layout and
-directory names as MicroPython (no `cp_` prefix, no `package.json` / MIP).
-MicroPython configs stay at the top level of `board_configs/` (not under an `mp/`
-folder).
+directory names as MicroPython (no `cp_` prefix, no `package.json` / MIP, no
+`board_devices.py`). MicroPython configs stay at the top level of
+`board_configs/` (not under an `mp/` folder).
 
 ## Picking a config
 

@@ -3,11 +3,15 @@
 Normative end-device surface for `board_config` — CircuitPython-like discovery,
 stable role names, and a clear split between eager UI devices and lazy extras.
 
-This is the **target** contract. Board configs and drivers live in
-[`micropython-hardware`](https://github.com/PyDevices/micropython-hardware);
-campaign boards there use the split layout, while many others are still
-single-file. Prefer graduating new split boards in that repo rather than
-adding `board_devices.py` ad hoc.
+This is the **target** contract for **MicroPython** boards. Board configs and
+drivers live in
+[`micropython-hardware`](https://github.com/PyDevices/micropython-hardware).
+
+**CircuitPython** (`board_configs/cp/`) does **not** use `board_devices.py` or
+lazy `DEVICES`. CP already exposes pins/buses via the native `board` module.
+CP `board_config.py` only constructs `display_drv`, `runtime`, and eager UI
+inputs wired into `runtime` (`touch`, `keypad`, `encoder`, `joystick`). Do not
+`from board_config import …` inside CP configs.
 
 Planning notes (agent/internal) remain in the pydisplay repo: [`.cursor/board-device-contract.md`](https://github.com/PyDevices/pydisplay/blob/main/.cursor/board-device-contract.md).
 
@@ -142,15 +146,15 @@ if "wlan" in board.DEVICES:
 
 Board configs and drivers live in
 [`PyDevices/micropython-hardware`](https://github.com/PyDevices/micropython-hardware).
-Ten campaign boards are **graduated** there to the split layout
-(`board_config.py` + `board_devices.py`). Remaining boards still use the
-single-file `board_config.py` until retrofitted.
+MicroPython campaign + product boards use the split layout
+(`board_config.py` + `board_devices.py`). CircuitPython twins under `cp/` stay
+single-file (eager UI only).
 
 | In micropython-hardware now | Still to do |
 |-----------------------------|-------------|
-| End-device names `touch` / `encoder`; infra buses | Split layout for non-campaign boards |
-| Campaign boards: `DEVICES` + lazy factories | Fill remaining lazy factories |
-| Sequence-preserving `touch_read` | Mass retrofit of remaining configs |
+| MP split layout for matrix product boards | Fill remaining lazy factories (`NotImplementedError`) |
+| CP eager UI parity (`touch` / `keypad` / `encoder` / `joystick`) | Optional MP Feather DVI config; CP non-UI stays on `board` |
+| Sequence-preserving `touch_read` | |
 
 See also [device-matrix.md](device-matrix.md) and the other notes in this `docs/` directory.
 

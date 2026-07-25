@@ -79,6 +79,34 @@ def _touch_points():
 
 touch_rotation_table = (0, 0, 0, 0)
 
+# PCA9554 @ 0x3f (rev B 0x38): buttons on expander bits 5/6 (active-low)
+_IOX_ADDR = tft_io_expander.get("i2c_address", 0x3F)
+
+
+def _keypad_read():
+    buf = bytearray(1)
+    while not i2c.try_lock():
+        pass
+    try:
+        i2c.writeto(_IOX_ADDR, b"\x00")
+        i2c.readfrom_into(_IOX_ADDR, buf)
+    finally:
+        i2c.unlock()
+    pressed = []
+    if not (buf[0] & (1 << 5)):
+        pressed.append(ord("U"))
+    if not (buf[0] & (1 << 6)):
+        pressed.append(ord("D"))
+    return pressed
+
+
+class _Keypad:
+    def read(self):
+        return _keypad_read()
+
+
+keypad = _Keypad()
+
 runtime = eventsys.Runtime(
     display=display_drv,
     touch_read=_touch_points,
@@ -88,3 +116,4 @@ runtime = eventsys.Runtime(
     # leave LVGL unarmed / blank after ``import lv_test_timer``.
     timer_async=False,
 )
+runtime.add_keypad(read=keypad.read)

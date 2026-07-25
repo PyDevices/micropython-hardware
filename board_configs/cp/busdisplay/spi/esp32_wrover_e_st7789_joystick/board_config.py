@@ -1,8 +1,11 @@
 """ESP32 WROVER-E ST7789 with GPIO joystick — CircuitPython"""
 
+import analogio
 import board
+import digitalio
 from displayio import release_displays
 from fourwire import FourWire
+from gpiojoystick import GPIOJoystick
 from st7789 import ST7789
 
 import eventsys
@@ -29,4 +32,33 @@ display_drv = ST7789(
     reverse_bytes_in_word=True,
     invert=False,
 )
+
+
+def _btn(pin):
+    dio = digitalio.DigitalInOut(pin)
+    dio.switch_to_input(pull=digitalio.Pull.UP)
+    return dio
+
+
+def _pin(*names):
+    for name in names:
+        if hasattr(board, name):
+            return getattr(board, name)
+    raise AttributeError("pin not found: {}".format(names))
+
+
+joystick = GPIOJoystick(
+    instance_id=1,
+    axes=[
+        analogio.AnalogIn(_pin("A3", "IO39", "D39")),
+        analogio.AnalogIn(_pin("A0", "IO36", "D36")),
+    ],
+    buttons=[
+        _btn(_pin("D4", "IO4")),
+        _btn(_pin("D25", "IO25")),
+        _btn(_pin("D26", "IO26")),
+    ],
+)
+
 runtime = eventsys.Runtime(display=display_drv)
+runtime.add_joystick(joystick_driver=joystick, emulate_digital=[[0, 1]])

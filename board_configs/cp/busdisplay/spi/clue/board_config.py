@@ -3,9 +3,15 @@
 import board
 from displayio import release_displays
 from fourwire import FourWire
+from keypad_gpio import GPIOButtons
 from st7789 import ST7789
 
 import eventsys
+
+try:
+    from eventsys.keys import Keys
+except ImportError:
+    from keys import Keys
 
 release_displays()
 
@@ -27,4 +33,13 @@ display_drv = ST7789(
     bgr=False,
     reverse_bytes_in_word=True,
 )
-runtime = None
+
+keypad = GPIOButtons(
+    {
+        "a": (board.BUTTON_A, Keys.K_a),
+        "b": (board.BUTTON_B, Keys.K_b),
+    }
+)
+
+runtime = eventsys.Runtime(display=display_drv)
+runtime.add_keypad(read=keypad.read)

@@ -1,11 +1,20 @@
 """ODROID-GO ILI9341 2.4" — CircuitPython"""
 
+import analogio
 import board
+import digitalio
 from displayio import release_displays
 from fourwire import FourWire
+from gpiojoystick import GPIOJoystick
 from ili9341 import ILI9341
+from keypad_gpio import GPIOButtons
 
 import eventsys
+
+try:
+    from eventsys.keys import Keys
+except ImportError:
+    from keys import Keys
 
 release_displays()
 
@@ -32,4 +41,39 @@ display_drv = ILI9341(
     backlight_pin=board.TFT_BACKLIGHT,
     backlight_on_high=True,
 )
-runtime = None
+
+
+def _btn(pin):
+    dio = digitalio.DigitalInOut(pin)
+    dio.switch_to_input(pull=digitalio.Pull.UP)
+    return dio
+
+
+# Hardkernel ODROID-GO button / joystick map (board.IO* when present)
+def _pin(*names):
+    for name in names:
+        if hasattr(board, name):
+            return getattr(board, name)
+    raise AttributeError("ODROID-GO pin not found: {}".format(names))
+
+
+keypad = GPIOButtons(
+    {
+        "a": (_btn(_pin("BUTTON_A", "IO32", "D32")), Keys.K_a),
+        "b": (_btn(_pin("BUTTON_B", "IO33", "D33")), Keys.K_b),
+        "menu": (_btn(_pin("BUTTON_MENU", "IO13", "D13")), Keys.K_ESCAPE),
+        "select": (_btn(_pin("BUTTON_SELECT", "IO27", "D27")), Keys.K_SPACE),
+        "start": (_btn(_pin("BUTTON_START", "IO39", "D39")), Keys.K_RETURN),
+    }
+)
+joystick = GPIOJoystick(
+    instance_id=0,
+    axes=[
+        analogio.AnalogIn(_pin("JOYSTICK_X", "IO34", "D34")),
+        analogio.AnalogIn(_pin("JOYSTICK_Y", "IO35", "D35")),
+    ],
+)
+
+runtime = eventsys.Runtime(display=display_drv)
+runtime.add_keypad(read=keypad.read)
+runtime.add_joystick(joystick_driver=joystick, emulate_digital=[[0, 1]])

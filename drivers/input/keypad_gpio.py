@@ -24,6 +24,8 @@ class GPIOButtons:
         pressed = []
         for pin, key in self._buttons:
             value = pin.value
+            if callable(value):
+                value = value()
             if self._active_low:
                 down = not value
             else:
