@@ -111,8 +111,8 @@ rest).</p>
 <td><code>fbdisplay/esp32-p4-wifi6-touch-lcd-4b</code></td>
 <td><code>touch</code></td>
 <td><code>audio</code>, <code>microphone</code>, <code>sdcard</code>,
-<code>camera</code>, <code>ethernet</code>, <code>radio</code>,
-<code>wlan</code>, <code>ble</code>, <code>usb_device</code></td>
+<code>camera</code>, <code>radio</code>, <code>wlan</code>,
+<code>ble</code>, <code>usb_device</code></td>
 </tr>
 <tr class="even">
 <td>Adafruit Qualia S3 + TL040HDS20</td>
@@ -191,6 +191,8 @@ rest).</p>
 <p><code>display_drv</code> / <code>runtime</code> /
 <code>display_bus</code> are always part of the board surface when
 present; they are omitted from the Eager column for brevity.</p>
+<p>P4 WIFI6-Touch-LCD-4B has no ethernet PHY (ETH is a different SKU);
+<code>camera</code> stays in <code>DEVICES</code> as a CSI stub.</p>
 <hr />
 <h2 id="product-matrix-mp-retrofit">Product matrix (MP retrofit)</h2>
 <p>Sensor-rich / inventory-linked products. All rows below have
@@ -272,18 +274,6 @@ present; they are omitted from the Eager column for brevity.</p>
 <td>no contract role for ALS</td>
 </tr>
 <tr class="even">
-<td>Adafruit CLUE</td>
-<td>—</td>
-<td><code>busdisplay/spi/clue</code></td>
-<td><code>keypad</code></td>
-<td><code>accelerometer</code>, <code>gyroscope</code>,
-<code>magnetometer</code>, <code>temperature</code>,
-<code>humidity</code>, <code>pressure</code>, <code>microphone</code>,
-<code>pixels</code>, <code>led</code>, <code>i2c</code>,
-<code>ble</code></td>
-<td>BMP280/pixels/led/i2c/ble live; IMU/humidity/mic raise</td>
-</tr>
-<tr class="odd">
 <td>Adafruit PyBadge</td>
 <td>—</td>
 <td><code>busdisplay/spi/pybadge</code></td>
@@ -292,7 +282,7 @@ present; they are omitted from the Eager column for brevity.</p>
 <code>i2c</code></td>
 <td></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Adafruit PyPortal</td>
 <td>—</td>
 <td><code>busdisplay/spi/pyportal</code></td>
@@ -301,7 +291,7 @@ present; they are omitted from the Eager column for brevity.</p>
 <code>i2c</code>, <code>wlan</code></td>
 <td>AirLift as <code>radio</code>/<code>wlan</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Adafruit PyPortal Titano</td>
 <td>—</td>
 <td><code>busdisplay/spi/pyportal_titano</code></td>
@@ -310,7 +300,7 @@ present; they are omitted from the Eager column for brevity.</p>
 <code>i2c</code>, <code>wlan</code></td>
 <td></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Adafruit HalloWing M4</td>
 <td>—</td>
 <td><code>busdisplay/spi/hallowing_m4</code></td>
@@ -319,7 +309,7 @@ present; they are omitted from the Eager column for brevity.</p>
 <code>i2c</code></td>
 <td></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>ODROID-GO</td>
 <td>—</td>
 <td><code>busdisplay/spi/odroid_go</code></td>
@@ -328,7 +318,7 @@ present; they are omitted from the Eager column for brevity.</p>
 <code>wlan</code></td>
 <td></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>M5Stack CoreS3</td>
 <td>—</td>
 <td><code>busdisplay/spi/m5stack-cores3</code></td>
@@ -336,9 +326,9 @@ present; they are omitted from the Eager column for brevity.</p>
 <td><code>microphone</code>, <code>audio</code>, <code>sdcard</code>,
 <code>camera</code>, <code>accelerometer</code>, <code>gyroscope</code>,
 <code>i2c</code>, <code>wlan</code>, <code>ble</code></td>
-<td>several factories raise until codecs/IMU land</td>
+<td>AW88298/ES7210/BMI270 wired; camera stub</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>M5Stack Tab5 (ILI9881C)</td>
 <td>—</td>
 <td><code>fbdisplay/m5stack_tab5_ili9881c</code></td>
@@ -346,9 +336,9 @@ present; they are omitted from the Eager column for brevity.</p>
 <td><code>microphone</code>, <code>audio</code>, <code>sdcard</code>,
 <code>camera</code>, <code>i2c</code>, <code>wlan</code>,
 <code>ble</code></td>
-<td>same</td>
+<td>ES8388/ES7210 wired; camera stub</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>M5Stack Tab5 (ST7123)</td>
 <td>—</td>
 <td><code>fbdisplay/m5stack_tab5_st7123</code></td>
@@ -358,7 +348,7 @@ present; they are omitted from the Eager column for brevity.</p>
 <code>ble</code></td>
 <td>same</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>LILYGO T-Display-S3</td>
 <td>—</td>
 <td><code>busdisplay/i80/t-display-s3</code></td>
@@ -366,7 +356,7 @@ present; they are omitted from the Eager column for brevity.</p>
 <td><code>battery</code>, <code>wlan</code>, <code>ble</code></td>
 <td></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>LILYGO T-Display-S3 Pro</td>
 <td>—</td>
 <td><code>busdisplay/spi/t-display-s3-pro</code></td>
@@ -375,7 +365,7 @@ present; they are omitted from the Eager column for brevity.</p>
 <code>ble</code></td>
 <td></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>LILYGO T-QT Pro</td>
 <td>—</td>
 <td><code>busdisplay/spi/t-qt-pro</code></td>
@@ -383,7 +373,7 @@ present; they are omitted from the Eager column for brevity.</p>
 <td><code>battery</code>, <code>wlan</code>, <code>ble</code></td>
 <td></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>LILYGO T-Dongle-S3</td>
 <td>—</td>
 <td><code>busdisplay/spi/t-dongle-s3</code></td>
@@ -391,7 +381,7 @@ present; they are omitted from the Eager column for brevity.</p>
 <td><code>pixels</code>, <code>wlan</code>, <code>ble</code></td>
 <td></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Adafruit MatrixPortal M4</td>
 <td>—</td>
 <td><code>fbdisplay/matrixportal_m4_64x32</code></td>
@@ -399,7 +389,7 @@ present; they are omitted from the Eager column for brevity.</p>
 <td><code>accelerometer</code>, <code>i2c</code></td>
 <td>HUB75 is <code>display_drv</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Adafruit MatrixPortal S3</td>
 <td>—</td>
 <td><code>fbdisplay/matrixportal_s3_64x64</code></td>
@@ -408,7 +398,7 @@ present; they are omitted from the Eager column for brevity.</p>
 <code>ble</code></td>
 <td></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>BPI-Centi-S3</td>
 <td>—</td>
 <td><code>busdisplay/i80/bpi-centi-s3</code></td>
@@ -416,7 +406,7 @@ present; they are omitted from the Eager column for brevity.</p>
 <td><code>wlan</code>, <code>ble</code></td>
 <td></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>WT32-SC01 Plus</td>
 <td>—</td>
 <td><code>busdisplay/i80/wt32sc01-plus</code></td>
@@ -424,7 +414,7 @@ present; they are omitted from the Eager column for brevity.</p>
 <td><code>sdcard</code>, <code>wlan</code>, <code>ble</code></td>
 <td></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>ESP32-WROVER-E ST7789 + joystick</td>
 <td>—</td>
 <td><code>busdisplay/spi/esp32_wrover_e_st7789_joystick</code></td>
@@ -432,7 +422,7 @@ present; they are omitted from the Eager column for brevity.</p>
 <td><code>wlan</code></td>
 <td></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>PiTFT ILI9341 FeatherWing</td>
 <td>—</td>
 <td><code>busdisplay/spi/pitft_ili9341_featherwing</code></td>
