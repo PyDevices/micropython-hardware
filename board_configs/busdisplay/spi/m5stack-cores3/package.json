@@ -19,6 +19,18 @@
     [
       "boarddev.py",
       "github:PyDevices/pydisplay/src/lib/boarddev.py"
+    ],
+    [
+      "es7210.py",
+      "github:PyDevices/micropython-hardware/drivers/codec/es7210.py"
+    ],
+    [
+      "aw88298.py",
+      "github:PyDevices/micropython-hardware/drivers/codec/aw88298.py"
+    ],
+    [
+      "bmi270.py",
+      "github:PyDevices/micropython-hardware/drivers/imu/bmi270.py"
     ]
   ],
   "deps": [
@@ -35,5 +47,6 @@
       "main"
     ]
   ],
-  "version": "0.2"
+  "version": "0.3",
+  "notes": "AW88298+ES7210 audio; BMI270 IMU; camera stub."
 }

@@ -4,6 +4,14 @@ import sys
 
 DEVICES = frozenset({"microphone", "audio", "sdcard", "camera", "i2c", "wlan", "ble"})
 
+# M5Unified Tab5 I2S / codec pin map
+_MCLK = 30
+_BCLK = 27
+_LRCK = 29
+_DOUT = 26
+_DIN = 28
+_RATE = 16000
+
 
 def setup_devices(ns):
     boarddev.bind_lazy(ns, sys.modules[__name__])
@@ -16,11 +24,51 @@ def i2c():
 
 
 def microphone():
-    raise NotImplementedError("Tab5 microphone needs codec/I2S bring-up")
+    """ES7210 ADC + I2S RX."""
+    from machine import I2S, Pin
+
+    from es7210 import ES7210
+
+    import board_config as bc
+
+    ES7210(bc.i2c, profile="m5")
+    return I2S(
+        0,
+        sck=Pin(_BCLK),
+        ws=Pin(_LRCK),
+        sd=Pin(_DIN),
+        mck=Pin(_MCLK),
+        mode=I2S.RX,
+        bits=16,
+        format=I2S.STEREO,
+        rate=_RATE,
+        ibuf=20000,
+    )
 
 
 def audio():
-    raise NotImplementedError("Tab5 audio needs codec/I2S bring-up")
+    """ES8388 DAC + I2S TX (+ PI4IOE amp enable)."""
+    from machine import I2S, Pin
+
+    from es8388 import ES8388
+    from pi4ioe5v import tab5_set_amp
+
+    import board_config as bc
+
+    ES8388(bc.i2c)
+    tab5_set_amp(bc.i2c, True)
+    return I2S(
+        0,
+        sck=Pin(_BCLK),
+        ws=Pin(_LRCK),
+        sd=Pin(_DOUT),
+        mck=Pin(_MCLK),
+        mode=I2S.TX,
+        bits=16,
+        format=I2S.STEREO,
+        rate=_RATE,
+        ibuf=20000,
+    )
 
 
 def sdcard():

@@ -15,6 +15,10 @@ TAB5_PI4IOE1_ADDR = 0x43
 TAB5_LCD_RESET_BIT = 7
 
 
+# Tab5 speaker amp enable on PI4IOE1 bit 1 (M5Unified `_speaker_enabled_cb_tab5`).
+TAB5_SPK_EN_BIT = 1
+
+
 def tab5_init_lcd_reset(i2c: I2C, address: int = TAB5_PI4IOE1_ADDR) -> None:
     """Program Tab5 PI4IOE expander and pulse LCD reset (ILI9881C and ST7123 panels)."""
     i2c.writeto_mem(address, _REG_CHIP_RESET, b"\xff")
@@ -23,3 +27,13 @@ def tab5_init_lcd_reset(i2c: I2C, address: int = TAB5_PI4IOE1_ADDR) -> None:
     i2c.writeto_mem(address, _REG_PULL_SEL, bytes([0b01111111]))
     i2c.writeto_mem(address, _REG_PULL_EN, bytes([0b01111111]))
     i2c.writeto_mem(address, _REG_OUT_SET, bytes([0b01110110]))
+
+
+def tab5_set_amp(i2c: I2C, enable: bool = True, address: int = TAB5_PI4IOE1_ADDR) -> None:
+    """Enable/disable Tab5 speaker amp via PI4IOE1 OUT bit 1."""
+    cur = i2c.readfrom_mem(address, _REG_OUT_SET, 1)[0]
+    if enable:
+        cur |= 1 << TAB5_SPK_EN_BIT
+    else:
+        cur &= ~(1 << TAB5_SPK_EN_BIT)
+    i2c.writeto_mem(address, _REG_OUT_SET, bytes([cur]))
