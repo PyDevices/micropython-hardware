@@ -1,10 +1,18 @@
+# Shared minimum (PyDevices package / cmod repos)
+.venv/
 __pycache__/
 *.py[cod]
 *.egg-info/
-.venv/
-.DS_Store
-_site/
+.eggs/
+build/
+dist/
+*.so
+*.pyd
 
 # Cursor IDE throwaways (do not ignore the whole .cursor/ tree)
 .cursor/debug*
 .cursor/plans/
+
+# Repo-specific
+.DS_Store
+_site/
