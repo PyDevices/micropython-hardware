@@ -6,7 +6,7 @@ from ssd1306 import SSD1306
 
 import eventsys
 
-display_bus = I2CBus(I2C(0, sda=Pin(4), scl=Pin(5), freq=400_000), address=0x3C)
+display_bus = I2CBus(I2C(0, sda=Pin(4), scl=Pin(5), freq=400_000), device_address=0x3C)
 
 display_drv = SSD1306(
     display_bus,
