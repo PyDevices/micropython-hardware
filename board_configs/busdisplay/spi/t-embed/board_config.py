@@ -16,8 +16,8 @@ display_bus = SPIBus(
     sck=12,
     mosi=11,
     miso=-1,
-    dc=13,
-    cs=10,
+    command=13,
+    chip_select=10,
     reset=9,
 )
 

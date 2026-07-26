@@ -10,8 +10,8 @@ display_bus = SPIBus(
     baudrate=60_000_000,
     sck=3,
     mosi=2,
-    dc=6,
-    cs=5,
+    command=6,
+    chip_select=5,
 )
 
 display_drv = GC9A01(

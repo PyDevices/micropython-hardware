@@ -12,8 +12,8 @@ display_bus = SPIBus(
     baudrate=60_000_000,
     sck=36,
     mosi=37,
-    dc=35,
-    cs=3,
+    command=35,
+    chip_select=3,
 )
 
 display_drv = ILI9341(
