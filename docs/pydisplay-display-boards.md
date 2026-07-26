@@ -12,7 +12,7 @@ Device roles (eager / lazy):
 ([Pages](https://pydevices.github.io/micropython-hardware/)).
 Native drivers live in pydevices **displayif** (`displayif.DotClockFramebuffer`
 or `mipidsi`). Soft-reset / scanout lessons:
-[displayif `SOFT_RESET_AND_BRINGUP.md`](https://github.com/PyDevices/displayif/blob/main/SOFT_RESET_AND_BRINGUP.md).
+[displayif `docs/SOFT_RESET_AND_BRINGUP.md`](https://github.com/PyDevices/displayif/blob/main/docs/SOFT_RESET_AND_BRINGUP.md).
 
 Typical MicroPython flash for the ESP32-S3 RGB boards below:
 `ESP32_GENERIC_S3` + **`SPIRAM_OCT`** (8 MB octal PSRAM). P4 uses its own board
@@ -281,7 +281,7 @@ variant (`C6_WIFI` in inventory fixture #1).
   + notimpl stubs), **graphics**, **lvgl** (`lv_micropython_cmod`). Flash via
   ST-Link MSD (`NOD_H743ZI2` / `firmware.bin`). Inventory fixture **#25**.
 - **Demos verified:** RGB stripes; `simon.py` (graphics + eventsys); headless
-  `lv_bindings/test_lvgl_smoke.py`; `lvgl_test.py` (tap-count button on real
+  `lv_bindings/tools/test_lvgl_smoke.py`; `lvgl_test.py` (tap-count button on real
   panel via `display_driver`). **`main.py`** boots `lvgl_test.py`.
 - **Setup:** `mpftp put` board_config + `displaysys/{__init__,busdisplay}.py` +
   `eventsys` + `multimer` + `display_driver.py` + `ili9341`/`ft6x36` + examples
@@ -291,7 +291,7 @@ variant (`C6_WIFI` in inventory fixture #1).
 
 ## DotClock knobs (cross-cutting)
 
-Do not conflate these (full write-up in displayif `SOFT_RESET_AND_BRINGUP.md`):
+Do not conflate these (full write-up in displayif `docs/SOFT_RESET_AND_BRINGUP.md`):
 
 | Knob | Role |
 |------|------|
