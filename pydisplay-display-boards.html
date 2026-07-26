@@ -65,8 +65,8 @@ href="https://pydevices.github.io/micropython-hardware/">Pages</a>).
 Native drivers live in pydevices <strong>displayif</strong>
 (<code>displayif.DotClockFramebuffer</code> or <code>mipidsi</code>).
 Soft-reset / scanout lessons: <a
-href="https://github.com/PyDevices/displayif/blob/main/SOFT_RESET_AND_BRINGUP.md">displayif
-<code>SOFT_RESET_AND_BRINGUP.md</code></a>.</p>
+href="https://github.com/PyDevices/displayif/blob/main/docs/SOFT_RESET_AND_BRINGUP.md">displayif
+<code>docs/SOFT_RESET_AND_BRINGUP.md</code></a>.</p>
 <p>Typical MicroPython flash for the ESP32-S3 RGB boards below:
 <code>ESP32_GENERIC_S3</code> + <strong><code>SPIRAM_OCT</code></strong>
 (8 MB octal PSRAM). P4 uses its own board variant (<code>C6_WIFI</code>
@@ -561,10 +561,10 @@ fixture <strong>#25</strong>.</li>
 </ul></li>
 <li><strong>Demos verified:</strong> RGB stripes; <code>simon.py</code>
 (graphics + eventsys); headless
-<code>lv_bindings/test_lvgl_smoke.py</code>; <code>lvgl_test.py</code>
-(tap-count button on real panel via <code>display_driver</code>).
-<strong><code>main.py</code></strong> boots
-<code>lvgl_test.py</code>.</li>
+<code>lv_bindings/tools/test_lvgl_smoke.py</code>;
+<code>lvgl_test.py</code> (tap-count button on real panel via
+<code>display_driver</code>). <strong><code>main.py</code></strong>
+boots <code>lvgl_test.py</code>.</li>
 <li><strong>Setup:</strong> <code>mpftp put</code> board_config +
 <code>displaysys/{__init__,busdisplay}.py</code> + <code>eventsys</code>
 + <code>multimer</code> + <code>display_driver.py</code> +
@@ -575,7 +575,7 @@ fixture). Package deps: eventsys + multimer.</li>
 <h2 id="dotclock-knobs-cross-cutting">DotClock knobs
 (cross-cutting)</h2>
 <p>Do not conflate these (full write-up in displayif
-<code>SOFT_RESET_AND_BRINGUP.md</code>):</p>
+<code>docs/SOFT_RESET_AND_BRINGUP.md</code>):</p>
 <table>
 <thead>
 <tr class="header">
