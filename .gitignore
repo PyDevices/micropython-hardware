@@ -4,3 +4,7 @@ __pycache__/
 .venv/
 .DS_Store
 _site/
+
+# Cursor IDE throwaways (do not ignore the whole .cursor/ tree)
+.cursor/debug*
+.cursor/plans/
