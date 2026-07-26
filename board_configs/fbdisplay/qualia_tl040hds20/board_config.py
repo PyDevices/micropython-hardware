@@ -17,10 +17,10 @@ from displaysys.fbdisplay import FBDisplay
 import eventsys
 
 try:
-    import displayif
+    import dotclockframebuffer
 except ImportError as exc:
     raise NotImplementedError(
-        "Parallel RGB scanout requires displayif.DotClockFramebuffer (esp32 port)"
+        "Parallel RGB scanout requires dotclockframebuffer.DotClockFramebuffer (esp32 port)"
     ) from exc
 
 
@@ -94,7 +94,7 @@ send_init_sequence(
     cs=io_expander.Pin(1, Pin.OUT, value=1),
 )
 
-fb = displayif.DotClockFramebuffer(**tft_pins, **tft_timings)
+fb = dotclockframebuffer.DotClockFramebuffer(**tft_pins, **tft_timings)
 display_drv = FBDisplay(fb)
 
 touch = FT6x36(i2c, address=0x48)
