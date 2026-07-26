@@ -13,8 +13,6 @@ CP `board_config.py` only constructs `display_drv`, `runtime`, and eager UI
 inputs wired into `runtime` (`touch`, `keypad`, `encoder`, `joystick`). Do not
 `from board_config import …` inside CP configs.
 
-Planning notes (agent/internal) remain in the pydisplay repo: [`.cursor/board-device-contract.md`](https://github.com/PyDevices/pydisplay/blob/main/.cursor/board-device-contract.md).
-
 ## Specials (always these names)
 
 | Symbol | Required | Notes |
