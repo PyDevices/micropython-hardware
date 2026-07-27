@@ -13,8 +13,8 @@ display_bus = SPIBus(
     sck=18,
     mosi=19,
     miso=-1,
-    dc=10,
-    cs=9,
+    command=10,
+    chip_select=9,
     reset=6,
 )
 _epaper = ACeP7In(

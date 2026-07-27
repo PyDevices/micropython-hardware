@@ -9,10 +9,10 @@ from displaysys.fbdisplay import FBDisplay
 import eventsys
 
 try:
-    import displayif
+    import dotclockframebuffer
 except ImportError as exc:
     raise NotImplementedError(
-        "Parallel RGB scanout requires displayif.DotClockFramebuffer (mimxrt eLCDIF)"
+        "Parallel RGB scanout requires dotclockframebuffer.DotClockFramebuffer (mimxrt eLCDIF)"
     ) from exc
 
 LCD_BACKLIGHT = Pin("GPIO_B1_15", Pin.OUT, value=1)
@@ -28,18 +28,23 @@ tft_pins = {
     "vsync": Pin("GPIO_B0_03"),
     "hsync": Pin("GPIO_B0_02"),
     "dclk": Pin("GPIO_B0_00"),
-    "data": (
+    # RGB565 wire order B0..B4, G0..G5, R0..R4 (EVK LCDIF D0..D15)
+    "blue": (
         Pin("GPIO_B0_04"),
         Pin("GPIO_B0_05"),
         Pin("GPIO_B0_06"),
         Pin("GPIO_B0_07"),
         Pin("GPIO_B0_08"),
+    ),
+    "green": (
         Pin("GPIO_B0_09"),
         Pin("GPIO_B0_10"),
         Pin("GPIO_B0_11"),
         Pin("GPIO_B0_12"),
         Pin("GPIO_B0_13"),
         Pin("GPIO_B0_14"),
+    ),
+    "red": (
         Pin("GPIO_B0_15"),
         Pin("GPIO_B1_00"),
         Pin("GPIO_B1_01"),
@@ -65,7 +70,7 @@ tft_timings = {
     "pclk_idle_high": False,
 }
 
-fb = displayif.DotClockFramebuffer(**tft_pins, **tft_timings)
+fb = dotclockframebuffer.DotClockFramebuffer(**tft_pins, **tft_timings)
 
 display_drv = FBDisplay(fb)
 

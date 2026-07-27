@@ -21,8 +21,10 @@ LCD_BACKLIGHT = 22
 TOUCH_INT = 23
 
 i2c = I2C(0, scl=Pin(I2C_SCL), sda=Pin(I2C_SDA), freq=400_000)
+# Panel reset / backlight owned by board_config (not mipidsi.Display).
 tab5_init_lcd_reset(i2c)
 time.sleep_ms(100)
+lcd_backlight = Pin(LCD_BACKLIGHT, Pin.OUT, value=0)
 
 touch = GT911(
     i2c,
@@ -38,7 +40,7 @@ display_bus = Bus(frequency=730_000_000, num_lanes=2)
 
 fb = Display(
     display_bus,
-    init_sequence=TAB5_ILI9881C_INIT,
+    TAB5_ILI9881C_INIT,
     width=720,
     height=1_280,
     color_depth=16,
@@ -49,9 +51,8 @@ fb = Display(
     vsync_pulse_width=4,
     vsync_front_porch=20,
     vsync_back_porch=20,
-    backlight_pin=LCD_BACKLIGHT,
-    backlight_on_high=True,
 )
+lcd_backlight.value(1)
 
 
 touch_rotation_table = (0, 0, 0, 0)

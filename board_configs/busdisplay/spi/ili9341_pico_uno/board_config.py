@@ -13,8 +13,8 @@ display_bus = SPIBus(
     sck=18,
     mosi=19,
     miso=16,
-    dc=3,
-    cs=17,
+    command=3,
+    chip_select=17,
 )
 
 display_drv = ILI9341(

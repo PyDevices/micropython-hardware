@@ -30,16 +30,16 @@ if USE_SOFTSPI:
         sck="D13",
         mosi="D11",
         miso="D12",
-        dc="D9",
-        cs="D10",
+        command="D9",
+        chip_select="D10",
     )
 else:
     # Shield SPI via ICSP / LPSPI1 = machine.SPI(0).
     display_bus = SPIBus(
         id=0,
         baudrate=24_000_000,
-        dc="D9",
-        cs="D10",
+        command="D9",
+        chip_select="D10",
     )
 
 display_drv = ILI9341(

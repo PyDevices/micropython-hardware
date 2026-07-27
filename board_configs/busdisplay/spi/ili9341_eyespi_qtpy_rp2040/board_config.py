@@ -17,8 +17,8 @@ display_bus = SPIBus(
     sck=6,
     mosi=3,
     miso=4,
-    dc=5,
-    cs=20,
+    command=5,
+    chip_select=20,
 )
 
 gc.collect()

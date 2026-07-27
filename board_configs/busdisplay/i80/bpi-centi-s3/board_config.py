@@ -9,10 +9,10 @@ import eventsys
 display_rd_pin = Pin(7, Pin.OUT, value=1)
 
 display_bus = I80Bus(
-    dc=5,
-    cs=4,
-    wr=6,
-    data=[8, 9, 10, 11, 12, 13, 14, 15],
+    command=5,
+    chip_select=4,
+    write=6,
+    data_pins=[8, 9, 10, 11, 12, 13, 14, 15],
 )
 
 display_drv = ST7789(

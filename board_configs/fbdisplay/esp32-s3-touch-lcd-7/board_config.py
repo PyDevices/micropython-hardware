@@ -15,10 +15,10 @@ from displaysys.fbdisplay import FBDisplay
 import eventsys
 
 try:
-    import displayif
+    import dotclockframebuffer
 except ImportError as exc:
     raise NotImplementedError(
-        "Parallel RGB scanout requires displayif.DotClockFramebuffer (esp32 port)"
+        "Parallel RGB scanout requires dotclockframebuffer.DotClockFramebuffer (esp32 port)"
     ) from exc
 
 # CH422G EXIO map (Waveshare wiki / ESP_PANEL backlight IO=2)
@@ -42,8 +42,10 @@ tft_pins = {
     "vsync": 3,
     "hsync": 46,
     "dclk": 7,
-    # RGB565 D0..D15 (B0..B4, G0..G5, R0..R4)
-    "data": (14, 38, 18, 17, 10, 39, 0, 45, 48, 47, 21, 1, 2, 42, 41, 40),
+    # RGB565 wire order B0..B4, G0..G5, R0..R4
+    "blue": (14, 38, 18, 17, 10),
+    "green": (39, 0, 45, 48, 47, 21),
+    "red": (1, 2, 42, 41, 40),
 }
 
 tft_timings = {
@@ -63,7 +65,7 @@ tft_timings = {
     "pclk_idle_high": False,
 }
 
-fb = displayif.DotClockFramebuffer(**tft_pins, **tft_timings)
+fb = dotclockframebuffer.DotClockFramebuffer(**tft_pins, **tft_timings)
 display_drv = FBDisplay(fb)
 
 # GT911: RST on CH422G EXIO1, INT=GPIO4 (address-select during reset → 0x5D)

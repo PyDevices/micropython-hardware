@@ -17,10 +17,10 @@ sleep_ms(100)
 display_reset_pin.value(1)
 
 display_bus = I80Bus(
-    dc=7,
-    cs=6,
-    wr=8,
-    data=[39, 40, 41, 42, 45, 46, 47, 48],
+    command=7,
+    chip_select=6,
+    write=8,
+    data_pins=[39, 40, 41, 42, 45, 46, 47, 48],
 )
 
 display_drv = ST7789(
