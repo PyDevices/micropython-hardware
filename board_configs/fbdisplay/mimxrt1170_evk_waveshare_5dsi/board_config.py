@@ -19,7 +19,7 @@ display_bus = Bus(frequency=1_000_000_000, num_lanes=2)
 
 fb = Display(
     display_bus,
-    init_sequence=PANEL_INIT_SEQUENCE,
+    PANEL_INIT_SEQUENCE,
     width=800,
     height=480,
     color_depth=16,

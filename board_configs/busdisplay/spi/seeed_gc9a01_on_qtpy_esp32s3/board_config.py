@@ -13,8 +13,8 @@ display_bus = SPIBus(
     sck=36,
     mosi=35,
     miso=37,
-    dc=8,
-    cs=17,
+    command=8,
+    chip_select=17,
 )
 
 display_drv = GC9A01(

@@ -47,17 +47,20 @@ ST7703_INIT_SEQUENCE = (
     b"\x29\x81\x00\x32"
 )
 
+# Panel reset / backlight owned by board_config (not mipidsi.Display).
 lcd_reset = Pin(LCD_RESET, Pin.OUT, value=1)
 lcd_reset.value(0)
 time.sleep_ms(100)
 lcd_reset.value(1)
 time.sleep_ms(200)
+# Active-low backlight; enable after Display init.
+lcd_backlight = Pin(LCD_BACKLIGHT, Pin.OUT, value=1)
 
 display_bus = Bus(frequency=1_000_000_000, num_lanes=2, ldo_chan=3, ldo_voltage_mv=2500)
 
 fb = Display(
     display_bus,
-    init_sequence=ST7703_INIT_SEQUENCE,
+    ST7703_INIT_SEQUENCE,
     width=720,
     height=720,
     color_depth=16,
@@ -68,10 +71,8 @@ fb = Display(
     vsync_pulse_width=4,
     vsync_front_porch=30,
     vsync_back_porch=12,
-    reset_pin=LCD_RESET,
-    backlight_pin=LCD_BACKLIGHT,
-    backlight_on_high=False,
 )
+lcd_backlight.value(0)
 i2c = I2C(1, scl=Pin(I2C_SCL), sda=Pin(I2C_SDA), freq=400_000)
 
 touch = GT911(

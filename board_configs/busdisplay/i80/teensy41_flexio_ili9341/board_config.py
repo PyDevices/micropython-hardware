@@ -32,11 +32,11 @@ except ImportError as exc:
 _DATA = tuple(Pin(f"GPIO_B1_{i:02d}") for i in range(8))
 
 display_bus = I80Bus(
-    dc=Pin("GPIO_B1_09"),
-    cs=Pin("GPIO_B1_10"),
-    wr=Pin("GPIO_B1_08"),
-    data=_DATA,
-    freq=20_000_000,
+    command=Pin("GPIO_B1_09"),
+    chip_select=Pin("GPIO_B1_10"),
+    write=Pin("GPIO_B1_08"),
+    data_pins=_DATA,
+    frequency=20_000_000,
 )
 
 display_drv = ILI9341(

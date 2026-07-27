@@ -26,18 +26,23 @@ fb = dotclockframebuffer.DotClockFramebuffer(
     vsync=board.LCD_VSYNC,
     hsync=board.LCD_HSYNC,
     dclk=board.LCD_CLK,
-    data=(
+    # RGB565 wire order B0..B4, G0..G5, R0..R4 (LCD_D0..D15)
+    blue=(
         board.LCD_D0,
         board.LCD_D1,
         board.LCD_D2,
         board.LCD_D3,
         board.LCD_D4,
+    ),
+    green=(
         board.LCD_D5,
         board.LCD_D6,
         board.LCD_D7,
         board.LCD_D8,
         board.LCD_D9,
         board.LCD_D10,
+    ),
+    red=(
         board.LCD_D11,
         board.LCD_D12,
         board.LCD_D13,

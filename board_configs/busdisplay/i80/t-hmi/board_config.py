@@ -12,10 +12,10 @@ Pin(14, Pin.OUT, value=1)  # PWR_ON
 Pin(10, Pin.OUT, value=1)  # PWR_EN
 
 display_bus = I80Bus(
-    dc=7,
-    cs=6,
-    wr=8,
-    data=[48, 47, 39, 40, 41, 42, 45, 46],
+    command=7,
+    chip_select=6,
+    write=8,
+    data_pins=[48, 47, 39, 40, 41, 42, 45, 46],
 )
 
 display_drv = ST7789(
@@ -54,7 +54,7 @@ touch_spi = SPI(
 )
 touch = Touch(
     spi=touch_spi,
-    cs=Pin(2),
+    chip_select=Pin(2),
     int_pin=Pin(9),  # driver enables PULL_UP; IRQ active-low
 )
 

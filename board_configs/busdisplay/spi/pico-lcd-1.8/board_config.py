@@ -10,8 +10,8 @@ display_bus = SPIBus(
     baudrate=60_000_000,
     sck=10,
     mosi=11,
-    dc=8,
-    cs=9,
+    command=8,
+    chip_select=9,
 )
 
 display_drv = ST7735R(
