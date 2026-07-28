@@ -61,7 +61,7 @@ def encoder_button_func():
     return not encoder_button.value()
 
 
-runtime = eventsys.Runtime(display=display_drv)
+runtime = eventsys.Runtime(displays=[display_drv])
 runtime.add_encoder(read=encoder_read_func, button_read=encoder_button_func)
 
 from board_devices import DEVICES, setup_devices

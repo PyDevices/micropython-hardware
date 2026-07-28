@@ -57,7 +57,7 @@ joystick = GPIOJoystick(
 )
 
 
-runtime = eventsys.Runtime(display=display_drv)
+runtime = eventsys.Runtime(displays=[display_drv])
 runtime.add_joystick(joystick_driver=joystick, emulate_digital=[[0, 1]])
 
 from board_devices import DEVICES, setup_devices

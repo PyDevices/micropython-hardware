@@ -12,7 +12,7 @@ display_drv = JNDisplay(width, height)
 devices_drv = JNDevices(display_drv)
 
 runtime = eventsys.Runtime(
-    display=display_drv,
+    displays=[display_drv],
     host_read=devices_drv.read,
     timer_async=True,
 )

@@ -65,7 +65,7 @@ except Exception:
     touch_read = None
 
 runtime = eventsys.Runtime(
-    display=display_drv,
+    displays=[display_drv],
     touch_read=touch_read,
     touch_rotation_table=touch_rotation_table,
 )

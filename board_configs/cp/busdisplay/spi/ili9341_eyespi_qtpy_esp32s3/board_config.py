@@ -44,7 +44,7 @@ def _touch_points():
 touch_rotation_table = (6, 3, 0, 5)
 
 runtime = eventsys.Runtime(
-    display=display_drv,
+    displays=[display_drv],
     touch_read=_touch_points,
     touch_rotation_table=touch_rotation_table,
 )

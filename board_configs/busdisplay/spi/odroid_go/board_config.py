@@ -77,7 +77,7 @@ joystick = GPIOJoystick(
     ],
 )
 
-runtime = eventsys.Runtime(display=display_drv)
+runtime = eventsys.Runtime(displays=[display_drv])
 runtime.add_keypad(read=keypad.read)
 runtime.add_joystick(joystick_driver=joystick, emulate_digital=[[0, 1]])
 

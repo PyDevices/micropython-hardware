@@ -22,7 +22,7 @@ display_drv = DTDisplay(
 )
 
 runtime = eventsys.Runtime(
-    display=display_drv,
+    displays=[display_drv],
     host_read=get_events,
 )
 

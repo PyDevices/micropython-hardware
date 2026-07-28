@@ -81,7 +81,7 @@ touch = GT911(
 touch_rotation_table = (0, 0, 0, 0)
 
 runtime = eventsys.Runtime(
-    display=display_drv,
+    displays=[display_drv],
     touch_read=touch.get_positions,
     touch_rotation_table=touch_rotation_table,
 )

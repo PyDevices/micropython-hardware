@@ -54,7 +54,7 @@ try:
 except ValueError:
     i2c = I2C(1, sda=Pin(12), scl=Pin(13), freq=400_000)
 
-runtime = eventsys.Runtime(display=display_drv)
+runtime = eventsys.Runtime(displays=[display_drv])
 runtime.add_keypad(read=keypad.read)
 runtime.add_joystick(joystick_driver=joystick, emulate_digital=[[0, 1]])
 

@@ -12,7 +12,7 @@ display_drv = PSDisplay("display_canvas", width, height)
 devices_drv = PSDevices("display_canvas", display_drv)
 
 runtime = eventsys.Runtime(
-    display=display_drv,
+    displays=[display_drv],
     host_read=devices_drv.read,
     timer_async=True,
 )

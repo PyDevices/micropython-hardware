@@ -41,7 +41,7 @@ touch = FT6x36(i2c)
 touch_rotation_table = None
 
 runtime = eventsys.Runtime(
-    display=display_drv,
+    displays=[display_drv],
     touch_read=touch.get_positions,
     touch_rotation_table=touch_rotation_table,
 )

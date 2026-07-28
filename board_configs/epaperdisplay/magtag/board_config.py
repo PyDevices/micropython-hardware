@@ -38,7 +38,7 @@ keypad = GPIOButtons(
     }
 )
 
-runtime = eventsys.Runtime(display=display_drv)
+runtime = eventsys.Runtime(displays=[display_drv])
 runtime.add_keypad(read=keypad.read)
 
 from board_devices import DEVICES, setup_devices

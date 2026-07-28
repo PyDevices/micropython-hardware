@@ -108,7 +108,7 @@ def _map_touch_points():
 touch_rotation_table = (0, 0, 0, 0)
 
 runtime = eventsys.Runtime(
-    display=display_drv,
+    displays=[display_drv],
     touch_read=_map_touch_points,
     touch_rotation_table=touch_rotation_table,
 )

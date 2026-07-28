@@ -58,7 +58,7 @@ touch = CST226(i2c, irq_pin=21, rst_pin=13)
 touch_rotation_table = (0, 5, 6, 3)
 
 runtime = eventsys.Runtime(
-    display=display_drv,
+    displays=[display_drv],
     touch_read=touch.get_point,
     touch_rotation_table=touch_rotation_table,
 )

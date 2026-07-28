@@ -100,7 +100,7 @@ _REVERSE_Y = 0b100
 touch_rotation_table = (_REVERSE_Y, _REVERSE_Y, _REVERSE_Y, _REVERSE_Y)
 
 runtime = eventsys.Runtime(
-    display=display_drv,
+    displays=[display_drv],
     touch_read=_touch_read,
     touch_rotation_table=touch_rotation_table,
 )
