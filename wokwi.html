@@ -114,18 +114,18 @@ href="https://github.com/PyDevices/micropython-hardware/blob/main/board_configs/
 </tr>
 <tr class="even">
 <td>SPI SCK</td>
-<td>36</td>
-<td><code>lcd1:SCK</code> → <code>esp:36</code></td>
+<td>12</td>
+<td><code>lcd1:SCK</code> → <code>esp:12</code> (SPI2 IOMUX)</td>
 </tr>
 <tr class="odd">
 <td>SPI MOSI</td>
-<td>35</td>
-<td><code>lcd1:MOSI</code> → <code>esp:35</code></td>
+<td>11</td>
+<td><code>lcd1:MOSI</code> → <code>esp:11</code></td>
 </tr>
 <tr class="even">
 <td>SPI MISO</td>
-<td>37</td>
-<td><code>lcd1:MISO</code> → <code>esp:37</code></td>
+<td>13</td>
+<td><code>lcd1:MISO</code> → <code>esp:13</code></td>
 </tr>
 <tr class="odd">
 <td>Display D/C</td>
@@ -150,10 +150,21 @@ href="https://github.com/PyDevices/micropython-hardware/blob/main/board_configs/
 <tr class="odd">
 <td>Backlight</td>
 <td>3V3</td>
-<td><code>lcd1:LED</code> → <code>esp:3V3.1</code></td>
+<td><code>lcd1:LED</code> → <code>esp:3V3.1</code> (required on
+<code>board-ili9341-cap-touch</code>)</td>
+</tr>
+<tr class="even">
+<td>Reset</td>
+<td>3V3</td>
+<td><code>lcd1:RST</code> → <code>esp:3V3.1</code> (hold out of
+reset)</td>
 </tr>
 </tbody>
 </table>
+<p>SPI baudrate in board_config is <strong>20 MHz</strong>
+(GPIO-matrix-safe; IOMUX pins above also allow higher clocks). Do
+<strong>not</strong> use GPIO 35/36/37 for SPI on ESP32-S3 — they
+collide with Octal PSRAM / MicroPython <code>SPI(2)</code> defaults.</p>
 <p>Display part id in <code>diagram.json</code>:
 <strong><code>lcd1</code></strong>
 (<code>board-ili9341-cap-touch</code>).</p>
@@ -219,10 +230,16 @@ with that config.</p>
 </thead>
 <tbody>
 <tr class="odd">
+<td>Blank LCD, no traceback</td>
+<td>Usually missing <code>LED</code>/<code>RST</code>→3V3 on
+<code>board-ili9341-cap-touch</code>, or SPI on GPIO 35/36/37 @ 60 MHz —
+use the pin table above</td>
+</tr>
+<tr class="even">
 <td><code>TouchKeypad</code> IndexError on last row</td>
 <td>Wokwi simulator quirk; may not reproduce on hardware</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Old hosted wokwi.com project IDs</td>
 <td>May be stale; use in-repo <a
 href="https://github.com/PyDevices/pydisplay/tree/main/web/wokwi"><code>wokwi/</code></a></td>
