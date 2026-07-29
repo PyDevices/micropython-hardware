@@ -7,12 +7,15 @@ from spibus import SPIBus
 
 import eventsys
 
+# SPI(1) = IDF SPI2 IOMUX pins (11/12/13). Avoid GPIO 35/36/37 — those are
+# Octal-PSRAM / MicroPython SPI(2) defaults and break on many S3 modules;
+# 60 MHz over the GPIO matrix also exceeds the ~40 MHz matrix limit.
 display_bus = SPIBus(
     id=1,
-    baudrate=60_000_000,
-    sck=36,
-    mosi=35,
-    miso=37,
+    baudrate=20_000_000,
+    sck=12,
+    mosi=11,
+    miso=13,
     command=16,
     chip_select=5,
 )

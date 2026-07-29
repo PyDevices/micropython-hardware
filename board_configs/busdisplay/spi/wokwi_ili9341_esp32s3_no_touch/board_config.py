@@ -5,12 +5,13 @@ from spibus import SPIBus
 
 import eventsys
 
+# SPI(1) = IDF SPI2 IOMUX pins (11/12/13). See wokwi_ili9341_ft6x36_esp32s3.
 display_bus = SPIBus(
     id=1,
-    baudrate=60_000_000,
-    sck=36,
-    mosi=35,
-    miso=37,
+    baudrate=20_000_000,
+    sck=12,
+    mosi=11,
+    miso=13,
     command=16,
     chip_select=5,
 )

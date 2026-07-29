@@ -25,14 +25,17 @@ Matches [`wokwi_ili9341_ft6x36_esp32s3/board_config.py`](https://github.com/PyDe
 | Signal | GPIO | `diagram.json` part / pin |
 |--------|------|---------------------------|
 | Power | 3V3 | `lcd1:VCC` → `esp:3V3.1` |
-| SPI SCK | 36 | `lcd1:SCK` → `esp:36` |
-| SPI MOSI | 35 | `lcd1:MOSI` → `esp:35` |
-| SPI MISO | 37 | `lcd1:MISO` → `esp:37` |
+| SPI SCK | 12 | `lcd1:SCK` → `esp:12` (SPI2 IOMUX) |
+| SPI MOSI | 11 | `lcd1:MOSI` → `esp:11` |
+| SPI MISO | 13 | `lcd1:MISO` → `esp:13` |
 | Display D/C | 16 | `lcd1:D/C` → `esp:16` |
 | Display CS | 5 | `lcd1:CS` → `esp:5` |
 | Touch I2C SDA | 7 | `lcd1:SDA` → `esp:7` |
 | Touch I2C SCL | 6 | `lcd1:SCL` → `esp:6` |
-| Backlight | 3V3 | `lcd1:LED` → `esp:3V3.1` |
+| Backlight | 3V3 | `lcd1:LED` → `esp:3V3.1` (required on `board-ili9341-cap-touch`) |
+| Reset | 3V3 | `lcd1:RST` → `esp:3V3.1` (hold out of reset) |
+
+SPI baudrate in board_config is **20 MHz** (GPIO-matrix-safe; IOMUX pins above also allow higher clocks). Do **not** use GPIO 35/36/37 for SPI on ESP32-S3 — they collide with Octal PSRAM / MicroPython `SPI(2)` defaults.
 
 Display part id in `diagram.json`: **`lcd1`** (`board-ili9341-cap-touch`).
 
@@ -94,6 +97,7 @@ Use a display-only `diagram.json` (no touch I2C wires) with that config.
 
 | Issue | Notes |
 |-------|-------|
+| Blank LCD, no traceback | Usually missing `LED`/`RST`→3V3 on `board-ili9341-cap-touch`, or SPI on GPIO 35/36/37 @ 60 MHz — use the pin table above |
 | `TouchKeypad` IndexError on last row | Wokwi simulator quirk; may not reproduce on hardware |
 | Old hosted wokwi.com project IDs | May be stale; use in-repo [`wokwi/`](https://github.com/PyDevices/pydisplay/tree/main/web/wokwi) |
 
