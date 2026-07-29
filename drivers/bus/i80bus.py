@@ -7,6 +7,7 @@ i80bus
 
 from array import array
 import struct
+from time import sleep_us
 
 import micropython
 from micropython import const
@@ -30,52 +31,106 @@ WR_ACTIVE = const(1)
 WR_INACTIVE = const(0)
 
 
+def _pin_unset(pin) -> bool:
+    """True when a pin kwarg was omitted (None / -1 sentinel)."""
+    return pin is None or pin == -1
+
+
+def _pin_num(pin) -> int:
+    """Resolve an int or Pin-like object to a GPIO number for data0 expansion."""
+    if isinstance(pin, int):
+        return pin
+    if hasattr(pin, "pin") and callable(pin.pin):
+        return pin.pin()
+    if hasattr(pin, "id"):
+        pid = pin.id
+        return pid() if callable(pid) else pid
+    return int(pin)
+
+
 class _I80BaseBus:
     """
     Base class for I80 bus communication.
 
+    Keyword args match displayif ``I80Bus`` / CircuitPython ``ParallelBus``.
+
     Args:
-        dc (int): The pin number for the data/command control.
-        cs (int): The pin number for the chip select.
-        wr (int): The pin number for the write control.
-        data (list[int]): A list of pin numbers for the data pins.
-        freq (int): The frequency for the bus. Defaults to 20,000,000.
+        data0: First of eight consecutive data GPIOs (mutually exclusive with
+            ``data_pins``).
+        data_pins: Sequence of 8 or 16 data pin specs.
+        command: D/C pin.
+        chip_select: CS pin; omit/-1 for no CS.
+        write: WR strobe pin.
+        read: RD pin (accepted for CP signature parity; unused on write path).
+        reset: Optional reset pin.
+        frequency: Bus frequency in Hz. Defaults to 30,000,000.
     """
 
     def __init__(
         self,
-        dc: int,
-        cs: int,
-        wr: int,
-        data: list[int],
-        freq: int = 20_000_000,
+        *,
+        data0=None,
+        data_pins=None,
+        command,
+        chip_select=-1,
+        write,
+        read=None,
+        reset=None,
+        frequency: int = 30_000_000,
     ) -> None:
         print("I80Bus loading...")
+        if _pin_unset(command) or _pin_unset(write):
+            raise ValueError("command and write pins must be specified")
+        if frequency <= 0:
+            raise ValueError("frequency must be positive")
+
+        has_data0 = data0 is not None and data0 != -1
+        has_data_pins = data_pins is not None
+        if has_data0 == has_data_pins:
+            raise ValueError("Specify exactly one of data0 or data_pins")
+
+        if has_data0:
+            base = _pin_num(data0)
+            data = [base + i for i in range(8)]
+        else:
+            data = list(data_pins)
+            if len(data) not in (8, 16):
+                raise ValueError("data_pins must be 8 or 16 pins")
+
+        # Accepted for CircuitPython ParallelBus signature parity (unused).
+        _ = read
+
         # Not used in this class; may be used in subclasses like _i80bus_rp2.py
-        self._freq = freq
+        self._freq = frequency
 
         # Create a list of Pin objects for the data pins
         # NOTE:  data8-15 are optional and not implemented in most subclasses
-        data_pins = [Pin(pin, Pin.OUT) for pin in data]
+        data_pin_objs = [Pin(pin, Pin.OUT) for pin in data]
 
         # Setup the control pins
         # _wr_active, _wr_inactive are boolean values
         # indicating the level of the pin in that state.  True is high, False is low.
-        self._dc: Pin = Pin(dc, Pin.OUT)
+        self._dc: Pin = Pin(command, Pin.OUT)
         self._dc(DC_CMD)  # Set the DC pin to the command level
 
-        # If cs was not specified, set it to a lambda that does nothing
-        # so lines like the next won't fail.
-        self._cs: Pin = Pin(cs, Pin.OUT) if cs != -1 else lambda val: None
-        self._cs(CS_INACTIVE)  # Set the CS pin to the inactive level
+        self._has_cs = not _pin_unset(chip_select)
+        self._cs = Pin(chip_select, Pin.OUT) if self._has_cs else None
+        if self._has_cs:
+            self._cs(CS_INACTIVE)
 
-        self._wr: Pin = Pin(wr, Pin.OUT)
+        self._wr: Pin = Pin(write, Pin.OUT)
         self._wr(WR_INACTIVE)  # Set the WR pin to the inactive level
+
+        self._reset = None if _pin_unset(reset) else Pin(reset, Pin.OUT, value=1)
 
         self._buf1: bytearray = bytearray(1)
 
-        self._setup(data_pins)
+        self._setup(data_pin_objs)
         print("I80Bus loaded")
+
+    def _cs_set(self, level: int) -> None:
+        if self._has_cs:
+            self._cs(level)
 
     @micropython.native
     def send(self, command=None, data=None) -> None:
@@ -88,7 +143,7 @@ class _I80BaseBus:
             None
         """
 
-        self._cs(CS_ACTIVE)
+        self._cs_set(CS_ACTIVE)
 
         if command is not None:
             struct.pack_into("B", self._buf1, 0, command)
@@ -99,7 +154,15 @@ class _I80BaseBus:
             self._dc(DC_DATA)
             self._write(data, len(data))
 
-        self._cs(CS_INACTIVE)
+        self._cs_set(CS_INACTIVE)
+
+    def reset(self) -> None:
+        """Hardware reset pulse when ``reset`` pin was provided."""
+        if self._reset is None:
+            raise RuntimeError("No reset pin defined")
+        self._reset.value(0)
+        sleep_us(4)
+        self._reset.value(1)
 
     def deinit(self):
         pass
@@ -112,12 +175,9 @@ class I80Bus(_I80BaseBus):
     """
     Class for I80 bus communication.
 
-    Args:
-        dc (int): The pin number for the data/command control.
-        cs (int): The pin number for the chip select.
-        wr (int): The pin number for the write control.
-        data (list[int]): A list of pin numbers for the data pins.
-        freq (int): The frequency for the bus. Defaults to 20,000,000.
+    Keyword args match displayif ``I80Bus`` / CircuitPython ``ParallelBus``:
+    exactly one of ``data0`` or ``data_pins``, plus ``command``, ``chip_select``,
+    ``write``, optional ``read`` / ``reset``, and ``frequency`` (default 30 MHz).
     """
 
     def _setup(self, data_pins: list[Pin]) -> None:

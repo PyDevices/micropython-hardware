@@ -5,7 +5,7 @@ spibus
 
 import struct
 import sys
-from time import sleep_ms
+from time import sleep_us
 
 from machine import SPI, Pin
 
@@ -32,6 +32,9 @@ class SPIBus:
     """
     Represents an SPI bus.
 
+    Keyword args match displayif ``SPIBus`` / CircuitPython ``FourWire``
+    display-control names, plus MicroPython SPI extras.
+
     Args:
         id (int): The ID of the SPI bus (ignored when ``soft=True``).
         baudrate (int): The baudrate of the SPI bus.
@@ -43,11 +46,9 @@ class SPIBus:
         sck: SCK pin (int, name str, or Pin); omit/-1 for default SPI pins.
         mosi: MOSI pin (int, name str, or Pin); omit/-1 for default SPI pins.
         miso: MISO pin (int, name str, or Pin); omit/-1 for default/none.
-        dc: DC pin (int, name str, or Pin); required.
-        cs: CS pin (int, name str, or Pin); omit/-1 for no CS.
-
-    Raises:
-        ValueError: If the DC pin is not specified.
+        command: D/C pin (int, name str, or Pin); omit/-1 for 9-bit DC-in-stream.
+        chip_select: CS pin (int, name str, or Pin); omit/-1 for no CS.
+        reset: Reset pin (int, name str, or Pin); omit/-1 for none.
     """
 
     def __init__(
@@ -63,13 +64,11 @@ class SPIBus:
         sck: int = -1,
         mosi: int = -1,
         miso: int = -1,
-        dc: int = -1,
-        cs: int = -1,
+        command: int = -1,
+        chip_select: int = -1,
         reset: int = -1,
     ) -> None:
         print("SPIBus loading...")
-        if _pin_unset(dc):
-            raise ValueError("DC pin must be specified")
 
         self._baudrate: int = baudrate
         self._polarity: int = polarity
@@ -129,10 +128,20 @@ class SPIBus:
                 miso=self._miso,
             )
 
-        # DC and CS pins must be set AFTER the SPI bus is initialized on some boards
-        self._dc: Pin = Pin(dc, Pin.OUT, value=DC_DATA)
-        self._cs = Pin(cs, Pin.OUT, value=CS_INACTIVE) if not _pin_unset(cs) else lambda val: None
+        # command / chip_select after SPI init (same order as displayif SPIBus)
+        self._has_dc = not _pin_unset(command)
+        self._dc = Pin(command, Pin.OUT, value=DC_DATA) if self._has_dc else None
+        self._has_cs = not _pin_unset(chip_select)
+        self._cs = (
+            Pin(chip_select, Pin.OUT, value=CS_INACTIVE) if self._has_cs else None
+        )
         self._reset = None if _pin_unset(reset) else Pin(reset, Pin.OUT, value=1)
+        if self._reset is not None:
+            # Match CircuitPython FourWire: pulse reset on construct.
+            self._reset.value(0)
+            sleep_us(1000)
+            self._reset.value(1)
+            sleep_us(1000)
 
         self._buf1: bytearray = bytearray(1)
         print("SPIBus loaded")
@@ -142,9 +151,44 @@ class SPIBus:
         if self._reset is None:
             raise RuntimeError("No reset pin defined")
         self._reset.value(0)
-        sleep_ms(10)
+        sleep_us(1000)
         self._reset.value(1)
-        sleep_ms(10)
+        sleep_us(1000)
+
+    def _write_9bit(self, dc: int, data) -> None:
+        """CircuitPython FourWire 9-bit DC-in-stream when no command (D/C) pin."""
+        length = len(data)
+        if length == 0:
+            return
+        buffer = 0
+        bits = 0
+        for i in range(length):
+            bits = (bits + 1) % 8
+            if bits == 0:
+                buffer = ((buffer << 1) | dc) & 0xFF
+                self._buf1[0] = buffer
+                self._spi.write(self._buf1)
+                self._buf1[0] = data[i]
+                self._spi.write(self._buf1)
+            else:
+                buffer = (
+                    (buffer << (9 - bits)) | (dc << (8 - bits)) | (data[i] >> bits)
+                ) & 0xFF
+                self._buf1[0] = buffer
+                self._spi.write(self._buf1)
+            buffer = data[i]
+        if bits > 0:
+            buffer = (buffer << (8 - bits)) & 0xFF
+            self._buf1[0] = buffer
+            self._spi.write(self._buf1)
+            if self._has_cs:
+                self._cs(CS_INACTIVE)
+                sleep_us(1)
+                self._cs(CS_ACTIVE)
+
+    def _cs_set(self, level: int) -> None:
+        if self._has_cs:
+            self._cs(level)
 
     @micropython.native
     def send(
@@ -182,18 +226,25 @@ class SPIBus:
                 init_kw["miso"] = self._miso
             self._spi.init(**init_kw)
 
-        self._cs(CS_ACTIVE)
+        self._cs_set(CS_ACTIVE)
 
-        if command is not None:
-            struct.pack_into("B", self._buf1, 0, command)
-            self._dc(DC_CMD)
-            self._spi.write(self._buf1)
+        if not self._has_dc:
+            if command is not None:
+                self._buf1[0] = command & 0xFF
+                self._write_9bit(DC_CMD, self._buf1)
+            if data and len(data):
+                self._write_9bit(DC_DATA, data)
+        else:
+            if command is not None:
+                struct.pack_into("B", self._buf1, 0, command)
+                self._dc(DC_CMD)
+                self._spi.write(self._buf1)
 
-        if data and len(data):
-            self._dc(DC_DATA)
-            self._spi.write(data)
+            if data and len(data):
+                self._dc(DC_DATA)
+                self._spi.write(data)
 
-        self._cs(CS_INACTIVE)
+        self._cs_set(CS_INACTIVE)
 
     def deinit(self) -> None:
         """
