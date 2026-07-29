@@ -23,15 +23,11 @@
   ],
   "deps": [
     [
-      "github:PyDevices/pydisplay/packages/displaysys.json",
-      "main"
+      "displaysys",
+      "latest"
     ],
     [
       "github:PyDevices/pydisplay/packages/epaperdisplay.json",
-      "main"
-    ],
-    [
-      "github:PyDevices/pydisplay/packages/eventsys.json",
       "main"
     ],
     [

@@ -15,15 +15,11 @@
   ],
   "deps": [
     [
-      "github:PyDevices/pydisplay/packages/displaysys.json",
-      "main"
+      "displaysys",
+      "latest"
     ],
     [
       "github:PyDevices/pydisplay/packages/picodvi.json",
-      "main"
-    ],
-    [
-      "github:PyDevices/pydisplay/packages/eventsys.json",
       "main"
     ]
   ],

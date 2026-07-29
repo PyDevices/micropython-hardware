@@ -17,10 +17,6 @@
     [
       "github:PyDevices/micropython-hardware/packages/i80bus.json",
       "main"
-    ],
-    [
-      "github:PyDevices/micropython-hardware/packages/i80bus.json",
-      "main"
     ]
   ],
   "version": "0.1"

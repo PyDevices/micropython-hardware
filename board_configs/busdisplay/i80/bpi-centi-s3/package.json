@@ -23,8 +23,8 @@
       "main"
     ],
     [
-      "github:PyDevices/pydisplay/packages/eventsys.json",
-      "main"
+      "eventsys",
+      "latest"
     ]
   ],
   "version": "0.2",

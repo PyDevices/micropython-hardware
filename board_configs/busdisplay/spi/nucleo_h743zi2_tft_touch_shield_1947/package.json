@@ -47,12 +47,8 @@
   ],
   "deps": [
     [
-      "github:PyDevices/pydisplay/packages/eventsys.json",
-      "main"
-    ],
-    [
-      "github:PyDevices/pydisplay/packages/multimer.json",
-      "main"
+      "eventsys",
+      "latest"
     ]
   ],
   "version": "0.2",

@@ -35,16 +35,8 @@
   ],
   "deps": [
     [
-      "github:PyDevices/pydisplay/packages/displaysys.json",
-      "main"
-    ],
-    [
-      "github:PyDevices/pydisplay/packages/eventsys.json",
-      "main"
-    ],
-    [
-      "github:PyDevices/pydisplay/packages/multimer.json",
-      "main"
+      "displaysys",
+      "latest"
     ]
   ],
   "version": "0.4",

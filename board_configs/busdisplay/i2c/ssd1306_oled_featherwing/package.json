@@ -11,12 +11,8 @@
   ],
   "deps": [
     [
-      "github:PyDevices/pydisplay/packages/displaysys.json",
-      "main"
-    ],
-    [
-      "github:PyDevices/micropython-hardware/packages/i2cbus.json",
-      "main"
+      "displaysys",
+      "latest"
     ],
     [
       "github:PyDevices/micropython-hardware/packages/i2cbus.json",

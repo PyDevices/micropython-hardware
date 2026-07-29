@@ -7,10 +7,10 @@
   ],
   "deps": [
     [
-      "github:PyDevices/pydisplay/packages/displaysys.json",
-      "main"
+      "displaysys",
+      "latest"
     ]
   ],
   "version": "0.1",
-  "notes": "Stub: NotImplementedError — RP2040 SRAM limit; CP POC under cp/."
+  "notes": "Stub: NotImplementedError \u2014 RP2040 SRAM limit; CP POC under cp/."
 }

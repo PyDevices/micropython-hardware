@@ -23,19 +23,10 @@
   ],
   "deps": [
     [
-      "github:PyDevices/pydisplay/packages/displaysys.json",
-      "main"
-    ],
-    [
-      "github:PyDevices/pydisplay/packages/eventsys.json",
-      "main"
-    ],
-    [
-      "github:PyDevices/pydisplay/packages/multimer.json",
-      "main"
+      "displaysys",
+      "latest"
     ]
   ],
   "version": "0.2",
   "notes": "SDMMC 1-bit sdcard (SCLK=12 CMD=11 DAT0=13)."
 }
-

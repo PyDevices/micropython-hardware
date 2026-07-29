@@ -23,19 +23,11 @@
   ],
   "deps": [
     [
-      "github:PyDevices/pydisplay/packages/displaysys.json",
-      "main"
+      "displaysys",
+      "latest"
     ],
     [
       "github:PyDevices/micropython-hardware/packages/i80bus.json",
-      "main"
-    ],
-    [
-      "github:PyDevices/micropython-hardware/packages/i80bus.json",
-      "main"
-    ],
-    [
-      "github:PyDevices/pydisplay/packages/eventsys.json",
       "main"
     ]
   ],

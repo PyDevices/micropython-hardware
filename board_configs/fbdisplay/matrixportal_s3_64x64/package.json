@@ -19,12 +19,8 @@
   ],
   "deps": [
     [
-      "github:PyDevices/pydisplay/packages/displaysys.json",
-      "main"
-    ],
-    [
-      "github:PyDevices/pydisplay/packages/eventsys.json",
-      "main"
+      "displaysys",
+      "latest"
     ]
   ],
   "version": "0.2"

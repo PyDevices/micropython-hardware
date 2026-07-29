@@ -23,19 +23,11 @@
   ],
   "deps": [
     [
-      "github:PyDevices/pydisplay/packages/displaysys.json",
-      "main"
+      "displaysys",
+      "latest"
     ],
     [
       "github:PyDevices/pydisplay/packages/mipidsi.json",
-      "main"
-    ],
-    [
-      "github:PyDevices/pydisplay/packages/eventsys.json",
-      "main"
-    ],
-    [
-      "github:PyDevices/pydisplay/packages/multimer.json",
       "main"
     ]
   ],

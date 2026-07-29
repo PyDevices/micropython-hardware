@@ -32,8 +32,11 @@ Docs are markdown under `docs/`, published only via GitHub Pages
   `github:PyDevices/micropython-hardware/...` for files in this repo.
   Pull `boarddev.py` from `github:PyDevices/pydisplay/src/lib/boarddev.py`
   (MicroPython boards only).
-  Pull pydisplay core deps (`displaysys`, …) from
-  `github:PyDevices/pydisplay/packages/...`.
+  Pull pydisplay core deps as bare MIP names (`displaysys`, `eventsys`,
+  `multimer`, `pygraphics`) so `mip.install(..., index=PyDevices micropython-lib)`
+  resolves them. `displaysys` → `eventsys` → `multimer` is declared in the
+  micropython-lib package manifests — board `package.json` only needs
+  `displaysys` (plus hardware deps like `spibus.json`).
 
 ## Do not
 
