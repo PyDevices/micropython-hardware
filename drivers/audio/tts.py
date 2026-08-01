@@ -144,16 +144,32 @@ class GoogleCloudTTS(_Provider):
 
 
 class GeminiTTS(_Provider):
-    """Gemini native TTS adapter (base64 raw 24 kHz PCM response)."""
+    """Gemini streaming TTS adapter (base64 raw 24 kHz PCM deltas)."""
 
-    def __init__(self, api_key, *, model="gemini-2.5-flash-preview-tts", voice="Kore", base_url="https://generativelanguage.googleapis.com/v1beta"):
+    def __init__(self, api_key, *, model="gemini-3.1-flash-tts-preview", voice="Kore", base_url="https://generativelanguage.googleapis.com/v1beta"):
         self.api_key, self.model, self.voice, self.base_url = api_key, model, voice, base_url.rstrip("/")
 
     def request(self, text, *, voice=None, instructions=None, **unused):
         prompt = (instructions + "\n" + text) if instructions else text
-        body = {"contents": [{"parts": [{"text": prompt}]}], "generationConfig": {"responseModalities": ["AUDIO"], "speechConfig": {"voiceConfig": {"prebuiltVoiceConfig": {"voiceName": voice or self.voice}}}}}
-        url = "%s/models/%s:generateContent?key=%s" % (self.base_url, quote(self.model, safe=""), quote(self.api_key, safe=""))
-        return self._json_request(url, {}, body, response="gemini-pcm")
+        body = {
+            "model": self.model,
+            "input": prompt,
+            "response_format": {"type": "audio"},
+            "generation_config": {"speech_config": [{"voice": voice or self.voice}]},
+            "stream": True,
+        }
+        headers = {
+            "x-goog-api-key": self.api_key,
+            "Accept": "text/event-stream",
+            "Accept-Encoding": "identity",
+            "Api-Revision": "2026-05-20",
+        }
+        return self._json_request(
+            self.base_url + "/interactions",
+            headers,
+            body,
+            response="gemini-sse",
+        )
 
 
 class RequestsTransport:
@@ -177,6 +193,9 @@ class RequestsTransport:
             detail = getattr(response, "text", "")
             response.close()
             raise OSError("TTS HTTP %d: %s" % (status, detail))
+        raw = getattr(response, "raw", None)
+        if raw is not None and hasattr(raw, "decode_content"):
+            raw.decode_content = True
         return response
 
 
@@ -187,6 +206,35 @@ def _read_chunks(response, size):
         if not chunk:
             break
         yield chunk
+
+
+def _sse_data(response, size):
+    """Yield JSON payloads from a server-sent event response."""
+    raw = getattr(response, "raw", response)
+    pending = b""
+    while True:
+        chunk = raw.read(size)
+        if not chunk:
+            break
+        pending += chunk.replace(b"\r\n", b"\n")
+        while b"\n\n" in pending:
+            event, pending = pending.split(b"\n\n", 1)
+            data = b"\n".join(
+                line[5:].lstrip() for line in event.split(b"\n") if line.startswith(b"data:")
+            )
+            if data and data != b"[DONE]":
+                yield json.loads(data)
+
+
+def _gemini_pcm(response, size):
+    received = False
+    for event in _sse_data(response, size):
+        delta = event.get("delta", {})
+        if event.get("event_type") == "step.delta" and delta.get("type") == "audio":
+            received = True
+            yield binascii.a2b_base64(delta["data"])
+    if not received:
+        raise ValueError("Gemini stream completed without audio")
 
 
 def _wav_pcm(data):
@@ -214,6 +262,8 @@ class TTSClient:
         response = self.transport.post(request)
         if request.response == "audio":
             return SpeechStream(_read_chunks(response, self.chunk_size), request.audio_format, response.close)
+        if request.response == "gemini-sse":
+            return SpeechStream(_gemini_pcm(response, self.chunk_size), request.audio_format, response.close)
         try:
             value = response.json() if hasattr(response, "json") else json.loads(response.read())
             if request.response == "google-wav":

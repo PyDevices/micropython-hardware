@@ -68,10 +68,23 @@ class ProviderTests(unittest.TestCase):
         self.assertEqual(TTSClient(GoogleCloudTTS("key"), transport=transport).synthesize("hi"), pcm)
         self.assertTrue(response.closed)
 
-    def test_gemini_decodes_inline_pcm(self):
-        value = {"candidates": [{"content": {"parts": [{"inlineData": {"data": base64.b64encode(b"pcm").decode()}}]}}]}
-        client = TTSClient(GeminiTTS("key"), transport=Transport(Response(value, as_json=True)))
-        self.assertEqual(client.synthesize("hi", instructions="cheerful"), b"pcm")
+    def test_gemini_yields_streamed_pcm_deltas(self):
+        events = []
+        for pcm in (b"first", b"second"):
+            value = {
+                "event_type": "step.delta",
+                "delta": {"type": "audio", "data": base64.b64encode(pcm).decode()},
+            }
+            events.append(b"event: step.delta\r\ndata: " + json.dumps(value).encode() + b"\r\n\r\n")
+        events.append(b"event: done\ndata: [DONE]\n\n")
+        transport = Transport(Response(b"".join(events)))
+        client = TTSClient(GeminiTTS("key"), transport=transport, chunk_size=7)
+        stream = client.stream("hi", instructions="cheerful")
+        self.assertEqual(list(stream), [b"first", b"second"])
+        request = transport.request
+        self.assertEqual(request.headers["x-goog-api-key"], "key")
+        self.assertNotIn("key=", request.url)
+        self.assertEqual(json.loads(request.body)["model"], "gemini-3.1-flash-tts-preview")
 
     def test_speak_checks_format(self):
         class Output:
