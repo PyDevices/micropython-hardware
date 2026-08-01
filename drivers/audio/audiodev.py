@@ -5,6 +5,8 @@ try:
 except ImportError:  # pragma: no cover - uasyncio name on older firmware
     import uasyncio as asyncio
 
+import sys
+
 
 class AudioFormat:  # noqa: PLW1641 - mutable value object is intentionally unhashable
     """Description of raw, interleaved PCM frames."""
@@ -59,13 +61,18 @@ class AudioSession:
         self.codec = None
         self._owners = []
 
+    def get_codec(self):
+        """Return the shared codec, constructing it on first access."""
+        if self.codec is None and self.codec_factory is not None:
+            self.codec = self.codec_factory()
+        return self.codec
+
     def acquire(self, owner, direction):
         if owner in self._owners:
             return self.codec
         if self._owners and not self.duplex:
             raise OSError("audio session is already active")
-        if self.codec is None and self.codec_factory is not None:
-            self.codec = self.codec_factory()
+        self.get_codec()
         self._owners.append(owner)
         return self.codec
 
@@ -130,6 +137,18 @@ class _Device:
         self.session = session
         self.stream = None
         self.is_open = False
+        self._async_stream = None
+        self._codec = None
+
+    @property
+    def codec(self):
+        if self._codec is None and self.session is not None:
+            return self.session.get_codec()
+        return self._codec
+
+    @codec.setter
+    def codec(self, value):
+        self._codec = value
 
     def _open_stream(self):
         stream = self._stream_factory() if callable(self._stream_factory) else self._stream_factory
@@ -159,6 +178,7 @@ class _Device:
                 _call_optional(self.stream, "deinit")
         finally:
             self.stream = None
+            self._async_stream = None
             self.is_open = False
             if self.session is not None:
                 self.session.release(self)
@@ -213,6 +233,8 @@ class PCMOutput(_Device):
         return self._muted
 
     def open(self):
+        if self.is_open:
+            return self
         super().open()
         if self.session is not None and self.codec is None:
             self.codec = self.session.codec
@@ -274,6 +296,12 @@ class PCMOutput(_Device):
         self.open()
         source = self._prepare(buf)
         method = getattr(self.stream, "awrite", None)
+        if method is None and sys.implementation.name == "micropython":
+            if self._async_stream is None:
+                self._async_stream = asyncio.StreamWriter(self.stream)
+            self._async_stream.write(source)
+            await self._async_stream.drain()
+            return len(buf)
         written = 0
         while written < len(source):
             if method is not None:
@@ -323,12 +351,14 @@ class PCMInput(_Device):
         codec=None,
         set_hardware_gain=None,
         set_hardware_mute=None,
+        power=None,
     ):
         super().__init__(stream_factory, session)
         self.format = format
         self.codec = codec
         self._set_hardware_gain = set_hardware_gain
         self._set_hardware_mute = set_hardware_mute
+        self._power = power
         self._gain = 100
         self._muted = False
         capabilities = {"pcm", "capture", "gain", "mute"}
@@ -344,9 +374,13 @@ class PCMInput(_Device):
         return self._muted
 
     def open(self):
+        if self.is_open:
+            return self
         super().open()
         if self.session is not None and self.codec is None:
             self.codec = self.session.codec
+        if self._power is not None:
+            self._power(True)
         if self._set_hardware_gain is not None:
             self._set_hardware_gain(self._gain)
         if self._set_hardware_mute is not None:
@@ -385,12 +419,28 @@ class PCMInput(_Device):
         if len(buf) % self.format.frame_size:
             raise ValueError("PCM buffer must hold complete frames")
         method = getattr(self.stream, "areadinto", None)
+        if method is None and sys.implementation.name == "micropython":
+            if self._async_stream is None:
+                self._async_stream = asyncio.StreamReader(self.stream)
+            count = await self._async_stream.readinto(buf)
+            return self._finish_read(buf, count)
         if method is not None:
             count = await method(buf)
         else:
             count = self.stream.readinto(buf)
             await asyncio.sleep_ms(0) if hasattr(asyncio, "sleep_ms") else asyncio.sleep(0)
         return self._finish_read(buf, count)
+
+    def close(self):
+        if not self.is_open:
+            return
+        try:
+            if self._set_hardware_mute is not None:
+                self._set_hardware_mute(True)
+            if self._power is not None:
+                self._power(False)
+        finally:
+            super().close()
 
 
 class ToneOutput(_Device):
@@ -399,11 +449,20 @@ class ToneOutput(_Device):
     kind = "tone"
     direction = "out"
 
-    def __init__(self, stream_factory, *, session=None):
+    def __init__(self, stream_factory, *, session=None, power=None):
         super().__init__(stream_factory, session)
+        self._power = power
         self.capabilities = frozenset({"tone", "playback", "volume", "mute"})
         self._volume = 100
         self._muted = False
+
+    def open(self):
+        if self.is_open:
+            return self
+        super().open()
+        if self._power is not None:
+            self._power(True)
+        return self
 
     @property
     def volume(self):
@@ -461,4 +520,6 @@ class ToneOutput(_Device):
     def close(self):
         if self.is_open:
             self.stop()
+            if self._power is not None:
+                self._power(False)
         super().close()

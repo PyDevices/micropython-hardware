@@ -2,7 +2,11 @@
 import boarddev
 import sys
 
-DEVICES = frozenset({"pixels", "audio", "microphone", "sdcard", "battery", "i2c", "wlan", "ble"})
+DEVICES = frozenset({"pixels", "audio_out", "audio_in", "sdcard", "battery", "i2c", "wlan", "ble"})
+
+from audiodev import AudioFormat, PCMInput, PCMOutput
+
+_FORMAT = AudioFormat(16000, 2, 16)
 
 # LilyGO T-Embed pin_config.h
 _APA102_CLK = 45
@@ -37,11 +41,12 @@ def pixels():
     return DotStar(spi, 7, auto_write=True)
 
 
-def audio():
+def audio_out():
     """MAX98357A I2S amplifier (no codec chip)."""
     from machine import I2S, Pin
 
-    return I2S(
+    def stream():
+        return I2S(
         1,
         sck=Pin(_IIS_BCLK),
         ws=Pin(_IIS_WCLK),
@@ -51,18 +56,22 @@ def audio():
         format=I2S.STEREO,
         rate=16000,
         ibuf=20000,
-    )
+        )
+
+    return PCMOutput(stream, _FORMAT)
 
 
-def microphone():
+def audio_in():
     """ES7210 ADC + I2S RX (dual MEMS)."""
     from machine import I2C, I2S, Pin
 
     from es7210 import ES7210
 
     i2c = I2C(0, sda=Pin(_IIC_SDA), scl=Pin(_IIC_SCL), freq=400_000)
-    ES7210(i2c)
-    return I2S(
+    codec = ES7210(i2c)
+
+    def stream():
+        return I2S(
         0,
         sck=Pin(_ES7210_BCLK),
         ws=Pin(_ES7210_LRCK),
@@ -73,6 +82,11 @@ def microphone():
         format=I2S.STEREO,
         rate=16000,
         ibuf=20000,
+        )
+
+    return PCMInput(
+        stream, _FORMAT, codec=codec,
+        set_hardware_gain=codec.set_gain, power=codec.enable_input,
     )
 
 

@@ -190,12 +190,15 @@ class ToneTests(unittest.TestCase):
     def test_tone_and_async_stop(self):
         async def run():
             stream = FakeTone()
-            tone = ToneOutput(stream)
+            power = []
+            tone = ToneOutput(stream, power=power.append)
             tone.set_volume(25)
             tone.play(440)
             self.assertEqual((stream.frequency, stream.level), (440, 25))
             await tone.aplay(880, 1)
             self.assertTrue(stream.stopped)
+            tone.close()
+            self.assertEqual(power, [True, False])
 
         asyncio.run(run())
 

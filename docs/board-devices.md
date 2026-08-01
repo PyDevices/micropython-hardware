@@ -34,7 +34,7 @@ Omit the name entirely when the hardware is absent. Canonical symbols:
 | Discrete LED | `led` | Primary user LED only |
 | Motion | `accelerometer`, `gyroscope`, `magnetometer` | Separate; omit missing axes |
 | Environment | `temperature`, `humidity`, `pressure` | Same driver may bind to several names |
-| Audio | `audio`, `microphone` | `audio` = playback; `microphone` separate |
+| Audio | `audio_out`, `audio_in` | Playback and capture use the portable `audiodev` contracts |
 | Storage | `sdcard` | Driver object only; no auto-mount |
 | Camera | `camera` | |
 | Expansion I2C | `i2c` | Dedicated STEMMA/Qwiic/Grove only (not internal-only) |
@@ -45,6 +45,14 @@ Omit the name entirely when the hardware is absent. Canonical symbols:
 | Bluetooth Classic | `bt` | BR/EDR; omit when absent |
 | RF co-processor | `radio` | AirLift/C6/etc.; may coexist with `wlan`/`ble` |
 | Runtime USB device | `usb_device` | Non-tooling `machine.USBDevice`; omit tooling CDC bridge |
+
+`audio_out` returns `PCMOutput` for sample playback or `ToneOutput` for
+PWM/buzzer hardware. `audio_in` returns `PCMInput`. PCM devices expose their
+`format`, `capabilities`, normalized volume/gain and mute controls, synchronous
+I/O, and portable asynchronous I/O. When a codec provides hardware controls,
+the device delegates to them and exposes the codec as `device.codec`; otherwise
+volume or gain is applied to PCM samples in software.
+See [Portable audio](audio.md) for backend, async, speech, and board details.
 
 Out of contract as `board_config` symbols: high-level `wifi` / `bluetooth` modules
 and tooling USB / UART bridges. Apps may still use those stacks directly.

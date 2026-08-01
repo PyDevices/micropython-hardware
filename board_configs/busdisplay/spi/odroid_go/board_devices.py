@@ -2,7 +2,9 @@
 import boarddev
 import sys
 
-DEVICES = frozenset({"battery", "sdcard", "audio", "wlan"})
+DEVICES = frozenset({"battery", "sdcard", "audio_out", "wlan"})
+
+from audiodev import ToneOutput
 
 
 def setup_devices(ns):
@@ -25,10 +27,10 @@ def sdcard():
     return SDCard(spi, Pin(22, Pin.OUT, value=1))
 
 
-def audio():
+def audio_out():
     from machine import Pin, PWM
 
-    return PWM(Pin(26), freq=440, duty=0)
+    return ToneOutput(lambda: PWM(Pin(26), freq=440, duty=0))
 
 
 def wlan():

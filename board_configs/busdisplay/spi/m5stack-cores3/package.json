@@ -31,6 +31,10 @@
     [
       "bmi270.py",
       "github:PyDevices/micropython-hardware/drivers/imu/bmi270.py"
+    ],
+    [
+      "audiodev.py",
+      "github:PyDevices/micropython-hardware/drivers/audio/audiodev.py"
     ]
   ],
   "deps": [

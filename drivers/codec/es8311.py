@@ -25,6 +25,13 @@ except ImportError:
 
 I2C_ADDR = const(0x18)
 
+
+def _sleep_ms(milliseconds):
+    if hasattr(time, "sleep_ms"):
+        time.sleep_ms(milliseconds)
+    else:
+        time.sleep(milliseconds / 1000)
+
 # ---------------------------------------------------------------------------
 # Register addresses (from es8311_reg.h, Espressif reference driver)
 # ---------------------------------------------------------------------------
@@ -70,6 +77,11 @@ class ES8311:
 
     def __init__(self, i2c):
         self._i2c = i2c
+        self.dac_volume = 85
+        self.adc_volume = 100
+        self.dac_muted = True
+        self.output_enabled = False
+        self.input_enabled = False
         self._init()
 
     # ------------------------------------------------------------------
@@ -85,7 +97,7 @@ class ES8311:
     def _init(self):
         # --- Reset sequence (matches Espressif es8311_init) ---
         self._wr(_REG00_RESET, 0x1F)   # assert reset
-        time.sleep_ms(20)
+        _sleep_ms(20)
         self._wr(_REG00_RESET, 0x00)   # release reset
         self._wr(_REG00_RESET, 0x80)   # power-on command (required)
 
@@ -146,6 +158,7 @@ class ES8311:
         else:
             val &= ~0x60  # bits[6:5] = 00 → soft mute off
         self._wr(_REG31_DAC_MUTE, val)
+        self.dac_muted = bool(mute)
 
     def set_dac_volume(self, percent):
         """
@@ -160,6 +173,7 @@ class ES8311:
         else:
             val = (percent * 256 // 100) - 1
         self._wr(_REG32_DAC_VOL, val)
+        self.dac_volume = percent
 
     def set_adc_volume(self, percent):
         """
@@ -171,3 +185,28 @@ class ES8311:
         percent = max(0, min(100, percent))
         val = percent * 0xC8 // 100
         self._wr(_REG17_ADC_VOL, val)
+        self.adc_volume = percent
+
+    def enable_output(self, enable=True):
+        """Enable or safely mute the DAC and headphone output path."""
+        enable = bool(enable)
+        if enable:
+            self._wr(_REG12_DAC_EN, 0x00)
+            self._wr(_REG13_SYS, 0x10)
+        else:
+            self.dac_mute(True)
+            self._wr(_REG13_SYS, 0x00)
+        self.output_enabled = enable
+
+    def enable_input(self, enable=True):
+        """Enable or disable the analog PGA and ADC modulator."""
+        enable = bool(enable)
+        self._wr(_REG0E_SYS, 0x02 if enable else 0x00)
+        self.input_enabled = enable
+
+    def close(self):
+        """Put both signal paths into their safe inactive state."""
+        self.enable_output(False)
+        self.enable_input(False)
+
+    deinit = close
