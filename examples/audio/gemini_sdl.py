@@ -1,17 +1,15 @@
 """Stream Gemini 3.1 TTS to the default SDL audio output.
 
-Set ``GEMINI_API_KEY`` before running. On CPython, optional command-line words
-replace the demonstration passage::
+Copy ``secrets.py.example`` to ``secrets.py`` beside this file and put your
+Gemini API key in it before running::
 
-    python gemini_sdl.py "Hello from streaming Gemini speech."
+    GEMINI_API_KEY = "your-key"
 """
 
-import os
-import sys
-import time
-
 from audiodev import AudioFormat
+from multimer import ticks_diff, ticks_ms
 from sdl2audio import audio_out
+from secrets import GEMINI_API_KEY
 from tts import GeminiTTS, TTSClient
 
 
@@ -23,26 +21,10 @@ DEFAULT_TEXT = (
 )
 
 
-def _milliseconds():
-    if hasattr(time, "ticks_ms"):
-        return time.ticks_ms()
-    return int(time.monotonic() * 1000)
-
-
-def _elapsed(start, end):
-    if hasattr(time, "ticks_diff"):
-        return time.ticks_diff(end, start)
-    return end - start
-
-
 def main(text=DEFAULT_TEXT):
-    key = os.getenv("GEMINI_API_KEY")
-    if not key:
-        raise RuntimeError("set GEMINI_API_KEY before running this example")
-
     output = audio_out(AudioFormat(24000, 1, 16), queue_ms=150)
-    client = TTSClient(GeminiTTS(key), chunk_size=4096)
-    started = _milliseconds()
+    client = TTSClient(GeminiTTS(GEMINI_API_KEY), chunk_size=4096)
+    started = ticks_ms()
     stream = client.stream(
         text,
         instructions="Read clearly in a friendly, relaxed voice.",
@@ -53,12 +35,12 @@ def main(text=DEFAULT_TEXT):
     try:
         for pcm in stream:
             if first_audio is None:
-                first_audio = _milliseconds()
+                first_audio = ticks_ms()
             chunks += 1
             total += output.write(pcm)
-        stream_complete = _milliseconds()
+        stream_complete = ticks_ms()
         output.drain()
-        playback_complete = _milliseconds()
+        playback_complete = ticks_ms()
     finally:
         stream.close()
         output.close()
@@ -67,14 +49,14 @@ def main(text=DEFAULT_TEXT):
         raise RuntimeError("Gemini returned no audio")
     print("audio chunks:", chunks)
     print("PCM bytes:", total)
-    print("first audio: %d ms" % _elapsed(started, first_audio))
-    print("stream complete: %d ms" % _elapsed(started, stream_complete))
-    print("playback complete: %d ms" % _elapsed(started, playback_complete))
+    print("first audio: %d ms" % ticks_diff(first_audio, started))
+    print("stream complete: %d ms" % ticks_diff(stream_complete, started))
+    print("playback complete: %d ms" % ticks_diff(playback_complete, started))
     print(
         "generation/playback overlap: %d ms"
-        % _elapsed(first_audio, stream_complete)
+        % ticks_diff(stream_complete, first_audio)
     )
 
 
 if __name__ == "__main__":
-    main(" ".join(sys.argv[1:]) if len(sys.argv) > 1 else DEFAULT_TEXT)
+    main()
