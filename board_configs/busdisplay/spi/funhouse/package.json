@@ -35,6 +35,10 @@
     [
       "bmp280.py",
       "github:PyDevices/micropython-hardware/drivers/env/bmp280.py"
+    ],
+    [
+      "audiodev.py",
+      "github:PyDevices/micropython-hardware/drivers/audio/audiodev.py"
     ]
   ],
   "deps": [

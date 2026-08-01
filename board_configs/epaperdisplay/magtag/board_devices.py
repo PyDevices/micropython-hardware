@@ -2,7 +2,9 @@
 import boarddev
 import sys
 
-DEVICES = frozenset({"pixels", "audio", "i2c", "wlan"})
+DEVICES = frozenset({"pixels", "audio_out", "i2c", "wlan"})
+
+from audiodev import ToneOutput
 
 
 def setup_devices(ns):
@@ -18,12 +20,15 @@ def pixels():
     return NeoPixel(Pin(1), 4)
 
 
-def audio():
+def audio_out():
     """Speaker on GPIO17 with enable GPIO16."""
     from machine import Pin, PWM
 
-    Pin(16, Pin.OUT, value=1)  # SPEAKER_ENABLE
-    return PWM(Pin(17), freq=440, duty=0)
+    enable = Pin(16, Pin.OUT, value=0)
+    return ToneOutput(
+        lambda: PWM(Pin(17), freq=440, duty=0),
+        power=lambda value: enable.value(value),
+    )
 
 
 def i2c():

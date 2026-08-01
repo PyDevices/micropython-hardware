@@ -2,7 +2,9 @@
 import boarddev
 import sys
 
-DEVICES = frozenset({"pixels", "accelerometer", "sdcard", "battery", "audio", "i2c"})
+DEVICES = frozenset({"pixels", "accelerometer", "sdcard", "battery", "audio_out", "i2c"})
+
+from audiodev import ToneOutput
 
 
 def setup_devices(ns):
@@ -63,15 +65,19 @@ def battery():
         return BatteryADC(6, scale=2.0)
 
 
-def audio():
+def audio_out():
     from machine import Pin, PWM
 
     try:
-        Pin("SPEAKER_ENABLE", Pin.OUT, value=1)
-        return PWM(Pin("SPEAKER"), freq=440, duty=0)
+        enable = Pin("SPEAKER_ENABLE", Pin.OUT, value=0)
+        speaker = Pin("SPEAKER")
     except ValueError:
-        Pin(27, Pin.OUT, value=1)
-        return PWM(Pin(2), freq=440, duty=0)
+        enable = Pin(27, Pin.OUT, value=0)
+        speaker = Pin(2)
+    return ToneOutput(
+        lambda: PWM(speaker, freq=440, duty=0),
+        power=lambda value: enable.value(value),
+    )
 
 
 def i2c():

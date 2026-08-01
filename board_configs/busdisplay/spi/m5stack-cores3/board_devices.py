@@ -4,8 +4,8 @@ import sys
 
 DEVICES = frozenset(
     {
-        "microphone",
-        "audio",
+        "audio_in",
+        "audio_out",
         "sdcard",
         "camera",
         "accelerometer",
@@ -15,6 +15,11 @@ DEVICES = frozenset(
         "ble",
     }
 )
+
+from audiodev import AudioFormat, AudioSession, PCMInput, PCMOutput
+
+_FORMAT = AudioFormat(16000, 2, 16)
+_SESSION = AudioSession(duplex=False)
 
 # M5Unified CoreS3 I2S / codec pin map
 _MCLK = 0
@@ -50,7 +55,7 @@ def _bmi270():
     return _imu
 
 
-def microphone():
+def audio_in():
     """ES7210 ADC + I2S RX (dual MEMS)."""
     from machine import I2S, Pin
 
@@ -58,8 +63,10 @@ def microphone():
 
     import board_config as bc
 
-    ES7210(bc.i2c, profile="m5")
-    return I2S(
+    codec = ES7210(bc.i2c, profile="m5")
+
+    def stream():
+        return I2S(
         1,
         sck=Pin(_BCLK),
         ws=Pin(_LRCK),
@@ -70,10 +77,15 @@ def microphone():
         format=I2S.STEREO,
         rate=_RATE,
         ibuf=20000,
+        )
+
+    return PCMInput(
+        stream, _FORMAT, session=_SESSION, codec=codec,
+        set_hardware_gain=codec.set_gain, power=codec.enable_input,
     )
 
 
-def audio():
+def audio_out():
     """AW88298 amp + I2S TX (AW9523 speaker enable)."""
     from machine import I2S, Pin
 
@@ -81,8 +93,10 @@ def audio():
 
     import board_config as bc
 
-    AW88298(bc.i2c, sample_rate=_RATE, enable_aw9523=True)
-    return I2S(
+    codec = AW88298(bc.i2c, sample_rate=_RATE, enable_aw9523=True)
+
+    def stream():
+        return I2S(
         1,
         sck=Pin(_BCLK),
         ws=Pin(_LRCK),
@@ -92,6 +106,11 @@ def audio():
         format=I2S.STEREO,
         rate=_RATE,
         ibuf=20000,
+        )
+
+    return PCMOutput(
+        stream, _FORMAT, session=_SESSION, codec=codec,
+        set_hardware_mute=codec.mute, power=codec.enable_output,
     )
 
 

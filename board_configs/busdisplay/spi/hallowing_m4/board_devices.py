@@ -2,7 +2,9 @@
 import boarddev
 import sys
 
-DEVICES = frozenset({"pixels", "accelerometer", "audio", "i2c"})
+DEVICES = frozenset({"pixels", "accelerometer", "audio_out", "i2c"})
+
+from audiodev import ToneOutput
 
 _i2c = None
 
@@ -47,11 +49,14 @@ def accelerometer():
     raise OSError("LIS3DH not found on HalloWing I2C")
 
 
-def audio():
+def audio_out():
     from machine import Pin, PWM
 
     try:
-        Pin("SPEAKER_ENABLE", Pin.OUT, value=1)
-        return PWM(Pin("SPEAKER"), freq=440, duty=0)
+        enable = Pin("SPEAKER_ENABLE", Pin.OUT, value=0)
+        speaker = Pin("SPEAKER")
     except ValueError:
-        return PWM(Pin(2), freq=440, duty=0)
+        enable = None
+        speaker = Pin(2)
+    power = None if enable is None else lambda value: enable.value(value)
+    return ToneOutput(lambda: PWM(speaker, freq=440, duty=0), power=power)

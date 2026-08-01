@@ -2,7 +2,9 @@
 import boarddev
 import sys
 
-DEVICES = frozenset({"sdcard", "radio", "audio", "i2c", "wlan"})
+DEVICES = frozenset({"sdcard", "radio", "audio_out", "i2c", "wlan"})
+
+from audiodev import ToneOutput
 
 
 def setup_devices(ns):
@@ -33,14 +35,17 @@ def radio():
     return wlan()
 
 
-def audio():
+def audio_out():
     from machine import Pin, PWM
 
     try:
-        Pin("SPEAKER_ENABLE", Pin.OUT, value=1)
-        return PWM(Pin("SPEAKER"), freq=440, duty=0)
+        enable = Pin("SPEAKER_ENABLE", Pin.OUT, value=0)
+        speaker = Pin("SPEAKER")
     except ValueError:
-        return PWM(Pin(2), freq=440, duty=0)
+        enable = None
+        speaker = Pin(2)
+    power = None if enable is None else lambda value: enable.value(value)
+    return ToneOutput(lambda: PWM(speaker, freq=440, duty=0), power=power)
 
 
 def i2c():

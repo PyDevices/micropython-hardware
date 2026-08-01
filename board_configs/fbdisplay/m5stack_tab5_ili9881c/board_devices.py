@@ -2,7 +2,12 @@
 import boarddev
 import sys
 
-DEVICES = frozenset({"microphone", "audio", "sdcard", "camera", "i2c", "wlan", "ble"})
+DEVICES = frozenset({"audio_in", "audio_out", "sdcard", "camera", "i2c", "wlan", "ble"})
+
+from audiodev import AudioFormat, AudioSession, PCMInput, PCMOutput
+
+_FORMAT = AudioFormat(16000, 2, 16)
+_SESSION = AudioSession(duplex=False)
 
 # M5Unified Tab5 I2S / codec pin map
 _MCLK = 30
@@ -23,7 +28,7 @@ def i2c():
     return bc.i2c
 
 
-def microphone():
+def audio_in():
     """ES7210 ADC + I2S RX."""
     from machine import I2S, Pin
 
@@ -31,8 +36,10 @@ def microphone():
 
     import board_config as bc
 
-    ES7210(bc.i2c, profile="m5")
-    return I2S(
+    codec = ES7210(bc.i2c, profile="m5")
+
+    def stream():
+        return I2S(
         0,
         sck=Pin(_BCLK),
         ws=Pin(_LRCK),
@@ -43,10 +50,15 @@ def microphone():
         format=I2S.STEREO,
         rate=_RATE,
         ibuf=20000,
+        )
+
+    return PCMInput(
+        stream, _FORMAT, session=_SESSION, codec=codec,
+        set_hardware_gain=codec.set_gain, power=codec.enable_input,
     )
 
 
-def audio():
+def audio_out():
     """ES8388 DAC + I2S TX (+ PI4IOE amp enable)."""
     from machine import I2S, Pin
 
@@ -55,9 +67,10 @@ def audio():
 
     import board_config as bc
 
-    ES8388(bc.i2c)
-    tab5_set_amp(bc.i2c, True)
-    return I2S(
+    codec = ES8388(bc.i2c)
+
+    def stream():
+        return I2S(
         0,
         sck=Pin(_BCLK),
         ws=Pin(_LRCK),
@@ -68,6 +81,16 @@ def audio():
         format=I2S.STEREO,
         rate=_RATE,
         ibuf=20000,
+        )
+
+    def power(enable):
+        codec.enable_output(enable)
+        tab5_set_amp(bc.i2c, enable)
+
+    return PCMOutput(
+        stream, _FORMAT, session=_SESSION, codec=codec,
+        set_hardware_volume=codec.set_dac_volume,
+        set_hardware_mute=codec.dac_mute, power=power,
     )
 
 

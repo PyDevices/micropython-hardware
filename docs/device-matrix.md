@@ -26,12 +26,12 @@ First-wave display campaign. Lazy column is the live `DEVICES` set.
 
 | Product | Inventory # | `board_config` path | Eager UI | Lazy `DEVICES` |
 |---------|-------------|---------------------|----------|----------------|
-| Waveshare ESP32-P4-WIFI6-Touch-LCD-4B | [#1](board-inventory.md) | `fbdisplay/esp32-p4-wifi6-touch-lcd-4b` | `touch` | `audio`, `microphone`, `sdcard`, `camera`, `radio`, `wlan`, `ble`, `usb_device` |
+| Waveshare ESP32-P4-WIFI6-Touch-LCD-4B | [#1](board-inventory.md) | `fbdisplay/esp32-p4-wifi6-touch-lcd-4b` | `touch` | `audio_out`, `audio_in`, `sdcard`, `camera`, `radio`, `wlan`, `ble`, `usb_device` |
 | Adafruit Qualia S3 + TL040HDS20 | [#8](board-inventory.md) | `fbdisplay/qualia_tl040hds20` | `touch`, `keypad`, `io_expander` | `wlan`, `ble` |
 | Waveshare ESP32-S3-Touch-LCD-4.3 | — | `fbdisplay/esp32-s3-touch-lcd-4_3` | `touch`, `io_expander` | `sdcard`, `can`, `rs485`, `usb_device`, `wlan`, `ble` |
 | Waveshare ESP32-S3-Touch-LCD-7 | — | `fbdisplay/esp32-s3-touch-lcd-7` | `touch`, `io_expander` | `sdcard`, `can`, `rs485`, `usb_device`, `wlan`, `ble` |
 | LILYGO T-RGB 2.1″ | — | `fbdisplay/t-rgb_480` | `touch` | `sdcard`, `battery`, `wlan`, `ble` |
-| LILYGO T-Embed | — | `busdisplay/spi/t-embed` | `encoder` | `pixels`, `audio`, `microphone`, `sdcard`, `battery`, `i2c`, `wlan`, `ble` |
+| LILYGO T-Embed | — | `busdisplay/spi/t-embed` | `encoder` | `pixels`, `audio_out`, `audio_in`, `sdcard`, `battery`, `i2c`, `wlan`, `ble` |
 | LILYGO T-HMI | — | `busdisplay/i80/t-hmi` | `touch` | `sdcard`, `i2c`, `wlan`, `ble` |
 | Waveshare RP2040-Touch-LCD-1.28 | — | `busdisplay/spi/rp2040-touch-lcd-1.28` | `touch` | `accelerometer`, `gyroscope`, `battery` |
 | Adafruit Metro M7 + TFT shield 1947 | [#5](board-inventory.md) host | `busdisplay/spi/metro_m7_tft_touch_shield_1947` | `touch` | `pixels`, `led`, `sdcard`, `radio`, `wlan`, `i2c` |
@@ -54,21 +54,21 @@ contract surface.
 
 | Product | Inventory # | `board_config` path (MP) | Eager UI | Lazy `DEVICES` | Notes |
 |---------|-------------|--------------------------|----------|----------------|-------|
-| Adafruit FunHouse | [#13](board-inventory.md) | `busdisplay/spi/funhouse` | `touch`, `keypad` | `temperature`, `humidity`, `pressure`, `pixels`, `audio`, `wlan` | no BLE on ESP32-S2 |
-| Adafruit PyGamer | [#27](board-inventory.md) | `busdisplay/spi/pygamer` | `joystick`, `keypad` | `pixels`, `accelerometer`, `sdcard`, `battery`, `audio`, `i2c` | |
+| Adafruit FunHouse | [#13](board-inventory.md) | `busdisplay/spi/funhouse` | `touch`, `keypad` | `temperature`, `humidity`, `pressure`, `pixels`, `audio_out`, `wlan` | no BLE on ESP32-S2 |
+| Adafruit PyGamer | [#27](board-inventory.md) | `busdisplay/spi/pygamer` | `joystick`, `keypad` | `pixels`, `accelerometer`, `sdcard`, `battery`, `audio_out`, `i2c` | |
 | Adafruit Feather RP2040 + RGB matrix wing | [#7](board-inventory.md) host | `fbdisplay/feather_rp2040_rgb_matrix_64x32` | — | `i2c` | matrix is `display_drv` |
 | Adafruit Feather RP2040 DVI | [#21](board-inventory.md) | `fbdisplay/adafruit_feather_rp2040_dvi_320x240` | — | — | MP stub raises `NotImplementedError` (SRAM); CP POC under `cp/fbdisplay/adafruit_feather_rp2040_dvi_320x240` |
 | Teensy 4.1 + FlexIO ILI9341 | [#23](board-inventory.md) | `busdisplay/i80/teensy41_flexio_ili9341` | — | *(empty)* | split layout; no onboard lazy extras |
 | Teensy 4.1 + RGB matrix featherwing | [#23](board-inventory.md) | `fbdisplay/rgb_matrix_featherwing_teensy41_64x32` | — | *(empty)* | |
-| Adafruit MagTag | — | `epaperdisplay/magtag` | `keypad` | `pixels`, `audio`, `i2c`, `wlan` | no contract role for ALS |
-| Adafruit PyBadge | — | `busdisplay/spi/pybadge` | `keypad` | `pixels`, `accelerometer`, `audio`, `i2c` | |
-| Adafruit PyPortal | — | `busdisplay/spi/pyportal` | `touch` | `sdcard`, `radio`, `audio`, `i2c`, `wlan` | AirLift as `radio`/`wlan` |
-| Adafruit PyPortal Titano | — | `busdisplay/spi/pyportal_titano` | `touch` | `sdcard`, `radio`, `audio`, `i2c`, `wlan` | |
-| Adafruit HalloWing M4 | — | `busdisplay/spi/hallowing_m4` | — | `pixels`, `accelerometer`, `audio`, `i2c` | |
-| ODROID-GO | — | `busdisplay/spi/odroid_go` | `joystick`, `keypad` | `battery`, `sdcard`, `audio`, `wlan` | |
-| M5Stack CoreS3 | — | `busdisplay/spi/m5stack-cores3` | `touch` | `microphone`, `audio`, `sdcard`, `camera`, `accelerometer`, `gyroscope`, `i2c`, `wlan`, `ble` | AW88298/ES7210/BMI270 wired; camera stub |
-| M5Stack Tab5 (ILI9881C) | — | `fbdisplay/m5stack_tab5_ili9881c` | `touch` | `microphone`, `audio`, `sdcard`, `camera`, `i2c`, `wlan`, `ble` | ES8388/ES7210 wired; camera stub |
-| M5Stack Tab5 (ST7123) | — | `fbdisplay/m5stack_tab5_st7123` | `touch` | `microphone`, `audio`, `sdcard`, `camera`, `i2c`, `wlan`, `ble` | same |
+| Adafruit MagTag | — | `epaperdisplay/magtag` | `keypad` | `pixels`, `audio_out`, `i2c`, `wlan` | no contract role for ALS |
+| Adafruit PyBadge | — | `busdisplay/spi/pybadge` | `keypad` | `pixels`, `accelerometer`, `audio_out`, `i2c` | |
+| Adafruit PyPortal | — | `busdisplay/spi/pyportal` | `touch` | `sdcard`, `radio`, `audio_out`, `i2c`, `wlan` | AirLift as `radio`/`wlan` |
+| Adafruit PyPortal Titano | — | `busdisplay/spi/pyportal_titano` | `touch` | `sdcard`, `radio`, `audio_out`, `i2c`, `wlan` | |
+| Adafruit HalloWing M4 | — | `busdisplay/spi/hallowing_m4` | — | `pixels`, `accelerometer`, `audio_out`, `i2c` | |
+| ODROID-GO | — | `busdisplay/spi/odroid_go` | `joystick`, `keypad` | `battery`, `sdcard`, `audio_out`, `wlan` | |
+| M5Stack CoreS3 | — | `busdisplay/spi/m5stack-cores3` | `touch` | `audio_in`, `audio_out`, `sdcard`, `camera`, `accelerometer`, `gyroscope`, `i2c`, `wlan`, `ble` | AW88298/ES7210/BMI270 wired; camera stub |
+| M5Stack Tab5 (ILI9881C) | — | `fbdisplay/m5stack_tab5_ili9881c` | `touch` | `audio_in`, `audio_out`, `sdcard`, `camera`, `i2c`, `wlan`, `ble` | ES8388/ES7210 wired; camera stub |
+| M5Stack Tab5 (ST7123) | — | `fbdisplay/m5stack_tab5_st7123` | `touch` | `audio_in`, `audio_out`, `sdcard`, `camera`, `i2c`, `wlan`, `ble` | same |
 | LILYGO T-Display-S3 | — | `busdisplay/i80/t-display-s3` | — | `battery`, `wlan`, `ble` | |
 | LILYGO T-Display-S3 Pro | — | `busdisplay/spi/t-display-s3-pro` | `touch` | `sdcard`, `battery`, `wlan`, `ble` | |
 | LILYGO T-QT Pro | — | `busdisplay/spi/t-qt-pro` | — | `battery`, `wlan`, `ble` | |

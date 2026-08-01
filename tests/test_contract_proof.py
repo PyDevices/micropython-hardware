@@ -22,11 +22,10 @@ EXPECTED = {
         "path": "fbdisplay/esp32-p4-wifi6-touch-lcd-4b",
         "eager_touch": True,
         "devices": {
-            "audio",
-            "microphone",
+            "audio_out",
+            "audio_in",
             "sdcard",
             "camera",
-            "ethernet",
             "radio",
             "wlan",
             "ble",
@@ -59,8 +58,8 @@ EXPECTED = {
         "eager_encoder": True,
         "devices": {
             "pixels",
-            "audio",
-            "microphone",
+            "audio_out",
+            "audio_in",
             "sdcard",
             "battery",
             "i2c",
@@ -190,7 +189,8 @@ class TestGraduatedBindLazy(unittest.TestCase):
                     ns.pop(role, None)
                     try:
                         obj = ns["__getattr__"](role)
-                    except (NotImplementedError, ImportError, OSError):
+                    # Host structural smoke may not provide a board's runtime buses.
+                    except (NotImplementedError, ImportError, OSError, AttributeError):
                         continue
                     else:
                         self.assertIs(ns[role], obj)

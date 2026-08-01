@@ -3,7 +3,7 @@ import boarddev
 import sys
 
 DEVICES = frozenset(
-    {"audio", "microphone", "sdcard", "camera", "radio", "wlan", "ble", "usb_device"}
+    {"audio_out", "audio_in", "sdcard", "camera", "radio", "wlan", "ble", "usb_device"}
 )
 
 # Waveshare wiki I2S / ES8311 pin map (P4 panel family)
@@ -13,6 +13,12 @@ _ASDOUT = 11
 _LRCK = 10
 _DSDIN = 9
 _PA_CTRL = 53
+
+from audiodev import AudioFormat, AudioSession, PCMInput, PCMOutput
+
+_FORMAT = AudioFormat(16000, 2, 16)
+_SESSION = AudioSession(codec_factory=lambda: _codec(), duplex=False)
+_pa = None
 
 
 def setup_devices(ns):
@@ -26,13 +32,9 @@ def _codec():
     return ES8311(bc.i2c)
 
 
-def audio():
-    """ES8311 DAC + I2S TX (+ PA enable)."""
+def _output_stream():
     from machine import I2S, Pin
 
-    codec = _codec()
-    codec.dac_mute(False)
-    Pin(_PA_CTRL, Pin.OUT, value=1)
     return I2S(
         0,
         sck=Pin(_SCLK),
@@ -47,11 +49,9 @@ def audio():
     )
 
 
-def microphone():
-    """ES8311 ADC + I2S RX (ES7210 AEC left to firmware/apps)."""
+def _input_stream():
     from machine import I2S, Pin
 
-    _codec()
     return I2S(
         0,
         sck=Pin(_SCLK),
@@ -63,6 +63,47 @@ def microphone():
         format=I2S.STEREO,
         rate=16000,
         ibuf=20000,
+    )
+
+
+def _codec_call(name, value):
+    return getattr(_SESSION.get_codec(), name)(value)
+
+
+def _output_power(enable):
+    global _pa
+    from machine import Pin
+
+    if _pa is None:
+        _pa = Pin(_PA_CTRL, Pin.OUT, value=0)
+    if enable:
+        _codec_call("enable_output", True)
+        _pa.value(1)
+    else:
+        _pa.value(0)
+        _codec_call("enable_output", False)
+
+
+def audio_out():
+    """Portable ES8311 PCM playback device with hardware volume and mute."""
+    return PCMOutput(
+        _output_stream,
+        _FORMAT,
+        session=_SESSION,
+        set_hardware_volume=lambda value: _codec_call("set_dac_volume", value),
+        set_hardware_mute=lambda value: _codec_call("dac_mute", value),
+        power=_output_power,
+    )
+
+
+def audio_in():
+    """Portable ES8311 PCM capture device with hardware ADC gain."""
+    return PCMInput(
+        _input_stream,
+        _FORMAT,
+        session=_SESSION,
+        set_hardware_gain=lambda value: _codec_call("set_adc_volume", value),
+        power=lambda enable: _codec_call("enable_input", enable),
     )
 
 

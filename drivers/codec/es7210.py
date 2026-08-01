@@ -19,6 +19,13 @@ except ImportError:
 
 I2C_ADDR = const(0x40)
 
+
+def _sleep_ms(milliseconds):
+    if hasattr(time, "sleep_ms"):
+        time.sleep_ms(milliseconds)
+    else:
+        time.sleep(milliseconds / 1000)
+
 _RESET = const(0x00)
 _CLOCK_OFF = const(0x01)
 _MAIN_CLK = const(0x02)
@@ -74,6 +81,9 @@ class ES7210:
     def __init__(self, i2c, address=I2C_ADDR, *, gain=0x1A, profile="default"):
         self._i2c = i2c
         self._addr = address
+        self.profile = profile
+        self.gain = 0
+        self.enabled = False
         if profile == "m5":
             self._init_m5()
         elif profile == "default":
@@ -86,7 +96,7 @@ class ES7210:
 
     def _init_default(self, gain):
         self._wr(_RESET, 0xFF)
-        time.sleep_ms(10)
+        _sleep_ms(10)
         self._wr(_RESET, 0x41)
         self._wr(_CLOCK_OFF, 0x1F)
         self._wr(_MAIN_CLK, 0xC1)
@@ -103,11 +113,36 @@ class ES7210:
         self._wr(_MIC4_GAIN, 0x00)
         self._wr(_ADC_CTRL, 0xC0)
         self._wr(_CLOCK_OFF, 0x00)
-        time.sleep_ms(20)
+        _sleep_ms(20)
+        self.set_gain((gain & 0x0F) * 100 // 14)
+        self.enabled = True
 
     def _init_m5(self):
         self._wr(_RESET, 0xFF)
-        time.sleep_ms(10)
+        _sleep_ms(10)
         for reg, val in _M5_INIT:
             self._wr(reg, val)
-        time.sleep_ms(20)
+        _sleep_ms(20)
+        self.gain = 11 * 100 // 14
+        self.enabled = True
+
+    def set_gain(self, percent):
+        """Set both active microphone preamps from 0 to 37.5 dB."""
+        percent = max(0, min(100, int(percent)))
+        step = percent * 14 // 100
+        value = 0x10 | step
+        self._wr(_MIC1_GAIN, value)
+        self._wr(_MIC2_GAIN, value)
+        self.gain = percent
+        return percent
+
+    def enable_input(self, enable=True):
+        """Enable or gate clocks to the ADC capture path."""
+        enable = bool(enable)
+        self._wr(_CLOCK_OFF, 0x00 if enable else 0x1F)
+        self.enabled = enable
+
+    def close(self):
+        self.enable_input(False)
+
+    deinit = close

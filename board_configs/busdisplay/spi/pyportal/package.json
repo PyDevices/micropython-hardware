@@ -23,6 +23,10 @@
     [
       "sdcard.py",
       "github:PyDevices/micropython-hardware/drivers/storage/sdcard.py"
+    ],
+    [
+      "audiodev.py",
+      "github:PyDevices/micropython-hardware/drivers/audio/audiodev.py"
     ]
   ],
   "deps": [

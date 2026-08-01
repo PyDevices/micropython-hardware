@@ -21,6 +21,13 @@ except ImportError:
 
 I2C_ADDR = const(0x10)
 
+
+def _sleep_ms(milliseconds):
+    if hasattr(time, "sleep_ms"):
+        time.sleep_ms(milliseconds)
+    else:
+        time.sleep(milliseconds / 1000)
+
 # (reg, value) — Tab5 speaker enable bulk (DAC path)
 _INIT = (
     (0x00, 0x80),  # RESET / CSM power on
@@ -60,6 +67,9 @@ class ES8388:
     def __init__(self, i2c, address=I2C_ADDR):
         self._i2c = i2c
         self._addr = address
+        self.volume = 100
+        self.muted = False
+        self.enabled = False
         self._init()
 
     def _wr(self, reg, val):
@@ -69,4 +79,33 @@ class ES8388:
         for reg, val in _INIT:
             self._wr(reg, val)
             if reg == 0x00 and val == 0x80:
-                time.sleep_ms(10)
+                _sleep_ms(10)
+        self.enabled = True
+
+    def set_dac_volume(self, percent):
+        """Set stereo DAC volume from -96 dB (0%) to 0 dB (100%)."""
+        percent = max(0, min(100, int(percent)))
+        attenuation = (100 - percent) * 0xC0 // 100
+        self._wr(0x1A, attenuation)
+        self._wr(0x1B, attenuation)
+        self.volume = percent
+        return percent
+
+    def dac_mute(self, mute=True):
+        """Mute both DAC analog outputs while retaining the signal path."""
+        self._wr(0x19, 0x24 if mute else 0x20)
+        self.muted = bool(mute)
+
+    def enable_output(self, enable=True):
+        enable = bool(enable)
+        if enable:
+            self._wr(0x04, 0x3C)
+        else:
+            self.dac_mute(True)
+            self._wr(0x04, 0xC0)
+        self.enabled = enable
+
+    def close(self):
+        self.enable_output(False)
+
+    deinit = close

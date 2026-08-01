@@ -30,6 +30,8 @@ class AW88298:
     def __init__(self, i2c, address=I2C_ADDR, *, sample_rate=16000, enable_aw9523=True):
         self._i2c = i2c
         self._addr = address
+        self.muted = False
+        self.enabled = False
         if enable_aw9523:
             self.enable_cores3_amp(True)
         self._init(sample_rate)
@@ -49,6 +51,24 @@ class AW88298:
         self._wr16(0x05, 0x0008)  # HMUTE=0
         self._wr16(0x06, reg06)
         self._wr16(0x0C, 0x0064)  # full volume
+        self.enabled = True
+
+    def mute(self, mute=True):
+        """Toggle the AW88298 hardware mute."""
+        self._wr16(0x05, 0x0009 if mute else 0x0008)
+        self.muted = bool(mute)
+
+    def enable_output(self, enable=True):
+        enable = bool(enable)
+        if enable:
+            self.enable_cores3_amp(True)
+            self._wr16(0x04, 0x4040)
+            self.mute(False)
+        else:
+            self.mute(True)
+            self._wr16(0x04, 0x4000)
+            self.enable_cores3_amp(False)
+        self.enabled = enable
 
     def enable_cores3_amp(self, enable=True):
         """Toggle CoreS3 AW9523 P0.2 speaker path (no-op if expander absent)."""
@@ -64,5 +84,7 @@ class AW88298:
 
     def shutdown(self):
         """Disable I2S path on the amp (keeps chip powered)."""
-        self._wr16(0x04, 0x4000)
-        self.enable_cores3_amp(False)
+        self.enable_output(False)
+
+    close = shutdown
+    deinit = shutdown
