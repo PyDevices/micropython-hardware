@@ -71,17 +71,182 @@ class _Provider:
 class OpenAITTS(_Provider):
     """OpenAI ``/v1/audio/speech`` adapter (raw 24 kHz PCM by default)."""
 
-    def __init__(self, api_key, *, model="gpt-4o-mini-tts", voice="alloy", base_url="https://api.openai.com/v1"):
+    def __init__(self, api_key="not-needed", *, model="gpt-4o-mini-tts", voice="alloy", base_url="https://api.openai.com/v1", response_format="pcm", audio_format=PCM_24000, response="audio"):
         self.api_key, self.model, self.voice = api_key, model, voice
         self.base_url = base_url.rstrip("/")
+        self.response_format = response_format
+        self.audio_format = audio_format
+        self.response = response
 
     def request(self, text, *, voice=None, instructions=None, speed=None, **unused):
-        body = {"model": self.model, "voice": voice or self.voice, "input": text, "response_format": "pcm"}
+        body = {
+            "model": self.model,
+            "voice": voice or self.voice,
+            "input": text,
+            "response_format": self.response_format,
+        }
         if instructions is not None:
             body["instructions"] = instructions
         if speed is not None:
             body["speed"] = speed
-        return self._json_request(self.base_url + "/audio/speech", {"Authorization": "Bearer " + self.api_key}, body)
+        return self._json_request(
+            self.base_url + "/audio/speech",
+            {"Authorization": "Bearer " + self.api_key},
+            body,
+            response=self.response,
+            audio_format=self.audio_format,
+        )
+
+
+# Kokoro-82M local OpenAI-compatible server (:8880, raw PCM 24 kHz).
+# https://huggingface.co/hexgrad/Kokoro-82M
+# Host setup + MicroPython streaming notes:
+#   https://pydevices.github.io/micropython-hardware/audio.html#local-kokoro-tts
+# Default: http://127.0.0.1:8880/v1 — on MCU set secrets.KOKORO_BASE_URL to the host LAN URL.
+
+KOKORO_VOICES = (
+    ("af_heart", "US Female Warm"),
+    ("af_bella", "US Female Expressive"),
+    ("af_nicole", "US Female Friendly"),
+    ("af_aoede", "US Female"),
+    ("af_kore", "US Female"),
+    ("af_sarah", "US Female Conversational"),
+    ("af_nova", "US Female Clear"),
+    ("af_sky", "US Female Neutral"),
+    ("af_alloy", "US Female Balanced"),
+    ("af_jessica", "US Female Energetic"),
+    ("af_river", "US Female Calm"),
+    ("am_adam", "US Male Deep"),
+    ("am_michael", "US Male Clear"),
+    ("am_echo", "US Male Neutral"),
+    ("am_eric", "US Male Authoritative"),
+    ("am_fenrir", "US Male Distinctive"),
+    ("am_liam", "US Male Conversational"),
+    ("am_onyx", "US Male Rich"),
+    ("am_puck", "US Male Expressive"),
+    ("am_santa", "US Male Warm"),
+    ("bf_emma", "UK Female"),
+    ("bf_isabella", "UK Female"),
+    ("bf_alice", "UK Female"),
+    ("bf_lily", "UK Female"),
+    ("bm_george", "UK Male"),
+    ("bm_fable", "UK Male"),
+    ("bm_daniel", "UK Male"),
+    ("bm_lewis", "UK Male"),
+)
+
+
+class KokoroTTS(OpenAITTS):
+    """Local Kokoro-82M via OpenAI-compatible ``/v1/audio/speech`` (PCM 24 kHz).
+
+    Expects a host that streams raw PCM. For MicroPython play-while-generating,
+    run the server with uvicorn ``--http h11`` (HTTP/1.0 clients reject chunked
+    transfer). See docs/audio.md § Local Kokoro TTS.
+    """
+
+    def __init__(self, *, voice="af_heart", base_url="http://127.0.0.1:8880/v1", api_key="not-needed"):
+        super().__init__(
+            api_key,
+            model="kokoro",
+            voice=voice,
+            base_url=base_url,
+            response_format="pcm",
+            audio_format=PCM_24000,
+            response="audio",
+        )
+
+    @staticmethod
+    def voices():
+        return KOKORO_VOICES
+
+    @staticmethod
+    def voice_label(name, description=None):
+        if description is None:
+            for voice_name, desc in KOKORO_VOICES:
+                if voice_name == name:
+                    description = desc
+                    break
+        if description:
+            return "%s - %s" % (name, description)
+        return name
+
+    @staticmethod
+    def voice_from_label(label):
+        label = (label or "").strip()
+        for sep in (" - ", " — "):
+            if sep in label:
+                return label.split(sep, 1)[0].strip()
+        return label
+
+    def request(self, text, *, voice=None, speed=None, instructions=None, **unused):
+        # Kokoro has no instructions field; optional style is not spoken.
+        return OpenAITTS.request(self, text, voice=voice, speed=speed)
+
+
+# Orpheus-3B via LM Studio + OpenAI speech bridge (default :5005).
+# Model: https://huggingface.co/isaiahbjork/orpheus-3b-0.1-ft-Q4_K_M-GGUF
+# Bridge e.g. https://github.com/TheLocalLab/Orpheus-FastAPI-LMStudio
+# UI: pydisplay examples/tts_orpheus.py — docs/audio.md § Orpheus (LM Studio)
+
+ORPHEUS_VOICES = (
+    ("tara", "Female Conversational"),
+    ("leah", "Female Warm"),
+    ("jess", "Female Energetic"),
+    ("leo", "Male Authoritative"),
+    ("dan", "Male Friendly"),
+    ("mia", "Female Professional"),
+    ("zac", "Male Enthusiastic"),
+    ("zoe", "Female Calm"),
+)
+
+
+class OrpheusTTS(OpenAITTS):
+    """Orpheus-3B through the LM Studio FastAPI bridge (WAV body → PCM).
+
+    The bridge returns WAV (not raw PCM). :class:`TTSClient` strips the header
+    when ``response="wav"``. Emotion tags belong in the spoken text
+    (e.g. ``<laugh>``), not as a separate instructions field.
+    """
+
+    def __init__(self, *, voice="tara", base_url="http://127.0.0.1:5005/v1", api_key="not-needed"):
+        super().__init__(
+            api_key,
+            model="orpheus",
+            voice=voice,
+            base_url=base_url,
+            response_format="wav",
+            audio_format=PCM_24000,
+            response="wav",
+        )
+
+    @staticmethod
+    def voices():
+        return ORPHEUS_VOICES
+
+    @staticmethod
+    def voice_label(name, description=None):
+        if description is None:
+            for voice_name, desc in ORPHEUS_VOICES:
+                if voice_name == name:
+                    description = desc
+                    break
+        if description:
+            return "%s - %s" % (name, description)
+        return name
+
+    @staticmethod
+    def voice_from_label(label):
+        label = (label or "").strip()
+        for sep in (" - ", " — "):
+            if sep in label:
+                return label.split(sep, 1)[0].strip()
+        return label
+
+    def request(self, text, *, voice=None, speed=None, instructions=None, **unused):
+        # Optional style line is prepended so emotion tags / stage directions stay in-band.
+        if instructions:
+            text = instructions.strip() + "\n" + text
+        return OpenAITTS.request(self, text, voice=voice, speed=speed)
 
 
 class ElevenLabsTTS(_Provider):
@@ -361,11 +526,16 @@ class TTSClient:
         if request.response == "gemini-sse":
             return SpeechStream(_gemini_pcm(response, self.chunk_size), request.audio_format, response.close)
         try:
-            value = response.json() if hasattr(response, "json") else json.loads(response.read())
-            if request.response == "google-wav":
-                data = _wav_pcm(binascii.a2b_base64(value["audioContent"]))
+            if request.response == "wav":
+                # Full WAV body (Orpheus-FastAPI); strip header → raw PCM.
+                raw = getattr(response, "raw", response)
+                data = _wav_pcm(raw.read() if hasattr(raw, "read") else response.read())
             else:
-                data = binascii.a2b_base64(value["candidates"][0]["content"]["parts"][0]["inlineData"]["data"])
+                value = response.json() if hasattr(response, "json") else json.loads(response.read())
+                if request.response == "google-wav":
+                    data = _wav_pcm(binascii.a2b_base64(value["audioContent"]))
+                else:
+                    data = binascii.a2b_base64(value["candidates"][0]["content"]["parts"][0]["inlineData"]["data"])
         finally:
             response.close()
         chunks = (data[i:i + self.chunk_size] for i in range(0, len(data), self.chunk_size))

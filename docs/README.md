@@ -5,6 +5,7 @@ https://pydevices.github.io/micropython-hardware/
 
 | Doc | HTML |
 |-----|------|
+| [audio.md](audio.md) | [audio.html](https://pydevices.github.io/micropython-hardware/audio.html) |
 | [board-configs.md](board-configs.md) | [board-configs.html](https://pydevices.github.io/micropython-hardware/board-configs.html) |
 | [board-devices.md](board-devices.md) | [board-devices.html](https://pydevices.github.io/micropython-hardware/board-devices.html) |
 | [device-matrix.md](device-matrix.md) | [device-matrix.html](https://pydevices.github.io/micropython-hardware/device-matrix.html) |

@@ -16,7 +16,7 @@ board configs. Prefer single-file modules; MIP manifests live under `../packages
 | `codec/es7210.py` | Minimal ES7210 ADC init for I2S mics (`profile="m5"` for CoreS3/Tab5) |
 | `codec/aw88298.py` | AW88298 smart amp init (CoreS3) |
 | `codec/es8388.py` | ES8388 DAC init (Tab5) |
-| `audio/tts.py` | Streaming PCM TTS facade for OpenAI, ElevenLabs, Azure, Google Cloud, and Gemini |
+| `audio/tts.py` | Streaming PCM TTS (`KokoroTTS`, Orpheus, OpenAI, ElevenLabs, Azure, Google, Gemini) — see [docs/audio.md](../docs/audio.md) |
 | `power/battery_adc.py` | ADC + divider → volts |
 | `bus/rs485.py` | UART (+ optional DE) |
 | `bus/canbus.py` | `machine.CAN` helper when firmware exposes TWAI |

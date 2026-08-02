@@ -14,7 +14,9 @@ from tts import (  # noqa: E402
     ElevenLabsTTS,
     GeminiTTS,
     GoogleCloudTTS,
+    KokoroTTS,
     OpenAITTS,
+    OrpheusTTS,
     TTSClient,
 )
 
@@ -113,6 +115,36 @@ class ProviderTests(unittest.TestCase):
         self.assertEqual(label, "Kore - Firm")
         self.assertEqual(GeminiTTS.voice_from_label(label), "Kore")
         self.assertIn("gemini-3.1-flash-tts-preview", GeminiTTS.models())
+
+    def test_kokoro_openai_compatible_pcm_request(self):
+        transport = Transport(Response(b"\x00\x01" * 4))
+        client = TTSClient(KokoroTTS(base_url="http://127.0.0.1:8880/v1"), transport=transport)
+        self.assertEqual(client.synthesize("hi", voice="af_bella"), b"\x00\x01" * 4)
+        body = json.loads(transport.request.body)
+        self.assertEqual(body["model"], "kokoro")
+        self.assertEqual(body["voice"], "af_bella")
+        self.assertEqual(body["response_format"], "pcm")
+        self.assertTrue(transport.request.url.endswith("/v1/audio/speech"))
+        self.assertEqual(KokoroTTS.voice_from_label("af_heart - US Female Warm"), "af_heart")
+
+    def test_orpheus_wav_body_is_stripped(self):
+        pcm = b"\x01\x00\x02\x00"
+        wav = (
+            b"RIFF"
+            + struct.pack("<I", 36 + len(pcm))
+            + b"WAVEfmt "
+            + struct.pack("<IHHIIHH", 16, 1, 1, 24000, 48000, 2, 16)
+            + b"data"
+            + struct.pack("<I", len(pcm))
+            + pcm
+        )
+        transport = Transport(Response(wav))
+        client = TTSClient(OrpheusTTS(base_url="http://127.0.0.1:5005/v1"), transport=transport)
+        self.assertEqual(client.synthesize("hi", voice="tara"), pcm)
+        body = json.loads(transport.request.body)
+        self.assertEqual(body["model"], "orpheus")
+        self.assertEqual(body["response_format"], "wav")
+        self.assertEqual(OrpheusTTS.voices()[0][0], "tara")
 
     def test_speak_checks_format(self):
         class Output:
