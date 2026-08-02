@@ -9,7 +9,14 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "drivers" / "audio"))
 
 from audiodev import AudioFormat  # noqa: E402
-from tts import AzureTTS, ElevenLabsTTS, GeminiTTS, GoogleCloudTTS, OpenAITTS, TTSClient  # noqa: E402
+from tts import (  # noqa: E402
+    AzureTTS,
+    ElevenLabsTTS,
+    GeminiTTS,
+    GoogleCloudTTS,
+    OpenAITTS,
+    TTSClient,
+)
 
 
 class Response:
@@ -85,6 +92,27 @@ class ProviderTests(unittest.TestCase):
         self.assertEqual(request.headers["x-goog-api-key"], "key")
         self.assertNotIn("key=", request.url)
         self.assertEqual(json.loads(request.body)["model"], "gemini-3.1-flash-tts-preview")
+
+    def test_gemini_surfaces_sse_error_events(self):
+        value = {
+            "event_type": "error",
+            "error": {"code": "quota_exceeded", "message": "Please retry in 55s."},
+        }
+        body = b"event: error\ndata: " + json.dumps(value).encode() + b"\n\n"
+        client = TTSClient(GeminiTTS("key"), transport=Transport(Response(body)))
+        with self.assertRaises(ValueError) as ctx:
+            client.synthesize("hi")
+        self.assertIn("quota_exceeded", str(ctx.exception))
+        self.assertIn("Please retry", str(ctx.exception))
+
+    def test_gemini_voices_catalog_and_labels(self):
+        voices = GeminiTTS.voices()
+        self.assertGreaterEqual(len(voices), 30)
+        self.assertEqual(voices[0][0], "Zephyr")
+        label = GeminiTTS.voice_label("Kore")
+        self.assertEqual(label, "Kore - Firm")
+        self.assertEqual(GeminiTTS.voice_from_label(label), "Kore")
+        self.assertIn("gemini-3.1-flash-tts-preview", GeminiTTS.models())
 
     def test_speak_checks_format(self):
         class Output:

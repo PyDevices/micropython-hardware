@@ -147,16 +147,96 @@ class GoogleCloudTTS(_Provider):
 # https://ai.google.dev/gemini-api/docs/speech-generation
 # Gemini Live API for interactive, bidirectional audio:
 # https://ai.google.dev/gemini-api/docs/live-api
-class GeminiTTS(_Provider):
-    """Gemini streaming TTS adapter (base64 raw 24 kHz PCM deltas)."""
+#
+# There is no list-voices HTTP endpoint; the Interactions API documents a fixed
+# prebuilt catalog. Expose it here so UIs can call GeminiTTS.voices().
 
-    def __init__(self, api_key, *, model="gemini-3.1-flash-tts-preview", voice="Kore", base_url="https://generativelanguage.googleapis.com/v1beta"):
+GEMINI_TTS_MODELS = (
+    "gemini-3.1-flash-tts-preview",
+    "gemini-2.5-flash-preview-tts",
+    "gemini-2.5-pro-preview-tts",
+)
+
+# (voice name, short description) — official prebuilt voices.
+GEMINI_VOICES = (
+    ("Zephyr", "Bright"),
+    ("Puck", "Upbeat"),
+    ("Charon", "Informative"),
+    ("Kore", "Firm"),
+    ("Fenrir", "Excitable"),
+    ("Leda", "Youthful"),
+    ("Orus", "Firm"),
+    ("Aoede", "Breezy"),
+    ("Callirrhoe", "Easy-going"),
+    ("Autonoe", "Bright"),
+    ("Enceladus", "Breathy"),
+    ("Iapetus", "Clear"),
+    ("Umbriel", "Easy-going"),
+    ("Algieba", "Smooth"),
+    ("Despina", "Smooth"),
+    ("Erinome", "Clear"),
+    ("Algenib", "Gravelly"),
+    ("Rasalgethi", "Informative"),
+    ("Laomedeia", "Upbeat"),
+    ("Achernar", "Soft"),
+    ("Alnilam", "Firm"),
+    ("Schedar", "Even"),
+    ("Gacrux", "Mature"),
+    ("Pulcherrima", "Forward"),
+    ("Achird", "Friendly"),
+    ("Zubenelgenubi", "Casual"),
+    ("Vindemiatrix", "Gentle"),
+    ("Sadachbia", "Lively"),
+    ("Sadaltager", "Knowledgeable"),
+    ("Sulafat", "Warm"),
+)
+
+
+class GeminiTTS(_Provider):
+    """Gemini streaming TTS adapter (base64 raw 24 kHz PCM deltas).
+
+    Style / pace / accent are prompt-driven via ``instructions``.
+    """
+
+    def __init__(self, api_key, *, model=GEMINI_TTS_MODELS[0], voice="Kore", base_url="https://generativelanguage.googleapis.com/v1beta"):
         self.api_key, self.model, self.voice, self.base_url = api_key, model, voice, base_url.rstrip("/")
 
-    def request(self, text, *, voice=None, instructions=None, **unused):
+    @staticmethod
+    def voices():
+        """Return ``((name, description), ...)`` for prebuilt Gemini TTS voices."""
+        return GEMINI_VOICES
+
+    @staticmethod
+    def models():
+        """Return known Gemini TTS model ids (streaming varies by model)."""
+        return GEMINI_TTS_MODELS
+
+    @staticmethod
+    def voice_label(name, description=None):
+        """Dropdown label: ``Name - Description`` (ASCII for LVGL fonts)."""
+        if description is None:
+            for voice_name, desc in GEMINI_VOICES:
+                if voice_name == name:
+                    description = desc
+                    break
+        if description:
+            return "%s - %s" % (name, description)
+        return name
+
+    @staticmethod
+    def voice_from_label(label):
+        """Parse a ``voice_label`` string back to the voice name."""
+        label = (label or "").strip()
+        # Prefer ASCII separator; still accept legacy em dash labels.
+        for sep in (" - ", " — "):
+            if sep in label:
+                return label.split(sep, 1)[0].strip()
+        return label
+
+    def request(self, text, *, voice=None, instructions=None, model=None, **unused):
         prompt = (instructions + "\n" + text) if instructions else text
         body = {
-            "model": self.model,
+            "model": model or self.model,
             "input": prompt,
             "response_format": {"type": "audio"},
             "generation_config": {"speech_config": [{"voice": voice or self.voice}]},
@@ -230,9 +310,21 @@ def _sse_data(response, size):
                 yield json.loads(data)
 
 
+def _gemini_error(event):
+    """Raise a clear error from an Interactions SSE ``error`` event."""
+    err = event.get("error") or {}
+    if not isinstance(err, dict):
+        raise ValueError("Gemini error: %s" % (err,))
+    code = err.get("code") or event.get("event_type") or "error"
+    message = err.get("message") or str(err)
+    raise ValueError("Gemini %s: %s" % (code, message))
+
+
 def _gemini_pcm(response, size):
     received = False
     for event in _sse_data(response, size):
+        if event.get("event_type") == "error" or "error" in event:
+            _gemini_error(event)
         delta = event.get("delta", {})
         if event.get("event_type") == "step.delta" and delta.get("type") == "audio":
             received = True
