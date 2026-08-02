@@ -73,19 +73,223 @@ so applications use <code>sdl2audio.audio_in</code> for host
 microphones.</p>
 <h2 id="speech">Speech</h2>
 <p>The SAM example synthesizes locally and writes its PCM directly to an
-<code>audio_out</code> device. <code>tts.py</code> supplies optional
-streaming HTTP adapters for OpenAI, ElevenLabs, Azure, Google Cloud, and
-Gemini and sends provider-neutral PCM chunks through the same device
-contract. Wit.ai is an audio-input speech recognition/NLU service rather
-than a text-to-speech provider, so it belongs on the capture/upload side
-and is not presented as a TTS backend.</p>
+<code>audio_out</code> device. <a
+href="../drivers/audio/tts.py"><code>drivers/audio/tts.py</code></a>
+supplies optional streaming HTTP adapters and sends provider-neutral PCM
+chunks through the same <code>audio_out</code> contract
+(<code>TTSClient.speak</code> / <code>.stream</code>).</p>
+<table>
+<thead>
+<tr class="header">
+<th>Provider class</th>
+<th>Typical use</th>
+<th>Default format</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>KokoroTTS</code></td>
+<td>Local Kokoro-82M OpenAI-compatible server</td>
+<td>streamed PCM 24 kHz</td>
+</tr>
+<tr class="even">
+<td><code>OrpheusTTS</code></td>
+<td>Local Orpheus via LM Studio + FastAPI bridge</td>
+<td>WAV → PCM</td>
+</tr>
+<tr class="odd">
+<td><code>OpenAITTS</code></td>
+<td>OpenAI <code>/v1/audio/speech</code></td>
+<td>PCM</td>
+</tr>
+<tr class="even">
+<td><code>ElevenLabsTTS</code></td>
+<td>ElevenLabs stream</td>
+<td>PCM</td>
+</tr>
+<tr class="odd">
+<td><code>AzureTTS</code></td>
+<td>Azure Cognitive Services</td>
+<td>PCM</td>
+</tr>
+<tr class="even">
+<td><code>GoogleTTS</code></td>
+<td>Google Cloud TTS</td>
+<td>WAV-in-JSON</td>
+</tr>
+<tr class="odd">
+<td><code>GeminiTTS</code></td>
+<td>Gemini speech generation (SSE)</td>
+<td>PCM deltas</td>
+</tr>
+</tbody>
+</table>
+<p>Wit.ai is an audio-input speech recognition/NLU service rather than a
+text-to-speech provider, so it belongs on the capture/upload side and is
+not presented as a TTS backend.</p>
+<p>MIP package:
+<code>github:PyDevices/micropython-hardware/packages/tts.json</code></p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tts <span class="im">import</span> KokoroTTS, TTSClient</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>client <span class="op">=</span> TTSClient(KokoroTTS(base_url<span class="op">=</span><span class="st">&quot;http://192.168.1.10:8880/v1&quot;</span>))</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>client.speak(<span class="st">&quot;Hello from MicroPython.&quot;</span>, board_config.audio_out)</span></code></pre></div>
+<h2 id="local-kokoro-tts">Local Kokoro TTS</h2>
+<p><a href="https://huggingface.co/hexgrad/Kokoro-82M">Kokoro-82M</a>
+runs on a host PC; the MCU only streams PCM over HTTP. Any OpenAI-shaped
+<code>/v1/audio/speech</code> server that returns <strong>raw 24 kHz
+mono PCM</strong> works with <code>KokoroTTS</code>. For
+play-while-generating on MicroPython, the server must stream the body
+<strong>without</strong> <code>Transfer-Encoding: chunked</code> for
+HTTP/1.0 clients.</p>
+<h3 id="why---http-h11-matters">Why <code>--http h11</code> matters</h3>
+<p>MicroPython’s <code>requests</code> library issues
+<strong>HTTP/1.0</strong> and raises if the response advertises chunked
+transfer. Uvicorn’s default httptools backend always adds chunked
+encoding when <code>Content-Length</code> is unknown. Run:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uvicorn</span> server:app <span class="at">--host</span> 0.0.0.0 <span class="at">--port</span> 8880 <span class="at">--http</span> h11</span></code></pre></div>
+<p>With h11, HTTP/1.0 peers get
+body-until-<code>Connection: close</code>, so
+<code>TTSClient.speak</code> can write PCM to <code>audio_out</code> as
+chunks arrive.</p>
+<h3 id="host-server-cpu">Host server (CPU)</h3>
+<p>A minimal FastAPI reference server lives in the PyDevices workspace
+as <code>kokoro-tts/</code> (sibling of
+<code>micropython-hardware</code> / <code>pydisplay</code>).
+Summary:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> kokoro-tts</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> venv .venv</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> pip install <span class="at">--python</span> .venv/bin/python torch <span class="at">--index-url</span> https://download.pytorch.org/whl/cpu</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> pip install <span class="at">--python</span> .venv/bin/python <span class="at">-r</span> requirements.txt</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> pip install <span class="at">--python</span> .venv/bin/python <span class="dt">\</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="ex">.venv/bin/uvicorn</span> server:app <span class="at">--host</span> 0.0.0.0 <span class="at">--port</span> 8880 <span class="at">--http</span> h11</span></code></pre></div>
+<ul>
+<li>Health: <code>GET http://HOST:8880/health</code> → should include
+<code>"pcm_streaming": true</code></li>
+<li>Speech: <code>POST http://HOST:8880/v1/audio/speech</code> with
+<code>{"model":"kokoro","input":"…","voice":"af_heart","response_format":"pcm"}</code></li>
+<li>Multi-sentence text (<code>.?!</code> / newlines) yields earlier
+first audio than one long undivided clause</li>
+</ul>
+<p>Third-party Kokoro OpenAI wrappers may work for desktop clients but
+often buffer fully or use chunked encoding; prefer a server verified
+with HTTP/1.0 as above.</p>
+<h3 id="board-ui-examples-esp32-p4">Board UI examples (ESP32-P4)</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Example</th>
+<th>Setup script</th>
+<th>Secrets</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a
+href="https://github.com/PyDevices/pydisplay/blob/main/src/examples/tts_kokoro.py">tts_kokoro.py</a></td>
+<td><code>setup_tts_kokoro.py</code></td>
+<td><code>KOKORO_BASE_URL</code></td>
+</tr>
+<tr class="even">
+<td><a
+href="https://github.com/PyDevices/pydisplay/blob/main/src/examples/tts_gemini.py">tts_gemini.py</a></td>
+<td><code>setup_tts_gemini.py</code></td>
+<td><code>GEMINI_API_KEY</code></td>
+</tr>
+<tr class="odd">
+<td><a
+href="https://github.com/PyDevices/pydisplay/blob/main/src/examples/tts_orpheus.py">tts_orpheus.py</a></td>
+<td><code>setup_tts_orpheus.py</code></td>
+<td><code>ORPHEUS_BASE_URL</code></td>
+</tr>
+</tbody>
+</table>
+<p>Board package: <a
+href="../board_configs/fbdisplay/esp32-p4-wifi6-touch-lcd-4b/"><code>board_configs/fbdisplay/esp32-p4-wifi6-touch-lcd-4b/</code></a></p>
+<p><strong>1. Firmware</strong> with frozen lvgl, display_driver,
+MIPI-DSI / FBDisplay stack, and <code>requests</code> (TLS required for
+Gemini).</p>
+<p><strong>2. Put helpers on the board</strong> (serial / mpftp — not
+installed by the setup script):</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># /secrets.py — include the fields your UI needs</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>WIFI_SSID <span class="op">=</span> <span class="st">&quot;your-ssid&quot;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>WIFI_PASSWORD <span class="op">=</span> <span class="st">&quot;your-password&quot;</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>KOKORO_BASE_URL <span class="op">=</span> <span class="st">&quot;http://192.168.1.10:8880/v1&quot;</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>GEMINI_API_KEY <span class="op">=</span> <span class="st">&quot;…&quot;</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>ORPHEUS_BASE_URL <span class="op">=</span> <span class="st">&quot;http://192.168.1.10:5005/v1&quot;</span></span></code></pre></div>
+<p>Also provide <code>/wifi.py</code> with
+<code>connect_from_secrets()</code> (pydisplay utils or your own).</p>
+<p><strong>3. Reachability (local servers)</strong> — From the board,
+<code>GET http://HOST:8880/health</code> (Kokoro) or the Orpheus bridge
+URL must succeed. On WSL2, allow the TCP port on the Windows firewall
+and/or port-proxy; use the Windows <strong>LAN</strong> address when the
+ESP32 cannot route to a WSL-only veth.</p>
+<p><strong>4. MIP install</strong> (WiFi connected), e.g. Kokoro:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mip</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>mip.install(</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github:PyDevices/micropython-hardware/board_configs/fbdisplay/&quot;</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;esp32-p4-wifi6-touch-lcd-4b/setup_tts_kokoro.py&quot;</span>,</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    target<span class="op">=</span><span class="st">&quot;/&quot;</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> setup_tts_kokoro</span></code></pre></div>
+<p>Swap <code>setup_tts_gemini</code> / <code>setup_tts_orpheus</code>
+for the other UIs. Each writes <code>/main.py</code> (<code>wifi</code>
+→ <code>import tts_*</code>).</p>
+<p><strong>5. Launch</strong> — Soft-reset skips <code>main.py</code> on
+MicroPython. Soft-reboot (<code>Ctrl-D</code>) or hard-reset, or
+<code>import tts_kokoro</code> (etc.) from the REPL after WiFi.</p>
+<p>Desktop / unix MicroPython can use the same examples with localhost
+URLs and <code>board_config.audio_out</code> (SDL).</p>
+<h2 id="orpheus-lm-studio">Orpheus (LM Studio)</h2>
+<p>Quantized model (CPU/GPU friendly): <a
+href="https://huggingface.co/isaiahbjork/orpheus-3b-0.1-ft-Q4_K_M-GGUF">isaiahbjork/orpheus-3b-0.1-ft-Q4_K_M-GGUF</a></p>
+<ol type="1">
+<li><p>Install <a href="https://lmstudio.ai/">LM Studio</a> and download
+that GGUF.</p></li>
+<li><p>Load the model and start LM Studio’s local server (often
+<code>http://127.0.0.1:1234</code>).</p></li>
+<li><p>Run an OpenAI <code>/v1/audio/speech</code> bridge that talks to
+LM Studio, e.g. <a
+href="https://github.com/TheLocalLab/Orpheus-FastAPI-LMStudio">Orpheus-FastAPI-LMStudio</a>
+on <code>:5005</code>, or <a
+href="https://github.com/isaiahbjork/orpheus-tts-local">orpheus-tts-local</a>
+for CLI/WAV workflows.</p></li>
+<li><p>Point the MCU at the <strong>bridge</strong> (not LM Studio’s
+chat port alone):</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tts <span class="im">import</span> OrpheusTTS, TTSClient</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>client <span class="op">=</span> TTSClient(OrpheusTTS(base_url<span class="op">=</span><span class="st">&quot;http://192.168.1.10:5005/v1&quot;</span>))</span></code></pre></div></li>
+</ol>
+<p>Emotion tags (<code>&lt;laugh&gt;</code>, <code>&lt;sigh&gt;</code>,
+<code>&lt;chuckle&gt;</code>, …) belong in the spoken text (or the Style
+field in <code>tts_orpheus</code>, which prepends them). Voices:
+<code>tara</code>, <code>leah</code>, <code>jess</code>,
+<code>leo</code>, <code>dan</code>, <code>mia</code>, <code>zac</code>,
+<code>zoe</code>.</p>
+<p><code>OrpheusTTS</code> expects a <strong>WAV</strong> body from the
+bridge; <code>TTSClient</code> strips the header to raw 24 kHz PCM for
+<code>audio_out</code>.</p>
+<h2 id="gemini-tts">Gemini TTS</h2>
+<p>Cloud streaming via <code>GeminiTTS</code> +
+<code>secrets.GEMINI_API_KEY</code>. LVGL UI: <a
+href="https://github.com/PyDevices/pydisplay/blob/main/src/examples/tts_gemini.py"><code>tts_gemini.py</code></a>.
+Style / pace / accent are prompt-driven (<code>instructions</code>).
+Quota errors may include a retry delay; the UI counts down before
+re-enabling Speak.</p>
 <h2 id="esp32-p4-status">ESP32-P4 status</h2>
 <p>The Waveshare ESP32-P4 configuration uses one half-duplex session for
 its I2S peripheral and ES8311. Playback exposes hardware DAC volume/mute
 and controls the speaker amplifier; capture exposes hardware ADC gain.
 Register, stream, session, and GPIO behavior is covered by host
-simulations. Physical electrical and acoustic validation is pending
-access to the board.</p>
+simulations. On-device TTS UIs (<code>tts_kokoro</code> + local Kokoro
+streaming; Gemini / Orpheus via the same <code>audio_out</code> path)
+have been exercised over WiFi.</p>
   </main>
 </body>
 </html>
