@@ -194,6 +194,44 @@ class ProviderTests(unittest.TestCase):
             GroqTTS.voice_from_label(GroqTTS.voice_label("autumn")), "autumn"
         )
 
+    def test_groq_wav_streams_frame_aligned_pcm(self):
+        pcm = b"\x01\x00\x02\x00\x03\x00\x04\x00"
+        wav = (
+            b"RIFF"
+            + struct.pack("<I", 40 + len(pcm))
+            + b"WAVEfmt "
+            + struct.pack("<IHHIIHH", 16, 1, 1, 24000, 48000, 2, 16)
+            + b"JUNK"
+            + struct.pack("<I", 1)
+            + b"x\x00"
+            + b"data"
+            + struct.pack("<I", len(pcm))
+            + pcm
+        )
+        response = Response(wav)
+        client = TTSClient(GroqTTS("key"), transport=Transport(response), chunk_size=3)
+        stream = client.stream("hi")
+        self.assertEqual(response.offset, 0)
+        chunks = iter(stream)
+        self.assertEqual(next(chunks), pcm[:2])
+        self.assertLess(response.offset, len(wav))
+        self.assertEqual(b"".join(chunks), pcm[2:])
+        stream.close()
+        self.assertTrue(response.closed)
+
+    def test_groq_open_ended_wav_stream(self):
+        pcm = b"\x01\x00\x02\x00\x03\x00"
+        wav = (
+            b"RIFF\xff\xff\xff\xffWAVEfmt "
+            + struct.pack("<IHHIIHH", 16, 1, 1, 24000, 48000, 2, 16)
+            + b"data\xff\xff\xff\xff"
+            + pcm
+        )
+        client = TTSClient(
+            GroqTTS("key"), transport=Transport(Response(wav)), chunk_size=3
+        )
+        self.assertEqual(client.synthesize("hi"), pcm)
+
     def test_speak_checks_format(self):
         class Output:
             format = AudioFormat(16000, 1, 16)

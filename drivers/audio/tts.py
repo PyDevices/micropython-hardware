@@ -769,6 +769,68 @@ def _wav_pcm(data):
     raise ValueError("WAV data chunk is missing")
 
 
+def _read_exact(raw, length):
+    data = b""
+    while len(data) < length:
+        chunk = raw.read(length - len(data))
+        if not chunk:
+            raise ValueError("truncated WAV response")
+        data += chunk
+    return data
+
+
+def _wav_pcm_chunks(response, size, audio_format):
+    """Parse a WAV response incrementally and yield frame-aligned PCM."""
+    raw = getattr(response, "raw", response)
+    header = _read_exact(raw, 12)
+    if header[:4] != b"RIFF" or header[8:12] != b"WAVE":
+        raise ValueError("TTS response is not WAV")
+
+    found_format = False
+    while True:
+        chunk_header = _read_exact(raw, 8)
+        chunk_id = chunk_header[:4]
+        chunk_length = int.from_bytes(chunk_header[4:8], "little")
+        if chunk_id == b"fmt ":
+            value = _read_exact(raw, chunk_length)
+            if len(value) < 16 or int.from_bytes(value[:2], "little") != 1:
+                raise ValueError("unsupported WAV encoding")
+            actual = AudioFormat(
+                int.from_bytes(value[4:8], "little"),
+                int.from_bytes(value[2:4], "little"),
+                int.from_bytes(value[14:16], "little"),
+            )
+            if actual != audio_format:
+                raise ValueError("WAV audio format does not match TTS format")
+            found_format = True
+        elif chunk_id == b"data":
+            if not found_format:
+                raise ValueError("WAV fmt chunk is missing")
+            remaining = chunk_length
+            open_ended = chunk_length >= 0x7FFFFFFF
+            pending = b""
+            while open_ended or remaining:
+                chunk = raw.read(size if open_ended else min(size, remaining))
+                if not chunk:
+                    if open_ended:
+                        break
+                    raise ValueError("truncated WAV audio data")
+                if not open_ended:
+                    remaining -= len(chunk)
+                pending += chunk
+                aligned = len(pending) - len(pending) % audio_format.frame_size
+                if aligned:
+                    yield pending[:aligned]
+                    pending = pending[aligned:]
+            if pending:
+                raise ValueError("WAV data contains an incomplete PCM frame")
+            return
+        else:
+            _read_exact(raw, chunk_length)
+        if chunk_length & 1:
+            _read_exact(raw, 1)
+
+
 class TTSClient:
     """Universal synthesize/stream/play facade around a provider adapter."""
 
@@ -792,25 +854,24 @@ class TTSClient:
                 request.audio_format,
                 response.close,
             )
+        if request.response == "wav":
+            return SpeechStream(
+                _wav_pcm_chunks(response, self.chunk_size, request.audio_format),
+                request.audio_format,
+                response.close,
+            )
         try:
-            if request.response == "wav":
-                # Full WAV body (Orpheus-FastAPI); strip header → raw PCM.
-                raw = getattr(response, "raw", response)
-                data = _wav_pcm(raw.read() if hasattr(raw, "read") else response.read())
+            value = (
+                response.json()
+                if hasattr(response, "json")
+                else json.loads(response.read())
+            )
+            if request.response == "google-wav":
+                data = _wav_pcm(binascii.a2b_base64(value["audioContent"]))
             else:
-                value = (
-                    response.json()
-                    if hasattr(response, "json")
-                    else json.loads(response.read())
+                data = binascii.a2b_base64(
+                    value["candidates"][0]["content"]["parts"][0]["inlineData"]["data"]
                 )
-                if request.response == "google-wav":
-                    data = _wav_pcm(binascii.a2b_base64(value["audioContent"]))
-                else:
-                    data = binascii.a2b_base64(
-                        value["candidates"][0]["content"]["parts"][0]["inlineData"][
-                            "data"
-                        ]
-                    )
         finally:
             response.close()
         chunks = (
