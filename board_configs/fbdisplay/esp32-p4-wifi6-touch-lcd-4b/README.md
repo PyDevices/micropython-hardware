@@ -7,6 +7,7 @@ MIPI-DSI FBDisplay, touch, and ES8311 `audio_out` / `audio_in`.
 
 | Setup script | Example | Secrets |
 |--------------|---------|---------|
+| `setup_chat_lvgl.py` | [`chat_lvgl`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/chat_lvgl.py) | `LM_STUDIO_BASE_URL`, `CHAT_MODEL`, `KOKORO_BASE_URL` |
 | `setup_tts_kokoro.py` | [`tts_kokoro`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/tts_kokoro.py) | `KOKORO_BASE_URL` |
 | `setup_tts_gemini.py` | [`tts_gemini`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/tts_gemini.py) | `GEMINI_API_KEY` |
 | `setup_tts_orpheus.py` | [`tts_orpheus`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/tts_orpheus.py) | `ORPHEUS_BASE_URL` |
@@ -48,7 +49,7 @@ mip.install(
     target="/",
 )
 import setup_tts_kokoro
-# Or: setup_tts_gemini / setup_tts_orpheus
+# Or: setup_chat_lvgl / setup_tts_gemini / setup_tts_orpheus
 ```
 
 Each script installs the board package, `tts`, and the chosen UI under `/lib`,

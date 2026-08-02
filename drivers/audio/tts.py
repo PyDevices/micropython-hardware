@@ -201,10 +201,9 @@ ORPHEUS_VOICES = (
 
 
 class OrpheusTTS(OpenAITTS):
-    """Orpheus-3B through the LM Studio FastAPI bridge (WAV body → PCM).
+    """Orpheus-3B through the LM Studio FastAPI bridge (streaming PCM).
 
-    The bridge returns WAV (not raw PCM). :class:`TTSClient` strips the header
-    when ``response="wav"``. Emotion tags belong in the spoken text
+    Emotion tags belong in the spoken text
     (e.g. ``<laugh>``), not as a separate instructions field.
     """
 
@@ -214,9 +213,9 @@ class OrpheusTTS(OpenAITTS):
             model="orpheus",
             voice=voice,
             base_url=base_url,
-            response_format="wav",
+            response_format="pcm",
             audio_format=PCM_24000,
-            response="wav",
+            response="audio",
         )
 
     @staticmethod
