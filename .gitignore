@@ -16,4 +16,3 @@ dist/
 # Repo-specific
 .DS_Store
 _site/
-examples/audio/secrets.py

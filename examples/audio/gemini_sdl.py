@@ -1,9 +1,6 @@
 """Stream Gemini 3.1 TTS to the default SDL audio output.
 
-Copy ``secrets.py.example`` to ``secrets.py`` beside this file and put your
-Gemini API key in it before running::
-
-    GEMINI_API_KEY = "your-key"
+Requires a ``secrets`` module that provides ``GEMINI_API_KEY``.
 """
 
 from audiodev import AudioFormat
