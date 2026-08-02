@@ -42,6 +42,7 @@ class FakeI2S:
     TX = 1
     RX = 2
     STEREO = 3
+    MONO = 4
 
     def __init__(self, number, **kwargs):
         self.number = number
@@ -59,6 +60,25 @@ class FakeI2S:
         self.closed = True
 
 
+class FakePWM:
+    instances = []
+
+    def __init__(self, pin, freq=None, duty_u16=None):
+        self.pin = pin
+        self._freq = freq
+        self.duty_u16 = duty_u16
+        self.closed = False
+        self.instances.append(self)
+
+    def freq(self, value=None):
+        if value is not None:
+            self._freq = value
+        return self._freq
+
+    def deinit(self):
+        self.closed = True
+
+
 class ESP32P4AudioTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -68,7 +88,7 @@ class ESP32P4AudioTests(unittest.TestCase):
         cls.i2c = FakeI2C()
         sys.modules["board_config"] = types.SimpleNamespace(i2c=cls.i2c)
         sys.modules["boarddev"] = types.SimpleNamespace(bind_lazy=lambda *args: None)
-        sys.modules["machine"] = types.SimpleNamespace(I2S=FakeI2S, Pin=FakePin)
+        sys.modules["machine"] = types.SimpleNamespace(I2S=FakeI2S, Pin=FakePin, PWM=FakePWM)
         spec = importlib.util.spec_from_file_location("p4_board_devices", BOARD / "board_devices.py")
         cls.board = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(cls.board)
@@ -85,7 +105,15 @@ class ESP32P4AudioTests(unittest.TestCase):
         session = self.board._SESSION
         session._owners[:] = []
         FakePin.instances.clear()
+        FakePWM.instances.clear()
         self.board._pa = None
+        self.board._mclk = None
+
+    def test_output_format_matches_gemini_tts_pcm(self):
+        from audiodev import AudioFormat
+
+        output = self.board.audio_out()
+        self.assertEqual(output.format, AudioFormat(24000, 1, 16))
 
     def test_output_has_codec_controls_and_amplifier_lifecycle(self):
         output = self.board.audio_out()

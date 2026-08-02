@@ -16,35 +16,70 @@ _PA_CTRL = 53
 
 from audiodev import AudioFormat, AudioSession, PCMInput, PCMOutput
 
-_FORMAT = AudioFormat(16000, 2, 16)
+# 24 kHz mono matches Gemini TTS. Firmware has no I2S mck= — PWM supplies MCLK.
+# Bring-up (ear-verified): MCLK before ES8311 init; unmute + volume before I2S; MONO.
+_RATE = 24000
+_FORMAT = AudioFormat(_RATE, 1, 16)
+_DEFAULT_VOLUME = 50
 _SESSION = AudioSession(codec_factory=lambda: _codec(), duplex=False)
 _pa = None
+_mclk = None
 
 
 def setup_devices(ns):
     boarddev.bind_lazy(ns, sys.modules[__name__])
 
 
+def _ensure_mclk():
+    """ES8311 needs MCLK = sample_rate × 256 on GPIO13 before codec init."""
+    global _mclk
+    from machine import PWM, Pin
+
+    freq = _RATE * 256
+    if _mclk is None:
+        _mclk = PWM(Pin(_MCLK), freq=freq, duty_u16=32768)
+    else:
+        _mclk.freq(freq)
+    return _mclk
+
+
+def _stop_mclk():
+    global _mclk
+    if _mclk is None:
+        return
+    try:
+        _mclk.deinit()
+    except Exception:
+        pass
+    _mclk = None
+
+
 def _codec():
     import board_config as bc
     from es8311 import ES8311
 
-    return ES8311(bc.i2c)
+    _ensure_mclk()
+    codec = ES8311(bc.i2c)
+    # Enable path before I2S starts (PCMOutput opens the stream next).
+    codec.enable_output(True)
+    codec.dac_mute(False)
+    codec.set_dac_volume(_DEFAULT_VOLUME)
+    return codec
 
 
 def _output_stream():
     from machine import I2S, Pin
 
+    _ensure_mclk()
     return I2S(
         0,
         sck=Pin(_SCLK),
         ws=Pin(_LRCK),
         sd=Pin(_DSDIN),
-        mck=Pin(_MCLK),
         mode=I2S.TX,
         bits=16,
-        format=I2S.STEREO,
-        rate=16000,
+        format=I2S.MONO,
+        rate=_RATE,
         ibuf=20000,
     )
 
@@ -52,16 +87,16 @@ def _output_stream():
 def _input_stream():
     from machine import I2S, Pin
 
+    _ensure_mclk()
     return I2S(
         0,
         sck=Pin(_SCLK),
         ws=Pin(_LRCK),
         sd=Pin(_ASDOUT),
-        mck=Pin(_MCLK),
         mode=I2S.RX,
         bits=16,
-        format=I2S.STEREO,
-        rate=16000,
+        format=I2S.MONO,
+        rate=_RATE,
         ibuf=20000,
     )
 
@@ -77,6 +112,7 @@ def _output_power(enable):
     if _pa is None:
         _pa = Pin(_PA_CTRL, Pin.OUT, value=0)
     if enable:
+        _ensure_mclk()
         _codec_call("enable_output", True)
         _pa.value(1)
     else:
@@ -86,7 +122,7 @@ def _output_power(enable):
 
 def audio_out():
     """Portable ES8311 PCM playback device with hardware volume and mute."""
-    return PCMOutput(
+    out = PCMOutput(
         _output_stream,
         _FORMAT,
         session=_SESSION,
@@ -94,6 +130,16 @@ def audio_out():
         set_hardware_mute=lambda value: _codec_call("dac_mute", value),
         power=_output_power,
     )
+    out.set_volume(_DEFAULT_VOLUME)
+    return out
+
+
+def _input_power(enable):
+    if enable:
+        _ensure_mclk()
+        _codec_call("enable_input", True)
+    else:
+        _codec_call("enable_input", False)
 
 
 def audio_in():
@@ -103,7 +149,7 @@ def audio_in():
         _FORMAT,
         session=_SESSION,
         set_hardware_gain=lambda value: _codec_call("set_adc_volume", value),
-        power=lambda enable: _codec_call("enable_input", enable),
+        power=_input_power,
     )
 
 

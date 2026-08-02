@@ -13,10 +13,6 @@
     [
       "displaysys",
       "latest"
-    ],
-    [
-      "github:PyDevices/pydisplay/packages/mipidsi.json",
-      "main"
     ]
   ],
   "version": "0.1"
