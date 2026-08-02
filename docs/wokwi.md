@@ -79,7 +79,7 @@ mip.install(PYDISPLAY + "/src/examples/testris.py", target=".")
 import testris
 ```
 
-**Full install on Wokwi:** uncomment the `add_ons` and `examples` `mip.install` lines in `main.py` (when present).
+**Full install on Wokwi:** uncomment the `utils` and `examples` `mip.install` lines in `main.py` (when present).
 
 **No-touch variant:**
 

@@ -3,8 +3,8 @@
 """Adafruit Feather RP2040 DVI (320x240) — CircuitPython + LVGL POC.
 
 Paint path mirrors ``cp_qualia_tl040hds20`` (Bitmap + TileGrid + ColorConverter).
-Flush/tick wiring mirrors ``add_ons/display_driver.DisplayDriver`` inline — no
-``display_driver`` import, no ``event_loop``, no input devices, no timers.
+Flush/tick wiring is inlined here — no shared helper, no ``event_loop``, no
+input devices, no timers.
 
 RP2040 SRAM is too tight for a full-screen RGB565 Bitmap beside the DVI
 framebuffer, so LVGL paints 160x120 and ``Group(scale=2)`` upscales. On an

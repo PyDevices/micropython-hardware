@@ -40,7 +40,7 @@ Omit the name entirely when the hardware is absent. Canonical symbols:
 | Expansion I2C | `i2c` | Dedicated STEMMA/Qwiic/Grove only (not internal-only) |
 | Power | `battery` | |
 | Field / PHY | `can`, `rs485`, `ethernet` | Dedicated board hardware |
-| Wi‑Fi | `wlan` | Station/AP handle; leave high-level `wifi` for add_ons / CP |
+| Wi‑Fi | `wlan` | Station/AP handle; leave high-level `wifi` for utils / CP |
 | Bluetooth LE | `ble` | Omit when absent |
 | Bluetooth Classic | `bt` | BR/EDR; omit when absent |
 | RF co-processor | `radio` | AirLift/C6/etc.; may coexist with `wlan`/`ble` |
