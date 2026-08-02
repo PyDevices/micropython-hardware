@@ -143,6 +143,10 @@ class GoogleCloudTTS(_Provider):
         return self._json_request(url, {}, body, response="google-wav", audio_format=AudioFormat(self.sample_rate, 1, 16))
 
 
+# Gemini streaming TTS:
+# https://ai.google.dev/gemini-api/docs/speech-generation
+# Gemini Live API for interactive, bidirectional audio:
+# https://ai.google.dev/gemini-api/docs/live-api
 class GeminiTTS(_Provider):
     """Gemini streaming TTS adapter (base64 raw 24 kHz PCM deltas)."""
 
