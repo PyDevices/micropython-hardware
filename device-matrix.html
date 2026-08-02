@@ -110,7 +110,7 @@ rest).</p>
 <td><a href="board-inventory.html">#1</a></td>
 <td><code>fbdisplay/esp32-p4-wifi6-touch-lcd-4b</code></td>
 <td><code>touch</code></td>
-<td><code>audio</code>, <code>microphone</code>, <code>sdcard</code>,
+<td><code>audio_out</code>, <code>audio_in</code>, <code>sdcard</code>,
 <code>camera</code>, <code>radio</code>, <code>wlan</code>,
 <code>ble</code>, <code>usb_device</code></td>
 </tr>
@@ -151,7 +151,7 @@ rest).</p>
 <td>—</td>
 <td><code>busdisplay/spi/t-embed</code></td>
 <td><code>encoder</code></td>
-<td><code>pixels</code>, <code>audio</code>, <code>microphone</code>,
+<td><code>pixels</code>, <code>audio_out</code>, <code>audio_in</code>,
 <code>sdcard</code>, <code>battery</code>, <code>i2c</code>,
 <code>wlan</code>, <code>ble</code></td>
 </tr>
@@ -217,7 +217,7 @@ present; they are omitted from the Eager column for brevity.</p>
 <td><code>busdisplay/spi/funhouse</code></td>
 <td><code>touch</code>, <code>keypad</code></td>
 <td><code>temperature</code>, <code>humidity</code>,
-<code>pressure</code>, <code>pixels</code>, <code>audio</code>,
+<code>pressure</code>, <code>pixels</code>, <code>audio_out</code>,
 <code>wlan</code></td>
 <td>no BLE on ESP32-S2</td>
 </tr>
@@ -227,7 +227,7 @@ present; they are omitted from the Eager column for brevity.</p>
 <td><code>busdisplay/spi/pygamer</code></td>
 <td><code>joystick</code>, <code>keypad</code></td>
 <td><code>pixels</code>, <code>accelerometer</code>,
-<code>sdcard</code>, <code>battery</code>, <code>audio</code>,
+<code>sdcard</code>, <code>battery</code>, <code>audio_out</code>,
 <code>i2c</code></td>
 <td></td>
 </tr>
@@ -269,7 +269,7 @@ present; they are omitted from the Eager column for brevity.</p>
 <td>—</td>
 <td><code>epaperdisplay/magtag</code></td>
 <td><code>keypad</code></td>
-<td><code>pixels</code>, <code>audio</code>, <code>i2c</code>,
+<td><code>pixels</code>, <code>audio_out</code>, <code>i2c</code>,
 <code>wlan</code></td>
 <td>no contract role for ALS</td>
 </tr>
@@ -278,8 +278,8 @@ present; they are omitted from the Eager column for brevity.</p>
 <td>—</td>
 <td><code>busdisplay/spi/pybadge</code></td>
 <td><code>keypad</code></td>
-<td><code>pixels</code>, <code>accelerometer</code>, <code>audio</code>,
-<code>i2c</code></td>
+<td><code>pixels</code>, <code>accelerometer</code>,
+<code>audio_out</code>, <code>i2c</code></td>
 <td></td>
 </tr>
 <tr class="odd">
@@ -287,7 +287,7 @@ present; they are omitted from the Eager column for brevity.</p>
 <td>—</td>
 <td><code>busdisplay/spi/pyportal</code></td>
 <td><code>touch</code></td>
-<td><code>sdcard</code>, <code>radio</code>, <code>audio</code>,
+<td><code>sdcard</code>, <code>radio</code>, <code>audio_out</code>,
 <code>i2c</code>, <code>wlan</code></td>
 <td>AirLift as <code>radio</code>/<code>wlan</code></td>
 </tr>
@@ -296,7 +296,7 @@ present; they are omitted from the Eager column for brevity.</p>
 <td>—</td>
 <td><code>busdisplay/spi/pyportal_titano</code></td>
 <td><code>touch</code></td>
-<td><code>sdcard</code>, <code>radio</code>, <code>audio</code>,
+<td><code>sdcard</code>, <code>radio</code>, <code>audio_out</code>,
 <code>i2c</code>, <code>wlan</code></td>
 <td></td>
 </tr>
@@ -305,8 +305,8 @@ present; they are omitted from the Eager column for brevity.</p>
 <td>—</td>
 <td><code>busdisplay/spi/hallowing_m4</code></td>
 <td>—</td>
-<td><code>pixels</code>, <code>accelerometer</code>, <code>audio</code>,
-<code>i2c</code></td>
+<td><code>pixels</code>, <code>accelerometer</code>,
+<code>audio_out</code>, <code>i2c</code></td>
 <td></td>
 </tr>
 <tr class="even">
@@ -314,7 +314,7 @@ present; they are omitted from the Eager column for brevity.</p>
 <td>—</td>
 <td><code>busdisplay/spi/odroid_go</code></td>
 <td><code>joystick</code>, <code>keypad</code></td>
-<td><code>battery</code>, <code>sdcard</code>, <code>audio</code>,
+<td><code>battery</code>, <code>sdcard</code>, <code>audio_out</code>,
 <code>wlan</code></td>
 <td></td>
 </tr>
@@ -323,7 +323,7 @@ present; they are omitted from the Eager column for brevity.</p>
 <td>—</td>
 <td><code>busdisplay/spi/m5stack-cores3</code></td>
 <td><code>touch</code></td>
-<td><code>microphone</code>, <code>audio</code>, <code>sdcard</code>,
+<td><code>audio_in</code>, <code>audio_out</code>, <code>sdcard</code>,
 <code>camera</code>, <code>accelerometer</code>, <code>gyroscope</code>,
 <code>i2c</code>, <code>wlan</code>, <code>ble</code></td>
 <td>AW88298/ES7210/BMI270 wired; camera stub</td>
@@ -333,7 +333,7 @@ present; they are omitted from the Eager column for brevity.</p>
 <td>—</td>
 <td><code>fbdisplay/m5stack_tab5_ili9881c</code></td>
 <td><code>touch</code></td>
-<td><code>microphone</code>, <code>audio</code>, <code>sdcard</code>,
+<td><code>audio_in</code>, <code>audio_out</code>, <code>sdcard</code>,
 <code>camera</code>, <code>i2c</code>, <code>wlan</code>,
 <code>ble</code></td>
 <td>ES8388/ES7210 wired; camera stub</td>
@@ -343,7 +343,7 @@ present; they are omitted from the Eager column for brevity.</p>
 <td>—</td>
 <td><code>fbdisplay/m5stack_tab5_st7123</code></td>
 <td><code>touch</code></td>
-<td><code>microphone</code>, <code>audio</code>, <code>sdcard</code>,
+<td><code>audio_in</code>, <code>audio_out</code>, <code>sdcard</code>,
 <code>camera</code>, <code>i2c</code>, <code>wlan</code>,
 <code>ble</code></td>
 <td>same</td>

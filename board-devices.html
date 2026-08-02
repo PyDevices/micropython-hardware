@@ -148,8 +148,9 @@ apps use <code>runtime.touch_dev</code></td>
 </tr>
 <tr class="odd">
 <td>Audio</td>
-<td><code>audio</code>, <code>microphone</code></td>
-<td><code>audio</code> = playback; <code>microphone</code> separate</td>
+<td><code>audio_out</code>, <code>audio_in</code></td>
+<td>Playback and capture use the portable <code>audiodev</code>
+contracts</td>
 </tr>
 <tr class="even">
 <td>Storage</td>
@@ -179,7 +180,7 @@ apps use <code>runtime.touch_dev</code></td>
 <tr class="odd">
 <td>Wi‑Fi</td>
 <td><code>wlan</code></td>
-<td>Station/AP handle; leave high-level <code>wifi</code> for add_ons /
+<td>Station/AP handle; leave high-level <code>wifi</code> for utils /
 CP</td>
 </tr>
 <tr class="even">
@@ -206,6 +207,16 @@ bridge</td>
 </tr>
 </tbody>
 </table>
+<p><code>audio_out</code> returns <code>PCMOutput</code> for sample
+playback or <code>ToneOutput</code> for PWM/buzzer hardware.
+<code>audio_in</code> returns <code>PCMInput</code>. PCM devices expose
+their <code>format</code>, <code>capabilities</code>, normalized
+volume/gain and mute controls, synchronous I/O, and portable
+asynchronous I/O. When a codec provides hardware controls, the device
+delegates to them and exposes the codec as <code>device.codec</code>;
+otherwise volume or gain is applied to PCM samples in software. See <a
+href="audio.html">Portable audio</a> for backend, async, speech, and
+board details.</p>
 <p>Out of contract as <code>board_config</code> symbols: high-level
 <code>wifi</code> / <code>bluetooth</code> modules and tooling USB /
 UART bridges. Apps may still use those stacks directly.</p>
