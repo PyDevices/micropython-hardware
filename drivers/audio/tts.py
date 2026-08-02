@@ -11,15 +11,23 @@ import json
 try:
     from urllib.parse import quote
 except ImportError:  # MicroPython
+
     def quote(value, safe=""):
         out = []
         for byte in value.encode():
             char = chr(byte)
-            if char.isalnum() or char in "-_.~" or char in safe:
+            if (
+                "a" <= char <= "z"
+                or "A" <= char <= "Z"
+                or "0" <= char <= "9"
+                or char in "-_.~"
+                or char in safe
+            ):
                 out.append(char)
             else:
                 out.append("%%%02X" % byte)
         return "".join(out)
+
 
 from audiodev import AudioFormat
 
@@ -71,7 +79,17 @@ class _Provider:
 class OpenAITTS(_Provider):
     """OpenAI ``/v1/audio/speech`` adapter (raw 24 kHz PCM by default)."""
 
-    def __init__(self, api_key="not-needed", *, model="gpt-4o-mini-tts", voice="alloy", base_url="https://api.openai.com/v1", response_format="pcm", audio_format=PCM_24000, response="audio"):
+    def __init__(
+        self,
+        api_key="not-needed",
+        *,
+        model="gpt-4o-mini-tts",
+        voice="alloy",
+        base_url="https://api.openai.com/v1",
+        response_format="pcm",
+        audio_format=PCM_24000,
+        response="audio",
+    ):
         self.api_key, self.model, self.voice = api_key, model, voice
         self.base_url = base_url.rstrip("/")
         self.response_format = response_format
@@ -144,7 +162,13 @@ class KokoroTTS(OpenAITTS):
     transfer). See docs/audio.md § Local Kokoro TTS.
     """
 
-    def __init__(self, *, voice="af_heart", base_url="http://127.0.0.1:8880/v1", api_key="not-needed"):
+    def __init__(
+        self,
+        *,
+        voice="af_heart",
+        base_url="http://127.0.0.1:8880/v1",
+        api_key="not-needed",
+    ):
         super().__init__(
             api_key,
             model="kokoro",
@@ -207,7 +231,9 @@ class OrpheusTTS(OpenAITTS):
     (e.g. ``<laugh>``), not as a separate instructions field.
     """
 
-    def __init__(self, *, voice="tara", base_url="http://127.0.0.1:5005/v1", api_key="not-needed"):
+    def __init__(
+        self, *, voice="tara", base_url="http://127.0.0.1:5005/v1", api_key="not-needed"
+    ):
         super().__init__(
             api_key,
             model="orpheus",
@@ -248,10 +274,82 @@ class OrpheusTTS(OpenAITTS):
         return OpenAITTS.request(self, text, voice=voice, speed=speed)
 
 
+GROQ_ORPHEUS_VOICES = (
+    ("autumn", "Female"),
+    ("diana", "Female"),
+    ("hannah", "Female"),
+    ("austin", "Male"),
+    ("daniel", "Male"),
+    ("troy", "Male"),
+)
+
+
+class GroqTTS(_Provider):
+    """Groq-hosted Orpheus TTS adapter (24 kHz mono WAV response)."""
+
+    def __init__(
+        self,
+        api_key,
+        *,
+        model="canopylabs/orpheus-v1-english",
+        voice="autumn",
+        base_url="https://api.groq.com/openai/v1",
+    ):
+        self.api_key, self.model, self.voice = api_key, model, voice
+        self.base_url = base_url.rstrip("/")
+
+    @staticmethod
+    def voices():
+        return GROQ_ORPHEUS_VOICES
+
+    @staticmethod
+    def voice_label(name, description=None):
+        if description is None:
+            for voice_name, desc in GROQ_ORPHEUS_VOICES:
+                if voice_name == name:
+                    description = desc
+                    break
+        return "%s - %s" % (name, description) if description else name
+
+    @staticmethod
+    def voice_from_label(label):
+        label = (label or "").strip()
+        for sep in (" - ", " — "):
+            if sep in label:
+                return label.split(sep, 1)[0].strip()
+        return label
+
+    def request(self, text, *, voice=None, instructions=None, **unused):
+        if instructions:
+            text = instructions.strip() + " " + text
+        if len(text) > 200:
+            raise ValueError("Groq Orpheus input is limited to 200 characters")
+        return self._json_request(
+            self.base_url + "/audio/speech",
+            {"Authorization": "Bearer " + self.api_key},
+            {
+                "model": self.model,
+                "input": text,
+                "voice": voice or self.voice,
+                "response_format": "wav",
+            },
+            response="wav",
+            audio_format=PCM_24000,
+        )
+
+
 class ElevenLabsTTS(_Provider):
     """ElevenLabs streaming TTS adapter."""
 
-    def __init__(self, api_key, voice, *, model="eleven_multilingual_v2", sample_rate=24000, base_url="https://api.elevenlabs.io/v1"):
+    def __init__(
+        self,
+        api_key,
+        voice,
+        *,
+        model="eleven_multilingual_v2",
+        sample_rate=24000,
+        base_url="https://api.elevenlabs.io/v1",
+    ):
         if sample_rate not in (16000, 22050, 24000, 44100):
             raise ValueError("unsupported ElevenLabs PCM sample rate")
         self.api_key, self.voice, self.model = api_key, voice, model
@@ -259,35 +357,150 @@ class ElevenLabsTTS(_Provider):
 
     def request(self, text, *, voice=None, voice_settings=None, **unused):
         voice = quote(voice or self.voice, safe="")
-        url = "%s/text-to-speech/%s/stream?output_format=pcm_%d" % (self.base_url, voice, self.sample_rate)
+        url = "%s/text-to-speech/%s/stream?output_format=pcm_%d" % (
+            self.base_url,
+            voice,
+            self.sample_rate,
+        )
         body = {"text": text, "model_id": self.model}
         if voice_settings is not None:
             body["voice_settings"] = voice_settings
         fmt = AudioFormat(self.sample_rate, 1, 16)
-        return self._json_request(url, {"xi-api-key": self.api_key}, body, audio_format=fmt)
+        return self._json_request(
+            url, {"xi-api-key": self.api_key}, body, audio_format=fmt
+        )
+
+
+DEEPGRAM_VOICES = (
+    ("aura-2-thalia-en", "US Female Clear Energetic"),
+    ("aura-2-andromeda-en", "US Female Casual Expressive"),
+    ("aura-2-helena-en", "US Female Friendly Natural"),
+    ("aura-2-apollo-en", "US Male Confident Casual"),
+    ("aura-2-arcas-en", "US Male Smooth Clear"),
+    ("aura-2-aries-en", "US Male Warm Energetic"),
+)
+
+
+class DeepgramTTS(_Provider):
+    """Deepgram Aura REST adapter using streamed raw signed 16-bit PCM."""
+
+    def __init__(
+        self,
+        token,
+        *,
+        voice="aura-2-thalia-en",
+        sample_rate=24000,
+        base_url="https://api.deepgram.com/v1",
+    ):
+        if sample_rate not in (8000, 16000, 24000, 32000, 48000):
+            raise ValueError("unsupported Deepgram PCM sample rate")
+        self.token, self.voice = token, voice
+        self.sample_rate, self.base_url = sample_rate, base_url.rstrip("/")
+
+    @staticmethod
+    def voices():
+        return DEEPGRAM_VOICES
+
+    @staticmethod
+    def voice_label(name, description=None):
+        if description is None:
+            for voice_name, desc in DEEPGRAM_VOICES:
+                if voice_name == name:
+                    description = desc
+                    break
+        return "%s - %s" % (name, description) if description else name
+
+    @staticmethod
+    def voice_from_label(label):
+        label = (label or "").strip()
+        for sep in (" - ", " — "):
+            if sep in label:
+                return label.split(sep, 1)[0].strip()
+        return label
+
+    def request(self, text, *, voice=None, speed=None, **unused):
+        voice = quote(voice or self.voice, safe="-")
+        url = "%s/speak?model=%s&encoding=linear16&sample_rate=%d&container=none" % (
+            self.base_url,
+            voice,
+            self.sample_rate,
+        )
+        if speed is not None:
+            speed = float(speed)
+            if speed < 0.7 or speed > 1.5:
+                raise ValueError("Deepgram speed must be between 0.7 and 1.5")
+            url += "&speed=%s" % speed
+        return self._json_request(
+            url,
+            {"Authorization": "Token " + self.token},
+            {"text": text},
+            audio_format=AudioFormat(self.sample_rate, 1, 16),
+        )
 
 
 def _xml(value):
-    return str(value).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;").replace("'", "&apos;")
+    return (
+        str(value)
+        .replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace('"', "&quot;")
+        .replace("'", "&apos;")
+    )
 
 
 class AzureTTS(_Provider):
     """Azure Speech REST adapter using raw mono PCM."""
 
-    def __init__(self, api_key, region, *, voice="en-US-AvaMultilingualNeural", language="en-US", sample_rate=24000, endpoint=None):
+    def __init__(
+        self,
+        api_key,
+        region,
+        *,
+        voice="en-US-AvaMultilingualNeural",
+        language="en-US",
+        sample_rate=24000,
+        endpoint=None,
+    ):
         if sample_rate not in (8000, 16000, 22050, 24000, 44100, 48000):
             raise ValueError("unsupported Azure PCM sample rate")
-        self.api_key, self.voice, self.language, self.sample_rate = api_key, voice, language, sample_rate
-        self.endpoint = endpoint or "https://%s.tts.speech.microsoft.com/cognitiveservices/v1" % region
+        self.api_key, self.voice, self.language, self.sample_rate = (
+            api_key,
+            voice,
+            language,
+            sample_rate,
+        )
+        self.endpoint = (
+            endpoint
+            or "https://%s.tts.speech.microsoft.com/cognitiveservices/v1" % region
+        )
 
     def request(self, text, *, voice=None, language=None, ssml=False, **unused):
         language, voice = language or self.language, voice or self.voice
-        body = text if ssml else '<speak version="1.0" xml:lang="%s"><voice name="%s">%s</voice></speak>' % (_xml(language), _xml(voice), _xml(text))
-        headers = {"Ocp-Apim-Subscription-Key": self.api_key, "Content-Type": "application/ssml+xml", "User-Agent": "micropython-hardware", "X-Microsoft-OutputFormat": "raw-%dkhz-16bit-mono-pcm" % (self.sample_rate // 1000)}
+        body = (
+            text
+            if ssml
+            else '<speak version="1.0" xml:lang="%s"><voice name="%s">%s</voice></speak>'
+            % (_xml(language), _xml(voice), _xml(text))
+        )
+        headers = {
+            "Ocp-Apim-Subscription-Key": self.api_key,
+            "Content-Type": "application/ssml+xml",
+            "User-Agent": "micropython-hardware",
+            "X-Microsoft-OutputFormat": "raw-%dkhz-16bit-mono-pcm"
+            % (self.sample_rate // 1000),
+        }
         # Azure spells the 22.05/44.1 kHz values without a decimal point.
         if self.sample_rate in (22050, 44100):
-            headers["X-Microsoft-OutputFormat"] = "raw-%dhz-16bit-mono-pcm" % self.sample_rate
-        return TTSRequest(self.endpoint, headers, body.encode(), audio_format=AudioFormat(self.sample_rate, 1, 16))
+            headers["X-Microsoft-OutputFormat"] = (
+                "raw-%dhz-16bit-mono-pcm" % self.sample_rate
+            )
+        return TTSRequest(
+            self.endpoint,
+            headers,
+            body.encode(),
+            audio_format=AudioFormat(self.sample_rate, 1, 16),
+        )
 
 
 class GoogleCloudTTS(_Provider):
@@ -297,14 +510,43 @@ class GoogleCloudTTS(_Provider):
     header is removed by :class:`TTSClient`, yielding raw PCM to callers.
     """
 
-    def __init__(self, api_key, *, voice="en-US-Chirp3-HD-Achernar", language="en-US", sample_rate=24000, endpoint="https://texttospeech.googleapis.com/v1/text:synthesize"):
+    def __init__(
+        self,
+        api_key,
+        *,
+        voice="en-US-Chirp3-HD-Achernar",
+        language="en-US",
+        sample_rate=24000,
+        endpoint="https://texttospeech.googleapis.com/v1/text:synthesize",
+    ):
         self.api_key, self.voice, self.language = api_key, voice, language
         self.sample_rate, self.endpoint = sample_rate, endpoint
 
     def request(self, text, *, voice=None, language=None, **unused):
-        body = {"input": {"text": text}, "voice": {"languageCode": language or self.language, "name": voice or self.voice}, "audioConfig": {"audioEncoding": "LINEAR16", "sampleRateHertz": self.sample_rate}}
-        url = self.endpoint + ("&" if "?" in self.endpoint else "?") + "key=" + quote(self.api_key)
-        return self._json_request(url, {}, body, response="google-wav", audio_format=AudioFormat(self.sample_rate, 1, 16))
+        body = {
+            "input": {"text": text},
+            "voice": {
+                "languageCode": language or self.language,
+                "name": voice or self.voice,
+            },
+            "audioConfig": {
+                "audioEncoding": "LINEAR16",
+                "sampleRateHertz": self.sample_rate,
+            },
+        }
+        url = (
+            self.endpoint
+            + ("&" if "?" in self.endpoint else "?")
+            + "key="
+            + quote(self.api_key)
+        )
+        return self._json_request(
+            url,
+            {},
+            body,
+            response="google-wav",
+            audio_format=AudioFormat(self.sample_rate, 1, 16),
+        )
 
 
 # Gemini streaming TTS:
@@ -362,8 +604,20 @@ class GeminiTTS(_Provider):
     Style / pace / accent are prompt-driven via ``instructions``.
     """
 
-    def __init__(self, api_key, *, model=GEMINI_TTS_MODELS[0], voice="Kore", base_url="https://generativelanguage.googleapis.com/v1beta"):
-        self.api_key, self.model, self.voice, self.base_url = api_key, model, voice, base_url.rstrip("/")
+    def __init__(
+        self,
+        api_key,
+        *,
+        model=GEMINI_TTS_MODELS[0],
+        voice="Kore",
+        base_url="https://generativelanguage.googleapis.com/v1beta",
+    ):
+        self.api_key, self.model, self.voice, self.base_url = (
+            api_key,
+            model,
+            voice,
+            base_url.rstrip("/"),
+        )
 
     @staticmethod
     def voices():
@@ -433,9 +687,13 @@ class RequestsTransport:
 
     def post(self, request):
         try:
-            response = self.module.post(request.url, headers=request.headers, data=request.body, stream=True)
+            response = self.module.post(
+                request.url, headers=request.headers, data=request.body, stream=True
+            )
         except TypeError:  # urequests has no stream keyword
-            response = self.module.post(request.url, headers=request.headers, data=request.body)
+            response = self.module.post(
+                request.url, headers=request.headers, data=request.body
+            )
         status = getattr(response, "status_code", 200)
         if status < 200 or status >= 300:
             detail = getattr(response, "text", "")
@@ -468,7 +726,9 @@ def _sse_data(response, size):
         while b"\n\n" in pending:
             event, pending = pending.split(b"\n\n", 1)
             data = b"\n".join(
-                line[5:].lstrip() for line in event.split(b"\n") if line.startswith(b"data:")
+                line[5:].lstrip()
+                for line in event.split(b"\n")
+                if line.startswith(b"data:")
             )
             if data and data != b"[DONE]":
                 yield json.loads(data)
@@ -502,9 +762,9 @@ def _wav_pcm(data):
         raise ValueError("Google LINEAR16 response is not WAV")
     offset = 12
     while offset + 8 <= len(data):
-        size = int.from_bytes(data[offset + 4:offset + 8], "little")
-        if data[offset:offset + 4] == b"data":
-            return data[offset + 8:offset + 8 + size]
+        size = int.from_bytes(data[offset + 4 : offset + 8], "little")
+        if data[offset : offset + 4] == b"data":
+            return data[offset + 8 : offset + 8 + size]
         offset += 8 + size + (size & 1)
     raise ValueError("WAV data chunk is missing")
 
@@ -521,23 +781,41 @@ class TTSClient:
         request = self.provider.request(text, **options)
         response = self.transport.post(request)
         if request.response == "audio":
-            return SpeechStream(_read_chunks(response, self.chunk_size), request.audio_format, response.close)
+            return SpeechStream(
+                _read_chunks(response, self.chunk_size),
+                request.audio_format,
+                response.close,
+            )
         if request.response == "gemini-sse":
-            return SpeechStream(_gemini_pcm(response, self.chunk_size), request.audio_format, response.close)
+            return SpeechStream(
+                _gemini_pcm(response, self.chunk_size),
+                request.audio_format,
+                response.close,
+            )
         try:
             if request.response == "wav":
                 # Full WAV body (Orpheus-FastAPI); strip header → raw PCM.
                 raw = getattr(response, "raw", response)
                 data = _wav_pcm(raw.read() if hasattr(raw, "read") else response.read())
             else:
-                value = response.json() if hasattr(response, "json") else json.loads(response.read())
+                value = (
+                    response.json()
+                    if hasattr(response, "json")
+                    else json.loads(response.read())
+                )
                 if request.response == "google-wav":
                     data = _wav_pcm(binascii.a2b_base64(value["audioContent"]))
                 else:
-                    data = binascii.a2b_base64(value["candidates"][0]["content"]["parts"][0]["inlineData"]["data"])
+                    data = binascii.a2b_base64(
+                        value["candidates"][0]["content"]["parts"][0]["inlineData"][
+                            "data"
+                        ]
+                    )
         finally:
             response.close()
-        chunks = (data[i:i + self.chunk_size] for i in range(0, len(data), self.chunk_size))
+        chunks = (
+            data[i : i + self.chunk_size] for i in range(0, len(data), self.chunk_size)
+        )
         return SpeechStream(chunks, request.audio_format)
 
     def synthesize(self, text, **options):

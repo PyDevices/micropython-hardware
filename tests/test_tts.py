@@ -11,9 +11,11 @@ sys.path.insert(0, str(ROOT / "drivers" / "audio"))
 from audiodev import AudioFormat  # noqa: E402
 from tts import (  # noqa: E402
     AzureTTS,
+    DeepgramTTS,
     ElevenLabsTTS,
     GeminiTTS,
     GoogleCloudTTS,
+    GroqTTS,
     KokoroTTS,
     OpenAITTS,
     OrpheusTTS,
@@ -30,7 +32,7 @@ class Response:
     def read(self, size=-1):
         if size < 0:
             size = len(self.data) - self.offset
-        value = self.data[self.offset:self.offset + size]
+        value = self.data[self.offset : self.offset + size]
         self.offset += len(value)
         return value
 
@@ -64,17 +66,46 @@ class ProviderTests(unittest.TestCase):
         self.assertIn("voice%2Fid/stream?output_format=pcm_16000", request.url)
         self.assertEqual(request.audio_format, AudioFormat(16000, 1, 16))
 
+    def test_deepgram_raw_pcm_request(self):
+        request = DeepgramTTS("key", sample_rate=24000).request(
+            "hello", voice="aura-2-arcas-en", speed=0.9
+        )
+        self.assertIn("model=aura-2-arcas-en", request.url)
+        self.assertIn("encoding=linear16&sample_rate=24000&container=none", request.url)
+        self.assertIn("speed=0.9", request.url)
+        self.assertEqual(request.headers["Authorization"], "Token key")
+        self.assertEqual(json.loads(request.body), {"text": "hello"})
+        self.assertEqual(request.audio_format, AudioFormat(24000, 1, 16))
+        self.assertEqual(
+            DeepgramTTS.voice_from_label(DeepgramTTS.voice_label("aura-2-thalia-en")),
+            "aura-2-thalia-en",
+        )
+
     def test_azure_escapes_ssml_and_selects_raw(self):
         request = AzureTTS("key", "westus", sample_rate=48000).request("a < b")
         self.assertIn(b"a &lt; b", request.body)
-        self.assertEqual(request.headers["X-Microsoft-OutputFormat"], "raw-48khz-16bit-mono-pcm")
+        self.assertEqual(
+            request.headers["X-Microsoft-OutputFormat"], "raw-48khz-16bit-mono-pcm"
+        )
 
     def test_google_decodes_base64_and_removes_wav(self):
         pcm = b"\x01\x00\x02\x00"
-        wav = b"RIFF" + struct.pack("<I", 36 + len(pcm)) + b"WAVEfmt " + struct.pack("<IHHIIHH", 16, 1, 1, 24000, 48000, 2, 16) + b"data" + struct.pack("<I", len(pcm)) + pcm
-        response = Response({"audioContent": base64.b64encode(wav).decode()}, as_json=True)
+        wav = (
+            b"RIFF"
+            + struct.pack("<I", 36 + len(pcm))
+            + b"WAVEfmt "
+            + struct.pack("<IHHIIHH", 16, 1, 1, 24000, 48000, 2, 16)
+            + b"data"
+            + struct.pack("<I", len(pcm))
+            + pcm
+        )
+        response = Response(
+            {"audioContent": base64.b64encode(wav).decode()}, as_json=True
+        )
         transport = Transport(response)
-        self.assertEqual(TTSClient(GoogleCloudTTS("key"), transport=transport).synthesize("hi"), pcm)
+        self.assertEqual(
+            TTSClient(GoogleCloudTTS("key"), transport=transport).synthesize("hi"), pcm
+        )
         self.assertTrue(response.closed)
 
     def test_gemini_yields_streamed_pcm_deltas(self):
@@ -84,7 +115,11 @@ class ProviderTests(unittest.TestCase):
                 "event_type": "step.delta",
                 "delta": {"type": "audio", "data": base64.b64encode(pcm).decode()},
             }
-            events.append(b"event: step.delta\r\ndata: " + json.dumps(value).encode() + b"\r\n\r\n")
+            events.append(
+                b"event: step.delta\r\ndata: "
+                + json.dumps(value).encode()
+                + b"\r\n\r\n"
+            )
         events.append(b"event: done\ndata: [DONE]\n\n")
         transport = Transport(Response(b"".join(events)))
         client = TTSClient(GeminiTTS("key"), transport=transport, chunk_size=7)
@@ -93,7 +128,9 @@ class ProviderTests(unittest.TestCase):
         request = transport.request
         self.assertEqual(request.headers["x-goog-api-key"], "key")
         self.assertNotIn("key=", request.url)
-        self.assertEqual(json.loads(request.body)["model"], "gemini-3.1-flash-tts-preview")
+        self.assertEqual(
+            json.loads(request.body)["model"], "gemini-3.1-flash-tts-preview"
+        )
 
     def test_gemini_surfaces_sse_error_events(self):
         value = {
@@ -118,28 +155,49 @@ class ProviderTests(unittest.TestCase):
 
     def test_kokoro_openai_compatible_pcm_request(self):
         transport = Transport(Response(b"\x00\x01" * 4))
-        client = TTSClient(KokoroTTS(base_url="http://127.0.0.1:8880/v1"), transport=transport)
+        client = TTSClient(
+            KokoroTTS(base_url="http://127.0.0.1:8880/v1"), transport=transport
+        )
         self.assertEqual(client.synthesize("hi", voice="af_bella"), b"\x00\x01" * 4)
         body = json.loads(transport.request.body)
         self.assertEqual(body["model"], "kokoro")
         self.assertEqual(body["voice"], "af_bella")
         self.assertEqual(body["response_format"], "pcm")
         self.assertTrue(transport.request.url.endswith("/v1/audio/speech"))
-        self.assertEqual(KokoroTTS.voice_from_label("af_heart - US Female Warm"), "af_heart")
+        self.assertEqual(
+            KokoroTTS.voice_from_label("af_heart - US Female Warm"), "af_heart"
+        )
 
     def test_orpheus_openai_compatible_pcm_request(self):
         pcm = b"\x01\x00\x02\x00"
         transport = Transport(Response(pcm))
-        client = TTSClient(OrpheusTTS(base_url="http://127.0.0.1:5005/v1"), transport=transport)
+        client = TTSClient(
+            OrpheusTTS(base_url="http://127.0.0.1:5005/v1"), transport=transport
+        )
         self.assertEqual(client.synthesize("hi", voice="tara"), pcm)
         body = json.loads(transport.request.body)
         self.assertEqual(body["model"], "orpheus")
         self.assertEqual(body["response_format"], "pcm")
         self.assertEqual(OrpheusTTS.voices()[0][0], "tara")
 
+    def test_groq_orpheus_wav_request(self):
+        request = GroqTTS("key").request("hello", voice="troy", instructions="[warm]")
+        self.assertEqual(request.url, "https://api.groq.com/openai/v1/audio/speech")
+        self.assertEqual(request.headers["Authorization"], "Bearer key")
+        self.assertEqual(request.response, "wav")
+        self.assertEqual(request.audio_format, AudioFormat(24000, 1, 16))
+        body = json.loads(request.body)
+        self.assertEqual(body["model"], "canopylabs/orpheus-v1-english")
+        self.assertEqual(body["voice"], "troy")
+        self.assertEqual(body["input"], "[warm] hello")
+        self.assertEqual(
+            GroqTTS.voice_from_label(GroqTTS.voice_label("autumn")), "autumn"
+        )
+
     def test_speak_checks_format(self):
         class Output:
             format = AudioFormat(16000, 1, 16)
+
         client = TTSClient(OpenAITTS("key"), transport=Transport(Response(b"pcm")))
         with self.assertRaises(ValueError):
             client.speak("hi", Output())
