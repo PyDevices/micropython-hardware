@@ -104,6 +104,7 @@ class ESP32P4AudioTests(unittest.TestCase):
     def tearDown(self):
         session = self.board._SESSION
         session._owners[:] = []
+        self.board._INPUT_SESSION._owners[:] = []
         FakePin.instances.clear()
         FakePWM.instances.clear()
         self.board._pa = None
@@ -118,6 +119,8 @@ class ESP32P4AudioTests(unittest.TestCase):
     def test_output_has_codec_controls_and_amplifier_lifecycle(self):
         output = self.board.audio_out()
         self.assertIsNotNone(output.codec)
+        self.assertEqual(output.codec.mclk_multiplier, 512)
+        self.assertEqual(self.i2c.registers[0x02], 0x20)
         output.set_volume(42)
         output.open()
         self.assertEqual(output.codec.dac_volume, 42)
@@ -127,15 +130,17 @@ class ESP32P4AudioTests(unittest.TestCase):
         self.assertTrue(output.codec.dac_muted)
         self.assertEqual(FakePin.instances[53].state, 0)
 
-    def test_input_has_codec_gain_and_shared_half_duplex_session(self):
+    def test_input_uses_es7210_codec_and_gain(self):
         capture = self.board.audio_in()
         capture.set_gain(35)
         capture.open()
-        self.assertEqual(capture.codec.adc_volume, 35)
-        with self.assertRaises(OSError):
-            self.board.audio_out().open()
+        self.assertEqual(capture.codec.gain, 35)
+        self.assertEqual(FakePWM.instances[-1].freq(), 24000 * 512)
+        self.assertEqual(capture.stream.options["sck"].number, 12)
+        self.assertEqual(capture.stream.options["ws"].number, 10)
+        self.assertEqual(capture.stream.options["sd"].number, 11)
         capture.close()
-        self.assertFalse(capture.codec.input_enabled)
+        self.assertFalse(capture.codec.enabled)
 
 
 if __name__ == "__main__":

@@ -22,6 +22,7 @@ _RATE = 24000
 _FORMAT = AudioFormat(_RATE, 1, 16)
 _DEFAULT_VOLUME = 50
 _SESSION = AudioSession(codec_factory=lambda: _codec(), duplex=False)
+_INPUT_SESSION = AudioSession(codec_factory=lambda: _input_codec(), duplex=False)
 _pa = None
 _mclk = None
 
@@ -30,12 +31,12 @@ def setup_devices(ns):
     boarddev.bind_lazy(ns, sys.modules[__name__])
 
 
-def _ensure_mclk():
-    """ES8311 needs MCLK = sample_rate × 256 on GPIO13 before codec init."""
+def _ensure_mclk(multiplier=512):
+    """Drive the shared codec MCLK on GPIO13 (fixed at 512fs on this board)."""
     global _mclk
     from machine import PWM, Pin
 
-    freq = _RATE * 256
+    freq = _RATE * multiplier
     if _mclk is None:
         _mclk = PWM(Pin(_MCLK), freq=freq, duty_u16=32768)
     else:
@@ -58,8 +59,8 @@ def _codec():
     import board_config as bc
     from es8311 import ES8311
 
-    _ensure_mclk()
-    codec = ES8311(bc.i2c)
+    _ensure_mclk(512)
+    codec = ES8311(bc.i2c, mclk_multiplier=512)
     # Enable path before I2S starts (PCMOutput opens the stream next).
     codec.enable_output(True)
     codec.dac_mute(False)
@@ -67,10 +68,18 @@ def _codec():
     return codec
 
 
+def _input_codec():
+    import board_config as bc
+    from es7210 import ES7210
+
+    _ensure_mclk(512)
+    return ES7210(bc.i2c, profile="waveshare_p4")
+
+
 def _output_stream():
     from machine import I2S, Pin
 
-    _ensure_mclk()
+    _ensure_mclk(512)
     return I2S(
         0,
         sck=Pin(_SCLK),
@@ -87,7 +96,7 @@ def _output_stream():
 def _input_stream():
     from machine import I2S, Pin
 
-    _ensure_mclk()
+    _ensure_mclk(512)
     return I2S(
         0,
         sck=Pin(_SCLK),
@@ -112,7 +121,7 @@ def _output_power(enable):
     if _pa is None:
         _pa = Pin(_PA_CTRL, Pin.OUT, value=0)
     if enable:
-        _ensure_mclk()
+        _ensure_mclk(512)
         _codec_call("enable_output", True)
         _pa.value(1)
     else:
@@ -136,10 +145,10 @@ def audio_out():
 
 def _input_power(enable):
     if enable:
-        _ensure_mclk()
-        _codec_call("enable_input", True)
+        _ensure_mclk(512)
+        _INPUT_SESSION.get_codec().enable_input(True)
     else:
-        _codec_call("enable_input", False)
+        _INPUT_SESSION.get_codec().enable_input(False)
 
 
 def audio_in():
@@ -147,8 +156,8 @@ def audio_in():
     return PCMInput(
         _input_stream,
         _FORMAT,
-        session=_SESSION,
-        set_hardware_gain=lambda value: _codec_call("set_adc_volume", value),
+        session=_INPUT_SESSION,
+        set_hardware_gain=lambda value: _INPUT_SESSION.get_codec().set_gain(value),
         power=_input_power,
     )
 

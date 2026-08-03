@@ -49,7 +49,7 @@ mip.install(
     target="/",
 )
 import setup_tts_kokoro
-# Or: setup_chat_lvgl / setup_tts_gemini / setup_tts_orpheus
+# Or: setup_chat_lvgl / setup_chat_groq / setup_tts_gemini / setup_tts_orpheus
 ```
 
 Each script installs the board package, `tts`, and the chosen UI under `/lib`,
@@ -68,5 +68,6 @@ hard reset. Or from the REPL after WiFi: `import tts_kokoro` (or
 | `/lib/board_config.py` | Display + lazy `DEVICES` |
 | `/lib/board_devices.py` | `audio_out`, etc. |
 | `/lib/tts.py` | Provider adapters + `TTSClient` |
+| `/lib/stt.py` | Provider adapters + `STTClient` |
 | `/lib/tts_*.py` | Chosen LVGL UI |
 | `/main.py` | WiFi → selected UI |

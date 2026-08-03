@@ -86,6 +86,8 @@ class ES7210:
         self.enabled = False
         if profile == "m5":
             self._init_m5()
+        elif profile == "waveshare_p4":
+            self._init_waveshare_p4(gain)
         elif profile == "default":
             self._init_default(gain)
         else:
@@ -124,6 +126,49 @@ class ES7210:
             self._wr(reg, val)
         _sleep_ms(20)
         self.gain = 11 * 100 // 14
+        self.enabled = True
+
+    def _init_waveshare_p4(self, gain):
+        """24 kHz, 12.288 MHz MCLK, onboard MIC1/2 routed to GPIO11."""
+        self._wr(_RESET, 0xFF)
+        _sleep_ms(10)
+        for reg, val in (
+            (_RESET, 0x41),
+            (_CLOCK_OFF, 0x3F),
+            (0x09, 0x30),
+            (0x0A, 0x30),
+            (0x23, 0x2A),
+            (0x22, 0x0A),
+            (0x20, 0x0A),
+            (0x21, 0x2A),
+            (_MODE, 0x10),       # slave mode
+            (0x40, 0x43),        # 3.3 V analog supply / fast VMID start
+            (0x41, 0x70),        # MIC1/2 bias
+            (0x42, 0x70),        # MIC3/4 bias
+            (_MAIN_CLK, 0x81),   # 12.288 MHz MCLK -> 24 kHz
+            (0x04, 0x02),
+            (0x05, 0x00),
+            (_ANALOG, 0x20),     # OSR
+            (_SDP12, 0x60),      # 16-bit I2S
+            (_SDP34, 0x00),      # two-channel, non-TDM
+            (_MIC1_GAIN, gain),
+            (_MIC2_GAIN, gain),
+            (_MIC3_GAIN, 0x00),
+            (_MIC4_GAIN, 0x00),
+            (0x4B, 0x00),        # MIC1/2 powered up
+            (0x4C, 0xFF),        # MIC3/4 powered down
+            (_CLOCK_OFF, 0x00),
+            (0x47, 0x08),
+            (0x48, 0x08),
+            (0x49, 0x08),
+            (0x4A, 0x08),
+            (_ADC_CTRL, 0x43),
+            (_RESET, 0x71),
+            (_RESET, 0x41),
+        ):
+            self._wr(reg, val)
+        _sleep_ms(20)
+        self.set_gain((gain & 0x0F) * 100 // 14)
         self.enabled = True
 
     def set_gain(self, percent):

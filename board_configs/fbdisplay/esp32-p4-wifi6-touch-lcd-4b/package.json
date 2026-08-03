@@ -23,6 +23,10 @@
     [
       "audiodev.py",
       "github:PyDevices/micropython-hardware/drivers/audio/audiodev.py"
+    ],
+    [
+      "keypad_gpio.py",
+      "github:PyDevices/micropython-hardware/drivers/input/keypad_gpio.py"
     ]
   ],
   "deps": [

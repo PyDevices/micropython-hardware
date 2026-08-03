@@ -1,0 +1,11 @@
+{
+  "urls": [
+    [
+      "stt.py",
+      "github:PyDevices/micropython-hardware/drivers/audio/stt.py"
+    ]
+  ],
+  "deps": [],
+  "version": "0.1",
+  "notes": "Portable PCM capture, WAV encoding, and Groq Whisper speech-to-text."
+}

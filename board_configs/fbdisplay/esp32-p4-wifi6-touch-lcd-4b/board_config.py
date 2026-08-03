@@ -7,6 +7,8 @@ from machine import I2C, Pin
 
 from displaysys.fbdisplay import FBDisplay
 import eventsys
+from eventsys.keys import Keys
+from keypad_gpio import GPIOButtons
 
 try:
     from mipidsi import Bus, Display
@@ -95,11 +97,15 @@ touch_rotation_table = (0, 0, 0, 0)
 
 display_drv = FBDisplay(fb)
 
+# Active-low BOOT button; GPIO35 is shared with Ethernet TXD1.
+keypad = GPIOButtons({"boot": (Pin(35, Pin.IN, Pin.PULL_UP), Keys.K_LCTRL)})
+
 runtime = eventsys.Runtime(
     displays=[display_drv],
     touch_read=touch.read_points,
     touch_rotation_table=touch_rotation_table,
 )
+runtime.add_keypad(read=keypad.read)
 
 from board_devices import DEVICES, setup_devices
 

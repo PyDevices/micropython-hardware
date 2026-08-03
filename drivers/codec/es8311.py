@@ -75,8 +75,11 @@ class ES8311:
         codec = ES8311(i2c)
     """
 
-    def __init__(self, i2c):
+    def __init__(self, i2c, *, mclk_multiplier=256):
+        if mclk_multiplier not in (256, 512):
+            raise ValueError("mclk_multiplier must be 256 or 512")
         self._i2c = i2c
+        self.mclk_multiplier = mclk_multiplier
         self.dac_volume = 85
         self.adc_volume = 100
         self.dac_muted = True
@@ -104,8 +107,9 @@ class ES8311:
         # --- Clock configuration ---
         # REG01: enable all internal clocks; select MCLK from MCLK pin (bit7=0)
         self._wr(_REG01_CLK_SRC, 0x3F)
-        # REG02: pre_div=1 (bits[7:5]=000), pre_multi=×1 (bits[4:3]=00)
-        self._wr(_REG02_CLK_DIV, 0x00)
+        # At 512fs, divide MCLK by two before the normal 256fs clock tree.
+        pre_div = 2 if self.mclk_multiplier == 512 else 1
+        self._wr(_REG02_CLK_DIV, (pre_div - 1) << 5)
         # REG03: ADC fs_mode=single-speed (bit6=0), ADC OSR=0x10
         self._wr(_REG03_ADC_OSR, 0x10)
         # REG04: DAC OSR=0x10
