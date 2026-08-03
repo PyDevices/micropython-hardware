@@ -1,0 +1,28 @@
+{
+  "urls": [
+    [
+      "board_config.py",
+      "github:PyDevices/micropython-hardware/board_configs/desktop/board_config.py"
+    ],
+    [
+      "boarddev.py",
+      "github:PyDevices/micropython-hardware/drivers/boarddev.py"
+    ],
+    [
+      "audiodev.py",
+      "github:PyDevices/micropython-hardware/drivers/audio/audiodev.py"
+    ],
+    [
+      "sdl2audio.py",
+      "github:PyDevices/micropython-hardware/drivers/audio/sdl2audio.py"
+    ]
+  ],
+  "deps": [
+    [
+      "displaysys",
+      "latest"
+    ]
+  ],
+  "version": "0.1",
+  "notes": "Universal non-MCU board_config for desktop, Jupyter, and PyScript runtimes."
+}
