@@ -35,3 +35,18 @@ objects are first accessed, not at import time.
 cd python/pydisplay-desktop
 TESTPYPI_API_TOKEN=... ./publish_testpypi.sh
 ```
+
+## Tag-based Release (repo-standard)
+
+Use the repository-level tag scripts, consistent with other PyDevices repos:
+
+1. Preview next version:
+
+	./scripts/next_release_version.sh --verbose
+
+2. Create and push release tag:
+
+	./scripts/publish_release_tag.sh --push
+
+Pushing a `vX.Y.Z` tag triggers `.github/workflows/publish-pydisplay-desktop.yml`,
+which sets the package version from the tag and uploads to TestPyPI.

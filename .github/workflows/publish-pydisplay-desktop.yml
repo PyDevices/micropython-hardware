@@ -1,0 +1,102 @@
+name: Publish pydisplay-desktop
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Semver X.Y.Z (optional when running from a vX.Y.Z tag)
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    if: github.repository == 'PyDevices/micropython-hardware'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve release version
+        id: version
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          normalize() {
+            local v="${1#v}"
+            v="$(echo "$v" | tr -d '[:space:]')"
+            if [[ ! "$v" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
+              echo "Invalid semver: $1 (expected X.Y.Z)" >&2
+              exit 1
+            fi
+            echo "$v"
+          }
+
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            VERSION="$(normalize "${GITHUB_REF_NAME}")"
+          elif [[ -n "${INPUT_VERSION:-}" ]]; then
+            VERSION="$(normalize "$INPUT_VERSION")"
+          else
+            TAG="$(git describe --tags --exact-match 2>/dev/null || true)"
+            if [[ -z "$TAG" ]]; then
+              echo "Set the version input or run this workflow from a vX.Y.Z tag." >&2
+              exit 1
+            fi
+            VERSION="$(normalize "$TAG")"
+          fi
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Publishing pydisplay-desktop $VERSION"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install build tooling
+        run: python -m pip install --upgrade build twine
+
+      - name: Set package version from tag
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          version = "${{ steps.version.outputs.version }}"
+          path = Path("python/pydisplay-desktop/pyproject.toml")
+          text = path.read_text(encoding="utf-8")
+          new_text, count = re.subn(
+              r'(?m)^version\s*=\s*"[^"]+"\s*$',
+              f'version = "{version}"',
+              text,
+              count=1,
+          )
+          if count != 1:
+              raise SystemExit("Failed to set version in pyproject.toml")
+          path.write_text(new_text, encoding="utf-8")
+          print(f"Set package version to {version}")
+          PY
+
+      - name: Build and validate artifacts
+        working-directory: python/pydisplay-desktop
+        run: |
+          python -m build
+          python -m twine check dist/*
+
+      - name: Upload to TestPyPI
+        working-directory: python/pydisplay-desktop
+        env:
+          TESTPYPI_API_TOKEN: ${{ secrets.TESTPYPI_API_TOKEN }}
+        run: |
+          if [[ -z "${TESTPYPI_API_TOKEN:-}" ]]; then
+            echo "Missing TESTPYPI_API_TOKEN secret." >&2
+            exit 1
+          fi
+          TWINE_USERNAME=__token__ TWINE_PASSWORD="$TESTPYPI_API_TOKEN" \
+            python -m twine upload --repository testpypi --verbose dist/*
