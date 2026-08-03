@@ -28,3 +28,10 @@ import board_config
 
 `board_config` uses lazy initialization. Display/audio setup runs when runtime
 objects are first accessed, not at import time.
+
+## Publish to TestPyPI
+
+```bash
+cd python/pydisplay-desktop
+TESTPYPI_API_TOKEN=... ./publish_testpypi.sh
+```
