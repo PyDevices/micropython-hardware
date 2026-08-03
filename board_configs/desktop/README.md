@@ -6,7 +6,24 @@ Universal non-MCU board config for desktop-like hosts.
 
 ```python
 import mip
-mip.install("github:PyDevices/micropython-hardware/board_configs/desktop")
+INDEX = "https://PyDevices.github.io/micropython-lib/mip/PyDevices"
+mip.install(
+	"github:PyDevices/micropython-hardware/board_configs/desktop",
+	index=INDEX,
+)
+```
+
+For script-first workflows (including `micropython.exe` on host systems), use a
+local target so the files land in the current directory:
+
+```python
+import mip
+INDEX = "https://PyDevices.github.io/micropython-lib/mip/PyDevices"
+mip.install(
+	"github:PyDevices/micropython-hardware/board_configs/desktop",
+	index=INDEX,
+	target=".",
+)
 ```
 
 ## Use
@@ -24,6 +41,7 @@ This bundle installs:
 - `boarddev.py`
 - `audiodev.py`
 - `sdl2audio.py`
+- plus `displaysys`, `eventsys`, and `multimer` from the PyDevices MIP index
 
 `board_config.py` selects host behavior at runtime:
 - PyScript: `PSDisplay`
