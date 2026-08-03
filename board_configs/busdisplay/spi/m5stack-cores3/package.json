@@ -18,7 +18,7 @@
     ],
     [
       "boarddev.py",
-      "github:PyDevices/pydisplay/src/lib/boarddev.py"
+      "github:PyDevices/micropython-hardware/drivers/boarddev.py"
     ],
     [
       "es7210.py",
