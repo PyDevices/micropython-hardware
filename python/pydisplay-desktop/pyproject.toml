@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pydisplay-desktop"
+version = "0.0.1"
+description = "Desktop board_config bundle for PyDevices non-MCU hosts"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+authors = [{ name = "Brad Barnett", email = "contact@pydevices.com" }]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+]
+dependencies = [
+  "displaysys",
+  "usdl2",
+]
+
+[project.urls]
+Homepage = "https://github.com/PyDevices/micropython-hardware"
+Repository = "https://github.com/PyDevices/micropython-hardware"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+py-modules = ["board_config", "boarddev", "audiodev", "sdl2audio"]
