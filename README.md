@@ -40,8 +40,9 @@ each board’s `package.json` `deps`.
 ## Desktop / browser configs
 
 `board_configs/{sdldisplay,pgdisplay,jndisplay,psdisplay}/` remain here for
-MIP/path consistency. pydisplay’s default desktop config is still
-`pydisplay/src/lib/board_config.py`.
+MIP/path consistency. The universal desktop config is now
+`board_configs/desktop/` for MIP installs and `pydisplay-desktop` for pip/TestPyPI
+installs, keeping the desktop flow analogous across package managers.
 
 ## License
 

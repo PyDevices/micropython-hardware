@@ -11,6 +11,10 @@ Installed modules:
 This package is intended to provide a single pip-installable desktop config
 bundle while core runtime libraries continue to come from PyDevices packages.
 
+`board_config.py` ownership for packaged desktop installs lives here
+(`pydisplay-desktop`), analogous to the MIP desktop bundle in
+`board_configs/desktop`.
+
 ## Install (TestPyPI)
 
 ```bash
