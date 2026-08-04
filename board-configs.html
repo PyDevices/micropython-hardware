@@ -79,8 +79,11 @@ for non-UI peripherals.</li>
 href="https://github.com/PyDevices/micropython-hardware"><code>PyDevices/micropython-hardware</code></a>
 (<code>board_configs/</code>). Each MicroPython directory with a
 <code>package.json</code> can be installed via MIP:</p>
-<div class="sourceCode" id="cb1"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>mip.install(<span class="st">&quot;github:PyDevices/micropython-hardware/board_configs/busdisplay/i80/t-display-s3&quot;</span>)</span></code></pre></div>
+<p>See the canonical commands and verification steps in <a
+href="install-workflows.html">install-workflows.md</a>.</p>
+<p>Standard MCU pattern: install the matching <code>board_config</code>
+directory and let <code>package.json</code> dependencies resolve
+automatically from the PyDevices MIP index.</p>
 <p>CircuitPython configs live under <code>board_configs/cp/</code> with
 the same bus layout and directory names as MicroPython (no
 <code>cp_</code> prefix, no <code>package.json</code> / MIP, no
@@ -595,9 +598,9 @@ Falsey: <code>0</code>, <code>false</code>, <code>no</code>,
 <code>off</code>. Unknown values fall back to the desktop default
 (<code>False</code>). Parsing lives in <a
 href="https://github.com/PyDevices/pydisplay/blob/main/src/lib/displaysys/__init__.py"><code>displaysys.env_bool</code></a>.</p>
-<div class="sourceCode" id="cb2"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Force asyncio timers on desktop (LVGL async smoke, matrix column)</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="va">PYDISPLAY_TIMER_ASYNC</span><span class="op">=</span>1 <span class="ex">python</span> my_example.py</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Force asyncio timers on desktop (LVGL async smoke, matrix column)</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="va">PYDISPLAY_TIMER_ASYNC</span><span class="op">=</span>1 <span class="ex">python</span> my_example.py</span></code></pre></div>
 <p>Per-board configs under <code>board_configs/</code> pass
 <code>timer_async=</code> explicitly in their <code>Runtime(...)</code>
 call; they do not read this env var unless you wire it in.</p>

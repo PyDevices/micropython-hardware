@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <script>try{if(localStorage.getItem('pydevices-theme')==='light'){document.documentElement.setAttribute('data-theme','light');}}catch(e){}</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>pydisplay-desktop — micropython-hardware</title>
+  <link rel="icon" type="image/svg+xml" href="https://pydevices.github.io/assets/img/logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap">
+  <link rel="stylesheet" href="https://pydevices.github.io/assets/css/site.css">
+  <script src="https://pydevices.github.io/assets/js/theme-toggle.js" defer></script>
+  <style>
+    main.doc { max-width: 52rem; padding: 1.5rem 0 3rem; }
+    main.doc h1 { font-family: "Space Grotesk", system-ui, sans-serif; }
+    main.doc table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.92rem; }
+    main.doc th, main.doc td {
+      border-bottom: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+      padding: 0.5rem 0.6rem; text-align: left; vertical-align: top;
+    }
+    main.doc pre, main.doc code { font-size: 0.9em; }
+    main.doc pre {
+      overflow-x: auto;
+      padding: 0.85rem 1rem;
+      border-radius: 8px;
+      background: color-mix(in srgb, currentColor 8%, transparent);
+    }
+    .doc-nav { margin: 0 0 1.25rem; font-size: 0.92rem; opacity: 0.85; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="https://pydevices.github.io/">
+        <span class="logo"><img src="https://pydevices.github.io/assets/img/logo.svg" alt="" width="30" height="30"></span>
+        PyDevices
+      </a>
+      <nav class="nav">
+        <a href="./">hardware</a>
+        <a href="https://pydisplay.readthedocs.io">pydisplay docs</a>
+        <a href="https://github.com/PyDevices/micropython-hardware">Source</a>
+      </nav>
+      <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle color theme" title="Toggle color theme">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+  <main class="wrap doc">
+    <p class="doc-nav"><a href="./">← micropython-hardware docs</a></p>
+<h1 id="pydisplay-desktop">pydisplay-desktop</h1>
+<p>Desktop bundle for non-MCU hosts using PyDevices display/runtime
+modules.</p>
+<p>Installed modules:</p>
+<ul>
+<li>board_config</li>
+<li>boarddev</li>
+<li>audiodev</li>
+<li>sdl2audio</li>
+</ul>
+<p>Source of truth:</p>
+<ul>
+<li>Runtime modules are generated from canonical sources in this repo
+(<code>board_configs/desktop/</code> and <code>drivers/</code>).</li>
+<li>Use <code>scripts/sync_pydisplay_desktop_sources.py</code> to stage
+package files for build/publish and avoid drift between MIP and pip
+behavior.</li>
+</ul>
+<p>This package is intended to provide a single pip-installable desktop
+config bundle while core runtime libraries continue to come from
+PyDevices packages.</p>
+<p><code>board_config.py</code> ownership for packaged desktop installs
+lives here (<code>pydisplay-desktop</code>), analogous to the MIP
+desktop bundle in <code>board_configs/desktop</code>.</p>
+<h2 id="install-testpypi">Install (TestPyPI)</h2>
+<p>Install and verification flows are centralized here: <a
+href="install-workflows.html">install-workflows.md</a></p>
+<p>Use the sections:</p>
+<ul>
+<li>"pydisplay-desktop via pip"</li>
+<li>"Verify with .venv"</li>
+<li>"Verify without .venv (python.exe / pip.exe)"</li>
+</ul>
+<p><code>board_config</code> uses lazy initialization. Display/audio
+setup runs when runtime objects are first accessed, not at import
+time.</p>
+<h2 id="publish-to-testpypi">Publish to TestPyPI</h2>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="va">TESTPYPI_API_TOKEN</span><span class="op">=</span>... <span class="ex">./scripts/publish_testpypi.sh</span></span></code></pre></div>
+<h2 id="tag-based-release-repo-standard">Tag-based Release
+(repo-standard)</h2>
+<p>Use the repository-level tag scripts, consistent with other PyDevices
+repos:</p>
+<ol type="1">
+<li><p>Preview next version:</p>
+<p>./scripts/next_release_version.sh --verbose</p></li>
+<li><p>Create and push release tag:</p>
+<p>./scripts/publish_release_tag.sh --push</p></li>
+</ol>
+<p>Pushing a <code>vX.Y.Z</code> tag triggers
+<code>.github/workflows/publish-pydisplay-desktop.yml</code>, which sets
+the package version from the tag and uploads to TestPyPI.</p>
+  </main>
+</body>
+</html>
