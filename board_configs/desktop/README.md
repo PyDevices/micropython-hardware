@@ -9,6 +9,30 @@ Use the canonical install/verify guide:
 
 For this package, follow the "Desktop board_config via MIP" section.
 
+### CircuitPython note
+
+Our current `micropython-lib` clone/index does not build CircuitPython-compatible
+`.mpy` files. If `.mpy` dependencies are installed, CircuitPython can fail with:
+
+`ValueError: MicroPython .mpy file; use CircuitPython mpy-cross`
+
+CircuitPython does not provide `mip`, so install with MicroPython and force
+source files:
+
+```python
+import mip
+
+INDEX = "https://PyDevices.github.io/micropython-lib/mip/PyDevices"
+mip.install(
+	"github:PyDevices/micropython-hardware/board_configs/desktop",
+	index=INDEX,
+	target="lib",
+	mpy=False,
+)
+```
+
+Run CircuitPython from that same working directory so it imports from `./lib`.
+
 ## Use
 
 ```python

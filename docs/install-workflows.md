@@ -49,6 +49,12 @@ Expected files from the desktop board package:
 - `audiodev.py`
 - `sdl2audio.py`
 
+CircuitPython note:
+- Our current `micropython-lib` clone/index does not build CircuitPython-compatible
+    `.mpy` files.
+- If `.mpy` dependencies are installed, CircuitPython can fail with:
+    `ValueError: MicroPython .mpy file; use CircuitPython mpy-cross`
+
 Quick verification (catches omitted split files):
 
 ```python
@@ -58,6 +64,36 @@ import board_devices
 print(board_config.__file__)
 print(board_devices.__file__)
 print(board_config.DEVICES)
+```
+
+## CircuitPython-compatible install via MicroPython `mip`
+
+CircuitPython does not provide `mip`, so install package dependencies with
+MicroPython and force source `.py` files (no `.mpy`) using `mpy=False`.
+
+Run from your target working directory (for example `/tmp/my-cpy-run`):
+
+```python
+import mip
+
+INDEX = "https://PyDevices.github.io/micropython-lib/mip/PyDevices"
+mip.install(
+    "github:PyDevices/micropython-hardware/board_configs/desktop",
+    index=INDEX,
+    target="lib",
+    mpy=False,
+)
+```
+
+Then run CircuitPython from that same directory so it imports from `./lib`.
+
+Quick check:
+
+```python
+import board_config
+import board_devices
+print(board_config.__file__)
+print(board_devices.__file__)
 ```
 
 ## pydisplay-desktop via pip
