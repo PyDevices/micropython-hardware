@@ -3,6 +3,7 @@
 
 The canonical implementation lives in:
 - board_configs/desktop/board_config.py
+- board_configs/desktop/board_devices.py
 - drivers/boarddev.py
 - drivers/audio/audiodev.py
 - drivers/audio/sdl2audio.py
@@ -21,6 +22,7 @@ import sys
 
 MAPPINGS = (
     ("board_configs/desktop/board_config.py", "src/board_config.py"),
+    ("board_configs/desktop/board_devices.py", "src/board_devices.py"),
     ("drivers/boarddev.py", "src/boarddev.py"),
     ("drivers/audio/audiodev.py", "src/audiodev.py"),
     ("drivers/audio/sdl2audio.py", "src/sdl2audio.py"),
