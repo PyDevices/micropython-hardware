@@ -8,6 +8,12 @@ Installed modules:
 - audiodev
 - sdl2audio
 
+Source of truth:
+- Runtime modules are generated from canonical sources in this repo
+  (`board_configs/desktop/` and `drivers/`).
+- Use `scripts/sync_pydisplay_desktop_sources.py` to stage package files for
+  build/publish and avoid drift between MIP and pip behavior.
+
 This package is intended to provide a single pip-installable desktop config
 bundle while core runtime libraries continue to come from PyDevices packages.
 
@@ -18,7 +24,7 @@ bundle while core runtime libraries continue to come from PyDevices packages.
 ## Install (TestPyPI)
 
 Install and verification flows are centralized here:
-[../../docs/install-workflows.md](../../docs/install-workflows.md)
+[install-workflows.md](install-workflows.md)
 
 Use the sections:
 - "pydisplay-desktop via pip"
@@ -31,8 +37,7 @@ objects are first accessed, not at import time.
 ## Publish to TestPyPI
 
 ```bash
-cd python/pydisplay-desktop
-TESTPYPI_API_TOKEN=... ./publish_testpypi.sh
+TESTPYPI_API_TOKEN=... ./scripts/publish_testpypi.sh
 ```
 
 ## Tag-based Release (repo-standard)

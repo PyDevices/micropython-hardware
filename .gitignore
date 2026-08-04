@@ -16,3 +16,5 @@ dist/
 # Repo-specific
 .DS_Store
 _site/
+.pydisplay-desktop-build/
+python/

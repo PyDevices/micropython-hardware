@@ -5,7 +5,7 @@
 #     Non-semver / pre-release tags (e.g. v1.2.3-rc1) are ignored.
 #   With no vX.Y.Z tags — base version from the first match of setup.py
 #     RELEASE_VERSION, pyproject.toml [project] version, a VERSION file,
-#     python/pydisplay-desktop/pyproject.toml [project] version, else 0.0.1.
+#     else 0.0.1.
 #
 # Usage:
 #   ./scripts/next_release_version.sh
@@ -45,13 +45,6 @@ read_base_version() {
     fi
     if [[ -f "$SOURCE_REPO/pyproject.toml" ]]; then
         v="$(grep -E '^\s*version\s*=\s*"[0-9]' "$SOURCE_REPO/pyproject.toml" | head -1 | sed -E 's/.*"([^"]+)".*/\1/')"
-        [[ "$v" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && {
-            echo "$v"
-            return 0
-        }
-    fi
-    if [[ -f "$SOURCE_REPO/python/pydisplay-desktop/pyproject.toml" ]]; then
-        v="$(grep -E '^\s*version\s*=\s*"[0-9]' "$SOURCE_REPO/python/pydisplay-desktop/pyproject.toml" | head -1 | sed -E 's/.*"([^"]+)".*/\1/')"
         [[ "$v" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && {
             echo "$v"
             return 0

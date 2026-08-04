@@ -18,6 +18,8 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     if: github.repository == 'PyDevices/micropython-hardware'
+    env:
+      STAGE_DIR: .pydisplay-desktop-build
     steps:
       - uses: actions/checkout@v4
         with:
@@ -62,6 +64,11 @@ jobs:
       - name: Install build tooling
         run: python -m pip install --upgrade build twine
 
+      - name: Sync pydisplay-desktop sources from canonical MIP files
+        run: |
+          rm -rf "$STAGE_DIR"
+          python scripts/sync_pydisplay_desktop_sources.py --stage-dir "$STAGE_DIR"
+
       - name: Set package version from tag
         run: |
           python - <<'PY'
@@ -69,7 +76,7 @@ jobs:
           import re
 
           version = "${{ steps.version.outputs.version }}"
-          path = Path("python/pydisplay-desktop/pyproject.toml")
+          path = Path("${{ env.STAGE_DIR }}/pyproject.toml")
           text = path.read_text(encoding="utf-8")
           new_text, count = re.subn(
               r'(?m)^version\s*=\s*"[^"]+"\s*$',
@@ -84,13 +91,13 @@ jobs:
           PY
 
       - name: Build and validate artifacts
-        working-directory: python/pydisplay-desktop
+        working-directory: ${{ env.STAGE_DIR }}
         run: |
           python -m build
           python -m twine check dist/*
 
       - name: Upload to TestPyPI
-        working-directory: python/pydisplay-desktop
+        working-directory: ${{ env.STAGE_DIR }}
         env:
           TESTPYPI_API_TOKEN: ${{ secrets.TESTPYPI_API_TOKEN }}
         run: |

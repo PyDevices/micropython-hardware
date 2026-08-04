@@ -16,6 +16,7 @@ https://pydevices.github.io/micropython-hardware/
 | [driver-inventory.md](driver-inventory.md) | [driver-inventory.html](https://pydevices.github.io/micropython-hardware/driver-inventory.html) |
 | [board-inventory.md](board-inventory.md) | [board-inventory.html](https://pydevices.github.io/micropython-hardware/board-inventory.html) |
 | [firmware-fixtures.md](firmware-fixtures.md) | [firmware-fixtures.html](https://pydevices.github.io/micropython-hardware/firmware-fixtures.html) |
+| [pydisplay-desktop.md](pydisplay-desktop.md) | [pydisplay-desktop.html](https://pydevices.github.io/micropython-hardware/pydisplay-desktop.html) |
 | [pydisplay-display-boards.md](pydisplay-display-boards.md) | [pydisplay-display-boards.html](https://pydevices.github.io/micropython-hardware/pydisplay-display-boards.html) |
 | [wokwi.md](wokwi.md) | [wokwi.html](https://pydevices.github.io/micropython-hardware/wokwi.html) |
 | [tft-espi-parity.md](tft-espi-parity.md) | [tft-espi-parity.html](https://pydevices.github.io/micropython-hardware/tft-espi-parity.html) |

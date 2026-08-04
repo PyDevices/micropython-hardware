@@ -166,9 +166,12 @@ def __getattr__(name):
         if name in globals():
             return globals()[name]
         current_getattr = globals().get("__getattr__")
-        if current_getattr is not None and current_getattr is not __getattr__:
+        if current_getattr is not None and current_getattr is not _BOOTSTRAP_GETATTR:
             return current_getattr(name)
     raise AttributeError("module has no attribute {!r}".format(name))
+
+
+_BOOTSTRAP_GETATTR = __getattr__
 
 
 def __dir__():
