@@ -17,18 +17,13 @@ bundle while core runtime libraries continue to come from PyDevices packages.
 
 ## Install (TestPyPI)
 
-```bash
-python -m pip install \
-	--index-url https://test.pypi.org/simple/ \
-	--extra-index-url https://pypi.org/simple \
-	pydisplay-desktop
-```
+Install and verification flows are centralized here:
+[../../docs/install-workflows.md](../../docs/install-workflows.md)
 
-After install:
-
-```python
-import board_config
-```
+Use the sections:
+- "pydisplay-desktop via pip"
+- "Verify with .venv"
+- "Verify without .venv (python.exe / pip.exe)"
 
 `board_config` uses lazy initialization. Display/audio setup runs when runtime
 objects are first accessed, not at import time.

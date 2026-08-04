@@ -21,9 +21,11 @@ Configs live in
 [`PyDevices/micropython-hardware`](https://github.com/PyDevices/micropython-hardware)
 (`board_configs/`). Each MicroPython directory with a `package.json` can be installed via MIP:
 
-```python
-mip.install("github:PyDevices/micropython-hardware/board_configs/busdisplay/i80/t-display-s3")
-```
+See the canonical commands and verification steps in
+[install-workflows.md](install-workflows.md).
+
+Standard MCU pattern: install the matching `board_config` directory and let
+`package.json` dependencies resolve automatically from the PyDevices MIP index.
 
 CircuitPython configs live under `board_configs/cp/` with the same bus layout and
 directory names as MicroPython (no `cp_` prefix, no `package.json` / MIP, no

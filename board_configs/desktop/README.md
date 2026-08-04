@@ -4,27 +4,10 @@ Universal non-MCU board config for desktop-like hosts.
 
 ## Install
 
-```python
-import mip
-INDEX = "https://PyDevices.github.io/micropython-lib/mip/PyDevices"
-mip.install(
-	"github:PyDevices/micropython-hardware/board_configs/desktop",
-	index=INDEX,
-)
-```
+Use the canonical install/verify guide:
+[../../docs/install-workflows.md](../../docs/install-workflows.md)
 
-For script-first workflows (including `micropython.exe` on host systems), use a
-local target so the files land in the current directory:
-
-```python
-import mip
-INDEX = "https://PyDevices.github.io/micropython-lib/mip/PyDevices"
-mip.install(
-	"github:PyDevices/micropython-hardware/board_configs/desktop",
-	index=INDEX,
-	target=".",
-)
-```
+For this package, follow the "Desktop board_config via MIP" section.
 
 ## Use
 

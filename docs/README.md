@@ -12,6 +12,7 @@ https://pydevices.github.io/micropython-hardware/
 | [display-drivers.md](display-drivers.md) | [display-drivers.html](https://pydevices.github.io/micropython-hardware/display-drivers.html) |
 | [touch-drivers.md](touch-drivers.md) | [touch-drivers.html](https://pydevices.github.io/micropython-hardware/touch-drivers.html) |
 | [display-interfaces.md](display-interfaces.md) | [display-interfaces.html](https://pydevices.github.io/micropython-hardware/display-interfaces.html) |
+| [install-workflows.md](install-workflows.md) | [install-workflows.html](https://pydevices.github.io/micropython-hardware/install-workflows.html) |
 | [driver-inventory.md](driver-inventory.md) | [driver-inventory.html](https://pydevices.github.io/micropython-hardware/driver-inventory.html) |
 | [board-inventory.md](board-inventory.md) | [board-inventory.html](https://pydevices.github.io/micropython-hardware/board-inventory.html) |
 | [firmware-fixtures.md](firmware-fixtures.md) | [firmware-fixtures.html](https://pydevices.github.io/micropython-hardware/firmware-fixtures.html) |

@@ -28,15 +28,12 @@ pydisplay’s `boarddev`.
 
 ## Install (MIP)
 
-```python
-import mip
-mip.install("github:PyDevices/micropython-hardware/board_configs/fbdisplay/esp32-p4-wifi6-touch-lcd-4b")
-# or a shared helper package:
-mip.install("github:PyDevices/micropython-hardware/packages/spibus.json")
-```
+See the canonical install/verify guide:
+[docs/install-workflows.md](docs/install-workflows.md)
 
-Also install pydisplay core packages (`displaysys`, `eventsys`, …) as listed in
-each board’s `package.json` `deps`.
+For MCU boards, the standard flow is: install the matching `board_config`
+directory via MIP with the PyDevices index and let `deps` resolve automatically.
+
 ## Desktop / browser configs
 
 `board_configs/{sdldisplay,pgdisplay,jndisplay,psdisplay}/` remain here for
