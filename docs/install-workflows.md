@@ -42,6 +42,24 @@ import board_config
 If you want local script-first installs in the current directory, use
 `target="."` instead of `target="lib"`.
 
+Expected files from the desktop board package:
+- `board_config.py`
+- `board_devices.py`
+- `boarddev.py`
+- `audiodev.py`
+- `sdl2audio.py`
+
+Quick verification (catches omitted split files):
+
+```python
+import board_config
+import board_devices
+
+print(board_config.__file__)
+print(board_devices.__file__)
+print(board_config.DEVICES)
+```
+
 ## pydisplay-desktop via pip
 
 Install `pydisplay-desktop` directly from TestPyPI (not through another repo's

@@ -21,6 +21,7 @@ runtime = board_config.runtime
 
 This bundle installs:
 - `board_config.py`
+- `board_devices.py`
 - `boarddev.py`
 - `audiodev.py`
 - `sdl2audio.py`

@@ -97,7 +97,6 @@ def _desktop_display(title):
 
 _INITIALIZED = False
 DEVICES = frozenset()
-_MISSING = object()
 
 
 def _init_runtime():
@@ -130,29 +129,10 @@ def _init_runtime():
             get_events,
             timer_async=_env_bool("PYDISPLAY_TIMER_ASYNC", DEFAULT_TIMER_ASYNC),
         )
+        from board_devices import DEVICES as _DEVICES, setup_devices
 
-        class _DesktopDevices:
-            DEVICES = frozenset(("audio_out", "audio_in"))
-
-            @staticmethod
-            def audio_out():
-                from audiodev import AudioFormat
-                from sdl2audio import audio_out as _sdl_audio_out
-
-                return _sdl_audio_out(AudioFormat(24000, 1, 16), queue_ms=150)
-
-            @staticmethod
-            def audio_in():
-                from audiodev import AudioFormat
-                from sdl2audio import audio_in as _sdl_audio_in
-
-                return _sdl_audio_in(AudioFormat(24000, 1, 16), queue_ms=150)
-
-        DEVICES = _DesktopDevices.DEVICES
-
-        import boarddev
-
-        boarddev.bind_lazy(globals(), _DesktopDevices)
+        DEVICES = _DEVICES
+        setup_devices(globals())
 
     globals()["display_drv"] = display_drv
     globals()["runtime"] = runtime
@@ -176,5 +156,6 @@ _BOOTSTRAP_GETATTR = __getattr__
 
 def __dir__():
     names = set(globals().keys())
-    names.update(("display_drv", "runtime", "audio_out", "audio_in"))
+    names.update(("display_drv", "runtime"))
+    names.update(DEVICES)
     return sorted(names)
