@@ -1,6 +1,26 @@
 {
-    "urls": [
-      ["board_config.py", "github:PyDevices/micropython-hardware/board_configs/jndisplay/board_config.py"]
+  "urls": [
+    [
+      "board_config.py",
+      "github:PyDevices/micropython-hardware/board_configs/jndisplay/board_config.py"
     ],
-    "version": "0.1"
-  }
+    [
+      "board_devices.py",
+      "github:PyDevices/micropython-hardware/board_configs/jndisplay/board_devices.py"
+    ],
+    [
+      "boarddev.py",
+      "github:PyDevices/micropython-hardware/drivers/boarddev.py"
+    ],
+    [
+      "audiodev.py",
+      "github:PyDevices/micropython-hardware/drivers/audio/audiodev.py"
+    ],
+    [
+      "sdl2audio.py",
+      "github:PyDevices/micropython-hardware/drivers/audio/sdl2audio.py"
+    ]
+  ],
+  "deps": [["displaysys", "latest"]],
+  "version": "0.1"
+}

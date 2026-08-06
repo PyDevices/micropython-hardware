@@ -49,9 +49,15 @@ This bundle installs:
 - `boarddev.py`
 - `audiodev.py`
 - `sdl2audio.py`
+- `pygameaudio.py`
+- `webaudio.py`
 - plus `displaysys`, `eventsys`, and `multimer` from the PyDevices MIP index
 
 `board_config.py` selects host behavior at runtime:
-- PyScript: `PSDisplay`
-- Jupyter: `JNDisplay`
-- Desktop CPython/MicroPython unix/windows: `PGDisplay` first, then `SDLDisplay` fallback
+- PyScript: `PSDisplay` + `webaudio`
+- Jupyter: `JNDisplay` + `sdl2audio` (kernel host)
+- Desktop CPython/MicroPython unix/windows: `PGDisplay` first, then `SDLDisplay` fallback;
+  audio follows `import pygame` → `pygameaudio`, else `sdl2audio`
+
+Terminal-only apps (no display) can `import board_devices` and call
+`audio_out()` / `audio_in()` without opening a window.

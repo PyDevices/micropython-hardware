@@ -48,6 +48,8 @@ Expected files from the desktop board package:
 - `boarddev.py`
 - `audiodev.py`
 - `sdl2audio.py`
+- `pygameaudio.py`
+- `webaudio.py`
 
 CircuitPython note:
 - Our current `micropython-lib` clone/index does not build CircuitPython-compatible

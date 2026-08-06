@@ -19,6 +19,14 @@
     [
       "sdl2audio.py",
       "github:PyDevices/micropython-hardware/drivers/audio/sdl2audio.py"
+    ],
+    [
+      "pygameaudio.py",
+      "github:PyDevices/micropython-hardware/drivers/audio/pygameaudio.py"
+    ],
+    [
+      "webaudio.py",
+      "github:PyDevices/micropython-hardware/drivers/audio/webaudio.py"
     ]
   ],
   "deps": [

@@ -523,3 +523,173 @@ class ToneOutput(_Device):
             if self._power is not None:
                 self._power(False)
         super().close()
+
+
+def _u16(value):
+    return int(value).to_bytes(2, "little")
+
+
+def _u32(value):
+    return int(value).to_bytes(4, "little")
+
+
+def _wav_header(fmt, data_length):
+    """Build a 44-byte PCM RIFF/WAVE header for *fmt* and *data_length* bytes."""
+    byte_rate = fmt.rate * fmt.frame_size
+    block_align = fmt.frame_size
+    bits = fmt.bits
+    channels = fmt.channels
+    # PCM WAVEFORMATEX; unsigned 8-bit is conventional for bits==8.
+    return (
+        b"RIFF"
+        + _u32(36 + data_length)
+        + b"WAVEfmt "
+        + _u32(16)
+        + _u16(1)
+        + _u16(channels)
+        + _u32(fmt.rate)
+        + _u32(byte_rate)
+        + _u16(block_align)
+        + _u16(bits)
+        + b"data"
+        + _u32(data_length)
+    )
+
+
+def _parse_pcm_wav(data):
+    """Return ``(AudioFormat, pcm_bytes)`` from a PCM WAV buffer."""
+    if len(data) < 44 or data[0:4] != b"RIFF" or data[8:12] != b"WAVE":
+        raise ValueError("Expected RIFF/WAVE data")
+
+    pos = 12
+    total = len(data)
+    channels = None
+    rate = None
+    bits = None
+    fmt_tag = None
+    payload = None
+
+    while pos + 8 <= total:
+        chunk_id = data[pos : pos + 4]
+        chunk_len = int.from_bytes(data[pos + 4 : pos + 8], "little")
+        pos += 8
+        end = pos + chunk_len
+        if end > total:
+            end = total
+
+        if chunk_id == b"fmt ":
+            chunk = data[pos:end]
+            if len(chunk) < 16:
+                raise ValueError("WAV fmt chunk is too short")
+            fmt_tag = int.from_bytes(chunk[0:2], "little")
+            channels = int.from_bytes(chunk[2:4], "little")
+            rate = int.from_bytes(chunk[4:8], "little")
+            bits = int.from_bytes(chunk[14:16], "little")
+        elif chunk_id == b"data":
+            payload = data[pos:end]
+            break
+
+        pos = end + (chunk_len % 2)
+
+    if payload is None:
+        raise ValueError("WAV data chunk not found")
+    if fmt_tag != 1:
+        raise ValueError("Only PCM WAV is supported")
+    if channels is None or rate is None or bits is None:
+        raise ValueError("WAV fmt metadata is incomplete")
+
+    signed = bits != 8
+    return AudioFormat(rate, channels, bits, signed=signed), bytes(payload)
+
+
+class _WavOutputStream:
+    """File stream that writes a PCM WAV, finalizing sizes on close."""
+
+    def __init__(self, path, fmt):
+        self.path = path
+        self.format = fmt
+        self._file = None
+        self._data_length = 0
+
+    def open(self):
+        if self._file is not None:
+            return self
+        self._file = open(self.path, "wb")
+        self._file.write(_wav_header(self.format, 0))
+        self._data_length = 0
+        return self
+
+    def write(self, buf):
+        self.open()
+        view = memoryview(buf)
+        self._file.write(view)
+        self._data_length += len(view)
+        return len(view)
+
+    def drain(self):
+        if self._file is not None:
+            self._file.flush()
+
+    def close(self):
+        if self._file is None:
+            return
+        try:
+            self._file.seek(0)
+            self._file.write(_wav_header(self.format, self._data_length))
+            self._file.flush()
+        finally:
+            self._file.close()
+            self._file = None
+
+
+class _WavInputStream:
+    """File-backed PCM stream; ``readinto`` returns 0 at EOF."""
+
+    def __init__(self, path):
+        self.path = path
+        self.format = None
+        self._pcm = b""
+        self._offset = 0
+        self._opened = False
+
+    def open(self):
+        if self._opened:
+            return self
+        with open(self.path, "rb") as handle:
+            data = handle.read()
+        self.format, self._pcm = _parse_pcm_wav(data)
+        self._offset = 0
+        self._opened = True
+        return self
+
+    def readinto(self, buf):
+        self.open()
+        remaining = len(self._pcm) - self._offset
+        if remaining <= 0:
+            return 0
+        count = min(len(buf), remaining)
+        buf[:count] = self._pcm[self._offset : self._offset + count]
+        self._offset += count
+        return count
+
+    def close(self):
+        self._opened = False
+        self._pcm = b""
+        self._offset = 0
+
+
+def wav_output(path, format):
+    """Create a :class:`PCMOutput` that writes interleaved PCM into a WAV file."""
+    if not isinstance(format, AudioFormat):
+        raise TypeError("format must be an AudioFormat")
+    return PCMOutput(lambda: _WavOutputStream(path, format), format)
+
+
+def wav_input(path):
+    """Create a :class:`PCMInput` that reads interleaved PCM from a WAV file."""
+    stream = _WavInputStream(path)
+    stream.open()
+    fmt = stream.format
+    # Re-open on PCMInput.open so lifecycle matches other devices.
+    stream.close()
+    return PCMInput(lambda: _WavInputStream(path), fmt)

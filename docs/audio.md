@@ -15,9 +15,35 @@ one direction owns the session raises `OSError`.
 
 `sdl2audio.py` is the reference playback and real-microphone backend for
 MicroPython and CPython. It uses queued SDL audio and provides the same sync and
-async contract as hardware devices. `pygameaudio.py` provides CPython playback,
-primarily for pygame-ce applications on Windows. pygame-ce has no public capture
-API, so applications use `sdl2audio.audio_in` for host microphones.
+async contract as hardware devices.
+
+`pygameaudio.py` provides CPython playback and capture for pygame-ce hosts
+(typically Windows / `python.exe`). Playback uses `pygame.mixer`; capture uses
+`pygame._sdl2.AudioDevice` (`iscapture=True`).
+
+`webaudio.py` provides PyScript / browser playback (`AudioContext`) and capture
+(`getUserMedia`).
+
+Desktop `board_devices` selects a backend by host probe (`import pygame`,
+`import pyscript`, or Jupyter / SDL fallback) without importing `displaysys`.
+
+## WAV file devices (MCU-safe)
+
+`audiodev.wav_output(path, format)` and `audiodev.wav_input(path)` implement
+file-backed `PCMOutput` / `PCMInput` for PCM WAV only. Use them to record a
+prompt to storage or to simulate a microphone on boards that already ship
+`audiodev` without the desktop audio package:
+
+```python
+from audiodev import AudioFormat, wav_input, wav_output
+
+fmt = AudioFormat(24000, 1, 16)
+out = wav_output("/sd/prompt.wav", fmt)
+out.write(pcm_bytes)
+out.close()
+
+mic = wav_input("/sd/prompt.wav")
+```
 
 ## Speech
 

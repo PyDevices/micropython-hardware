@@ -129,10 +129,11 @@ def _init_runtime():
             get_events,
             timer_async=_env_bool("PYDISPLAY_TIMER_ASYNC", DEFAULT_TIMER_ASYNC),
         )
-        from board_devices import DEVICES as _DEVICES, setup_devices
 
-        DEVICES = _DEVICES
-        setup_devices(globals())
+    from board_devices import DEVICES as _DEVICES, setup_devices
+
+    DEVICES = _DEVICES
+    setup_devices(globals())
 
     globals()["display_drv"] = display_drv
     globals()["runtime"] = runtime

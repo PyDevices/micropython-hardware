@@ -7,6 +7,8 @@ The canonical implementation lives in:
 - drivers/boarddev.py
 - drivers/audio/audiodev.py
 - drivers/audio/sdl2audio.py
+- drivers/audio/pygameaudio.py
+- drivers/audio/webaudio.py
 
 This script writes a throwaway staging tree so the pip package and MIP package
 stay behaviorally identical.
@@ -26,6 +28,8 @@ MAPPINGS = (
     ("drivers/boarddev.py", "src/boarddev.py"),
     ("drivers/audio/audiodev.py", "src/audiodev.py"),
     ("drivers/audio/sdl2audio.py", "src/sdl2audio.py"),
+    ("drivers/audio/pygameaudio.py", "src/pygameaudio.py"),
+    ("drivers/audio/webaudio.py", "src/webaudio.py"),
 )
 
 

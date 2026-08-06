@@ -22,3 +22,7 @@ runtime = eventsys.Runtime(
 )
 
 display_drv.fill(0)
+
+from board_devices import DEVICES, setup_devices
+
+setup_devices(globals())

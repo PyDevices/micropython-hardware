@@ -4,9 +4,12 @@ Desktop bundle for non-MCU hosts using PyDevices display/runtime modules.
 
 Installed modules:
 - board_config
+- board_devices
 - boarddev
 - audiodev
 - sdl2audio
+- pygameaudio
+- webaudio
 
 Source of truth:
 - Runtime modules are generated from canonical sources in this repo

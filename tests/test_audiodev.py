@@ -6,7 +6,15 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "drivers" / "audio"))
 
-from audiodev import AudioFormat, AudioSession, PCMInput, PCMOutput, ToneOutput  # noqa: E402
+from audiodev import (  # noqa: E402
+    AudioFormat,
+    AudioSession,
+    PCMInput,
+    PCMOutput,
+    ToneOutput,
+    wav_input,
+    wav_output,
+)
 
 
 class FakeOutput:
@@ -201,6 +209,32 @@ class ToneTests(unittest.TestCase):
             self.assertEqual(power, [True, False])
 
         asyncio.run(run())
+
+
+class WavRoundTripTests(unittest.TestCase):
+    def test_wav_output_feeds_wav_input(self):
+        import tempfile
+
+        fmt = AudioFormat(24000, 1, 16)
+        pcm = b"".join((i * 100).to_bytes(2, "little", signed=True) for i in range(64))
+        with tempfile.TemporaryDirectory() as tmp:
+            path = str(Path(tmp) / "self_feed.wav")
+            out = wav_output(path, fmt)
+            self.assertEqual(out.write(pcm), len(pcm))
+            out.close()
+
+            mic = wav_input(path)
+            self.assertEqual(mic.format, fmt)
+            got = bytearray()
+            buf = bytearray(32)
+            while True:
+                count = mic.readinto(buf)
+                if not count:
+                    break
+                got.extend(buf[:count])
+            self.assertEqual(mic.readinto(buf), 0)
+            mic.close()
+            self.assertEqual(bytes(got), pcm)
 
 
 if __name__ == "__main__":
