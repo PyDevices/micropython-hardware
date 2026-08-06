@@ -33,6 +33,16 @@ class PygameOutputStream:
         self.poll_ms = int(poll_ms)
         self.channel = None
         self._pygame = None
+        # Bytes that could not be handed to the channel yet because both the
+        # playing and queued slots were full. write()/awrite() used to spin
+        # (sleep-poll) the *caller's* thread until a slot freed — on the sync
+        # tick path that caller is the app's main thread, so every stall this
+        # produced blocked event/redraw processing too (measured 2-24ms
+        # stalls every ~10 chunks). Accumulate instead and flush
+        # opportunistically; a held-back chunk drains on the very next
+        # write() (one chunk period later), well within the mixer's
+        # look-ahead budget, and the caller never blocks.
+        self._pending = bytearray()
 
     def open(self):
         if self.channel is not None:
@@ -42,12 +52,19 @@ class PygameOutputStream:
         size = -self.format.bits if self.format.signed else self.format.bits
         current = pygame.mixer.get_init()
         wanted = (self.format.rate, size, self.format.channels)
+        # allowedchanges defaults to ALLOW_FREQUENCY_CHANGE | ALLOW_CHANNELS_CHANGE,
+        # so SDL is free to silently renegotiate e.g. mono -> stereo against the
+        # device's preferred layout. Sound(buffer=...) then reinterprets our raw
+        # PCM at the *actual* (changed) layout — a mono 40ms chunk gets read as
+        # half as many stereo frames and plays out in ~20ms, starving the
+        # channel between writes (audible dropouts/"jitter"). Pin the format so
+        # what we request is what Sound() actually gets.
         if current is None:
-            pygame.mixer.init(*wanted, buffer=self.buffer)
+            pygame.mixer.init(*wanted, buffer=self.buffer, allowedchanges=0)
         elif current[:3] != wanted:
             # pygame.init() may have opened the mixer at a default rate/layout.
             pygame.mixer.quit()
-            pygame.mixer.init(*wanted, buffer=self.buffer)
+            pygame.mixer.init(*wanted, buffer=self.buffer, allowedchanges=0)
         self._pygame = pygame
         self.channel = pygame.mixer.find_channel(force=True)
         return self
@@ -55,40 +72,52 @@ class PygameOutputStream:
     def _sound(self, buf):
         return self._pygame.mixer.Sound(buffer=bytes(buf))
 
+    def _push(self, buf):
+        """Hand *buf* to the channel now if a slot is free; else queue it.
+
+        Returns True when *buf* was accepted by the channel, False when both
+        slots were busy (caller should hold it in ``_pending``).
+        """
+        if not self.channel.get_busy():
+            self.channel.play(self._sound(buf))
+            return True
+        if self.channel.get_queue() is None:
+            self.channel.queue(self._sound(buf))
+            return True
+        return False
+
     def write(self, buf):
         self.open()
-        sound = self._sound(buf)
-        if not self.channel.get_busy():
-            self.channel.play(sound)
-        else:
-            while self.channel.get_queue() is not None:
-                _sleep_ms(self.poll_ms)
-            self.channel.queue(sound)
+        if self._pending:
+            self._pending.extend(buf)
+            if self._push(self._pending):
+                self._pending = bytearray()
+        elif not self._push(buf):
+            self._pending = bytearray(buf)
         return len(buf)
 
     async def awrite(self, buf):
-        self.open()
-        sound = self._sound(buf)
-        if not self.channel.get_busy():
-            self.channel.play(sound)
-        else:
-            while self.channel.get_queue() is not None:
-                await _asleep_ms(self.poll_ms)
-            self.channel.queue(sound)
-        return len(buf)
+        # Same non-blocking accumulate-and-flush path as write(); no sleep
+        # needed since we never wait on the mixer here.
+        return self.write(buf)
 
     def drain(self):
-        while self.channel is not None and self.channel.get_busy():
+        while self.channel is not None and (self.channel.get_busy() or self._pending):
+            if self._pending and self._push(self._pending):
+                self._pending = bytearray()
             _sleep_ms(self.poll_ms)
 
     async def adrain(self):
-        while self.channel is not None and self.channel.get_busy():
+        while self.channel is not None and (self.channel.get_busy() or self._pending):
+            if self._pending and self._push(self._pending):
+                self._pending = bytearray()
             await _asleep_ms(self.poll_ms)
 
     def close(self):
         if self.channel is not None:
             self.channel.stop()
             self.channel = None
+        self._pending = bytearray()
 
 
 def _pygame_audio_format(fmt):
