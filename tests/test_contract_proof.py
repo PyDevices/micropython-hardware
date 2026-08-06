@@ -13,8 +13,8 @@ import sys
 import unittest
 
 HW = Path(__file__).resolve().parents[1]
-ROOT = HW.parent / "pydisplay"
-LIB = ROOT / "src" / "lib"
+# boarddev.py is localized under drivers/ (not pulled from the pydisplay repo).
+LIB = HW / "drivers"
 
 # Graduated campaign boards: name -> path under micropython-hardware/board_configs/
 EXPECTED = {
@@ -157,7 +157,7 @@ class TestGraduatedBoardLayout(unittest.TestCase):
                 self.assertIn("boarddev.py", urls)
                 joined = " ".join(u[1] for u in meta["urls"])
                 self.assertIn("micropython-hardware/", joined)
-                self.assertIn("pydisplay/src/lib/boarddev.py", joined)
+                self.assertIn("micropython-hardware/drivers/boarddev.py", joined)
 
 
 @unittest.skipUnless(HW.is_dir(), "sibling micropython-hardware clone required")
