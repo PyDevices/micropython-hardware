@@ -88,6 +88,87 @@ def _await_js(value):
     return value
 
 
+def _new_audio_context(sample_rate):
+    """Create an AudioContext; MicroPython JS FFI rejects keyword args to ``.new``."""
+    if Object is not None:
+        opts = Object.new()
+        opts.sampleRate = int(sample_rate)
+        return AudioContext.new(opts)
+    return AudioContext.new()
+
+
+def _media_audio_constraints():
+    if Object is not None:
+        constraints = Object.new()
+        constraints.audio = True
+        return constraints
+    return {"audio": True}
+
+
+def _try_resume_context(ctx, timeout_ms=80):
+    """Best-effort AudioContext.resume(); never block forever (autoplay policy)."""
+    if ctx is None or str(ctx.state) != "suspended":
+        return str(getattr(ctx, "state", ""))
+    try:
+        pending = ctx.resume()
+    except Exception:
+        return str(ctx.state)
+    if not (hasattr(pending, "then") and create_proxy is not None):
+        return str(ctx.state)
+    done = {"finished": False}
+
+    def _ok(_result=None):
+        done["finished"] = True
+
+    def _err(_error=None):
+        done["finished"] = True
+
+    try:
+        pending.then(create_proxy(_ok), create_proxy(_err))
+    except Exception:
+        return str(ctx.state)
+    start = time.time()
+    while not done["finished"] and (time.time() - start) * 1000.0 < timeout_ms:
+        _sleep_ms(4)
+    return str(ctx.state)
+
+
+_GESTURE_ARMED = False
+
+
+def _arm_resume_on_gesture(ctx):
+    """Resume a suspended context on the next pointer/key event (autoplay unlock)."""
+    global _GESTURE_ARMED
+    if ctx is None or create_proxy is None or _GESTURE_ARMED:
+        return
+    try:
+        from js import document
+    except Exception:
+        return
+
+    def _on(_ev=None):
+        try:
+            ctx.resume()
+        except Exception:
+            pass
+
+    proxy = create_proxy(_on)
+    opts = None
+    if Object is not None:
+        opts = Object.new()
+        opts.once = True
+    try:
+        if opts is not None:
+            document.addEventListener("pointerdown", proxy, opts)
+            document.addEventListener("keydown", proxy, opts)
+        else:
+            document.addEventListener("pointerdown", proxy)
+            document.addEventListener("keydown", proxy)
+        _GESTURE_ARMED = True
+    except Exception:
+        pass
+
+
 class WebOutputStream:
     """Queued PCM playback via AudioContext + AudioBufferSourceNode."""
 
@@ -104,9 +185,11 @@ class WebOutputStream:
         _require_browser()
         if self._ctx is not None:
             return self
-        self._ctx = AudioContext.new(sampleRate=self.format.rate)
-        if self._ctx.state == "suspended":
-            self._ctx.resume()
+        self._ctx = _new_audio_context(self.format.rate)
+        state = _try_resume_context(self._ctx)
+        if state == "suspended":
+            _arm_resume_on_gesture(self._ctx)
+            print("webaudio: AudioContext suspended — click/tap the page to hear audio")
         self._next_time = float(self._ctx.currentTime)
         return self
 
@@ -144,12 +227,44 @@ class WebOutputStream:
 
     def drain(self):
         self.open()
+        # Autoplay policy can leave the context suspended; currentTime then
+        # never advances and a naive wait would spin forever on WASM.
+        if str(self._ctx.state) != "running":
+            _try_resume_context(self._ctx)
+            _arm_resume_on_gesture(self._ctx)
+        if str(self._ctx.state) != "running":
+            # Keep scheduled buffers alive for wall-clock duration so a later
+            # user gesture can resume and play them before close().
+            remaining = max(0.0, self._next_time - float(self._ctx.currentTime))
+            if remaining > 0:
+                _sleep_ms(int(remaining * 1000.0) + 100)
+            return
+        remaining = self._next_time - float(self._ctx.currentTime)
+        if remaining <= 0:
+            return
+        deadline = time.time() + remaining + 0.5
         while float(self._ctx.currentTime) < self._next_time:
+            if str(self._ctx.state) != "running" or time.time() > deadline:
+                break
             _sleep_ms(self.poll_ms)
 
     async def adrain(self):
         self.open()
+        if str(self._ctx.state) != "running":
+            _try_resume_context(self._ctx)
+            _arm_resume_on_gesture(self._ctx)
+        if str(self._ctx.state) != "running":
+            remaining = max(0.0, self._next_time - float(self._ctx.currentTime))
+            if remaining > 0:
+                await _asleep_ms(int(remaining * 1000.0) + 100)
+            return
+        remaining = self._next_time - float(self._ctx.currentTime)
+        if remaining <= 0:
+            return
+        deadline = time.time() + remaining + 0.5
         while float(self._ctx.currentTime) < self._next_time:
+            if str(self._ctx.state) != "running" or time.time() > deadline:
+                break
             await _asleep_ms(self.poll_ms)
 
     def close(self):
@@ -202,12 +317,11 @@ class WebInputStream:
         _require_browser()
         if self._ctx is not None:
             return self
-        constraints = Object.new(audio=True) if Object is not None else {"audio": True}
+        constraints = _media_audio_constraints()
         media = navigator.mediaDevices.getUserMedia(constraints)
         self._stream = _await_js(media)
-        self._ctx = AudioContext.new(sampleRate=self.format.rate)
-        if self._ctx.state == "suspended":
-            self._ctx.resume()
+        self._ctx = _new_audio_context(self.format.rate)
+        _try_resume_context(self._ctx)
         self._source = self._ctx.createMediaStreamSource(self._stream)
         self._processor = self._ctx.createScriptProcessor(self.buffer_size, 1, 1)
         self._proxy = create_proxy(self._on_audio)
