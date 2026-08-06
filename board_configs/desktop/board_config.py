@@ -5,8 +5,9 @@ Jupyter, and PyScript). Runtime/display initialization is lazy so importing
 ``board_config`` does not require active SDL/audio devices.
 """
 
-import os
 import sys
+
+from displaysys import env_bool, env_float, env_int
 
 DEFAULT_TIMER_ASYNC = False
 
@@ -15,42 +16,9 @@ height = 480
 rotation = 0
 scale = 2.0
 
-
-def _env_bool(name, default):
-    value = os.getenv(name)
-    if value is None:
-        return default
-    value = value.strip().lower()
-    if value in ("1", "true", "yes", "on"):
-        return True
-    if value in ("0", "false", "no", "off"):
-        return False
-    return default
-
-
-def _env_int(name, default):
-    value = os.getenv(name)
-    if value is None:
-        return default
-    try:
-        return int(value)
-    except Exception:
-        return default
-
-
-def _env_float(name, default):
-    value = os.getenv(name)
-    if value is None:
-        return default
-    try:
-        return float(value)
-    except Exception:
-        return default
-
-
-width = _env_int("PYDISPLAY_WIDTH", width)
-height = _env_int("PYDISPLAY_HEIGHT", height)
-scale = _env_float("PYDISPLAY_SCALE", scale)
+width = env_int("PYDISPLAY_WIDTH", width)
+height = env_int("PYDISPLAY_HEIGHT", height)
+scale = env_float("PYDISPLAY_SCALE", scale)
 
 
 def _host_kind():
@@ -127,7 +95,7 @@ def _init_runtime():
         runtime = _make_runtime(
             display_drv,
             get_events,
-            timer_async=_env_bool("PYDISPLAY_TIMER_ASYNC", DEFAULT_TIMER_ASYNC),
+            timer_async=env_bool("PYDISPLAY_TIMER_ASYNC", DEFAULT_TIMER_ASYNC),
         )
 
     from board_devices import DEVICES as _DEVICES, setup_devices
