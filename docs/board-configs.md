@@ -181,13 +181,20 @@ Tri-color / 4-gray configs use `color_depth=2` (0=white, 1=black, 2=accent). ACe
 
 ## Default config
 
-`src/lib/board_config.py` — auto-selected for desktop, PyScript, and Jupyter when no other config is installed.
+[`board_configs/desktop/`](../board_configs/desktop/) — universal non-MCU
+`board_config` for desktop, PyScript, and Jupyter. Host display selection is
+`displaysys.AutoDisplay` (PS / JN / PG→SDL); the config itself is MCU-shaped
+eager wiring (`display_drv` + `runtime` + `setup_devices`).
 
 | Branch | `runtime.timer_async` |
 |--------|------------------------|
 | PyScript | `True` (asyncio-native host) |
 | Jupyter | `True` (ipyevents / kernel loop) |
 | PG/SDL desktop | `False` unless **`PYDISPLAY_TIMER_ASYNC`** is set |
+
+Panel size overrides (before `import board_config`): `PYDISPLAY_WIDTH`,
+`PYDISPLAY_HEIGHT`, `PYDISPLAY_ROTATION`, `PYDISPLAY_SCALE`. Apps should read
+geometry from `display_drv`, not module-level names on `board_config`.
 
 Set the env var **before** `import board_config` (or any import that loads it).
 Truthy: `1`, `true`, `yes`, `on`. Falsey: `0`, `false`, `no`, `off`. Unknown

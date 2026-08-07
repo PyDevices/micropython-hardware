@@ -1,193 +1,46 @@
-"""Universal non-MCU board configuration.
-
-This module targets desktop-like hosts (CPython, MicroPython unix/windows,
-Jupyter, and PyScript). Runtime/display initialization is lazy so importing
-``board_config`` does not require active SDL/audio devices.
-"""
+"""Universal non-MCU board configuration (desktop / Jupyter / PyScript)."""
 
 import sys
 
-from displaysys import env_bool, env_float, env_get, env_int, env_set
+import eventsys
+from displaysys import AutoDisplay, env_bool, env_float, env_get, env_int, env_set
 
 if sys.platform == "win32":
     # SDL2's default Windows audio driver (WASAPI) has a compatibility issue
     # with pygame.mixer.Channel's play()/queue() small-chunk playback pattern
     # that produces periodic audible glitches (confirmed via runtime A/B test:
     # SDL_AUDIODRIVER=directsound is glitch-free with identical PCM output).
-    # Must be set before PGDisplay's pg.init() in _desktop_display() below --
-    # SDL locks in its audio driver at the first SDL_InitSubSystem(SDL_INIT_AUDIO)
-    # call, and pygameaudio.py opens the mixer lazily on first audio_out() use,
-    # well after that has already happened. An explicit user choice is left
-    # alone. env_set, not os.environ: MicroPython Windows is ``win32`` too and
-    # has only os.putenv, so os.environ would raise here on import.
+    # Must be set before AutoDisplay → PGDisplay's pg.init() -- SDL locks in
+    # its audio driver at the first SDL_InitSubSystem(SDL_INIT_AUDIO) call, and
+    # pygameaudio.py opens the mixer lazily on first audio_out() use, well
+    # after that has already happened. An explicit user choice is left alone.
+    # env_set, not os.environ: MicroPython Windows is ``win32`` too and has
+    # only os.putenv, so os.environ would raise here on import.
     if env_get("SDL_AUDIODRIVER") is None:
         env_set("SDL_AUDIODRIVER", "directsound")
 
-DEFAULT_TIMER_ASYNC = False
+_width = env_int("PYDISPLAY_WIDTH", 320)
+_height = env_int("PYDISPLAY_HEIGHT", 480)
+_rotation = env_int("PYDISPLAY_ROTATION", 0)
+_scale = env_float("PYDISPLAY_SCALE", 2.0)
 
-width = 320
-height = 480
-rotation = 0
-scale = 2.0
+_auto = AutoDisplay(
+    width=_width,
+    height=_height,
+    rotation=_rotation,
+    scale=_scale,
+    title="{} on {}".format(sys.implementation.name, sys.platform),
+)
 
-width = env_int("PYDISPLAY_WIDTH", width)
-height = env_int("PYDISPLAY_HEIGHT", height)
-scale = env_float("PYDISPLAY_SCALE", scale)
+display_drv = _auto.display
+runtime = eventsys.Runtime(
+    displays=[display_drv],
+    host_read=_auto.host_read,
+    timer_async=env_bool("PYDISPLAY_TIMER_ASYNC", _auto.timer_async),
+)
 
+display_drv.fill(0)
 
-def _host_kind():
-    try:
-        import pyscript  # noqa: F401
+from board_devices import DEVICES, setup_devices
 
-        return "pyscript"
-    except Exception:
-        pass
-    try:
-        get_ipython()  # noqa: F821
-        return "jupyter"
-    except Exception:
-        return "desktop"
-
-
-def _make_runtime(display, host_read, timer_async):
-    import eventsys
-
-    return eventsys.Runtime(
-        displays=[display],
-        host_read=host_read,
-        timer_async=timer_async,
-    )
-
-
-def _desktop_display(title):
-    try:
-        from displaysys.pgdisplay import PGDisplay as DTDisplay
-        from displaysys.pgdisplay import get_events
-    except Exception:
-        from displaysys.sdldisplay import SDLDisplay as DTDisplay
-        from displaysys.sdldisplay import get_events
-
-    display = DTDisplay(
-        width=width,
-        height=height,
-        rotation=rotation,
-        title=title,
-        scale=scale,
-    )
-    return display, get_events
-
-
-_INITIALIZED = False
-_INITIALIZING_IDENT = None
-DEVICES = frozenset()
-
-
-def _thread_ident():
-    """Identify the calling thread, or None on hosts without threads."""
-    try:
-        import _thread
-
-        return _thread.get_ident()
-    except (ImportError, AttributeError):
-        return None
-
-
-def _await_init(timeout_ms=15000):
-    """Block until the thread already inside :func:`_init_runtime` publishes."""
-    import time
-
-    from multimer import ticks_diff, ticks_ms
-
-    start = ticks_ms()
-    while not _INITIALIZED and ticks_diff(ticks_ms(), start) < timeout_ms:
-        time.sleep(0.01)
-
-
-def _init_runtime():
-    global _INITIALIZING_IDENT
-
-    if _INITIALIZED:
-        return
-
-    # Building a display and Runtime takes long enough (seconds, on a real
-    # desktop window) that other callers arrive while it is still under way, and
-    # ``display_drv`` / ``runtime`` are not published until the end. Letting a
-    # second caller build its own pair does not merely duplicate them: the new
-    # Runtime's timer asks for ``runtime`` from its own thread, so every
-    # duplicate spawns another duplicate.
-    if _INITIALIZING_IDENT is not None:
-        ident = _thread_ident()
-        if ident is None or ident == _INITIALIZING_IDENT:
-            # Re-entered on the initializing thread (a signal-driven timer
-            # callback, say). There is nothing to hand back yet, and waiting
-            # would wait on ourselves: report "not ready" via AttributeError.
-            return
-        _await_init()
-        return
-
-    ident = _thread_ident()
-    _INITIALIZING_IDENT = ident if ident is not None else True
-    try:
-        _init_runtime_once()
-    finally:
-        _INITIALIZING_IDENT = None
-
-
-def _init_runtime_once():
-    global _INITIALIZED
-    global DEVICES
-
-    host = _host_kind()
-
-    if host == "pyscript":
-        from displaysys.psdisplay import PSDevices, PSDisplay
-
-        display_drv = PSDisplay("display_canvas", width, height)
-        devices_drv = PSDevices("display_canvas", display_drv)
-        runtime = _make_runtime(display_drv, devices_drv.read, timer_async=True)
-    elif host == "jupyter":
-        from displaysys.jndisplay import JNDevices, JNDisplay
-
-        display_drv = JNDisplay(width, height)
-        devices_drv = JNDevices(display_drv)
-        runtime = _make_runtime(display_drv, devices_drv.read, timer_async=True)
-    else:
-        display_drv, get_events = _desktop_display(
-            "{} on {}".format(sys.implementation.name, sys.platform)
-        )
-        runtime = _make_runtime(
-            display_drv,
-            get_events,
-            timer_async=env_bool("PYDISPLAY_TIMER_ASYNC", DEFAULT_TIMER_ASYNC),
-        )
-
-    from board_devices import DEVICES as _DEVICES, setup_devices
-
-    DEVICES = _DEVICES
-    setup_devices(globals())
-
-    globals()["display_drv"] = display_drv
-    globals()["runtime"] = runtime
-    display_drv.fill(0)
-    _INITIALIZED = True
-
-
-def __getattr__(name):
-    if name in ("display_drv", "runtime", "audio_out", "audio_in"):
-        _init_runtime()
-        if name in globals():
-            return globals()[name]
-        current_getattr = globals().get("__getattr__")
-        if current_getattr is not None and current_getattr is not _BOOTSTRAP_GETATTR:
-            return current_getattr(name)
-    raise AttributeError("module has no attribute {!r}".format(name))
-
-
-_BOOTSTRAP_GETATTR = __getattr__
-
-
-def __dir__():
-    names = set(globals().keys())
-    names.update(("display_drv", "runtime"))
-    names.update(DEVICES)
-    return sorted(names)
+setup_devices(globals())

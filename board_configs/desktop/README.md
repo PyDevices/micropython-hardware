@@ -38,10 +38,12 @@ Run CircuitPython from that same working directory so it imports from `./lib`.
 ```python
 import board_config
 
-# Lazy init: display/audio setup occurs on first access.
 display_drv = board_config.display_drv
 runtime = board_config.runtime
 ```
+
+`display_drv` and `runtime` are constructed at import time (same shape as MCU
+board configs). Lazy audio roles still come from `board_devices`.
 
 This bundle installs:
 - `board_config.py`
@@ -53,11 +55,15 @@ This bundle installs:
 - `webaudio.py`
 - plus `displaysys`, `eventsys`, and `multimer` from the PyDevices MIP index
 
-`board_config.py` selects host behavior at runtime:
-- PyScript: `PSDisplay` + `webaudio`
-- Jupyter: `JNDisplay` + `sdl2audio` (kernel host)
-- Desktop CPython/MicroPython unix/windows: `PGDisplay` first, then `SDLDisplay` fallback;
-  audio follows `import pygame` → `pygameaudio`, else `sdl2audio`
+Display host selection is `displaysys.AutoDisplay`:
+- PyScript: `PSDisplay`
+- Jupyter: `JNDisplay`
+- Desktop CPython/MicroPython unix/windows: `PGDisplay` first, then `SDLDisplay` fallback
+
+Audio (in `board_devices`) follows the same host probe:
+- PyScript: `webaudio`
+- Jupyter: `sdl2audio` (kernel host)
+- Desktop: `import pygame` → `pygameaudio`, else `sdl2audio`
 
 Terminal-only apps (no display) can `import board_devices` and call
 `audio_out()` / `audio_in()` without opening a window.

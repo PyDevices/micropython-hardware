@@ -129,7 +129,9 @@ python -m pip install \
 python - <<'PY'
 import board_config
 print(board_config.__file__)
-print('lazy display?', 'display_drv' in board_config.__dict__)
+print('display_drv', type(board_config.display_drv).__name__)
+print('runtime', board_config.runtime is not None)
+print('DEVICES', board_config.DEVICES)
 PY
 ```
 
@@ -150,7 +152,9 @@ python.exe -m pip install --user \
 python.exe - <<'PY'
 import board_config
 print(board_config.__file__)
-print('lazy display?', 'display_drv' in board_config.__dict__)
+print('display_drv', type(board_config.display_drv).__name__)
+print('runtime', board_config.runtime is not None)
+print('DEVICES', board_config.DEVICES)
 PY
 ```
 
