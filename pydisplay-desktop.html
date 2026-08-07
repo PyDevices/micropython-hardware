@@ -68,9 +68,12 @@ href="install-workflows.html">install-workflows.md</a></p>
 <li>"Verify with .venv"</li>
 <li>"Verify without .venv (python.exe / pip.exe)"</li>
 </ul>
-<p><code>board_config</code> uses lazy initialization. Display/audio
-setup runs when runtime objects are first accessed, not at import
-time.</p>
+<p><code>board_config</code> constructs <code>display_drv</code> and
+<code>runtime</code> at import time (MCU-shaped eager wiring via
+<code>displaysys.AutoDisplay</code>). Lazy roles such as
+<code>audio_out</code> / <code>audio_in</code> still come from
+<code>board_devices</code> and allocate on first access. Terminal-only
+apps can <code>import board_devices</code> without opening a window.</p>
 <h2 id="publish-to-testpypi">Publish to TestPyPI</h2>
 <div class="sourceCode" id="cb1"><pre
 class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="va">TESTPYPI_API_TOKEN</span><span class="op">=</span>... <span class="ex">./scripts/publish_testpypi.sh</span></span></code></pre></div>

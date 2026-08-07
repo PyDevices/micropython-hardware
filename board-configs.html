@@ -549,8 +549,13 @@ under <code>cp/epaperdisplay/</code>):
 </tbody>
 </table>
 <h2 id="default-config">Default config</h2>
-<p><code>src/lib/board_config.py</code> — auto-selected for desktop,
-PyScript, and Jupyter when no other config is installed.</p>
+<p><a
+href="../board_configs/desktop/"><code>board_configs/desktop/</code></a>
+— universal non-MCU <code>board_config</code> for desktop, PyScript, and
+Jupyter. Host display selection is <code>displaysys.AutoDisplay</code>
+(PS / JN / PG→SDL); the config itself is MCU-shaped eager wiring
+(<code>display_drv</code> + <code>runtime</code> +
+<code>setup_devices</code>).</p>
 <table>
 <thead>
 <tr class="header">
@@ -574,6 +579,11 @@ PyScript, and Jupyter when no other config is installed.</p>
 </tr>
 </tbody>
 </table>
+<p>Panel size overrides (before <code>import board_config</code>):
+<code>PYDISPLAY_WIDTH</code>, <code>PYDISPLAY_HEIGHT</code>,
+<code>PYDISPLAY_ROTATION</code>, <code>PYDISPLAY_SCALE</code>. Apps
+should read geometry from <code>display_drv</code>, not module-level
+names on <code>board_config</code>.</p>
 <p>Set the env var <strong>before</strong>
 <code>import board_config</code> (or any import that loads it). Truthy:
 <code>1</code>, <code>true</code>, <code>yes</code>, <code>on</code>.

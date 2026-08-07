@@ -145,8 +145,10 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="
 <span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> <span class="at">-</span> <span class="op">&lt;&lt;&#39;PY&#39;</span></span>
 <span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="st">import board_config</span></span>
 <span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="st">print(board_config.__file__)</span></span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="st">print(&#39;lazy display?&#39;, &#39;display_drv&#39; in board_config.__dict__)</span></span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="op">PY</span></span></code></pre></div>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="st">print(&#39;display_drv&#39;, type(board_config.display_drv).__name__)</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="st">print(&#39;runtime&#39;, board_config.runtime is not None)</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="st">print(&#39;DEVICES&#39;, board_config.DEVICES)</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="op">PY</span></span></code></pre></div>
 <h2 id="verify-without-venv-pythonexe--pipexe">Verify without .venv
 (python.exe / pip.exe)</h2>
 <div class="sourceCode" id="cb9"><pre
@@ -164,8 +166,10 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="
 <span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="ex">python.exe</span> <span class="at">-</span> <span class="op">&lt;&lt;&#39;PY&#39;</span></span>
 <span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="st">import board_config</span></span>
 <span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="st">print(board_config.__file__)</span></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="st">print(&#39;lazy display?&#39;, &#39;display_drv&#39; in board_config.__dict__)</span></span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="op">PY</span></span></code></pre></div>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="st">print(&#39;display_drv&#39;, type(board_config.display_drv).__name__)</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="st">print(&#39;runtime&#39;, board_config.runtime is not None)</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="st">print(&#39;DEVICES&#39;, board_config.DEVICES)</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="op">PY</span></span></code></pre></div>
 <p><code>pip.exe</code> should resolve to the same interpreter as
 <code>python.exe</code> for consistent results.</p>
   </main>
