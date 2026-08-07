@@ -78,15 +78,64 @@ def _desktop_display(title):
 
 
 _INITIALIZED = False
+_INITIALIZING_IDENT = None
 DEVICES = frozenset()
 
 
+def _thread_ident():
+    """Identify the calling thread, or None on hosts without threads."""
+    try:
+        import _thread
+
+        return _thread.get_ident()
+    except (ImportError, AttributeError):
+        return None
+
+
+def _await_init(timeout_ms=15000):
+    """Block until the thread already inside :func:`_init_runtime` publishes."""
+    import time
+
+    from multimer import ticks_diff, ticks_ms
+
+    start = ticks_ms()
+    while not _INITIALIZED and ticks_diff(ticks_ms(), start) < timeout_ms:
+        time.sleep(0.01)
+
+
 def _init_runtime():
-    global _INITIALIZED
-    global DEVICES
+    global _INITIALIZING_IDENT
 
     if _INITIALIZED:
         return
+
+    # Building a display and Runtime takes long enough (seconds, on a real
+    # desktop window) that other callers arrive while it is still under way, and
+    # ``display_drv`` / ``runtime`` are not published until the end. Letting a
+    # second caller build its own pair does not merely duplicate them: the new
+    # Runtime's timer asks for ``runtime`` from its own thread, so every
+    # duplicate spawns another duplicate.
+    if _INITIALIZING_IDENT is not None:
+        ident = _thread_ident()
+        if ident is None or ident == _INITIALIZING_IDENT:
+            # Re-entered on the initializing thread (a signal-driven timer
+            # callback, say). There is nothing to hand back yet, and waiting
+            # would wait on ourselves: report "not ready" via AttributeError.
+            return
+        _await_init()
+        return
+
+    ident = _thread_ident()
+    _INITIALIZING_IDENT = ident if ident is not None else True
+    try:
+        _init_runtime_once()
+    finally:
+        _INITIALIZING_IDENT = None
+
+
+def _init_runtime_once():
+    global _INITIALIZED
+    global DEVICES
 
     host = _host_kind()
 
