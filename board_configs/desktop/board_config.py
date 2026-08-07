@@ -5,10 +5,9 @@ Jupyter, and PyScript). Runtime/display initialization is lazy so importing
 ``board_config`` does not require active SDL/audio devices.
 """
 
-import os
 import sys
 
-from displaysys import env_bool, env_float, env_int
+from displaysys import env_bool, env_float, env_get, env_int, env_set
 
 if sys.platform == "win32":
     # SDL2's default Windows audio driver (WASAPI) has a compatibility issue
@@ -18,9 +17,11 @@ if sys.platform == "win32":
     # Must be set before PGDisplay's pg.init() in _desktop_display() below --
     # SDL locks in its audio driver at the first SDL_InitSubSystem(SDL_INIT_AUDIO)
     # call, and pygameaudio.py opens the mixer lazily on first audio_out() use,
-    # well after that has already happened. setdefault() leaves an explicit
-    # user choice alone.
-    os.environ.setdefault("SDL_AUDIODRIVER", "directsound")
+    # well after that has already happened. An explicit user choice is left
+    # alone. env_set, not os.environ: MicroPython Windows is ``win32`` too and
+    # has only os.putenv, so os.environ would raise here on import.
+    if env_get("SDL_AUDIODRIVER") is None:
+        env_set("SDL_AUDIODRIVER", "directsound")
 
 DEFAULT_TIMER_ASYNC = False
 
