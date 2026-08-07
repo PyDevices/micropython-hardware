@@ -5,6 +5,10 @@
 # next_release_version.sh (highest vX.Y.Z tag + 1 patch). Pushing the tag
 # triggers this repo's publish workflow.
 #
+# Before tagging, pre-bumps the pydisplay-desktop floor in sibling
+# pydisplay/requirements.txt (packages this tag publishes) and commits there
+# when needed, so pydisplay does not need a post-publish floor commit.
+#
 # Usage:
 #   ./scripts/publish_release_tag.sh                # auto version; create tag
 #   ./scripts/publish_release_tag.sh --push         # auto version; create + push
@@ -12,6 +16,8 @@
 #   ./scripts/publish_release_tag.sh --dry-run      # preview only
 #
 # Preview the next version:  ./scripts/next_release_version.sh --verbose
+#
+# Override sibling checkout: PYDISPLAY_ROOT=/path/to/pydisplay
 
 set -euo pipefail
 
@@ -27,8 +33,11 @@ Create an annotated git tag vVERSION on the current commit.
 
   VERSION     Optional semver X.Y.Z. When omitted, computed by
               scripts/next_release_version.sh (highest tag + 1 patch).
-  --push      Push the tag to origin (triggers this repo's publish workflow)
-  --dry-run   Print the version that would be tagged; do not create a tag
+  --push      Push pydisplay floors (if committed), this branch, and the tag
+  --dry-run   Print the version / floor bump; do not commit or tag
+
+Before tagging, bumps pydisplay/requirements.txt ``pydisplay-desktop`` to
+VERSION (sibling repo; override with PYDISPLAY_ROOT).
 
 Examples:
   ./scripts/publish_release_tag.sh --push
@@ -84,11 +93,33 @@ fi
 
 TAG="v$VERSION"
 
+resolve_pydisplay_root() {
+    if [[ -n "${PYDISPLAY_ROOT:-}" ]]; then
+        printf '%s\n' "$(cd "$PYDISPLAY_ROOT" && pwd)"
+        return
+    fi
+    local sibling="$SOURCE_REPO/../pydisplay"
+    if [[ -d "$sibling/scripts" && -f "$sibling/requirements.txt" ]]; then
+        printf '%s\n' "$(cd "$sibling" && pwd)"
+        return
+    fi
+    local home_sibling="${HOME}/gh/pydevices/pydisplay"
+    if [[ -d "$home_sibling/scripts" && -f "$home_sibling/requirements.txt" ]]; then
+        printf '%s\n' "$(cd "$home_sibling" && pwd)"
+        return
+    fi
+    echo "Error: pydisplay checkout not found (set PYDISPLAY_ROOT)." >&2
+    return 1
+}
+
 cd "$SOURCE_REPO"
 
-if ! git diff --quiet || ! git diff --cached --quiet; then
-    echo "Error: working tree has uncommitted changes; commit or stash before tagging." >&2
-    exit 1
+# Dirty tree only matters for real tag/commit; allow --dry-run on WIP branches.
+if [[ "$DRY_RUN" -eq 0 ]]; then
+    if ! git diff --quiet || ! git diff --cached --quiet; then
+        echo "Error: working tree has uncommitted changes; commit or stash before tagging." >&2
+        exit 1
+    fi
 fi
 
 if git rev-parse "$TAG" >/dev/null 2>&1; then
@@ -102,17 +133,46 @@ else
     echo "Version: ${VERSION} (explicit)"
 fi
 
+PYDISPLAY_ROOT="$(resolve_pydisplay_root)"
+echo "Pre-bump pydisplay-desktop>=${VERSION} in ${PYDISPLAY_ROOT}/requirements.txt"
+
 if [[ "$DRY_RUN" -eq 1 ]]; then
-    echo "Dry run — would create tag $TAG on $(git rev-parse --short HEAD)"
+    echo "Dry run — would bump pydisplay floors, commit there if needed, then create tag $TAG here"
     exit 0
+fi
+
+if ! git -C "$PYDISPLAY_ROOT" diff --quiet || ! git -C "$PYDISPLAY_ROOT" diff --cached --quiet; then
+    echo "Error: pydisplay working tree has uncommitted changes; commit or stash before tagging." >&2
+    exit 1
+fi
+
+python3 "$PYDISPLAY_ROOT/scripts/refresh-requirements.py" \
+    --path "$PYDISPLAY_ROOT/requirements.txt" \
+    --set "pydisplay-desktop=${VERSION}"
+
+if ! git -C "$PYDISPLAY_ROOT" diff --quiet -- requirements.txt; then
+    git -C "$PYDISPLAY_ROOT" add requirements.txt
+    git -C "$PYDISPLAY_ROOT" commit -m "$(cat <<EOF
+Bump pydisplay-desktop TestPyPI floor for v${VERSION}.
+
+EOF
+)"
+    echo "Committed pydisplay requirements.txt floor bump for pydisplay-desktop $VERSION"
+    if [[ "$DO_PUSH" -eq 1 ]]; then
+        git -C "$PYDISPLAY_ROOT" push origin HEAD
+        echo "Pushed pydisplay HEAD"
+    fi
+else
+    echo "pydisplay-desktop floor already at $VERSION; no pydisplay floor commit"
 fi
 
 git tag -a "$TAG" -m "Release $VERSION"
 echo "Created annotated tag $TAG on $(git rev-parse --short HEAD)"
 
 if [[ "$DO_PUSH" -eq 1 ]]; then
+    git push origin HEAD
     git push origin "$TAG"
-    echo "Pushed $TAG — this repo's publish workflow should start shortly."
+    echo "Pushed HEAD and $TAG — this repo's publish workflow should start shortly."
 else
-    echo "Push to publish: git push origin $TAG"
+    echo "Push to publish: git push origin HEAD && git push origin $TAG"
 fi
