@@ -5,10 +5,25 @@ try:
 except ImportError:  # pragma: no cover
     import uasyncio as asyncio
 
+import sys
 import time
 
 from audiodev import AudioFormat, PCMInput, PCMOutput
 import usdl2 as sdl
+
+
+def _android_session():
+    """Attach Android media focus/FGS session on first PCM open (lazy).
+
+    Non-Android hosts get ``session=None`` (unchanged PCMOutput behavior).
+    On Android the module must be present; acquire/release stay lazy until
+    ``open()`` / ``write()`` via :class:`audiodev.PCMOutput`.
+    """
+    if sys.platform != "android":
+        return None
+    from androidaudio_session import get_session
+
+    return get_session()
 
 
 def _sleep_ms(milliseconds):
@@ -169,6 +184,7 @@ def audio_out(
             poll_ms=poll_ms,
         ),
         fmt,
+        session=_android_session(),
     )
 
 

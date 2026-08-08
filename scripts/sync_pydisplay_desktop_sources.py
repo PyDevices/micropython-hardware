@@ -7,6 +7,7 @@ The canonical implementation lives in:
 - drivers/boarddev.py
 - drivers/audio/audiodev.py
 - drivers/audio/sdl2audio.py
+- drivers/audio/androidaudio_session.py
 - drivers/usdl2.py
 - drivers/audio/pygameaudio.py
 - drivers/audio/webaudio.py
@@ -29,6 +30,7 @@ MAPPINGS = (
     ("drivers/boarddev.py", "src/boarddev.py"),
     ("drivers/audio/audiodev.py", "src/audiodev.py"),
     ("drivers/audio/sdl2audio.py", "src/sdl2audio.py"),
+    ("drivers/audio/androidaudio_session.py", "src/androidaudio_session.py"),
     ("drivers/usdl2.py", "src/usdl2.py"),
     ("drivers/audio/pygameaudio.py", "src/pygameaudio.py"),
     ("drivers/audio/webaudio.py", "src/webaudio.py"),

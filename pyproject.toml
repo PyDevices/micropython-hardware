@@ -26,4 +26,4 @@ Repository = "https://github.com/PyDevices/micropython-hardware"
 
 [tool.setuptools]
 package-dir = { "" = "src" }
-py-modules = ["board_config", "board_devices", "boarddev", "audiodev", "sdl2audio", "usdl2", "pygameaudio", "webaudio"]
+py-modules = ["board_config", "board_devices", "boarddev", "audiodev", "sdl2audio", "androidaudio_session", "usdl2", "pygameaudio", "webaudio"]

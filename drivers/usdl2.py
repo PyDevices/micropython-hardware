@@ -62,6 +62,8 @@ SDL_WINDOW_INPUT_FOCUS = const(0x00000200)
 SDL_WINDOW_MOUSE_FOCUS = const(0x00000400)
 SDL_WINDOW_FULLSCREEN_DESKTOP = const(0x00001001)
 SDL_WINDOW_ALLOW_HIGHDPI = const(0x00002000)
+# SDL_HINT_ORIENTATIONS — space-delimited LandscapeLeft/Right Portrait…
+SDL_HINT_ORIENTATIONS = "SDL_IOS_ORIENTATIONS"
 SDL_WINDOW_MOUSE_CAPTURE = const(0x00004000)
 SDL_WINDOW_ALWAYS_ON_TOP = const(0x00008000)
 SDL_WINDOW_SKIP_TASKBAR = const(0x00010000)
@@ -617,6 +619,7 @@ _FFI_FUNCS = (
     ("SDL_Quit", "v", ""),
     # _raw_* names: wrapped below for NULL/str encoding parity with usdl2_cpy.c
     ("_raw_SDL_GetError", "s", ""),
+    ("_raw_SDL_SetHint", "i", "ss"),
     ("SDL_CreateWindow", "P", "siiiii"),
     ("SDL_DestroyWindow", "v", "P"),
     ("SDL_GetWindowID", "I", "P"),
@@ -693,6 +696,7 @@ if _use_ffi:
     _bind_ffi(_libSDL2, _FFI_FUNCS)
     _raw_SDL_GetError = globals()["_raw_SDL_GetError"]
     _raw_SDL_GetKeyName = globals()["_raw_SDL_GetKeyName"]
+    _raw_SDL_SetHint = globals()["_raw_SDL_SetHint"]
 
     def _wrap_buf(buf, writable=False):
         return buf
@@ -707,6 +711,13 @@ if _use_ffi:
     def SDL_GetKeyName(sym):
         name = _raw_SDL_GetKeyName(sym)
         return name if name is not None else ""
+
+    def SDL_SetHint(name, value):
+        if isinstance(name, str):
+            name = name.encode("utf-8")
+        if isinstance(value, str):
+            value = value.encode("utf-8")
+        return _raw_SDL_SetHint(name, value)
 
 else:
     import ctypes
@@ -746,6 +757,7 @@ else:
         ("SDL_InitSubSystem", _i, (_u,)),
         ("SDL_Quit", None, ()),
         ("_raw_SDL_GetError", _c.c_char_p, ()),
+        ("_raw_SDL_SetHint", _i, (_c.c_char_p, _c.c_char_p)),
         ("_raw_SDL_CreateWindow", _v, (_c.c_char_p, _i, _i, _i, _i, _u)),
         ("SDL_DestroyWindow", None, (_v,)),
         ("SDL_GetWindowID", _u, (_v,)),
@@ -794,6 +806,7 @@ else:
     _bind_ctypes(_libSDL2, _CTYPES_FUNCS)
     _raw_SDL_GetError = globals()["_raw_SDL_GetError"]
     _raw_SDL_GetKeyName = globals()["_raw_SDL_GetKeyName"]
+    _raw_SDL_SetHint = globals()["_raw_SDL_SetHint"]
     _raw_SDL_CreateWindow = globals()["_raw_SDL_CreateWindow"]
 
     def _wrap_buf(buf, writable=False):
@@ -838,6 +851,13 @@ else:
         if isinstance(title, str):
             title = title.encode("utf-8")
         return _raw_SDL_CreateWindow(title, x, y, w, h, flags)
+
+    def SDL_SetHint(name, value):
+        if isinstance(name, str):
+            name = name.encode("utf-8")
+        if isinstance(value, str):
+            value = value.encode("utf-8")
+        return _raw_SDL_SetHint(name, value)
 
 
 # _bind_ffi / _bind_ctypes assign these via globals()[name]; materialize so

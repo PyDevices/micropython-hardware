@@ -8,6 +8,7 @@ Installed modules:
 - boarddev
 - audiodev
 - sdl2audio
+- androidaudio_session
 - usdl2
 - pygameaudio
 - webaudio

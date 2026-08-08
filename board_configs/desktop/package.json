@@ -21,6 +21,10 @@
       "github:PyDevices/micropython-hardware/drivers/audio/sdl2audio.py"
     ],
     [
+      "androidaudio_session.py",
+      "github:PyDevices/micropython-hardware/drivers/audio/androidaudio_session.py"
+    ],
+    [
       "pygameaudio.py",
       "github:PyDevices/micropython-hardware/drivers/audio/pygameaudio.py"
     ],
