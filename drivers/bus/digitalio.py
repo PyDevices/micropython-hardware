@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 """
-digitalio — MicroPython shim for vendored CircuitPython e-paper drivers.
+digitalio — MicroPython shim for CircuitPython board configs that import ``digitalio``.
 """
 
 from machine import Pin

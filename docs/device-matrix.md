@@ -60,7 +60,6 @@ contract surface.
 | Adafruit Feather RP2040 DVI | [#21](board-inventory.md) | `fbdisplay/adafruit_feather_rp2040_dvi_320x240` | — | — | MP stub raises `NotImplementedError` (SRAM); CP POC under `cp/fbdisplay/adafruit_feather_rp2040_dvi_320x240` |
 | Teensy 4.1 + FlexIO ILI9341 | [#23](board-inventory.md) | `busdisplay/i80/teensy41_flexio_ili9341` | — | *(empty)* | split layout; no onboard lazy extras |
 | Teensy 4.1 + RGB matrix featherwing | [#23](board-inventory.md) | `fbdisplay/rgb_matrix_featherwing_teensy41_64x32` | — | *(empty)* | |
-| Adafruit MagTag | — | `epaperdisplay/magtag` | `keypad` | `pixels`, `audio_out`, `i2c`, `wlan` | no contract role for ALS |
 | Adafruit PyBadge | — | `busdisplay/spi/pybadge` | `keypad` | `pixels`, `accelerometer`, `audio_out`, `i2c` | |
 | Adafruit PyPortal | — | `busdisplay/spi/pyportal` | `touch` | `sdcard`, `radio`, `audio_out`, `i2c`, `wlan` | AirLift as `radio`/`wlan` |
 | Adafruit PyPortal Titano | — | `busdisplay/spi/pyportal_titano` | `touch` | `sdcard`, `radio`, `audio_out`, `i2c`, `wlan` | |
@@ -131,5 +130,5 @@ listed in that board’s `package.json` `deps`.
 - Light / ALS sensors have no contract role yet — omit from `DEVICES`.
 - Metro M7 inventory [#5](board-inventory.md) is the host; the campaign path is
   the host + Adafruit TFT shield 1947.
-- Generic epaper/OLED breakouts and EyeSPI stacks are not enumerated here unless
+- Generic OLED breakouts and EyeSPI stacks are not enumerated here unless
   they expose meaningful non-display `DEVICES` roles.

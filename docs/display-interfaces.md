@@ -12,7 +12,6 @@ Maps hardware interface types to pydisplay `displaysys` backends and pydevices/d
 | RGB parallel timed | RGB565 / **RGB666** | `dotclockframebuffer` | **FBDisplay** | `displayif.DotClockFramebuffer` | displayif (esp32, mimxrt1062) |
 | HUB75 LED matrix | HUB75 | `rgbmatrix.RGBMatrix` | **FBDisplay** | `rgbmatrix` | displayif |
 | WS2812 / DotStar grid | Addressable LED matrix | `adafruit_pixel_framebuf` | **PixelDisplay** | `displaysys.pixeldisplay.PixelFramebuffer` + neopixel | Done |
-| SPI E-ink | E-paper | `epaperdisplay.EPaperDisplay` chip drivers | **EPaperDisplay** | SPI + chip driver | CP displayio push; MP bus.send path |
 | USB UVC gadget | USB Video | `usb_video` | **FBDisplay** | N/A | CP only |
 | MIPI DSI | MIPI DSI | `mipidsi` (SoC firmware) | **FBDisplay** | `mipidsi` | displayif (esp32-P4, mimxrt1176) |
 | DVI (TMDS) | DVI | `picodvi` | **FBDisplay** | `picodvi` | displayif (rp2040/rp2350 HSTX) |
@@ -26,7 +25,6 @@ Maps hardware interface types to pydisplay `displaysys` backends and pydevices/d
 | BusDisplay | `board_configs/busdisplay/{spi,i80,i2c}/` (+ `cp/…`) | `cp/busdisplay/spi/pyportal`, `ili9341_eyespi_qtpy_esp32s3` |
 | FBDisplay | `board_configs/fbdisplay/` | `qualia_tl040hds20`, `t-rgb_480`, `esp32-s3-touch-lcd-4_3`, `esp32-s3-touch-lcd-7`, `esp32-p4-wifi6-touch-lcd-4b` |
 | PixelDisplay | `board_configs/pixeldisplay/` (+ `cp/…`) | `cp/pixeldisplay/neopixel_8x4`, … |
-| EPaperDisplay | `board_configs/epaperdisplay/` (+ `cp/…`) | `cp/epaperdisplay/magtag` |
 
 MicroPython RGB/HUB75/DSI/DVI drivers live in **pydevices/displayif**, wired from board configs and drivers vendored here. CircuitPython configs live under `board_configs/cp/` (same directory names as MicroPython) and use CP native modules.
 
@@ -60,6 +58,5 @@ See also [TFT_eSPI parity](tft-espi-parity.md) for Arduino bus/driver mapping.
 1. `i2cbus` — OLED FeatherWings, QT Py OLED
 2. `rgbframebuffer` — Qualia / RGB parallel (RGB666)
 3. `rgbmatrix` — MatrixPortal HUB75
-4. `displaysys.epaperdisplay` — full MP backend
-5. ~~NeoPixel grid mapper for `PixelDisplay`~~ — `displaysys.pixeldisplay.PixelFramebuffer` (MP) + Adafruit bundle (CP)
-6. MIPI DSI host (SoC-specific — not RP2350)
+4. ~~NeoPixel grid mapper for `PixelDisplay`~~ — `displaysys.pixeldisplay.PixelFramebuffer` (MP) + Adafruit bundle (CP)
+5. MIPI DSI host (SoC-specific — not RP2350)

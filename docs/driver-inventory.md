@@ -41,30 +41,6 @@ python3 scripts/vendor_circuitpython_drivers.py --all
 | `ssd1331.py` | Adafruit | vendored |
 | `ssd1351.py` | Adafruit | vendored |
 
-## E-paper (EPaperDisplay on CP; epaperdisplay_chip on MP)
-
-| File | Source | Status |
-|------|--------|--------|
-| `epaperdisplay_chip.py` | pydisplay MP shim | in repo |
-| `digitalio.py` | pydisplay MP shim (`drivers/bus/`) | in repo |
-| `ssd1680.py` | Adafruit | vendored |
-| `ssd1681.py` | Adafruit | vendored |
-| `ssd1683.py` | Adafruit | vendored |
-| `ssd1675.py` | Adafruit | vendored |
-| `ssd1677.py` | Adafruit | vendored |
-| `ssd1608.py` | Adafruit | vendored |
-| `uc8151d.py` | Adafruit | vendored |
-| `uc8179.py` | Adafruit | vendored |
-| `uc8253.py` | Adafruit | vendored |
-| `il0373.py` | Adafruit | vendored |
-| `il0398.py` | Adafruit | vendored |
-| `il91874.py` | Adafruit | vendored |
-| `ek79686.py` | Adafruit | vendored |
-| `jd79661.py` | Adafruit | vendored |
-| `jd79667.py` | Adafruit | vendored |
-| `spd1656.py` | Adafruit | vendored |
-| `acep7in.py` | Adafruit | vendored |
-
 ## Other
 
 | File | Source | Status |

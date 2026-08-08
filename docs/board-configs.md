@@ -105,25 +105,6 @@ An exact match for all four is rare; bus + display controller is usually enough 
 
 Draw through `display_drv` only; `_pixel_framebuf` is an internal wiring detail.
 
-## E-paper configs
-
-| Directory | Hardware |
-|-----------|----------|
-| `cp/epaperdisplay/magtag` | Adafruit MagTag SSD1680 + KEYPAD |
-| `epaperdisplay/magtag` | MagTag SSD1680 + KEYPAD (MP) |
-| `cp/epaperdisplay/ssd1680_213_featherwing` | 2.13" E-Ink FeatherWing |
-| `epaperdisplay/ssd1680_213_featherwing` | 2.13" E-Ink FeatherWing (MP) |
-| `cp/epaperdisplay/acep7in_73` | ACeP 7.3" 7-color E-Ink |
-| `epaperdisplay/acep7in_73` | ACeP 7.3" (MP) |
-| `cp/epaperdisplay/ssd1675_213_featherwing` | SSD1675 2.13" monochrome FeatherWing |
-| `epaperdisplay/ssd1675_213_featherwing` | SSD1675 2.13" FeatherWing (MP) |
-| `cp/epaperdisplay/uc8151d_29_breakout` | UC8151D 2.9" flexible breakout |
-| `epaperdisplay/uc8151d_29_breakout` | UC8151D 2.9" breakout (MP) |
-
-Additional vendored chip drivers (each has a CircuitPython sibling under `cp/epaperdisplay/`): `ssd1681_154_tricolor`, `ssd1683_213_featherwing`, `ssd1677_583_mono`, `ssd1608_154_mono`, `il0373_213_tricolor`, `il0398_42_mono`, `il91874_27_tricolor`, `uc8179_583_mono`, `uc8253_37_mono`, `ek79686_27_tricolor`, `jd79661_213_4gray`, `jd79667_391_4gray`, `spd1656_154_acep`.
-
-Tri-color / 4-gray configs use `color_depth=2` (0=white, 1=black, 2=accent). ACeP configs use `color_depth=4`.
-
 | Directory | Hardware |
 |-----------|----------|
 | `cp/fbdisplay/matrixportal_m4_64x32` | MatrixPortal M4 HUB75 64×32 |
@@ -197,8 +178,12 @@ runtime = eventsys.Runtime(
 
 | Branch | `display_drv.requires_async_timer` | `runtime.timer_async` default |
 |--------|-----------------------------------|-------------------------------|
-| PyScript / Jupyter | `True` | `True` (override with **`PYDISPLAY_TIMER_ASYNC`**) |
+| PyScript / Jupyter | `True` | `True` (default; **`PYDISPLAY_TIMER_ASYNC=0` → Runtime raises**) |
 | PG/SDL desktop | `False` | `False` unless **`PYDISPLAY_TIMER_ASYNC`** is set |
+
+`eventsys.Runtime` rejects `timer_async=False` when any attached display has
+`requires_async_timer` (PS/JN), so a forced sync override fails at construction
+instead of hanging.
 
 Panel size overrides (before `import board_config`): `PYDISPLAY_WIDTH`,
 `PYDISPLAY_HEIGHT`, `PYDISPLAY_ROTATION`, `PYDISPLAY_SCALE`. Apps should read

@@ -60,7 +60,7 @@ This document states what is **implemented**, what uses **Python fallbacks**, an
 
 ## Chip drivers (TFT_eSPI `SetupNNN_*`)
 
-TFT_eSPI bundles dozens of controller init tables. pydisplay **vendors CircuitPython displayio chip drivers** (`ili9341`, `st7701`, `gc9a01`, …) and wires them through `BusDisplay` / `EPaperDisplay` — equivalent role, different file layout. Adding a new panel is a **driver + board_config** pair, not a `User_Setup.h` edit.
+TFT_eSPI bundles dozens of controller init tables. pydisplay **vendors CircuitPython displayio chip drivers** (`ili9341`, `st7701`, `gc9a01`, …) and wires them through `BusDisplay` — equivalent role, different file layout. Adding a new panel is a **driver + board_config** pair, not a `User_Setup.h` edit.
 
 ## Board config coverage (MP + CP)
 
