@@ -6,10 +6,13 @@ import sys
 import types
 import unittest
 
-ROOT = Path(__file__).resolve().parents[1]
+_TESTS = Path(__file__).resolve().parent
+if str(_TESTS) not in sys.path:
+    sys.path.insert(0, str(_TESTS))
+import _env  # noqa: E402, F401
+
+ROOT = _env.ROOT
 BOARD = ROOT / "board_configs" / "fbdisplay" / "esp32-p4-wifi6-touch-lcd-4b"
-sys.path.insert(0, str(ROOT / "drivers" / "audio"))
-sys.path.insert(0, str(ROOT / "drivers" / "codec"))
 
 
 class FakeI2C:
@@ -110,7 +113,7 @@ class ESP32P4AudioTests(unittest.TestCase):
         self.board._pa = None
         self.board._mclk = None
 
-    def test_output_format_matches_gemini_tts_pcm(self):
+    def test_output_format_is_24khz_mono_pcm(self):
         from audiodev import AudioFormat
 
         output = self.board.audio_out()

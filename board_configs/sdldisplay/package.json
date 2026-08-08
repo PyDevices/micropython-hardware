@@ -1,6 +1,19 @@
 {
-    "urls": [
-      ["board_config.py", "github:PyDevices/micropython-hardware/board_configs/sdldisplay/board_config.py"]
+  "urls": [
+    [
+      "board_config.py",
+      "github:PyDevices/micropython-hardware/board_configs/sdldisplay/board_config.py"
+    ]
+  ],
+  "deps": [
+    [
+      "displaysys",
+      "latest"
     ],
-    "version": "0.1"
-  }
+    [
+      "github:PyDevices/micropython-hardware/packages/usdl2.json",
+      "main"
+    ]
+  ],
+  "version": "0.1"
+}

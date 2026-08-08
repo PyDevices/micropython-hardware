@@ -52,7 +52,7 @@ PWM/buzzer hardware. `audio_in` returns `PCMInput`. PCM devices expose their
 I/O, and portable asynchronous I/O. When a codec provides hardware controls,
 the device delegates to them and exposes the codec as `device.codec`; otherwise
 volume or gain is applied to PCM samples in software.
-See [Portable audio](audio.md) for backend, async, speech, and board details.
+See [Portable audio](audio.md) for backend, async, and board details.
 
 Out of contract as `board_config` symbols: high-level `wifi` / `bluetooth` modules
 and tooling USB / UART bridges. Apps may still use those stacks directly.

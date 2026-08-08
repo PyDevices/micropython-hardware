@@ -4,8 +4,10 @@ from pathlib import Path
 import sys
 import unittest
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "drivers" / "codec"))
+_TESTS = Path(__file__).resolve().parent
+if str(_TESTS) not in sys.path:
+    sys.path.insert(0, str(_TESTS))
+import _env  # noqa: E402, F401
 
 from es8311 import ES8311  # noqa: E402
 

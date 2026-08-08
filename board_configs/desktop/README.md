@@ -51,6 +51,7 @@ This bundle installs:
 - `boarddev.py`
 - `audiodev.py`
 - `sdl2audio.py`
+- `usdl2.py`
 - `pygameaudio.py`
 - `webaudio.py`
 - plus `displaysys`, `eventsys`, and `multimer` from the PyDevices MIP index

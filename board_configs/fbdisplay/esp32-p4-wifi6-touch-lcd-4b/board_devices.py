@@ -16,7 +16,7 @@ _PA_CTRL = 53
 
 from audiodev import AudioFormat, AudioSession, PCMInput, PCMOutput
 
-# 24 kHz mono matches Gemini TTS. Firmware has no I2S mck= — PWM supplies MCLK.
+# 24 kHz mono PCM. Firmware has no I2S mck= — PWM supplies MCLK.
 # Bring-up (ear-verified): MCLK before ES8311 init; unmute + volume before I2S; MONO.
 _RATE = 24000
 _FORMAT = AudioFormat(_RATE, 1, 16)

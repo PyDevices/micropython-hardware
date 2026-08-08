@@ -7,13 +7,16 @@ import types
 import unittest
 from unittest import mock
 
-ROOT = Path(__file__).resolve().parents[1]
+_TESTS = Path(__file__).resolve().parent
+if str(_TESTS) not in sys.path:
+    sys.path.insert(0, str(_TESTS))
+import _env  # noqa: E402, F401 — drivers/ + drivers/audio (usdl2, sdl2audio, …)
+
+ROOT = _env.ROOT
 DESKTOP = ROOT / "board_configs" / "desktop"
-DRIVERS = ROOT / "drivers"
-AUDIO = ROOT / "drivers" / "audio"
 PYDISPLAY_LIB = Path.home() / "gh" / "pydevices" / "pydisplay" / "src" / "lib"
 
-for path in (str(DESKTOP), str(DRIVERS), str(AUDIO), str(PYDISPLAY_LIB)):
+for path in (str(DESKTOP), str(PYDISPLAY_LIB)):
     if path not in sys.path:
         sys.path.insert(0, path)
 

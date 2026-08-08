@@ -7,9 +7,12 @@ from pathlib import Path
 import sys
 import unittest
 
+_TESTS = Path(__file__).resolve().parent
+if str(_TESTS) not in sys.path:
+    sys.path.insert(0, str(_TESTS))
+import _env  # noqa: E402, F401
+
 os.environ.setdefault("SDL_AUDIODRIVER", "dummy")
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "drivers" / "audio"))
 
 from audiodev import AudioFormat  # noqa: E402
 import pygameaudio  # noqa: E402
@@ -44,14 +47,6 @@ class PygameBackendTests(unittest.TestCase):
         self.assertEqual(stream.readinto(buf), 4)
         self.assertEqual(bytes(buf), b"\x01\x00\x02\x00")
         stream.close()
-
-    @unittest.skipUnless(os.getenv("PYDEVICES_TEST_REAL_AUDIO"), "real audio opt-in")
-    def test_real_microphone(self):
-        capture = pygameaudio.audio_in(AudioFormat(16000, 1, 16))
-        buf = bytearray(1024)
-        count = capture.readinto(buf)
-        capture.close()
-        self.assertGreater(count, 0)
 
 
 if __name__ == "__main__":

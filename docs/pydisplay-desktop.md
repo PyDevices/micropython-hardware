@@ -8,6 +8,7 @@ Installed modules:
 - boarddev
 - audiodev
 - sdl2audio
+- usdl2
 - pygameaudio
 - webaudio
 

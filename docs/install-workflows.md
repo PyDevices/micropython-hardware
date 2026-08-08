@@ -48,6 +48,7 @@ Expected files from the desktop board package:
 - `boarddev.py`
 - `audiodev.py`
 - `sdl2audio.py`
+- `usdl2.py`
 - `pygameaudio.py`
 - `webaudio.py`
 

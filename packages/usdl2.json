@@ -1,0 +1,9 @@
+{
+  "urls": [
+    [
+      "usdl2.py",
+      "github:PyDevices/micropython-hardware/drivers/usdl2.py"
+    ]
+  ],
+  "version": "0.1"
+}

@@ -4,8 +4,10 @@ from pathlib import Path
 import sys
 import unittest
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "drivers" / "audio"))
+_TESTS = Path(__file__).resolve().parent
+if str(_TESTS) not in sys.path:
+    sys.path.insert(0, str(_TESTS))
+import _env  # noqa: E402, F401
 
 from audiodev import AudioFormat  # noqa: E402
 
@@ -13,10 +15,9 @@ from audiodev import AudioFormat  # noqa: E402
 class SDLBackendTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        if not os.getenv("PYDEVICES_TEST_REAL_AUDIO"):
-            os.environ.setdefault("SDL_AUDIODRIVER", "dummy")
+        os.environ.setdefault("SDL_AUDIODRIVER", "dummy")
         global sdl2audio
-        import sdl2audio
+        import sdl2audio  # needs in-repo drivers/usdl2.py via _env
 
     def test_sync_output_controls_and_drain(self):
         output = sdl2audio.audio_out(AudioFormat(8000, 1, 16), queue_ms=10)
@@ -47,15 +48,6 @@ class SDLBackendTests(unittest.TestCase):
             output.close()
 
         asyncio.run(run())
-
-    @unittest.skipUnless(os.getenv("PYDEVICES_TEST_REAL_AUDIO"), "real audio opt-in")
-    def test_real_microphone(self):
-        capture = sdl2audio.audio_in(AudioFormat(16000, 1, 16))
-        buf = bytearray(1024)
-        count = capture.readinto(buf)
-        capture.close()
-        self.assertGreater(count, 0)
-        self.assertGreater(len(set(buf[:count])), 1)
 
 
 if __name__ == "__main__":

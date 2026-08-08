@@ -5,10 +5,12 @@ import sys
 import unittest
 from unittest import mock
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "board_configs" / "desktop"))
-sys.path.insert(0, str(ROOT / "drivers"))
-sys.path.insert(0, str(ROOT / "drivers" / "audio"))
+_TESTS = Path(__file__).resolve().parent
+if str(_TESTS) not in sys.path:
+    sys.path.insert(0, str(_TESTS))
+import _env  # noqa: E402, F401
+
+sys.path.insert(0, str(_env.ROOT / "board_configs" / "desktop"))
 
 
 class BoardDevicesSelectTests(unittest.TestCase):

@@ -19,6 +19,10 @@
     [
       "sdl2audio.py",
       "github:PyDevices/micropython-hardware/drivers/audio/sdl2audio.py"
+    ],
+    [
+      "usdl2.py",
+      "github:PyDevices/micropython-hardware/drivers/usdl2.py"
     ]
   ],
   "deps": [["displaysys", "latest"]],
