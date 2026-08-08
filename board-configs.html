@@ -217,8 +217,7 @@ usually enough to adapt.</p>
 </tr>
 <tr class="even">
 <td><code>fbdisplay/esp32-p4-wifi6-touch-lcd-4b</code></td>
-<td>Waveshare ESP32-P4-WIFI6-Touch-LCD-4B (MIPI-DSI, touch, ES8311; <a
-href="audio.html#speech">TTS UIs</a>)</td>
+<td>Waveshare ESP32-P4-WIFI6-Touch-LCD-4B (MIPI-DSI, touch, ES8311)</td>
 </tr>
 <tr class="odd">
 <td><code>fbdisplay/t-rgb_480</code></td>
@@ -553,27 +552,32 @@ under <code>cp/epaperdisplay/</code>):
 href="../board_configs/desktop/"><code>board_configs/desktop/</code></a>
 — universal non-MCU <code>board_config</code> for desktop, PyScript, and
 Jupyter. Host display selection is <code>displaysys.AutoDisplay</code>
-(PS / JN / PG→SDL); the config itself is MCU-shaped eager wiring
-(<code>display_drv</code> + <code>runtime</code> +
-<code>setup_devices</code>).</p>
+(PS / JN / PG→SDL); the config itself is MCU-shaped eager wiring:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>display_drv <span class="op">=</span> AutoDisplay(...)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>runtime <span class="op">=</span> eventsys.Runtime(</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    displays<span class="op">=</span>[display_drv],</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    host_read<span class="op">=</span>display_drv.get_events,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    timer_async<span class="op">=</span>env_bool(<span class="st">&quot;PYDISPLAY_TIMER_ASYNC&quot;</span>, display_drv.requires_async_timer),</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <table>
 <thead>
 <tr class="header">
 <th>Branch</th>
-<th><code>runtime.timer_async</code></th>
+<th><code>display_drv.requires_async_timer</code></th>
+<th><code>runtime.timer_async</code> default</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>PyScript</td>
-<td><code>True</code> (asyncio-native host)</td>
+<td>PyScript / Jupyter</td>
+<td><code>True</code></td>
+<td><code>True</code> (override with
+<strong><code>PYDISPLAY_TIMER_ASYNC</code></strong>)</td>
 </tr>
 <tr class="even">
-<td>Jupyter</td>
-<td><code>True</code> (ipyevents / kernel loop)</td>
-</tr>
-<tr class="odd">
 <td>PG/SDL desktop</td>
+<td><code>False</code></td>
 <td><code>False</code> unless
 <strong><code>PYDISPLAY_TIMER_ASYNC</code></strong> is set</td>
 </tr>
@@ -591,9 +595,9 @@ Falsey: <code>0</code>, <code>false</code>, <code>no</code>,
 <code>off</code>. Unknown values fall back to the desktop default
 (<code>False</code>). Parsing lives in <a
 href="https://github.com/PyDevices/pydisplay/blob/main/src/lib/displaysys/__init__.py"><code>displaysys.env_bool</code></a>.</p>
-<div class="sourceCode" id="cb1"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Force asyncio timers on desktop (LVGL async smoke, matrix column)</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="va">PYDISPLAY_TIMER_ASYNC</span><span class="op">=</span>1 <span class="ex">python</span> my_example.py</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Force asyncio timers on desktop (LVGL async smoke, matrix column)</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="va">PYDISPLAY_TIMER_ASYNC</span><span class="op">=</span>1 <span class="ex">python</span> my_example.py</span></code></pre></div>
 <p>Per-board configs under <code>board_configs/</code> pass
 <code>timer_async=</code> explicitly in their <code>Runtime(...)</code>
 call; they do not read this env var unless you wire it in.</p>
