@@ -711,10 +711,24 @@ if _use_ffi:
 else:
     import ctypes
 
-    if sys.platform == "win32":
-        _libSDL2 = ctypes.CDLL("SDL2.dll")
-    else:
-        _libSDL2 = ctypes.CDLL("libSDL2-2.0.so.0")
+    def _load_sdl2():
+        if sys.platform == "win32":
+            return ctypes.CDLL("SDL2.dll")
+        # Desktop SONAME first; p4a / Android APKs typically expose libSDL2.so.
+        names = ("libSDL2-2.0.so.0", "libSDL2.so")
+        if sys.platform == "android":
+            names = ("libSDL2.so", "libSDL2-2.0.so.0")
+        errors = []
+        for name in names:
+            try:
+                return ctypes.CDLL(name)
+            except OSError as exc:
+                errors.append("{}: {}".format(name, exc))
+        raise OSError(
+            "Could not load SDL2 library; tried: {}".format("; ".join(errors))
+        )
+
+    _libSDL2 = _load_sdl2()
 
     _c = ctypes
     _v = _c.c_void_p
