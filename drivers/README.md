@@ -17,7 +17,7 @@ board configs. Prefer single-file modules; MIP manifests live under `../packages
 | `codec/aw88298.py` | AW88298 smart amp init (CoreS3) |
 | `codec/es8388.py` | ES8388 DAC init (Tab5) |
 | `audio/sdl2audio.py` | SDL2 queued PCM for `audiodev` (needs `usdl2`) |
-| `usdl2.py` | Pure-Python SDL2 ctypes/ffi binding (from [PyDevices/usdl2](https://github.com/PyDevices/usdl2) `lib/usdl2.py`) |
+| `usdl2.py` | Pure-Python SDL2 ctypes/ffi binding for desktop SDL |
 | `audio/pygameaudio.py` | pygame-ce PCM backend |
 | `audio/webaudio.py` | PyScript / Web Audio backend |
 | `audio/audiodev.py` | Portable `AudioFormat` / PCM device contracts |
