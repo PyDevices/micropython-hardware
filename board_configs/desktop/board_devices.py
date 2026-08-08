@@ -40,26 +40,24 @@ def _select_backend():
     host = _host_kind()
     if host == "pyscript":
         _BACKEND = "webaudio"
-    elif host == "jupyter":
-        _BACKEND = "sdl2audio"
-    elif _pygame_available():
-        _BACKEND = "pygameaudio"
+    else:
         if sys.platform == "win32":
             # See board_config.py for the full rationale (SDL2's default
             # Windows WASAPI backend glitches with pygame.mixer.Channel's
             # small-chunk playback; DirectSound does not). Duplicated here
             # because an app can init board_devices directly without ever
-            # importing board_config (e.g. examples/audio_out_test.py), and
-            # audio_out()/audio_in() below open the pygame mixer lazily on
-            # first use -- setdefault() must land before that, and before any
-            # board_config PGDisplay pg.init(), whichever runs first. Only set
-            # for the pygameaudio backend: sdl2audio's SDL_QueueAudio path is
-            # confirmed unaffected by the driver choice.
+            # importing board_config (e.g. examples/audio_out_test.py). Must
+            # land before first SDL audio init for every non-webaudio backend
+            # (jupyter/desktop sdl2audio and desktop pygameaudio).
             import os
 
             os.environ.setdefault("SDL_AUDIODRIVER", "directsound")
-    else:
-        _BACKEND = "sdl2audio"
+        if host == "jupyter":
+            _BACKEND = "sdl2audio"
+        elif _pygame_available():
+            _BACKEND = "pygameaudio"
+        else:
+            _BACKEND = "sdl2audio"
     return _BACKEND
 
 
