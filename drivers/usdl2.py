@@ -859,6 +859,26 @@ else:
             value = value.encode("utf-8")
         return _raw_SDL_SetHint(name, value)
 
+    _lib_SDL_GetWindowSize = _libSDL2.SDL_GetWindowSize
+    _lib_SDL_GetWindowSize.argtypes = (_v, _c.POINTER(_i), _c.POINTER(_i))
+    _lib_SDL_GetWindowSize.restype = None
+    _lib_SDL_GetRendererOutputSize = _libSDL2.SDL_GetRendererOutputSize
+    _lib_SDL_GetRendererOutputSize.argtypes = (_v, _c.POINTER(_i), _c.POINTER(_i))
+    _lib_SDL_GetRendererOutputSize.restype = _i
+
+    def SDL_GetWindowSize(window):
+        w = _i()
+        h = _i()
+        _lib_SDL_GetWindowSize(window, _c.byref(w), _c.byref(h))
+        return int(w.value), int(h.value)
+
+    def SDL_GetRendererOutputSize(renderer):
+        w = _i()
+        h = _i()
+        if _lib_SDL_GetRendererOutputSize(renderer, _c.byref(w), _c.byref(h)):
+            raise RuntimeError(SDL_GetError())
+        return int(w.value), int(h.value)
+
 
 # _bind_ffi / _bind_ctypes assign these via globals()[name]; materialize so
 # static analysis and the buffer wrappers below see real module bindings.
