@@ -184,13 +184,21 @@ Tri-color / 4-gray configs use `color_depth=2` (0=white, 1=black, 2=accent). ACe
 [`board_configs/desktop/`](../board_configs/desktop/) — universal non-MCU
 `board_config` for desktop, PyScript, and Jupyter. Host display selection is
 `displaysys.AutoDisplay` (PS / JN / PG→SDL); the config itself is MCU-shaped
-eager wiring (`display_drv` + `runtime` + `setup_devices`).
+eager wiring:
 
-| Branch | `runtime.timer_async` |
-|--------|------------------------|
-| PyScript | `True` (asyncio-native host) |
-| Jupyter | `True` (ipyevents / kernel loop) |
-| PG/SDL desktop | `False` unless **`PYDISPLAY_TIMER_ASYNC`** is set |
+```python
+display_drv = AutoDisplay(...)
+runtime = eventsys.Runtime(
+    displays=[display_drv],
+    host_read=display_drv.get_events,
+    timer_async=env_bool("PYDISPLAY_TIMER_ASYNC", display_drv.requires_async_timer),
+)
+```
+
+| Branch | `display_drv.requires_async_timer` | `runtime.timer_async` default |
+|--------|-----------------------------------|-------------------------------|
+| PyScript / Jupyter | `True` | `True` (override with **`PYDISPLAY_TIMER_ASYNC`**) |
+| PG/SDL desktop | `False` | `False` unless **`PYDISPLAY_TIMER_ASYNC`** is set |
 
 Panel size overrides (before `import board_config`): `PYDISPLAY_WIDTH`,
 `PYDISPLAY_HEIGHT`, `PYDISPLAY_ROTATION`, `PYDISPLAY_SCALE`. Apps should read

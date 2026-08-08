@@ -18,7 +18,6 @@ env_set("SDL_VIDEODRIVER", "kmsdrm")
 
 import usdl2
 from displaysys.sdldisplay import SDLDisplay as DTDisplay
-from displaysys.sdldisplay import get_events
 import eventsys
 
 # Why scale=1.0: KMS modes are typically already panel-native; avoid desktop
@@ -41,6 +40,9 @@ display_drv = DTDisplay(
     window_flags=window_flags,
 )
 
-runtime = eventsys.Runtime(displays=[display_drv], host_read=get_events)
+runtime = eventsys.Runtime(
+    displays=[display_drv],
+    host_read=display_drv.get_events,
+)
 
 display_drv.fill(0)

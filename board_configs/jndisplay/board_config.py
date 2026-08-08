@@ -2,19 +2,18 @@
 Board configuration for Jupyter Notebook.
 """
 
-from displaysys.jndisplay import JNDevices, JNDisplay
+from displaysys.jndisplay import JNDisplay
 import eventsys
 
 width = 320
 height = 480
 
 display_drv = JNDisplay(width, height)
-devices_drv = JNDevices(display_drv)
 
 runtime = eventsys.Runtime(
     displays=[display_drv],
-    host_read=devices_drv.read,
-    timer_async=True,
+    host_read=display_drv.get_events,
+    timer_async=display_drv.requires_async_timer,
 )
 
 display_drv.fill(0)

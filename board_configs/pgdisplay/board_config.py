@@ -21,7 +21,6 @@ if sys.platform == "win32":
     os.environ.setdefault("SDL_AUDIODRIVER", "directsound")
 
 from displaysys.pgdisplay import PGDisplay as DTDisplay
-from displaysys.pgdisplay import get_events
 import eventsys
 
 width = 320
@@ -39,7 +38,7 @@ display_drv = DTDisplay(
 
 runtime = eventsys.Runtime(
     displays=[display_drv],
-    host_read=get_events,
+    host_read=display_drv.get_events,
 )
 
 display_drv.fill(0)

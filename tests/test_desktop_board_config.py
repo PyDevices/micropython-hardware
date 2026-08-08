@@ -42,23 +42,15 @@ class DesktopBoardConfigContractTests(unittest.TestCase):
         display = mock.Mock(name="display_drv")
         display.needs_refresh = True
         display.fill = mock.Mock()
-        host_read = mock.Mock(name="host_read")
-        auto = types.SimpleNamespace(
-            display=display,
-            host_read=host_read,
-            timer_async=False,
-            host="desktop",
-        )
+        display.get_events = mock.Mock(name="get_events")
+        display.requires_async_timer = False
         runtime = mock.Mock(name="runtime")
 
-        # Minimal displaysys + eventsys for board_config import.
         displaysys_mod = types.ModuleType("displaysys")
-        displaysys_mod.AutoDisplay = mock.Mock(return_value=auto)
+        displaysys_mod.AutoDisplay = mock.Mock(return_value=display)
         displaysys_mod.env_bool = lambda name, default=False: default
         displaysys_mod.env_float = lambda name, default=0.0: default
         displaysys_mod.env_int = lambda name, default=0: default
-        displaysys_mod.env_get = lambda name, default=None: None
-        displaysys_mod.env_set = lambda name, value: None
 
         eventsys_mod = types.ModuleType("eventsys")
         eventsys_mod.Runtime = mock.Mock(return_value=runtime)
@@ -72,7 +64,6 @@ class DesktopBoardConfigContractTests(unittest.TestCase):
         self.assertIs(board_config.display_drv, display)
         self.assertIs(board_config.runtime, runtime)
         self.assertEqual(board_config.DEVICES, frozenset({"audio_out", "audio_in"}))
-        # Lazy roles are bound via __getattr__; factories stay on board_devices.
         import board_devices
 
         self.assertTrue(callable(board_devices.audio_out))
@@ -83,7 +74,7 @@ class DesktopBoardConfigContractTests(unittest.TestCase):
         eventsys_mod.Runtime.assert_called_once()
         kwargs = eventsys_mod.Runtime.call_args.kwargs
         self.assertEqual(kwargs["displays"], [display])
-        self.assertIs(kwargs["host_read"], host_read)
+        self.assertIs(kwargs["host_read"], display.get_events)
         self.assertFalse(kwargs["timer_async"])
 
 
@@ -107,10 +98,14 @@ class DesktopBoardConfigHeadlessSmoke(unittest.TestCase):
         self.assertIn("audio_in", board_config.DEVICES)
         self.assertTrue(hasattr(board_config.display_drv, "width"))
         self.assertTrue(hasattr(board_config.display_drv, "height"))
-        # Geometry is on the driver, not board_config module attrs.
+        self.assertTrue(callable(board_config.display_drv.get_events))
         self.assertFalse(hasattr(board_config, "width"))
         name = type(board_config.display_drv).__name__
         self.assertIn(name, ("PGDisplay", "SDLDisplay", "PSDisplay", "JNDisplay"))
+        self.assertIs(
+            board_config.runtime.host_dev._read,
+            board_config.display_drv.get_events,
+        )
 
 
 if __name__ == "__main__":

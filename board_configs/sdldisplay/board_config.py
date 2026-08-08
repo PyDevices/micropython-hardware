@@ -5,7 +5,6 @@ Combination board configuration for desktop, pyscript and jupyter notebook platf
 import sys
 
 from displaysys.sdldisplay import SDLDisplay as DTDisplay
-from displaysys.sdldisplay import get_events
 import eventsys
 
 width = 320
@@ -21,6 +20,9 @@ display_drv = DTDisplay(
     scale=scale,
 )
 
-runtime = eventsys.Runtime(displays=[display_drv], host_read=get_events)
+runtime = eventsys.Runtime(
+    displays=[display_drv],
+    host_read=display_drv.get_events,
+)
 
 display_drv.fill(0)
