@@ -98,14 +98,6 @@ neopixel</td>
 <td>Done</td>
 </tr>
 <tr class="odd">
-<td>SPI E-ink</td>
-<td>E-paper</td>
-<td><code>epaperdisplay.EPaperDisplay</code> chip drivers</td>
-<td><strong>EPaperDisplay</strong></td>
-<td>SPI + chip driver</td>
-<td>CP displayio push; MP bus.send path</td>
-</tr>
-<tr class="even">
 <td>USB UVC gadget</td>
 <td>USB Video</td>
 <td><code>usb_video</code></td>
@@ -113,7 +105,7 @@ neopixel</td>
 <td>N/A</td>
 <td>CP only</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>MIPI DSI</td>
 <td>MIPI DSI</td>
 <td><code>mipidsi</code> (SoC firmware)</td>
@@ -121,7 +113,7 @@ neopixel</td>
 <td><code>mipidsi</code></td>
 <td>displayif (esp32-P4, mimxrt1176)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>DVI (TMDS)</td>
 <td>DVI</td>
 <td><code>picodvi</code></td>
@@ -164,11 +156,6 @@ serial panel interface). <strong>RP2350 has no MIPI DSI</strong> — use
 <td><code>board_configs/pixeldisplay/</code> (+ <code>cp/…</code>)</td>
 <td><code>cp/pixeldisplay/neopixel_8x4</code>, …</td>
 </tr>
-<tr class="even">
-<td>EPaperDisplay</td>
-<td><code>board_configs/epaperdisplay/</code> (+ <code>cp/…</code>)</td>
-<td><code>cp/epaperdisplay/magtag</code></td>
-</tr>
 </tbody>
 </table>
 <p>MicroPython RGB/HUB75/DSI/DVI drivers live in
@@ -203,7 +190,6 @@ Arduino bus/driver mapping.</p>
 <li><code>i2cbus</code> — OLED FeatherWings, QT Py OLED</li>
 <li><code>rgbframebuffer</code> — Qualia / RGB parallel (RGB666)</li>
 <li><code>rgbmatrix</code> — MatrixPortal HUB75</li>
-<li><code>displaysys.epaperdisplay</code> — full MP backend</li>
 <li><del>NeoPixel grid mapper for <code>PixelDisplay</code></del> —
 <code>displaysys.pixeldisplay.PixelFramebuffer</code> (MP) + Adafruit
 bundle (CP)</li>

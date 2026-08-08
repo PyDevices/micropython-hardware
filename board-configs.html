@@ -292,68 +292,6 @@ configs</h2>
 </table>
 <p>Draw through <code>display_drv</code> only;
 <code>_pixel_framebuf</code> is an internal wiring detail.</p>
-<h2 id="e-paper-configs">E-paper configs</h2>
-<table>
-<thead>
-<tr class="header">
-<th>Directory</th>
-<th>Hardware</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>cp/epaperdisplay/magtag</code></td>
-<td>Adafruit MagTag SSD1680 + KEYPAD</td>
-</tr>
-<tr class="even">
-<td><code>epaperdisplay/magtag</code></td>
-<td>MagTag SSD1680 + KEYPAD (MP)</td>
-</tr>
-<tr class="odd">
-<td><code>cp/epaperdisplay/ssd1680_213_featherwing</code></td>
-<td>2.13" E-Ink FeatherWing</td>
-</tr>
-<tr class="even">
-<td><code>epaperdisplay/ssd1680_213_featherwing</code></td>
-<td>2.13" E-Ink FeatherWing (MP)</td>
-</tr>
-<tr class="odd">
-<td><code>cp/epaperdisplay/acep7in_73</code></td>
-<td>ACeP 7.3" 7-color E-Ink</td>
-</tr>
-<tr class="even">
-<td><code>epaperdisplay/acep7in_73</code></td>
-<td>ACeP 7.3" (MP)</td>
-</tr>
-<tr class="odd">
-<td><code>cp/epaperdisplay/ssd1675_213_featherwing</code></td>
-<td>SSD1675 2.13" monochrome FeatherWing</td>
-</tr>
-<tr class="even">
-<td><code>epaperdisplay/ssd1675_213_featherwing</code></td>
-<td>SSD1675 2.13" FeatherWing (MP)</td>
-</tr>
-<tr class="odd">
-<td><code>cp/epaperdisplay/uc8151d_29_breakout</code></td>
-<td>UC8151D 2.9" flexible breakout</td>
-</tr>
-<tr class="even">
-<td><code>epaperdisplay/uc8151d_29_breakout</code></td>
-<td>UC8151D 2.9" breakout (MP)</td>
-</tr>
-</tbody>
-</table>
-<p>Additional vendored chip drivers (each has a CircuitPython sibling
-under <code>cp/epaperdisplay/</code>):
-<code>ssd1681_154_tricolor</code>, <code>ssd1683_213_featherwing</code>,
-<code>ssd1677_583_mono</code>, <code>ssd1608_154_mono</code>,
-<code>il0373_213_tricolor</code>, <code>il0398_42_mono</code>,
-<code>il91874_27_tricolor</code>, <code>uc8179_583_mono</code>,
-<code>uc8253_37_mono</code>, <code>ek79686_27_tricolor</code>,
-<code>jd79661_213_4gray</code>, <code>jd79667_391_4gray</code>,
-<code>spd1656_154_acep</code>.</p>
-<p>Tri-color / 4-gray configs use <code>color_depth=2</code> (0=white,
-1=black, 2=accent). ACeP configs use <code>color_depth=4</code>.</p>
 <table>
 <thead>
 <tr class="header">
@@ -572,8 +510,9 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a hr
 <tr class="odd">
 <td>PyScript / Jupyter</td>
 <td><code>True</code></td>
-<td><code>True</code> (override with
-<strong><code>PYDISPLAY_TIMER_ASYNC</code></strong>)</td>
+<td><code>True</code> (default;
+<strong><code>PYDISPLAY_TIMER_ASYNC=0</code> → Runtime
+raises</strong>)</td>
 </tr>
 <tr class="even">
 <td>PG/SDL desktop</td>
@@ -583,6 +522,9 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a hr
 </tr>
 </tbody>
 </table>
+<p><code>eventsys.Runtime</code> rejects <code>timer_async=False</code>
+when any attached display has <code>requires_async_timer</code> (PS/JN),
+so a forced sync override fails at construction instead of hanging.</p>
 <p>Panel size overrides (before <code>import board_config</code>):
 <code>PYDISPLAY_WIDTH</code>, <code>PYDISPLAY_HEIGHT</code>,
 <code>PYDISPLAY_ROTATION</code>, <code>PYDISPLAY_SCALE</code>. Apps
