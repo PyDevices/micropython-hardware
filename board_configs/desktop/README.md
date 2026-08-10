@@ -11,25 +11,29 @@ For this package, follow the "Desktop board_config via MIP" section.
 
 ### CircuitPython note
 
-Our current `micropython-lib` clone/index does not build CircuitPython-compatible
+Our `micropython-lib` clone/index does not build CircuitPython-compatible
 `.mpy` files. If `.mpy` dependencies are installed, CircuitPython can fail with:
 
 `ValueError: MicroPython .mpy file; use CircuitPython mpy-cross`
 
-CircuitPython does not provide `mip`, so install with MicroPython and force
-source files:
+CircuitPython does not provide `mip`, so install with MicroPython using the
+`-m mip` CLI. Prefer `--no-mpy` when sharing that `lib/` with CircuitPython;
+omit `--no-mpy` for MicroPython-only installs to get precompiled `.mpy`.
+Run from the directory that should own `./lib`:
 
-```python
-import mip
+```bash
+# Shared with CircuitPython (source .py)
+micropython -m mip install --no-mpy -t lib \
+  -i https://PyDevices.github.io/micropython-lib/mip/PyDevices \
+  github:PyDevices/micropython-hardware/board_configs/desktop
 
-INDEX = "https://PyDevices.github.io/micropython-lib/mip/PyDevices"
-mip.install(
-	"github:PyDevices/micropython-hardware/board_configs/desktop",
-	index=INDEX,
-	target="lib",
-	mpy=False,
-)
+# MicroPython-only (precompiled .mpy) — omit --no-mpy
+# micropython -m mip install -t lib -i … github:…/board_configs/desktop
 ```
+
+Same with `micropython.exe` on Windows. See
+[install-workflows.md](../../docs/install-workflows.md) for the full notes
+and REPL equivalent.
 
 Run CircuitPython from that same working directory so it imports from `./lib`.
 
