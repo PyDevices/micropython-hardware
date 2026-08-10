@@ -8,7 +8,8 @@ under MicroPython and fights the GIL under CPython/LVGL).
 Four behaviors keep queued playback smooth, all established by measurement on
 WSLg/PulseAudio rather than by preference:
 
-* small writes are coalesced (~100ms) before being handed to SDL;
+* small writes are coalesced (``coalesce_ms``, 100ms by default) before being
+  handed to SDL;
 * the device stays paused until ``PREBUFFER_MS`` is queued, because starting on
   a nearly empty queue and then starving it makes PulseAudio stop asking for
   data;
@@ -60,7 +61,7 @@ except ImportError:  # pragma: no cover
 import sys
 import time
 
-from audiodev import AudioFormat, PCMInput, PCMOutput
+from audiodev import AudioFormat, PCMInput, PCMOutput, check_latency
 import usdl2 as sdl
 
 try:
@@ -77,6 +78,41 @@ DEFAULT_PLAY_SAMPLES = 4096
 # Playback cushion held in SDL's queue. Speech synthesis is bursty, so a couple
 # of seconds keeps the device fed while the next sentence is still being made.
 DEFAULT_PLAY_QUEUE_MS = 2000
+
+# PCM to accumulate in the *software* buffer before handing a piece to SDL.
+# Batching keeps a caller's small writes from becoming one SDL_QueueAudio call
+# each, but a realtime producer waits this long before its first sound.
+DEFAULT_COALESCE_MS = 100
+
+# Playback settings per ``audiodev`` latency profile. Only the values a caller
+# left unset are taken from here.
+#
+# "low" is what this backend defaulted to before queued playback grew stall
+# recovery, and it is chosen for note-to-sound delay rather than throughput:
+#
+# * a 512-sample period is ~21ms at 24kHz instead of ~170ms, so playback starts
+#   and stops on a musical timescale;
+# * queue_ms also shrinks the prebuffer, since ``_prebuffer_bytes`` is capped at
+#   a quarter of the queue -- 250ms of queue means ~62ms of priming, not 500ms;
+# * a 20ms coalesce window is under one 40ms synth chunk, so each chunk reaches
+#   SDL as it is rendered.
+#
+# Measured end to end with a realtime writer: ~59ms of latency against ~416ms
+# for the buffered profile. The tradeoff is real -- a short queue leaves less
+# room to recover from a host sink stall -- so it is opt-in, not the default.
+_PLAY_PROFILES = {
+    None: (DEFAULT_PLAY_SAMPLES, DEFAULT_PLAY_QUEUE_MS, DEFAULT_COALESCE_MS),
+    "buffered": (DEFAULT_PLAY_SAMPLES, DEFAULT_PLAY_QUEUE_MS, DEFAULT_COALESCE_MS),
+    "low": (512, 250, 20),
+}
+
+# Capture profiles. Recording has no prebuffer or coalescing, so only the period
+# and queue matter.
+_CAPTURE_PROFILES = {
+    None: (512, 250),
+    "buffered": (512, 250),
+    "low": (256, 100),
+}
 
 # PCM to accumulate in the *device* queue before unpausing a freshly primed
 # device. Lowering this trades startup latency for the risk that the sink stops
@@ -246,7 +282,7 @@ class SDLOutputStream(_SDLStream):
     """SDL playback via ``SDL_QueueAudio`` (no audio callback, no mixer).
 
     PCM travels through two buffers: writes land in ``_coalesce`` (software) and
-    are handed to SDL in ~100ms pieces up to ``_queue_limit`` (hardware).
+    are handed to SDL in ``coalesce_ms`` pieces up to ``_queue_limit`` (hardware).
     :meth:`queued_size` reports both, so a caller can treat "queued_size() == 0"
     as end of playback without knowing which buffer holds what.
 
@@ -254,16 +290,17 @@ class SDLOutputStream(_SDLStream):
     write can sit in ``_coalesce`` unqueued and a wedged device is never noticed.
     """
 
-    def __init__(self, fmt, **kwargs):
+    def __init__(self, fmt, *, coalesce_ms=DEFAULT_COALESCE_MS, **kwargs):
         super().__init__(fmt, capture=False, **kwargs)
         # SDL pulls a whole period at a time, so the queue must comfortably hold
         # several of them no matter what ``queue_ms`` a caller asked for.
         period_bytes = self.samples * fmt.frame_size
         self._queue_limit = max(self._queue_limit, 3 * period_bytes)
         self._coalesce = bytearray()
+        self.coalesce_ms = int(coalesce_ms)
         self._coalesce_bytes = max(
             fmt.frame_size,
-            self._bytes_per_second * 100 // 1000,
+            self._bytes_per_second * self.coalesce_ms // 1000,
         )
         # Kept under the caller's fill watermark so a pump that stops writing at
         # the watermark cannot leave us paused forever.
@@ -736,18 +773,28 @@ def audio_out(
     format=None,
     *,
     device=None,
-    samples=DEFAULT_PLAY_SAMPLES,
-    queue_ms=DEFAULT_PLAY_QUEUE_MS,
+    latency=None,
+    samples=None,
+    queue_ms=None,
+    coalesce_ms=None,
     poll_ms=2,
 ):
-    """Create an SDL-backed :class:`PCMOutput`."""
+    """Create an SDL-backed :class:`PCMOutput`.
+
+    ``latency`` picks a profile (see :data:`audiodev.LATENCIES`); pass
+    ``"low"`` for interactive callers such as a synth. Any of ``samples``,
+    ``queue_ms`` and ``coalesce_ms`` given explicitly override the profile.
+    """
+    check_latency(latency)
+    default_samples, default_queue_ms, default_coalesce_ms = _PLAY_PROFILES[latency]
     fmt = format or AudioFormat(16000, 2, 16)
     return PCMOutput(
         lambda: SDLOutputStream(
             fmt,
             device=device,
-            samples=samples,
-            queue_ms=queue_ms,
+            samples=default_samples if samples is None else samples,
+            queue_ms=default_queue_ms if queue_ms is None else queue_ms,
+            coalesce_ms=default_coalesce_ms if coalesce_ms is None else coalesce_ms,
             poll_ms=poll_ms,
         ),
         fmt,
@@ -759,18 +806,25 @@ def audio_in(
     format=None,
     *,
     device=None,
-    samples=512,
-    queue_ms=250,
+    latency=None,
+    samples=None,
+    queue_ms=None,
     poll_ms=2,
 ):
-    """Create an SDL-backed :class:`PCMInput` using real host capture."""
+    """Create an SDL-backed :class:`PCMInput` using real host capture.
+
+    ``latency`` picks a profile as in :func:`audio_out`; ``samples`` and
+    ``queue_ms`` given explicitly override it.
+    """
+    check_latency(latency)
+    default_samples, default_queue_ms = _CAPTURE_PROFILES[latency]
     fmt = format or AudioFormat(16000, 1, 16)
     return PCMInput(
         lambda: SDLInputStream(
             fmt,
             device=device,
-            samples=samples,
-            queue_ms=queue_ms,
+            samples=default_samples if samples is None else samples,
+            queue_ms=default_queue_ms if queue_ms is None else queue_ms,
             poll_ms=poll_ms,
         ),
         fmt,

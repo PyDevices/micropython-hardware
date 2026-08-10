@@ -7,7 +7,7 @@ except ImportError:  # pragma: no cover
 
 import time
 
-from audiodev import AudioFormat, PCMInput, PCMOutput
+from audiodev import AudioFormat, PCMInput, PCMOutput, check_latency
 
 try:
     from js import AudioContext, Object, navigator
@@ -285,14 +285,14 @@ class WebOutputStream:
 class WebInputStream:
     """Microphone capture via getUserMedia + ScriptProcessorNode."""
 
-    def __init__(self, fmt, *, poll_ms=4, queue_ms=500, buffer_size=2048):
+    def __init__(self, fmt, *, poll_ms=4, queue_ms=500, samples=2048):
         if fmt.bits != 16 or not fmt.signed or fmt.byteorder != "little":
             raise ValueError("webaudio capture requires signed 16-bit little-endian PCM")
         if fmt.channels != 1:
             raise ValueError("webaudio capture requires mono PCM")
         self.format = fmt
         self.poll_ms = int(poll_ms)
-        self.buffer_size = int(buffer_size)
+        self.samples = int(samples)
         self._queue_limit = max(
             fmt.frame_size,
             fmt.rate * fmt.frame_size * int(queue_ms) // 1000,
@@ -323,7 +323,7 @@ class WebInputStream:
         self._ctx = _new_audio_context(self.format.rate)
         _try_resume_context(self._ctx)
         self._source = self._ctx.createMediaStreamSource(self._stream)
-        self._processor = self._ctx.createScriptProcessor(self.buffer_size, 1, 1)
+        self._processor = self._ctx.createScriptProcessor(self.samples, 1, 1)
         self._proxy = create_proxy(self._on_audio)
         self._processor.onaudioprocess = self._proxy
         self._source.connect(self._processor)
@@ -390,21 +390,35 @@ class WebInputStream:
         self._pending = bytearray()
 
 
-def audio_out(format=None, *, poll_ms=4):
-    """Create a Web Audio-backed :class:`PCMOutput` (PyScript)."""
+def audio_out(format=None, *, latency=None, poll_ms=4):
+    """Create a Web Audio-backed :class:`PCMOutput` (PyScript).
+
+    ``latency`` is accepted for portability and validated, but every profile
+    behaves the same here: playback schedules each buffer onto the
+    ``AudioContext`` timeline as it arrives, so there is no queue or coalescing
+    window to shorten. Web Audio is already at the "low" profile.
+    """
+    check_latency(latency)
     fmt = format or AudioFormat(24000, 1, 16)
     return PCMOutput(lambda: WebOutputStream(fmt, poll_ms=poll_ms), fmt)
 
 
-def audio_in(format=None, *, poll_ms=4, queue_ms=500, buffer_size=2048):
-    """Create a Web Audio-backed :class:`PCMInput` via getUserMedia (PyScript)."""
+def audio_in(format=None, *, latency=None, poll_ms=4, queue_ms=500, samples=None):
+    """Create a Web Audio-backed :class:`PCMInput` via getUserMedia (PyScript).
+
+    ``samples`` is the ``ScriptProcessorNode`` block size, which the browser
+    rounds to a power of two. The ``"low"`` profile asks for a smaller block.
+    """
+    check_latency(latency)
+    if samples is None:
+        samples = 512 if latency == "low" else 2048
     fmt = format or AudioFormat(24000, 1, 16)
     return PCMInput(
         lambda: WebInputStream(
             fmt,
             poll_ms=poll_ms,
             queue_ms=queue_ms,
-            buffer_size=buffer_size,
+            samples=samples,
         ),
         fmt,
     )

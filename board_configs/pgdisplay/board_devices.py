@@ -31,13 +31,15 @@ def _format():
     return AudioFormat(24000, 1, 16)
 
 
-def audio_out():
+def audio_out(**kwargs):
+    """Build the playback device; keywords go straight to the backend."""
     from pygameaudio import audio_out as _audio_out
 
-    return _audio_out(_format())
+    return _audio_out(_format(), **kwargs)
 
 
-def audio_in():
+def audio_in(**kwargs):
+    """Build the capture device; keywords go straight to the backend."""
     from pygameaudio import audio_in as _audio_in
 
-    return _audio_in(_format())
+    return _audio_in(_format(), **kwargs)

@@ -12,7 +12,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 
-for _rel in ("drivers", "drivers/audio", "drivers/codec"):
+for _rel in ("drivers", "drivers/audio", "drivers/codec", "drivers/io_expander"):
     _path = str(ROOT / _rel)
     if _path not in sys.path:
         sys.path.insert(0, _path)

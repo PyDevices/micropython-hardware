@@ -35,7 +35,7 @@ import threading
 import time
 from pathlib import Path
 
-from audiodev import AudioFormat, PCMInput, PCMOutput
+from audiodev import AudioFormat, PCMInput, PCMOutput, check_latency
 
 try:
     import ctypes
@@ -101,6 +101,28 @@ _SDL = None
 # SDL device period (``SDL_AudioSpec.samples``) for playback. Writes are queued
 # rather than callback driven, so device latency is not important.
 DEFAULT_PLAY_SAMPLES = 4096
+
+# Playback cushion held in SDL's queue.
+DEFAULT_PLAY_QUEUE_MS = 2000
+
+# PCM to accumulate in the *software* buffer before handing a piece to SDL.
+DEFAULT_COALESCE_MS = 100
+
+# Playback settings per ``audiodev`` latency profile; see the matching table in
+# sdl2audio.py for why "low" uses these numbers. Only values a caller left unset
+# are taken from here.
+_PLAY_PROFILES = {
+    None: (DEFAULT_PLAY_SAMPLES, DEFAULT_PLAY_QUEUE_MS, DEFAULT_COALESCE_MS),
+    "buffered": (DEFAULT_PLAY_SAMPLES, DEFAULT_PLAY_QUEUE_MS, DEFAULT_COALESCE_MS),
+    "low": (512, 250, 20),
+}
+
+# Capture profiles: period and queue only.
+_CAPTURE_PROFILES = {
+    None: (512, 500),
+    "buffered": (512, 500),
+    "low": (256, 100),
+}
 
 # PCM to accumulate in the *device* queue before unpausing a freshly primed
 # device. Lowering this trades startup latency for the risk that the sink stops
@@ -269,11 +291,19 @@ class PygameOutputStream:
     write can sit in ``_coalesce`` unqueued and a wedged device is never noticed.
     """
 
-    def __init__(self, fmt, *, buffer=DEFAULT_PLAY_SAMPLES, poll_ms=2, queue_ms=2000):
+    def __init__(
+        self,
+        fmt,
+        *,
+        samples=DEFAULT_PLAY_SAMPLES,
+        poll_ms=2,
+        queue_ms=DEFAULT_PLAY_QUEUE_MS,
+        coalesce_ms=DEFAULT_COALESCE_MS,
+    ):
         # ~2s HW QueueAudio cushion: moonshine sentence synth often exceeds
         # the old 400ms limit, which underruns to silence between utterances.
         self.format = fmt
-        self.buffer = int(buffer)
+        self.samples = int(samples)
         self.poll_ms = int(poll_ms)
         self._bytes_per_second = fmt.rate * fmt.frame_size
         self._queue_limit = max(
@@ -281,9 +311,10 @@ class PygameOutputStream:
             self._bytes_per_second * int(queue_ms) // 1000,
         )
         self._coalesce = bytearray()
+        self.coalesce_ms = int(coalesce_ms)
         self._coalesce_bytes = max(
             fmt.frame_size,
-            self._bytes_per_second * 100 // 1000,
+            self._bytes_per_second * self.coalesce_ms // 1000,
         )
         # Do not start the device on a nearly empty queue: starting on ~40ms and
         # then starving it makes PulseAudio's RDP sink stop asking for data.
@@ -297,8 +328,8 @@ class PygameOutputStream:
         self._prime_pause = True
         self.channel = None  # debug probes
         self.mode = "queue"
-        period_bytes = self.buffer * fmt.frame_size
-        period_ms = 1000 * self.buffer // max(1, fmt.rate)
+        period_bytes = self.samples * fmt.frame_size
+        period_ms = 1000 * self.samples // max(1, fmt.rate)
         # Long enough that period quantization cannot look like a slow sink: a
         # healthy device delivers whole periods, so a short window can read well
         # under realtime purely from where the period boundaries fall.
@@ -349,7 +380,7 @@ class PygameOutputStream:
             _sdl_format_int(self.format),
             self.format.channels,
             0,
-            max(64, int(self.buffer)),
+            max(64, int(self.samples)),
             0,
             0,
             None,  # NULL callback → QueueAudio mode
@@ -740,10 +771,10 @@ class PygameOutputStream:
 class PygameInputStream:
     """Microphone capture via ``pygame._sdl2.AudioDevice``."""
 
-    def __init__(self, fmt, *, device=None, chunksize=512, poll_ms=2, queue_ms=500):
+    def __init__(self, fmt, *, device=None, samples=512, poll_ms=2, queue_ms=500):
         self.format = fmt
         self.device_name = device
-        self.chunksize = int(chunksize)
+        self.samples = int(samples)
         self.poll_ms = int(poll_ms)
         self._queue_limit = max(
             fmt.frame_size,
@@ -778,7 +809,7 @@ class PygameInputStream:
             frequency=self.format.rate,
             audioformat=_pygame_audio_format(self.format),
             numchannels=self.format.channels,
-            chunksize=self.chunksize,
+            chunksize=self.samples,
             allowed_changes=0,
             callback=self._callback,
         )
@@ -827,27 +858,51 @@ class PygameInputStream:
         _close_audiodevice_async(dev)
 
 
-def audio_out(format=None, *, buffer=DEFAULT_PLAY_SAMPLES, poll_ms=2, queue_ms=2000):
-    """Create a pygame-ce-backed PCM playback device (QueueAudio on pygame SDL)."""
+def audio_out(
+    format=None,
+    *,
+    latency=None,
+    samples=None,
+    poll_ms=2,
+    queue_ms=None,
+    coalesce_ms=None,
+):
+    """Create a pygame-ce-backed PCM playback device (QueueAudio on pygame SDL).
+
+    ``latency`` picks a profile (see :data:`audiodev.LATENCIES`); ``samples``,
+    ``queue_ms`` and ``coalesce_ms`` given explicitly override it.
+    """
+    check_latency(latency)
+    default_samples, default_queue_ms, default_coalesce_ms = _PLAY_PROFILES[latency]
     fmt = format or AudioFormat(16000, 2, 16)
     return PCMOutput(
         lambda: PygameOutputStream(
-            fmt, buffer=buffer, poll_ms=poll_ms, queue_ms=queue_ms
+            fmt,
+            samples=default_samples if samples is None else samples,
+            poll_ms=poll_ms,
+            queue_ms=default_queue_ms if queue_ms is None else queue_ms,
+            coalesce_ms=default_coalesce_ms if coalesce_ms is None else coalesce_ms,
         ),
         fmt,
     )
 
 
-def audio_in(format=None, *, device=None, chunksize=512, poll_ms=2, queue_ms=500):
-    """Create a pygame-ce-backed PCM capture device via ``_sdl2.AudioDevice``."""
+def audio_in(format=None, *, device=None, latency=None, samples=None, poll_ms=2, queue_ms=None):
+    """Create a pygame-ce-backed PCM capture device via ``_sdl2.AudioDevice``.
+
+    ``latency`` picks a profile as in :func:`audio_out`; ``samples`` and
+    ``queue_ms`` given explicitly override it.
+    """
+    check_latency(latency)
+    default_samples, default_queue_ms = _CAPTURE_PROFILES[latency]
     fmt = format or AudioFormat(16000, 1, 16)
     return PCMInput(
         lambda: PygameInputStream(
             fmt,
             device=device,
-            chunksize=chunksize,
+            samples=default_samples if samples is None else samples,
             poll_ms=poll_ms,
-            queue_ms=queue_ms,
+            queue_ms=default_queue_ms if queue_ms is None else queue_ms,
         ),
         fmt,
     )

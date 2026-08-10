@@ -40,26 +40,31 @@ def _select_backend():
     host = _host_kind()
     if host == "pyscript":
         _BACKEND = "webaudio"
+    elif host == "jupyter":
+        _BACKEND = "sdl2audio"
+    elif _pygame_available():
+        _BACKEND = "pygameaudio"
     else:
-        if sys.platform == "win32":
-            # See board_config.py for the full rationale (SDL2's default
-            # Windows WASAPI backend glitches with pygame.mixer.Channel's
-            # small-chunk playback; DirectSound does not). Duplicated here
-            # because an app can init board_devices directly without ever
-            # importing board_config (e.g. examples/audio_out_test.py). Must
-            # land before first SDL audio init for every non-webaudio backend
-            # (jupyter/desktop sdl2audio and desktop pygameaudio).
-            from displaysys import env_get, env_set
+        _BACKEND = "sdl2audio"
 
-            # Only when unset, so an explicit user choice still wins.
-            if env_get("SDL_AUDIODRIVER") is None:
-                env_set("SDL_AUDIODRIVER", "directsound")
-        if host == "jupyter":
-            _BACKEND = "sdl2audio"
-        elif _pygame_available():
-            _BACKEND = "pygameaudio"
-        else:
-            _BACKEND = "sdl2audio"
+    if _BACKEND == "pygameaudio" and sys.platform == "win32":
+        # See board_config.py for the full rationale: SDL2's default Windows
+        # WASAPI backend glitches with pygame's small-chunk playback, and
+        # DirectSound does not. Duplicated here because an app can init
+        # board_devices without ever importing board_config (e.g.
+        # examples/audio_out_test.py), and must land before the first SDL audio
+        # init either way.
+        #
+        # Only pygameaudio. sdl2audio queues whole buffers with
+        # SDL_QueueAudio and never hit the glitch, and DirectSound keeps a
+        # deeper buffer: measured on micropython.exe at latency="low", it holds
+        # 185ms against WASAPI's 55ms, which is the difference between playable
+        # and not for an interactive caller.
+        from displaysys import env_get, env_set
+
+        # Only when unset, so an explicit user choice still wins.
+        if env_get("SDL_AUDIODRIVER") is None:
+            env_set("SDL_AUDIODRIVER", "directsound")
     return _BACKEND
 
 
@@ -76,7 +81,14 @@ def setup_devices(ns):
     boarddev.bind_lazy(ns, sys.modules[__name__])
 
 
-def audio_out():
+def audio_out(**kwargs):
+    """Build the playback device. ``board_config.audio_out`` passes nothing.
+
+    Keyword arguments go straight to the selected backend, which is why the
+    three of them agree on names (``latency``, ``samples``, ``queue_ms``,
+    ``coalesce_ms``, ``poll_ms``). An interactive caller asks for
+    ``latency="low"``; the default stays buffered for throughput.
+    """
     fmt = _audio_format()
     backend = _select_backend()
     if backend == "webaudio":
@@ -86,10 +98,11 @@ def audio_out():
     else:
         from sdl2audio import audio_out as _audio_out
 
-    return _audio_out(fmt)
+    return _audio_out(fmt, **kwargs)
 
 
-def audio_in():
+def audio_in(**kwargs):
+    """Build the capture device; see :func:`audio_out` for the keyword contract."""
     fmt = _audio_format()
     backend = _select_backend()
     if backend == "webaudio":
@@ -99,4 +112,8 @@ def audio_in():
     else:
         from sdl2audio import audio_in as _audio_in
 
-    return _audio_in(fmt, queue_ms=150) if backend == "sdl2audio" else _audio_in(fmt)
+    if backend == "sdl2audio":
+        # Shorter than the backend default: capture is consumed live here, so a
+        # long queue only adds lag to whatever is listening.
+        kwargs.setdefault("queue_ms", 150)
+    return _audio_in(fmt, **kwargs)

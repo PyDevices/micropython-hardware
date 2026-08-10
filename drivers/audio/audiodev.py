@@ -7,6 +7,57 @@ except ImportError:  # pragma: no cover - uasyncio name on older firmware
 
 import sys
 
+# Latency profiles, shared vocabulary for every backend's ``audio_out`` /
+# ``audio_in``. Backends translate a profile into their own block and queue
+# sizes -- the names live here so all of them spell it the same way, and so a
+# caller can ask for a profile without knowing which backend it will get.
+#
+# ``None``      backend default: buffered for throughput, which is what a
+#               producer that can write faster than realtime wants (a TTS pump
+#               with whole utterances ready, file playback).
+# ``"low"``     interactive: shortest block and queue the backend supports, for
+#               a producer that writes at realtime with a small look-ahead (a
+#               synth responding to key presses). A buffered profile turns
+#               directly into note-to-sound delay for those callers.
+# ``"buffered"``the default, named explicitly.
+LATENCIES = (None, "low", "buffered")
+
+
+def check_latency(latency):
+    """Validate a latency profile name, returning it unchanged.
+
+    Raises rather than falling back, so a typo is a visible error instead of
+    silently buffered audio in an app that asked for low latency.
+    """
+    if latency not in LATENCIES:
+        raise ValueError(
+            "unknown latency profile {!r}; expected one of {}".format(latency, LATENCIES)
+        )
+    return latency
+
+
+# Queue depth for the "low" profile, in milliseconds of audio.
+LOW_LATENCY_QUEUE_MS = 100
+
+
+def queue_bytes(fmt, latency=None, queue_ms=None, default=None, minimum=0):
+    """Bytes of buffering for a latency profile, e.g. ``machine.I2S(ibuf=...)``.
+
+    MCU drivers size their ring buffer in bytes, which depends on the format, so
+    the profile is expressed in milliseconds and converted here. ``default`` is
+    returned untouched for the buffered profile: a board's own value is usually
+    tuned against its codec and should not be recomputed from a round number.
+    ``minimum`` is the smallest size the driver can work with (for I2S, a few DMA
+    buffers), so a caller asking for an unusable depth gets a working device.
+    """
+    check_latency(latency)
+    if queue_ms is None:
+        if latency != "low":
+            return default
+        queue_ms = LOW_LATENCY_QUEUE_MS
+    wanted = fmt.rate * fmt.frame_size * int(queue_ms) // 1000
+    return max(minimum, fmt.frame_size, wanted)
+
 
 class AudioFormat:  # noqa: PLW1641 - mutable value object is intentionally unhashable
     """Description of raw, interleaved PCM frames."""

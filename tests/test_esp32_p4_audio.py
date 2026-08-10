@@ -105,9 +105,12 @@ class ESP32P4AudioTests(unittest.TestCase):
                 sys.modules[name] = module
 
     def tearDown(self):
-        session = self.board._SESSION
-        session._owners[:] = []
-        self.board._INPUT_SESSION._owners[:] = []
+        for session in (self.board._SESSION, self.board._INPUT_SESSION):
+            session._owners[:] = []
+            # Drop the cached codec too: it holds register state from whatever
+            # this test opened, and the next test expects a fresh bring-up.
+            session.codec = None
+        self.i2c.registers.clear()
         FakePin.instances.clear()
         FakePWM.instances.clear()
         self.board._pa = None
@@ -132,6 +135,45 @@ class ESP32P4AudioTests(unittest.TestCase):
         output.close()
         self.assertTrue(output.codec.dac_muted)
         self.assertEqual(FakePin.instances[53].state, 0)
+
+    def test_default_ibuf_is_the_bring_up_value(self):
+        # Ear-verified during bring-up; a latency profile must not move it.
+        for latency in (None, "buffered"):
+            device = self.board.audio_out(latency=latency)
+            device.open()
+            self.assertEqual(20000, device.stream.options["ibuf"])
+            device.close()
+
+    def test_low_latency_shortens_the_i2s_ring_buffer(self):
+        device = self.board.audio_out(latency="low")
+        device.open()
+        # 100ms at 24kHz mono 16-bit.
+        self.assertEqual(4800, device.stream.options["ibuf"])
+        device.close()
+
+        capture = self.board.audio_in(latency="low")
+        capture.open()
+        self.assertEqual(4800, capture.stream.options["ibuf"])
+        capture.close()
+
+    def test_explicit_queue_ms_wins_but_cannot_starve_the_dma(self):
+        device = self.board.audio_out(queue_ms=200)
+        device.open()
+        self.assertEqual(9600, device.stream.options["ibuf"])
+        device.close()
+
+        device = self.board.audio_out(queue_ms=1)
+        device.open()
+        self.assertEqual(self.board._MIN_IBUF, device.stream.options["ibuf"])
+        device.close()
+
+    def test_unusable_keywords_raise_instead_of_being_ignored(self):
+        with self.assertRaises(ValueError):
+            self.board.audio_out(latency="fast")
+        # No software coalescing stage on this board, so silently accepting it
+        # would promise latency tuning that does not happen.
+        with self.assertRaises(TypeError):
+            self.board.audio_out(coalesce_ms=20)
 
     def test_input_uses_es7210_codec_and_gain(self):
         capture = self.board.audio_in()

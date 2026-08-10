@@ -11,10 +11,10 @@ find. It is also useful by hand::
     micropython.exe tests/portability_probe.py
     circuitpython tests/portability_probe.py
 
-It exercises the two things that have actually broken -- selecting a backend
-(which sets ``SDL_AUDIODRIVER`` on Windows) and writing PCM (which consumes
-bytearray buffers). Neither fails at import, only on first use, so importing the
-modules is not enough to prove anything.
+It exercises the things that have actually broken -- selecting a backend, the
+environment helpers that replaced ``os.environ``, and writing PCM (which
+consumes bytearray buffers). None of them fail at import, only on first use, so
+importing the modules is not enough to prove anything.
 
 This file must itself stay inside the API subset MicroPython and CircuitPython
 share: no ``os.path``, no ``pathlib``, no ``unittest``, no ``os.environ``.
@@ -58,14 +58,34 @@ def probe_backend_selection():
         backend in ("sdl2audio", "pygameaudio", "webaudio"),
     )
     current = os.getenv("SDL_AUDIODRIVER")
-    if sys.platform == "win32":
-        check("win32 sets an audio driver", current is not None)
-        if preset is None:
-            check("win32 defaults to directsound", current == "directsound")
-        else:
-            check("an explicit audio driver still wins", current == preset)
+    if preset is not None:
+        check("an explicit audio driver still wins", current == preset)
+    elif sys.platform == "win32" and backend == "pygameaudio":
+        check("win32 pygameaudio defaults to directsound", current == "directsound")
     else:
-        check("non-win32 leaves the audio driver alone", current == preset)
+        # Every other combination leaves it to SDL: only pygame's small-chunk
+        # playback needs DirectSound, and it costs sdl2audio latency.
+        check("the audio driver is left alone ({})".format(backend), current is None)
+
+
+def probe_env_helpers():
+    """The portable stand-in for ``os.environ``, which only CPython has.
+
+    Checked directly rather than through backend selection: an interpreter
+    without pygame never reaches the one place a board config writes an
+    environment variable, so that path alone would leave this unguarded.
+    """
+    try:
+        from displaysys import env_get, env_set
+    except ImportError:
+        print("  skip: displaysys is not installed for this interpreter")
+        return
+
+    name = "PYDEVICES_PROBE_VAR"
+    check("env_get returns None for an unset name", env_get(name) is None)
+    env_set(name, "directsound")
+    check("env_set is visible to env_get", env_get(name) == "directsound")
+    check("env_set is visible to os.getenv", os.getenv(name) == "directsound")
 
 
 def probe_buffer_consumption():
@@ -124,6 +144,34 @@ def probe_buffer_consumption():
     device.close()
 
 
+def probe_latency_profile():
+    """``latency="low"`` must build and play on every interpreter, not just CPython."""
+    os.putenv("SDL_AUDIODRIVER", "dummy")
+
+    from audiodev import AudioFormat
+    import sdl2audio
+
+    fmt = AudioFormat(24000, 1, 16)
+    device = sdl2audio.audio_out(fmt, latency="low")
+    device.open()
+    stream = device.stream
+    check(
+        "low profile shortened the coalesce window ({} bytes)".format(stream._coalesce_bytes),
+        stream._coalesce_bytes < 24000 * 2 * 100 // 1000,
+    )
+    stream.write(bytes(stream._coalesce_bytes * 2))
+    stream.service()
+    check("low profile queued PCM ({} bytes)".format(stream._queued_total), stream._queued_total > 0)
+    device.close()
+
+    failed = False
+    try:
+        sdl2audio.audio_out(fmt, latency="nope")
+    except ValueError:
+        failed = True
+    check("an unknown profile raises instead of falling back", failed)
+
+
 def probe_board_config():
     """``board_config`` is what apps import; it must load headless."""
     try:
@@ -141,7 +189,9 @@ def probe_board_config():
 
 def main():
     probe_backend_selection()
+    probe_env_helpers()
     probe_buffer_consumption()
+    probe_latency_profile()
     probe_board_config()
     print(
         "PORTABILITY OK ({} checks, {} {})".format(

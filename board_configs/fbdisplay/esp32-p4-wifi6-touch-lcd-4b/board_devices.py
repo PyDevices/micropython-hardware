@@ -14,13 +14,22 @@ _LRCK = 10
 _DSDIN = 9
 _PA_CTRL = 53
 
-from audiodev import AudioFormat, AudioSession, PCMInput, PCMOutput
+from audiodev import AudioFormat, AudioSession, PCMInput, PCMOutput, queue_bytes
 
 # 24 kHz mono PCM. Firmware has no I2S mck= — PWM supplies MCLK.
 # Bring-up (ear-verified): MCLK before ES8311 init; unmute + volume before I2S; MONO.
 _RATE = 24000
 _FORMAT = AudioFormat(_RATE, 1, 16)
 _DEFAULT_VOLUME = 50
+
+# I2S ring buffer. The default is the ear-verified bring-up value; leave it. A
+# caller asking for latency="low" gets a shorter one instead (see queue_bytes),
+# which is what an interactive synth needs and what buffered playback does not.
+_IBUF = 20000
+
+# Floor for that shortened buffer: I2S feeds from DMA blocks, so too small a ring
+# underruns no matter how promptly the caller writes.
+_MIN_IBUF = 4096
 _SESSION = AudioSession(codec_factory=lambda: _codec(), duplex=False)
 _INPUT_SESSION = AudioSession(codec_factory=lambda: _input_codec(), duplex=False)
 _pa = None
@@ -76,7 +85,7 @@ def _input_codec():
     return ES7210(bc.i2c, profile="waveshare_p4")
 
 
-def _output_stream():
+def _output_stream(ibuf=_IBUF):
     from machine import I2S, Pin
 
     _ensure_mclk(512)
@@ -89,11 +98,11 @@ def _output_stream():
         bits=16,
         format=I2S.MONO,
         rate=_RATE,
-        ibuf=20000,
+        ibuf=ibuf,
     )
 
 
-def _input_stream():
+def _input_stream(ibuf=_IBUF):
     from machine import I2S, Pin
 
     _ensure_mclk(512)
@@ -106,7 +115,7 @@ def _input_stream():
         bits=16,
         format=I2S.MONO,
         rate=_RATE,
-        ibuf=20000,
+        ibuf=ibuf,
     )
 
 
@@ -129,10 +138,17 @@ def _output_power(enable):
         _codec_call("enable_output", False)
 
 
-def audio_out():
-    """Portable ES8311 PCM playback device with hardware volume and mute."""
+def audio_out(*, latency=None, queue_ms=None):
+    """Portable ES8311 PCM playback device with hardware volume and mute.
+
+    ``latency`` / ``queue_ms`` size the I2S ring buffer. Only these two of the
+    shared audio keywords mean anything here: there is no software coalescing
+    stage and no host device to name, so the rest raise rather than being
+    accepted and ignored.
+    """
+    ibuf = queue_bytes(_FORMAT, latency, queue_ms, default=_IBUF, minimum=_MIN_IBUF)
     out = PCMOutput(
-        _output_stream,
+        lambda: _output_stream(ibuf),
         _FORMAT,
         session=_SESSION,
         set_hardware_volume=lambda value: _codec_call("set_dac_volume", value),
@@ -151,10 +167,14 @@ def _input_power(enable):
         _INPUT_SESSION.get_codec().enable_input(False)
 
 
-def audio_in():
-    """Portable ES8311 PCM capture device with hardware ADC gain."""
+def audio_in(*, latency=None, queue_ms=None):
+    """Portable ES8311 PCM capture device with hardware ADC gain.
+
+    ``latency`` / ``queue_ms`` size the I2S ring buffer; see :func:`audio_out`.
+    """
+    ibuf = queue_bytes(_FORMAT, latency, queue_ms, default=_IBUF, minimum=_MIN_IBUF)
     return PCMInput(
-        _input_stream,
+        lambda: _input_stream(ibuf),
         _FORMAT,
         session=_INPUT_SESSION,
         set_hardware_gain=lambda value: _INPUT_SESSION.get_codec().set_gain(value),

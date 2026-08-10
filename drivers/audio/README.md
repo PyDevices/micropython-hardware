@@ -6,7 +6,7 @@ modules are host backends that implement them.
 
 | File | Host | Role |
 |------|------|------|
-| `audiodev.py` | all | `AudioFormat`, `PCMOutput` / `PCMInput` / `ToneOutput`, WAV file streams |
+| `audiodev.py` | all | `AudioFormat`, `PCMOutput` / `PCMInput` / `ToneOutput`, WAV file streams, latency profiles |
 | `sdl2audio.py` | desktop MicroPython, CircuitPython, CPython, Jupyter | SDL2 queued PCM through `usdl2` |
 | `pygameaudio.py` | CPython desktop with pygame-ce installed | Queued PCM on pygame-ce's bundled SDL |
 | `webaudio.py` | PyScript / browser | Web Audio playback, `getUserMedia` capture |
@@ -16,6 +16,56 @@ Callers do not import these directly. `board_devices.audio_out()` /
 `audio_in()` select a backend — `webaudio` under PyScript, `sdl2audio` under
 Jupyter, `pygameaudio` when pygame-ce imports, otherwise `sdl2audio` — and
 return an `audiodev` device.
+
+## Buffering options
+
+Because a board forwards its keyword arguments to whichever backend it picks,
+the backends have to spell the same concept the same way. These names are the
+contract; do not add a fourth spelling for one of them.
+
+| Keyword | Meaning | Backends |
+|---------|---------|----------|
+| `latency` | Profile name: `None`/`"buffered"` or `"low"` (see `audiodev.LATENCIES`) | all three |
+| `samples` | Device block size in frames (SDL's `AudioSpec.samples`, Web Audio's `ScriptProcessorNode` size) | all three (capture only for `webaudio`) |
+| `queue_ms` | Playable audio the queue may hold | `sdl2audio`, `pygameaudio` |
+| `coalesce_ms` | How much PCM to batch in software before handing a piece to the device | `sdl2audio`, `pygameaudio` |
+| `poll_ms` | Sleep between polls while blocked | all three |
+| `device` | Host device name | `sdl2audio`, `pygameaudio` (capture) |
+
+A backend accepts a name only where the concept exists, rather than accepting
+and ignoring it: `webaudio` playback has no queue or coalesce window at all,
+because it schedules each buffer onto the `AudioContext` timeline as it arrives.
+
+The same rule reaches the MCU board configs that build PCM devices directly from
+`machine.I2S` (ESP32-P4, both M5Stack Tab5 variants). There `latency` and
+`queue_ms` size the I2S ring buffer — `audiodev.queue_bytes()` converts a profile
+into the byte count `ibuf` wants — and nothing else is accepted, since those
+boards have no software coalescing stage and no host device to name. Their
+buffered default is the board's own bring-up value, returned untouched rather
+than recomputed from a round number, and the shortened buffer has a floor so a
+caller cannot starve the DMA. Boards whose `audio_out` is a PWM
+`audiodev.ToneOutput` take no audio keywords at all.
+
+`latency` is the one knob every backend takes, so it is what portable code
+should use. The default profile is buffered, tuned for a producer that can write
+faster than realtime — speech synthesis with whole utterances ready, or file
+playback — where depth costs nothing and protects against a starved sink.
+
+`latency="low"` is for the opposite producer: a synth writing at realtime with a
+small look-ahead, where every buffered millisecond is note-to-sound delay.
+Measured on `micropython.exe` with a 40ms-per-40ms writer:
+
+| Profile | First sound | Steady latency |
+|---------|-------------|----------------|
+| default | 486 ms | 418 ms |
+| `"low"` | 42 ms | 52 ms |
+
+The tradeoff is real — a short queue leaves less slack to recover from a host
+sink stall (see [The WSLg / PulseAudio sink defect](#the-wslg--pulseaudio-sink-defect))
+— so it is opt-in. Explicit
+`samples` / `queue_ms` / `coalesce_ms` override whatever the profile chose. An
+unknown profile name raises rather than falling back, so a typo cannot quietly
+leave an interactive app buffered.
 
 ## The stream contract
 
@@ -199,9 +249,12 @@ stream.requeued_bytes            # PCM replayed after a rebuild
 A healthy long run recycles rarely and loses nothing: 208 s of speech across
 four utterances produced one recycle and zero lost bytes.
 
-Keyword arguments are `samples`, `queue_ms` and `poll_ms`. Leave the playback
-defaults alone unless you have measured a reason — an earlier board config passed
-`queue_ms=150`, which left too little cushion for sentence-at-a-time synthesis.
+Keyword arguments are the shared set in [Buffering options](#buffering-options).
+Leave the playback defaults alone unless you have measured a reason — an earlier
+board config passed `queue_ms=150`, which left too little cushion for
+sentence-at-a-time synthesis. A caller that needs less delay should ask for
+`latency="low"` rather than trimming the default profile, so speech playback
+keeps the depth it was tuned for.
 The `queue_ms=150` that `board_devices.audio_in()` still passes is unrelated and
 intentional: capture wants low latency.
 
@@ -240,7 +293,15 @@ values.
 When a fix lands in one backend it belongs in the other, because the failure they
 work around is in the host's audio sink, not in either library.
 
-Keyword arguments are `buffer` (device period), `queue_ms` and `poll_ms`.
+### Windows: only this backend wants DirectSound
+
+`board_devices` forces `SDL_AUDIODRIVER=directsound` on Windows for
+`pygameaudio` alone. SDL2's default WASAPI backend glitches with pygame's
+small-chunk playback, but `sdl2audio` queues whole buffers and never hit that,
+and DirectSound keeps a deeper buffer: measured on `micropython.exe` at
+`latency="low"`, DirectSound sits at 185 ms against WASAPI's 55 ms. Forcing it
+for every backend spent that on callers who gained nothing. An explicit
+`SDL_AUDIODRIVER` in the environment still wins in either case.
 
 ## `webaudio.py`
 
@@ -277,7 +338,8 @@ the import is a no-op.
 ## Tests
 
 `tests/test_audiodev.py`, `tests/test_sdl2audio.py` and `tests/test_pygameaudio.py`
-cover these modules against SDL's `dummy` driver:
+cover these modules against SDL's `dummy` driver, and
+`tests/test_audiodev_latency.py` covers the profile vocabulary on its own:
 
 ```bash
 python -m unittest discover -s tests -q
@@ -299,13 +361,20 @@ first, so run it through `discover` rather than on its own.
 statically, so it still guards CI, where no MicroPython build exists — and then
 runs `tests/portability_probe.py` under each of `micropython`,
 `micropython.exe`, and `circuitpython` found on `PATH`, skipping when none are.
-The probe selects a backend and writes PCM, since both idioms import cleanly
-everywhere and only raise on first use. Run it by hand against one interpreter
-with:
+The probe selects a backend, exercises the environment helpers, and writes PCM on
+both latency profiles, since these idioms import cleanly everywhere and only
+raise on first use. Run it by hand against one interpreter with:
 
 ```bash
 micropython tests/portability_probe.py
 ```
+
+`tests/test_esp32_p4_audio.py` and `tests/test_tab5_audio.py` simulate the MCU
+boards that build I2S devices directly, with fake `machine`, I2C and codecs, so
+the profile-to-`ibuf` mapping is checked without hardware. When editing those
+board configs, clear `__pycache__` before trusting a re-run: WSL mtimes are
+coarse enough that an edit in the same second as the previous run can leave stale
+bytecode in place and a real failure looking green.
 
 ## ⚠️ Troubleshooting
 

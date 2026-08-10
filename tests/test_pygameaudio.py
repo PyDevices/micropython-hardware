@@ -22,7 +22,7 @@ import pygameaudio  # noqa: E402
 class PygameBackendTests(unittest.TestCase):
     def test_sync_and_async_output(self):
         fmt = AudioFormat(8000, 1, 16)
-        output = pygameaudio.audio_out(fmt, buffer=128)
+        output = pygameaudio.audio_out(fmt, samples=128)
         output.write(b"\0\0" * 80)
         output.drain()
 
