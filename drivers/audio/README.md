@@ -294,6 +294,19 @@ which looks like a driver bug and is not one.
 `tests/test_contract_proof.py` relies on a sibling test importing `tests/_env.py`
 first, so run it through `discover` rather than on its own.
 
+`tests/test_portability.py` covers the constraints above. It rejects
+`del` on any bytearray buffer and any `os.environ` use in the portable modules —
+statically, so it still guards CI, where no MicroPython build exists — and then
+runs `tests/portability_probe.py` under each of `micropython`,
+`micropython.exe`, and `circuitpython` found on `PATH`, skipping when none are.
+The probe selects a backend and writes PCM, since both idioms import cleanly
+everywhere and only raise on first use. Run it by hand against one interpreter
+with:
+
+```bash
+micropython tests/portability_probe.py
+```
+
 ## ⚠️ Troubleshooting
 
 | Symptom | Likely cause |
