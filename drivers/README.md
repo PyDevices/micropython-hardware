@@ -27,3 +27,7 @@ board configs. Prefer single-file modules; MIP manifests live under `../packages
 | `bus/`, `touch/`, `display/`, `io_expander/`, `input/`, `joystick/` | Existing display/touch/bus helpers |
 
 Use `machine.SDCard` for SDMMC/SDIO slots; use `sdcard.py` for SPI CS paths.
+
+The audio backends share a stream contract and carry host-specific workarounds
+that are easy to undo by accident — read [`audio/README.md`](audio/README.md)
+before changing them.

@@ -84,7 +84,7 @@ def audio_out():
     else:
         from sdl2audio import audio_out as _audio_out
 
-    return _audio_out(fmt, queue_ms=150) if backend == "sdl2audio" else _audio_out(fmt)
+    return _audio_out(fmt)
 
 
 def audio_in():
