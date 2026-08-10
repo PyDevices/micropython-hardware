@@ -49,9 +49,11 @@ def _select_backend():
             # importing board_config (e.g. examples/audio_out_test.py). Must
             # land before first SDL audio init for every non-webaudio backend
             # (jupyter/desktop sdl2audio and desktop pygameaudio).
-            import os
+            from displaysys import env_get, env_set
 
-            os.environ.setdefault("SDL_AUDIODRIVER", "directsound")
+            # Only when unset, so an explicit user choice still wins.
+            if env_get("SDL_AUDIODRIVER") is None:
+                env_set("SDL_AUDIODRIVER", "directsound")
         if host == "jupyter":
             _BACKEND = "sdl2audio"
         elif _pygame_available():

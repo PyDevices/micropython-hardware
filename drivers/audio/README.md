@@ -47,6 +47,37 @@ every backend has them:
 are flushed there, and stall recovery only runs from `service()` and `drain()`.
 An app that never ticks will eventually hear PCM stop with data still buffered.
 
+## Portability
+
+`audiodev.py` and `sdl2audio.py` run on CPython, MicroPython (unix *and*
+`micropython.exe`), and CircuitPython, so they are limited to APIs all three
+provide. CPython-only idioms here do not fail at import — they raise at runtime
+on the first write, which is why they survive review.
+
+| Instead of | Write | Why |
+|------------|-------|-----|
+| `del buf[:n]` | `buf[:n] = b""` | MicroPython and CircuitPython bytearrays support no item deletion at all (`TypeError`). Slice assignment behaves identically on all four runtimes, including `[:]`, `n == len`, and `n > len`. |
+| `os.environ` | `displaysys.env_get` / `env_set` | Only CPython has `os.environ`; the others have `getenv`/`putenv` only. `env_set` walks `os.environ` → `os.putenv` → a process-local override. |
+| `time.monotonic()` | the module's `_monotonic_ms()` / `_elapsed_ms()` | MicroPython measures time with `ticks_ms`, which wraps; comparisons need `ticks_diff`. |
+| assuming `threading` | the guarded `threading is not None` paths | Bare MicroPython and CircuitPython have no `threading`, so `_lock` is `None` and the async rebuild degrades to a synchronous one. |
+
+Lists are unaffected — `del self._samples[:]` is fine everywhere; only
+`bytearray` (`_coalesce`, `_shadow`, `_pending`) has the restriction.
+
+`pygameaudio.py` and `webaudio.py` cannot run on MicroPython or CircuitPython at
+all (they need pygame-ce and Pyodide's `js` module), so a CPython-only idiom is
+not a bug there. `pygameaudio.py` still uses the portable forms, because it
+mirrors `sdl2audio.py` closely enough to diff — see "Keep it in step with
+`sdl2audio.py`" below. `webaudio.py` shares nothing with them and stays as it is.
+
+Verify with the real interpreters rather than by inspection — CPython accepts
+everything above:
+
+```bash
+cd pydisplay/src
+for rt in micropython micropython.exe circuitpython; do $rt examples/audio_out_test.py; done
+```
+
 ## `audiodev.py`
 
 Portable contracts, no host dependencies:

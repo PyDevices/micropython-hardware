@@ -443,7 +443,8 @@ class PygameOutputStream:
                 self._queued_total += len(data)
                 self._shadow.extend(data)
                 if len(self._shadow) > self._shadow_limit:
-                    del self._shadow[: len(self._shadow) - self._shadow_limit]
+                    # Slice assignment: MP/CP bytearrays cannot ``del``.
+                    self._shadow[: len(self._shadow) - self._shadow_limit] = b""
         if rc != 0:
             err = sdl.SDL_GetError()
             raise OSError(err.decode() if err else "SDL_QueueAudio failed")
@@ -474,7 +475,8 @@ class PygameOutputStream:
                 # which may be the UI thread.
                 break
             piece = bytes(self._coalesce[:take])
-            del self._coalesce[:take]
+            # Slice assignment: MP/CP bytearrays cannot ``del``.
+            self._coalesce[:take] = b""
             self._queue_bytes(piece)
         # Start (or not) once, after everything that fits has been queued, so the
         # device never begins on the first small chunk of a large flush.
@@ -611,7 +613,7 @@ class PygameOutputStream:
                 except Exception as exc:
                     error = exc
             self.lost_bytes += len(self._coalesce)
-            del self._coalesce[:]
+            self._coalesce[:] = b""
             self._shadow = bytearray()
             print("[pygameaudio] reopen after stall failed: %s" % (error,))
         finally:
@@ -792,7 +794,8 @@ class PygameInputStream:
             if count <= 0:
                 return b""
             data = bytes(self._pending[:count])
-            del self._pending[:count]
+            # Slice assignment: MP/CP bytearrays cannot ``del``.
+            self._pending[:count] = b""
             return data
 
     def readinto(self, buf):

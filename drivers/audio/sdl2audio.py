@@ -44,6 +44,12 @@ The ``recycles``, ``lost_bytes`` and ``requeued_bytes`` counters exist to keep
 those claims checkable: a healthy long run recycles rarely and loses nothing.
 ``README.md`` in this directory has the full account, including how to measure a
 change before making it.
+
+This module also runs on MicroPython (unix and ``micropython.exe``) and
+CircuitPython, so it avoids CPython-only APIs -- notably it consumes buffers with
+``buf[:n] = b""`` rather than ``del buf[:n]``, which those runtimes reject at
+runtime, not at import. See "Portability" in ``README.md``; verify changes by
+running ``examples/audio_out_test.py`` under all three interpreters.
 """
 
 try:
@@ -436,7 +442,8 @@ class SDLOutputStream(_SDLStream):
                 self._queued_total += len(data)
                 self._shadow.extend(data)
                 if len(self._shadow) > self._shadow_limit:
-                    del self._shadow[: len(self._shadow) - self._shadow_limit]
+                    # Slice assignment: MP/CP bytearrays cannot ``del``.
+                    self._shadow[: len(self._shadow) - self._shadow_limit] = b""
         finally:
             if self._lock is not None:
                 self._lock.release()
@@ -469,7 +476,8 @@ class SDLOutputStream(_SDLStream):
                 # which may be the UI thread.
                 break
             piece = bytes(self._coalesce[:take])
-            del self._coalesce[:take]
+            # Slice assignment: MP/CP bytearrays cannot ``del``.
+            self._coalesce[:take] = b""
             self._queue_bytes(piece)
         # Start (or not) once, after everything that fits has been queued, so the
         # device never begins on the first small chunk of a large flush.
@@ -636,7 +644,7 @@ class SDLOutputStream(_SDLStream):
                 except Exception as exc:
                     error = exc
             self.lost_bytes += len(self._coalesce)
-            del self._coalesce[:]
+            self._coalesce[:] = b""
             self._shadow = bytearray()
             print("[sdl2audio] reopen after stall failed: %s" % (error,))
         finally:

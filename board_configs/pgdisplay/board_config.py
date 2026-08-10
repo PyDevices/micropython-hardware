@@ -5,7 +5,7 @@ Board configuration for PyGame.
 import sys
 
 if sys.platform == "win32":
-    import os
+    from displaysys import env_get, env_set
 
     # SDL2's default Windows audio driver (WASAPI) has a compatibility issue
     # with pygame.mixer.Channel's play()/queue() small-chunk playback pattern
@@ -17,8 +17,10 @@ if sys.platform == "win32":
     # audio driver at the first SDL_InitSubSystem(SDL_INIT_AUDIO), so setting
     # this later in drivers/audio/pygameaudio.py (which opens the mixer lazily
     # on first audio_out() use, well after PGDisplay has already called
-    # pg.init()) is too late. setdefault() leaves an explicit user choice alone.
-    os.environ.setdefault("SDL_AUDIODRIVER", "directsound")
+    # pg.init()) is too late.
+    # Only when unset, so an explicit user choice still wins.
+    if env_get("SDL_AUDIODRIVER") is None:
+        env_set("SDL_AUDIODRIVER", "directsound")
 
 from displaysys.pgdisplay import PGDisplay as DTDisplay
 import eventsys

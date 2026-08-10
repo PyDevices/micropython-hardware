@@ -5,16 +5,18 @@ import sys
 import boarddev
 
 if sys.platform == "win32":
-    import os
+    from displaysys import env_get, env_set
 
     # See board_config.py for the full rationale (SDL2's default Windows
     # WASAPI backend glitches with pygame.mixer.Channel's small-chunk
     # playback; DirectSound does not). Duplicated here because an app can
     # init board_devices directly without ever importing board_config (e.g.
     # examples/audio_out_test.py), and audio_out()/audio_in() below open the
-    # pygame mixer lazily on first use -- setdefault() must land before that,
-    # and before any board_config PGDisplay pg.init(), whichever runs first.
-    os.environ.setdefault("SDL_AUDIODRIVER", "directsound")
+    # pygame mixer lazily on first use -- this must land before that, and
+    # before any board_config PGDisplay pg.init(), whichever runs first.
+    # Only when unset, so an explicit user choice still wins.
+    if env_get("SDL_AUDIODRIVER") is None:
+        env_set("SDL_AUDIODRIVER", "directsound")
 
 DEVICES = frozenset({"audio_out", "audio_in"})
 
