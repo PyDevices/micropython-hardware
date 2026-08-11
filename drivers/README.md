@@ -16,11 +16,8 @@ board configs. Prefer single-file modules; MIP manifests live under `../packages
 | `codec/es7210.py` | Minimal ES7210 ADC init for I2S mics (`profile="m5"` for CoreS3/Tab5) |
 | `codec/aw88298.py` | AW88298 smart amp init (CoreS3) |
 | `codec/es8388.py` | ES8388 DAC init (Tab5) |
-| `audio/sdl2audio.py` | SDL2 queued PCM for `audiodev` (needs `usdl2`) |
+| `audio/audiodev/` | Portable PCM/tone package (`PCMOutput` bases + backends) |
 | `usdl2.py` | Pure-Python SDL2 ctypes/ffi binding for desktop SDL |
-| `audio/pygameaudio.py` | pygame-ce PCM backend |
-| `audio/webaudio.py` | PyScript / Web Audio backend |
-| `audio/audiodev.py` | Portable `AudioFormat` / PCM device contracts |
 | `power/battery_adc.py` | ADC + divider → volts |
 | `bus/rs485.py` | UART (+ optional DE) |
 | `bus/canbus.py` | `machine.CAN` helper when firmware exposes TWAI |
@@ -28,6 +25,6 @@ board configs. Prefer single-file modules; MIP manifests live under `../packages
 
 Use `machine.SDCard` for SDMMC/SDIO slots; use `sdcard.py` for SPI CS paths.
 
-The audio backends share a stream contract and carry host-specific workarounds
+The audio backends subclass the `audiodev` bases and carry host-specific workarounds
 that are easy to undo by accident — read [`audio/README.md`](audio/README.md)
 before changing them.

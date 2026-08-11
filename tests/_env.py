@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 """Put micropython-hardware drivers on ``sys.path`` for unit tests.
 
-Import this before ``audiodev`` / ``sdl2audio`` / ``usdl2`` so the in-repo
+Import this before ``audiodev`` / ``usdl2`` so the in-repo
 pure-Python ``drivers/usdl2.py`` is found without a separate install.
 """
 

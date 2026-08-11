@@ -33,8 +33,12 @@
       "github:PyDevices/micropython-hardware/drivers/codec/es8388.py"
     ],
     [
-      "audiodev.py",
-      "github:PyDevices/micropython-hardware/drivers/audio/audiodev.py"
+      "audiodev/__init__.py",
+      "github:PyDevices/micropython-hardware/drivers/audio/audiodev/__init__.py"
+    ],
+    [
+      "audiodev/i2s_audio.py",
+      "github:PyDevices/micropython-hardware/drivers/audio/audiodev/i2s_audio.py"
     ]
   ],
   "deps": [

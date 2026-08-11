@@ -53,11 +53,8 @@ This bundle installs:
 - `board_config.py`
 - `board_devices.py`
 - `boarddev.py`
-- `audiodev.py`
-- `sdl2audio.py`
+- `audiodev/` (package)
 - `usdl2.py`
-- `pygameaudio.py`
-- `webaudio.py`
 - plus `displaysys`, `eventsys`, and `multimer` from the PyDevices MIP index
 
 Display host selection is `displaysys.AutoDisplay`:
@@ -66,9 +63,9 @@ Display host selection is `displaysys.AutoDisplay`:
 - Desktop CPython/MicroPython unix/windows: `PGDisplay` first, then `SDLDisplay` fallback
 
 Audio (in `board_devices`) follows the same host probe:
-- PyScript: `webaudio`
-- Jupyter: `sdl2audio` (kernel host)
-- Desktop: `import pygame` → `pygameaudio`, else `sdl2audio`
+- PyScript: `web_audio`
+- Jupyter: `sdl2_audio` (kernel host)
+- Desktop: `import pygame` → `pygame_audio`, else `sdl2_audio`
 
 Terminal-only apps (no display) can `import board_devices` and call
 `audio_out()` / `audio_in()` without opening a window.

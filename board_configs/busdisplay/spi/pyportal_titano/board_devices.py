@@ -4,7 +4,7 @@ import sys
 
 DEVICES = frozenset({"sdcard", "radio", "audio_out", "i2c", "wlan"})
 
-from audiodev import ToneOutput
+from audiodev.pwm_tone import PWMToneOutput
 
 
 def setup_devices(ns):
@@ -45,7 +45,7 @@ def audio_out():
         enable = None
         speaker = Pin(2)
     power = None if enable is None else lambda value: enable.value(value)
-    return ToneOutput(lambda: PWM(speaker, freq=440, duty=0), power=power)
+    return PWMToneOutput(lambda: PWM(speaker, freq=440, duty=0), power=power)
 
 
 def i2c():

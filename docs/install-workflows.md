@@ -79,11 +79,8 @@ Expected files from the desktop board package:
 - `board_config.py`
 - `board_devices.py`
 - `boarddev.py`
-- `audiodev.py`
-- `sdl2audio.py`
+- `audiodev/` (package)
 - `usdl2.py`
-- `pygameaudio.py`
-- `webaudio.py`
 
 CircuitPython note:
 - Our `micropython-lib` clone/index does not build CircuitPython-compatible

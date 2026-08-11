@@ -4,7 +4,8 @@ import sys
 
 DEVICES = frozenset({"pixels", "audio_out", "audio_in", "sdcard", "battery", "i2c", "wlan", "ble"})
 
-from audiodev import AudioFormat, PCMInput, PCMOutput
+from audiodev import AudioFormat
+from audiodev.i2s_audio import I2SPCMInput, I2SPCMOutput
 
 _FORMAT = AudioFormat(16000, 2, 16)
 
@@ -58,7 +59,7 @@ def audio_out():
         ibuf=20000,
         )
 
-    return PCMOutput(stream, _FORMAT)
+    return I2SPCMOutput(stream, _FORMAT)
 
 
 def audio_in():
@@ -84,7 +85,7 @@ def audio_in():
         ibuf=20000,
         )
 
-    return PCMInput(
+    return I2SPCMInput(
         stream, _FORMAT, codec=codec,
         set_hardware_gain=codec.set_gain, power=codec.enable_input,
     )

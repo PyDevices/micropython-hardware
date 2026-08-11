@@ -1,11 +1,15 @@
 # Portable audio
 
 The audio surface is split by direction: boards expose `audio_out` and/or
-`audio_in`. Each object owns stream lifecycle and reports an `AudioFormat` plus
-a `capabilities` set. PCM output supports `write`, `drain`, `awrite`, and
-`adrain`; PCM input supports `readinto` and `areadinto`. Volume, gain, and mute
-use a normalized 0–100 scale and select hardware controls when a codec provides
-them, otherwise `audiodev` scales PCM in software.
+`audio_in`. Each object is a subclass of `audiodev.PCMOutput`, `PCMInput`, or
+`ToneOutput`. It reports an `AudioFormat` plus a `capabilities` set. PCM output
+supports `write`, `drain`, `awrite`, and `adrain`; PCM input supports `readinto`
+and `areadinto`. Volume, gain, and mute use a normalized 0–100 scale and select
+hardware controls when a codec provides them, otherwise `audiodev` scales PCM in
+software.
+
+Queued hosts also implement `service()`, `queued_size()`, `is_active()`, and
+`clear()` on the device (no-ops on MCU). Call `service()` from the app tick.
 
 Codec-specific features remain reachable through `device.codec`. Shared
 half-duplex hardware uses `AudioSession`; opening the opposite direction while
@@ -13,38 +17,36 @@ one direction owns the session raises `OSError`.
 
 ## Host backends
 
-`sdl2audio.py` is the reference playback and real-microphone backend for
+`audiodev.sdl2_audio` is the reference playback and real-microphone backend for
 MicroPython and CPython. It uses queued SDL audio and provides the same sync and
 async contract as hardware devices.
 
-`pygameaudio.py` provides CPython playback and capture for pygame-ce hosts
-(typically Windows / `python.exe`). Playback uses `pygame.mixer`; capture uses
-`pygame._sdl2.AudioDevice` (`iscapture=True`).
+`audiodev.pygame_audio` provides CPython playback and capture for pygame-ce hosts
+(typically Windows / `python.exe`). Playback uses pygame's bundled SDL via
+`SDL_QueueAudio`; capture uses `pygame._sdl2.AudioDevice` (`iscapture=True`).
 
-`webaudio.py` provides PyScript / browser playback (`AudioContext`) and capture
-(`getUserMedia`).
+`audiodev.web_audio` provides PyScript / browser playback (`AudioContext`) and
+capture (`getUserMedia`).
 
-Desktop `board_devices` selects a backend by host probe (`import pygame`,
-`import pyscript`, or Jupyter / SDL fallback) without importing `displaysys`.
+Desktop `board_devices` may use `audiodev.auto` for host probe. Fixed host boards
+import a concrete backend. `audiodev` itself does not import `displaysys`.
 
-## WAV file devices (MCU-safe)
+## Emulated devices (CI / no hardware)
 
-`audiodev.wav_output(path, format)` and `audiodev.wav_input(path)` implement
-file-backed `PCMOutput` / `PCMInput` for PCM WAV only. Use them to record a
-prompt to storage or to simulate a microphone on boards that already ship
-`audiodev` without the desktop audio package:
+`audiodev.emulated_audio` implements WAV files, a waveform generator, in-memory
+loopback, and a discard sink. It is never auto-selected:
 
 ```python
-from audiodev import AudioFormat, wav_input, wav_output
+from audiodev import AudioFormat
+from audiodev.emulated_audio import audio_in, audio_out
 
 fmt = AudioFormat(24000, 1, 16)
-out = wav_output("/sd/prompt.wav", fmt)
+out = audio_out(fmt, path="/sd/prompt.wav")
 out.write(pcm_bytes)
 out.close()
 
-mic = wav_input("/sd/prompt.wav")
+mic = audio_in(path="/sd/prompt.wav")
 ```
-
 
 ## ESP32-P4 status
 

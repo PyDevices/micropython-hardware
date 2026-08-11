@@ -1,11 +1,14 @@
-"""Small portable PCM and tone device contracts for MicroPython and CPython."""
+"""Portable PCM and tone device contracts for MicroPython and CPython.
+
+Backends subclass :class:`PCMOutput`, :class:`PCMInput`, and
+:class:`ToneOutput`. Optional host selection lives in :mod:`audiodev.auto`
+and is never imported from here.
+"""
 
 try:
     import asyncio
 except ImportError:  # pragma: no cover - uasyncio name on older firmware
     import uasyncio as asyncio
-
-import sys
 
 # Latency profiles, shared vocabulary for every backend's ``audio_out`` /
 # ``audio_in``. Backends translate a profile into their own block and queue
@@ -57,6 +60,16 @@ def queue_bytes(fmt, latency=None, queue_ms=None, default=None, minimum=0):
         queue_ms = LOW_LATENCY_QUEUE_MS
     wanted = fmt.rate * fmt.frame_size * int(queue_ms) // 1000
     return max(minimum, fmt.frame_size, wanted)
+
+
+async def _asleep(seconds=0):
+    if seconds and hasattr(asyncio, "sleep_ms"):
+        await asyncio.sleep_ms(int(seconds * 1000) if seconds >= 0.001 else 0)
+        return
+    if hasattr(asyncio, "sleep_ms") and not seconds:
+        await asyncio.sleep_ms(0)
+        return
+    await asyncio.sleep(seconds)
 
 
 class AudioFormat:  # noqa: PLW1641 - mutable value object is intentionally unhashable
@@ -141,13 +154,6 @@ def _clamp_percent(value):
     return value
 
 
-def _call_optional(obj, name, *args):
-    method = getattr(obj, name, None)
-    if method is not None:
-        return method(*args)
-    return None
-
-
 def _scale_pcm(source, target, fmt, percent):
     """Scale PCM into target without allocating per sample."""
     src = memoryview(source)
@@ -181,14 +187,13 @@ def _scale_pcm(source, target, fmt, percent):
 
 
 class _Device:
+    """Shared open/close, session, and no-op queue housekeeping."""
+
     direction = None
 
-    def __init__(self, stream_factory, session=None):
-        self._stream_factory = stream_factory
+    def __init__(self, *, session=None):
         self.session = session
-        self.stream = None
         self.is_open = False
-        self._async_stream = None
         self._codec = None
 
     @property
@@ -201,10 +206,13 @@ class _Device:
     def codec(self, value):
         self._codec = value
 
-    def _open_stream(self):
-        stream = self._stream_factory() if callable(self._stream_factory) else self._stream_factory
-        _call_optional(stream, "open")
-        self.stream = stream
+    def _open(self):
+        """Open the transport. Subclasses override."""
+        pass
+
+    def _close(self):
+        """Close the transport. Subclasses override."""
+        pass
 
     def open(self):
         if self.is_open:
@@ -212,7 +220,7 @@ class _Device:
         if self.session is not None:
             self.session.acquire(self, self.direction)
         try:
-            self._open_stream()
+            self._open()
             self.is_open = True
         except Exception:
             if self.session is not None:
@@ -224,17 +232,29 @@ class _Device:
         if not self.is_open:
             return
         try:
-            _call_optional(self.stream, "close")
-            if not hasattr(self.stream, "close"):
-                _call_optional(self.stream, "deinit")
+            self._close()
         finally:
-            self.stream = None
-            self._async_stream = None
             self.is_open = False
             if self.session is not None:
                 self.session.release(self)
 
     deinit = close
+
+    def service(self):
+        """Per-tick housekeeping. Queued hosts override; default is a no-op."""
+        return None
+
+    def queued_size(self):
+        """Bytes still waiting to play or capture. Default 0."""
+        return 0
+
+    def is_active(self):
+        """True while PCM remains queued. Default False."""
+        return False
+
+    def clear(self):
+        """Drop queued PCM now. Default no-op."""
+        return None
 
     def __enter__(self):
         return self.open()
@@ -244,14 +264,17 @@ class _Device:
 
 
 class PCMOutput(_Device):
-    """Raw PCM playback with normalized volume and async support."""
+    """Raw PCM playback with normalized volume and async support.
+
+    Subclasses implement :meth:`_write` (and optionally :meth:`_drain`,
+    :meth:`_awrite`, :meth:`_adrain`, :meth:`service`).
+    """
 
     kind = "pcm"
     direction = "out"
 
     def __init__(
         self,
-        stream_factory,
         format,
         *,
         session=None,
@@ -261,7 +284,7 @@ class PCMOutput(_Device):
         set_hardware_mute=None,
         power=None,
     ):
-        super().__init__(stream_factory, session)
+        super().__init__(session=session)
         self.format = format
         self.codec = codec
         self.amplifier = amplifier
@@ -326,12 +349,28 @@ class PCMOutput(_Device):
         _scale_pcm(view, target, self.format, percent)
         return target
 
+    def _write(self, buf):
+        raise NotImplementedError("PCMOutput subclasses must implement _write")
+
+    def _drain(self):
+        return None
+
+    async def _awrite(self, buf):
+        count = self._write(buf)
+        await _asleep(0)
+        return count
+
+    async def _adrain(self):
+        result = self._drain()
+        await _asleep(0)
+        return result
+
     def write(self, buf):
         self.open()
         source = self._prepare(buf)
         written = 0
         while written < len(source):
-            count = self.stream.write(source[written:])
+            count = self._write(source[written:])
             if count is None:
                 count = len(source) - written
             if count <= 0:
@@ -341,25 +380,14 @@ class PCMOutput(_Device):
 
     def drain(self):
         self.open()
-        return _call_optional(self.stream, "drain")
+        return self._drain()
 
     async def awrite(self, buf):
         self.open()
         source = self._prepare(buf)
-        method = getattr(self.stream, "awrite", None)
-        if method is None and sys.implementation.name == "micropython":
-            if self._async_stream is None:
-                self._async_stream = asyncio.StreamWriter(self.stream)
-            self._async_stream.write(source)
-            await self._async_stream.drain()
-            return len(buf)
         written = 0
         while written < len(source):
-            if method is not None:
-                count = await method(source[written:])
-            else:
-                count = self.stream.write(source[written:])
-                await asyncio.sleep_ms(0) if hasattr(asyncio, "sleep_ms") else asyncio.sleep(0)
+            count = await self._awrite(source[written:])
             if count is None:
                 count = len(source) - written
             if count <= 0:
@@ -369,11 +397,7 @@ class PCMOutput(_Device):
 
     async def adrain(self):
         self.open()
-        method = getattr(self.stream, "adrain", None)
-        if method is not None:
-            return await method()
-        self.drain()
-        await asyncio.sleep_ms(0) if hasattr(asyncio, "sleep_ms") else asyncio.sleep(0)
+        return await self._adrain()
 
     def close(self):
         if not self.is_open:
@@ -388,14 +412,16 @@ class PCMOutput(_Device):
 
 
 class PCMInput(_Device):
-    """Raw PCM capture with normalized gain and async support."""
+    """Raw PCM capture with normalized gain and async support.
+
+    Subclasses implement :meth:`_readinto` (and optionally :meth:`_areadinto`).
+    """
 
     kind = "pcm"
     direction = "in"
 
     def __init__(
         self,
-        stream_factory,
         format,
         *,
         session=None,
@@ -404,7 +430,7 @@ class PCMInput(_Device):
         set_hardware_mute=None,
         power=None,
     ):
-        super().__init__(stream_factory, session)
+        super().__init__(session=session)
         self.format = format
         self.codec = codec
         self._set_hardware_gain = set_hardware_gain
@@ -459,28 +485,25 @@ class PCMInput(_Device):
             _scale_pcm(view, view, self.format, self._gain)
         return count
 
+    def _readinto(self, buf):
+        raise NotImplementedError("PCMInput subclasses must implement _readinto")
+
+    async def _areadinto(self, buf):
+        count = self._readinto(buf)
+        await _asleep(0)
+        return count
+
     def readinto(self, buf):
         self.open()
         if len(buf) % self.format.frame_size:
             raise ValueError("PCM buffer must hold complete frames")
-        return self._finish_read(buf, self.stream.readinto(buf))
+        return self._finish_read(buf, self._readinto(buf))
 
     async def areadinto(self, buf):
         self.open()
         if len(buf) % self.format.frame_size:
             raise ValueError("PCM buffer must hold complete frames")
-        method = getattr(self.stream, "areadinto", None)
-        if method is None and sys.implementation.name == "micropython":
-            if self._async_stream is None:
-                self._async_stream = asyncio.StreamReader(self.stream)
-            count = await self._async_stream.readinto(buf)
-            return self._finish_read(buf, count)
-        if method is not None:
-            count = await method(buf)
-        else:
-            count = self.stream.readinto(buf)
-            await asyncio.sleep_ms(0) if hasattr(asyncio, "sleep_ms") else asyncio.sleep(0)
-        return self._finish_read(buf, count)
+        return self._finish_read(buf, await self._areadinto(buf))
 
     def close(self):
         if not self.is_open:
@@ -495,13 +518,16 @@ class PCMInput(_Device):
 
 
 class ToneOutput(_Device):
-    """Frequency/duty output for PWM speakers and buzzers."""
+    """Frequency/duty output for PWM speakers and buzzers.
+
+    Subclasses implement :meth:`_play` and :meth:`_stop`.
+    """
 
     kind = "tone"
     direction = "out"
 
-    def __init__(self, stream_factory, *, session=None, power=None):
-        super().__init__(stream_factory, session)
+    def __init__(self, *, session=None, power=None):
+        super().__init__(session=session)
         self._power = power
         self.capabilities = frozenset({"tone", "playback", "volume", "mute"})
         self._volume = 100
@@ -533,30 +559,23 @@ class ToneOutput(_Device):
             self.stop()
         return self._muted
 
+    def _play(self, frequency, level):
+        raise NotImplementedError("ToneOutput subclasses must implement _play")
+
+    def _stop(self):
+        raise NotImplementedError("ToneOutput subclasses must implement _stop")
+
     def play(self, frequency, *, volume=None):
         self.open()
         level = self._volume if volume is None else _clamp_percent(volume)
         if self._muted:
             level = 0
-        if hasattr(self.stream, "play"):
-            self.stream.play(frequency, level)
-        else:
-            self.stream.freq(int(frequency))
-            duty = level * 32768 // 100
-            if hasattr(self.stream, "duty_u16"):
-                self.stream.duty_u16(duty)
-            else:
-                self.stream.duty(level * 512 // 100)
+        self._play(frequency, level)
 
     def stop(self):
         if not self.is_open:
             return
-        if hasattr(self.stream, "stop"):
-            self.stream.stop()
-        elif hasattr(self.stream, "duty_u16"):
-            self.stream.duty_u16(0)
-        else:
-            self.stream.duty(0)
+        self._stop()
 
     async def aplay(self, frequency, duration_ms):
         self.play(frequency)
@@ -576,171 +595,14 @@ class ToneOutput(_Device):
         super().close()
 
 
-def _u16(value):
-    return int(value).to_bytes(2, "little")
-
-
-def _u32(value):
-    return int(value).to_bytes(4, "little")
-
-
-def _wav_header(fmt, data_length):
-    """Build a 44-byte PCM RIFF/WAVE header for *fmt* and *data_length* bytes."""
-    byte_rate = fmt.rate * fmt.frame_size
-    block_align = fmt.frame_size
-    bits = fmt.bits
-    channels = fmt.channels
-    # PCM WAVEFORMATEX; unsigned 8-bit is conventional for bits==8.
-    return (
-        b"RIFF"
-        + _u32(36 + data_length)
-        + b"WAVEfmt "
-        + _u32(16)
-        + _u16(1)
-        + _u16(channels)
-        + _u32(fmt.rate)
-        + _u32(byte_rate)
-        + _u16(block_align)
-        + _u16(bits)
-        + b"data"
-        + _u32(data_length)
-    )
-
-
-def _parse_pcm_wav(data):
-    """Return ``(AudioFormat, pcm_bytes)`` from a PCM WAV buffer."""
-    if len(data) < 44 or data[0:4] != b"RIFF" or data[8:12] != b"WAVE":
-        raise ValueError("Expected RIFF/WAVE data")
-
-    pos = 12
-    total = len(data)
-    channels = None
-    rate = None
-    bits = None
-    fmt_tag = None
-    payload = None
-
-    while pos + 8 <= total:
-        chunk_id = data[pos : pos + 4]
-        chunk_len = int.from_bytes(data[pos + 4 : pos + 8], "little")
-        pos += 8
-        end = pos + chunk_len
-        if end > total:
-            end = total
-
-        if chunk_id == b"fmt ":
-            chunk = data[pos:end]
-            if len(chunk) < 16:
-                raise ValueError("WAV fmt chunk is too short")
-            fmt_tag = int.from_bytes(chunk[0:2], "little")
-            channels = int.from_bytes(chunk[2:4], "little")
-            rate = int.from_bytes(chunk[4:8], "little")
-            bits = int.from_bytes(chunk[14:16], "little")
-        elif chunk_id == b"data":
-            payload = data[pos:end]
-            break
-
-        pos = end + (chunk_len % 2)
-
-    if payload is None:
-        raise ValueError("WAV data chunk not found")
-    if fmt_tag != 1:
-        raise ValueError("Only PCM WAV is supported")
-    if channels is None or rate is None or bits is None:
-        raise ValueError("WAV fmt metadata is incomplete")
-
-    signed = bits != 8
-    return AudioFormat(rate, channels, bits, signed=signed), bytes(payload)
-
-
-class _WavOutputStream:
-    """File stream that writes a PCM WAV, finalizing sizes on close."""
-
-    def __init__(self, path, fmt):
-        self.path = path
-        self.format = fmt
-        self._file = None
-        self._data_length = 0
-
-    def open(self):
-        if self._file is not None:
-            return self
-        self._file = open(self.path, "wb")
-        self._file.write(_wav_header(self.format, 0))
-        self._data_length = 0
-        return self
-
-    def write(self, buf):
-        self.open()
-        view = memoryview(buf)
-        self._file.write(view)
-        self._data_length += len(view)
-        return len(view)
-
-    def drain(self):
-        if self._file is not None:
-            self._file.flush()
-
-    def close(self):
-        if self._file is None:
-            return
-        try:
-            self._file.seek(0)
-            self._file.write(_wav_header(self.format, self._data_length))
-            self._file.flush()
-        finally:
-            self._file.close()
-            self._file = None
-
-
-class _WavInputStream:
-    """File-backed PCM stream; ``readinto`` returns 0 at EOF."""
-
-    def __init__(self, path):
-        self.path = path
-        self.format = None
-        self._pcm = b""
-        self._offset = 0
-        self._opened = False
-
-    def open(self):
-        if self._opened:
-            return self
-        with open(self.path, "rb") as handle:
-            data = handle.read()
-        self.format, self._pcm = _parse_pcm_wav(data)
-        self._offset = 0
-        self._opened = True
-        return self
-
-    def readinto(self, buf):
-        self.open()
-        remaining = len(self._pcm) - self._offset
-        if remaining <= 0:
-            return 0
-        count = min(len(buf), remaining)
-        buf[:count] = self._pcm[self._offset : self._offset + count]
-        self._offset += count
-        return count
-
-    def close(self):
-        self._opened = False
-        self._pcm = b""
-        self._offset = 0
-
-
-def wav_output(path, format):
-    """Create a :class:`PCMOutput` that writes interleaved PCM into a WAV file."""
-    if not isinstance(format, AudioFormat):
-        raise TypeError("format must be an AudioFormat")
-    return PCMOutput(lambda: _WavOutputStream(path, format), format)
-
-
-def wav_input(path):
-    """Create a :class:`PCMInput` that reads interleaved PCM from a WAV file."""
-    stream = _WavInputStream(path)
-    stream.open()
-    fmt = stream.format
-    # Re-open on PCMInput.open so lifecycle matches other devices.
-    stream.close()
-    return PCMInput(lambda: _WavInputStream(path), fmt)
+__all__ = (
+    "LATENCIES",
+    "LOW_LATENCY_QUEUE_MS",
+    "AudioFormat",
+    "AudioSession",
+    "PCMInput",
+    "PCMOutput",
+    "ToneOutput",
+    "check_latency",
+    "queue_bytes",
+)

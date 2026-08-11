@@ -16,7 +16,8 @@ DEVICES = frozenset(
     }
 )
 
-from audiodev import AudioFormat, AudioSession, PCMInput, PCMOutput
+from audiodev import AudioFormat, AudioSession
+from audiodev.i2s_audio import I2SPCMInput, I2SPCMOutput
 
 _FORMAT = AudioFormat(16000, 2, 16)
 _SESSION = AudioSession(duplex=False)
@@ -79,7 +80,7 @@ def audio_in():
         ibuf=20000,
         )
 
-    return PCMInput(
+    return I2SPCMInput(
         stream, _FORMAT, session=_SESSION, codec=codec,
         set_hardware_gain=codec.set_gain, power=codec.enable_input,
     )
@@ -108,7 +109,7 @@ def audio_out():
         ibuf=20000,
         )
 
-    return PCMOutput(
+    return I2SPCMOutput(
         stream, _FORMAT, session=_SESSION, codec=codec,
         set_hardware_mute=codec.mute, power=codec.enable_output,
     )

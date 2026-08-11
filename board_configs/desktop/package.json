@@ -13,24 +13,32 @@
       "github:PyDevices/micropython-hardware/drivers/boarddev.py"
     ],
     [
-      "audiodev.py",
-      "github:PyDevices/micropython-hardware/drivers/audio/audiodev.py"
+      "audiodev/__init__.py",
+      "github:PyDevices/micropython-hardware/drivers/audio/audiodev/__init__.py"
     ],
     [
-      "sdl2audio.py",
-      "github:PyDevices/micropython-hardware/drivers/audio/sdl2audio.py"
+      "audiodev/auto.py",
+      "github:PyDevices/micropython-hardware/drivers/audio/audiodev/auto.py"
     ],
     [
-      "androidaudio_session.py",
-      "github:PyDevices/micropython-hardware/drivers/audio/androidaudio_session.py"
+      "audiodev/sdl2_audio.py",
+      "github:PyDevices/micropython-hardware/drivers/audio/audiodev/sdl2_audio.py"
     ],
     [
-      "pygameaudio.py",
-      "github:PyDevices/micropython-hardware/drivers/audio/pygameaudio.py"
+      "audiodev/pygame_audio.py",
+      "github:PyDevices/micropython-hardware/drivers/audio/audiodev/pygame_audio.py"
     ],
     [
-      "webaudio.py",
-      "github:PyDevices/micropython-hardware/drivers/audio/webaudio.py"
+      "audiodev/web_audio.py",
+      "github:PyDevices/micropython-hardware/drivers/audio/audiodev/web_audio.py"
+    ],
+    [
+      "audiodev/android_audio.py",
+      "github:PyDevices/micropython-hardware/drivers/audio/audiodev/android_audio.py"
+    ],
+    [
+      "audiodev/emulated_audio.py",
+      "github:PyDevices/micropython-hardware/drivers/audio/audiodev/emulated_audio.py"
     ]
   ],
   "deps": [

@@ -25,27 +25,25 @@ class BoardDevicesSelectTests(unittest.TestCase):
         board_devices._BACKEND = None
         return board_devices
 
-    def test_pygame_probe_selects_pygameaudio(self):
+    def test_pygame_probe_selects_pygame_audio(self):
         bd = self._load()
-        with mock.patch.object(bd, "_host_kind", return_value="desktop"):
-            with mock.patch.object(bd, "_pygame_available", return_value=True):
-                self.assertEqual(bd._select_backend(), "pygameaudio")
+        with mock.patch("audiodev.auto.select_backend", return_value="pygame_audio"):
+            self.assertEqual(bd._select_backend(), "pygame_audio")
 
-    def test_desktop_without_pygame_selects_sdl2audio(self):
+    def test_desktop_without_pygame_selects_sdl2_audio(self):
         bd = self._load()
-        with mock.patch.object(bd, "_host_kind", return_value="desktop"):
-            with mock.patch.object(bd, "_pygame_available", return_value=False):
-                self.assertEqual(bd._select_backend(), "sdl2audio")
+        with mock.patch("audiodev.auto.select_backend", return_value="sdl2_audio"):
+            self.assertEqual(bd._select_backend(), "sdl2_audio")
 
-    def test_pyscript_selects_webaudio(self):
+    def test_pyscript_selects_web_audio(self):
         bd = self._load()
-        with mock.patch.object(bd, "_host_kind", return_value="pyscript"):
-            self.assertEqual(bd._select_backend(), "webaudio")
+        with mock.patch("audiodev.auto.select_backend", return_value="web_audio"):
+            self.assertEqual(bd._select_backend(), "web_audio")
 
-    def test_jupyter_selects_sdl2audio(self):
+    def test_jupyter_selects_sdl2_audio(self):
         bd = self._load()
-        with mock.patch.object(bd, "_host_kind", return_value="jupyter"):
-            self.assertEqual(bd._select_backend(), "sdl2audio")
+        with mock.patch("audiodev.auto.select_backend", return_value="sdl2_audio"):
+            self.assertEqual(bd._select_backend(), "sdl2_audio")
 
     def test_devices_roles(self):
         bd = self._load()

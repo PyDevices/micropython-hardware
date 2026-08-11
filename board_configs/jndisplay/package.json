@@ -13,18 +13,23 @@
       "github:PyDevices/micropython-hardware/drivers/boarddev.py"
     ],
     [
-      "audiodev.py",
-      "github:PyDevices/micropython-hardware/drivers/audio/audiodev.py"
+      "audiodev/__init__.py",
+      "github:PyDevices/micropython-hardware/drivers/audio/audiodev/__init__.py"
     ],
     [
-      "sdl2audio.py",
-      "github:PyDevices/micropython-hardware/drivers/audio/sdl2audio.py"
+      "audiodev/sdl2_audio.py",
+      "github:PyDevices/micropython-hardware/drivers/audio/audiodev/sdl2_audio.py"
     ],
     [
       "usdl2.py",
       "github:PyDevices/micropython-hardware/drivers/usdl2.py"
     ]
   ],
-  "deps": [["displaysys", "latest"]],
+  "deps": [
+    [
+      "displaysys",
+      "latest"
+    ]
+  ],
   "version": "0.1"
 }

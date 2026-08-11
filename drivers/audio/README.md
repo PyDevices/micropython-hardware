@@ -1,21 +1,34 @@
 # Audio drivers
 
 PCM playback and capture for [micropython-hardware](https://github.com/PyDevices/micropython-hardware)
-board configs. `audiodev.py` defines the portable device contracts; the other
-modules are host backends that implement them.
+board configs. The `audiodev` package owns the portable bases; each backend is a
+standalone submodule that subclasses them. `audiodev.auto` is an optional
+selector only — backends never import it.
 
-| File | Host | Role |
-|------|------|------|
-| `audiodev.py` | all | `AudioFormat`, `PCMOutput` / `PCMInput` / `ToneOutput`, WAV file streams, latency profiles |
-| `sdl2audio.py` | desktop MicroPython, CircuitPython, CPython, Jupyter | SDL2 queued PCM through `usdl2` |
-| `pygameaudio.py` | CPython desktop with pygame-ce installed | Queued PCM on pygame-ce's bundled SDL |
-| `webaudio.py` | PyScript / browser | Web Audio playback, `getUserMedia` capture |
-| `androidaudio_session.py` | Android | Media focus + foreground service around playback |
+| Module | Host | Role |
+|--------|------|------|
+| `audiodev` | all | `AudioFormat`, `PCMOutput` / `PCMInput` / `ToneOutput` bases, latency helpers |
+| `audiodev.sdl2_audio` | desktop MicroPython, CircuitPython, CPython, Jupyter | SDL2 queued PCM through `usdl2` |
+| `audiodev.pygame_audio` | CPython desktop with pygame-ce installed | Queued PCM on pygame-ce's bundled SDL |
+| `audiodev.web_audio` | PyScript / browser | Web Audio playback, `getUserMedia` capture |
+| `audiodev.i2s_audio` | MCU | `machine.I2S` adapter |
+| `audiodev.pwm_tone` | MCU | PWM / buzzer adapter |
+| `audiodev.emulated_audio` | CI / no hardware | WAV, generator, loopback, discard |
+| `audiodev.android_audio` | Android | Media focus + foreground service |
+| `audiodev.auto` | host convenience | Probe-based `audio_out` / `audio_in` |
 
-Callers do not import these directly. `board_devices.audio_out()` /
-`audio_in()` select a backend — `webaudio` under PyScript, `sdl2audio` under
-Jupyter, `pygameaudio` when pygame-ce imports, otherwise `sdl2audio` — and
-return an `audiodev` device.
+Apps typically use `board_config.audio_out`. Board configs may import a concrete
+backend or `audiodev.auto`. Desktop `board_devices` uses auto after applying the
+Windows DirectSound env (composition only — audiodev does not import displaysys).
+
+This package does not import `displaysys`, `multimer`, or `eventsys`.
+
+Family invariants (template for later displaysys / multimer):
+
+1. Package owns base + standalone backend modules; each backend is complete without `Auto*`.
+2. `Auto*` is optional; dependency arrow is `auto → backends`, never reverse.
+3. Optional behavior is real methods with defaults (`service`, `queued_size`, `is_active`, `clear`), not `getattr` discovery.
+4. Platform defects stay documented with “do not simplify” tests, inside the owning subclass.
 
 ## Buffering options
 
@@ -25,15 +38,15 @@ contract; do not add a fourth spelling for one of them.
 
 | Keyword | Meaning | Backends |
 |---------|---------|----------|
-| `latency` | Profile name: `None`/`"buffered"` or `"low"` (see `audiodev.LATENCIES`) | all three |
-| `samples` | Device block size in frames (SDL's `AudioSpec.samples`, Web Audio's `ScriptProcessorNode` size) | all three (capture only for `webaudio`) |
-| `queue_ms` | Playable audio the queue may hold | `sdl2audio`, `pygameaudio` |
-| `coalesce_ms` | How much PCM to batch in software before handing a piece to the device | `sdl2audio`, `pygameaudio` |
-| `poll_ms` | Sleep between polls while blocked | all three |
-| `device` | Host device name | `sdl2audio`, `pygameaudio` (capture) |
+| `latency` | Profile name: `None`/`"buffered"` or `"low"` (see `audiodev.LATENCIES`) | host PCM backends |
+| `samples` | Device block size in frames (SDL's `AudioSpec.samples`, Web Audio's `ScriptProcessorNode` size) | host PCM (capture only for `web_audio`) |
+| `queue_ms` | Playable audio the queue may hold | `sdl2_audio`, `pygame_audio`, `emulated_audio` loopback |
+| `coalesce_ms` | How much PCM to batch in software before handing a piece to the device | `sdl2_audio`, `pygame_audio` |
+| `poll_ms` | Sleep between polls while blocked | host PCM backends |
+| `device` | Host device name | `sdl2_audio`, `pygame_audio` (capture) |
 
 A backend accepts a name only where the concept exists, rather than accepting
-and ignoring it: `webaudio` playback has no queue or coalesce window at all,
+and ignoring it: `web_audio` playback has no queue or coalesce window at all,
 because it schedules each buffer onto the `AudioContext` timeline as it arrives.
 
 The same rule reaches the MCU board configs that build PCM devices directly from
@@ -44,7 +57,7 @@ boards have no software coalescing stage and no host device to name. Their
 buffered default is the board's own bring-up value, returned untouched rather
 than recomputed from a round number, and the shortened buffer has a floor so a
 caller cannot starve the DMA. Boards whose `audio_out` is a PWM
-`audiodev.ToneOutput` take no audio keywords at all.
+`audiodev.pwm_tone.PWMToneOutput` take no audio keywords at all.
 
 `latency` is the one knob every backend takes, so it is what portable code
 should use. The default profile is buffered, tuned for a producer that can write
@@ -67,39 +80,33 @@ sink stall (see [The WSLg / PulseAudio sink defect](#the-wslg--pulseaudio-sink-d
 unknown profile name raises rather than falling back, so a typo cannot quietly
 leave an interactive app buffered.
 
-## The stream contract
+## The device contract
 
-A backend supplies a *stream*; `audiodev.PCMOutput` / `PCMInput` wrap it and add
-volume/gain scaling, session handling, and the sync/async surface. Streams
-implement `open()`, `close()`, and `write(buf)` or `readinto(buf)`, plus
-optionally `awrite` / `areadinto` and `drain` / `adrain`.
+Backends subclass `PCMOutput` / `PCMInput` / `ToneOutput`. The object the app
+holds *is* the backend. Bases provide session, volume/gain, write-all looping,
+and async defaults that yield. Subclasses implement `_write` / `_readinto` /
+`_play` (and `_open` / `_close`).
 
-If a stream defines `awrite`, `audiodev` uses it *instead of* its own
-`await asyncio.sleep(0)` fallback — so that method owns the cooperative yield. An
-`awrite` that never awaits (for example `return self.write(buf)`, whose
-backpressure is a blocking sleep) starves the event loop: a task looping on it
-never yields, so timers never fire and even its own `cancel()` is never
-delivered. Async stream methods must await, including when there is nothing to
-wait for.
-
-Queued backends also expose methods `audiodev` does **not** forward. Callers
-reach these through `device.stream` and must probe with `getattr`, since not
-every backend has them:
+Queued hosts override these methods on the device itself (safe no-ops on MCU):
 
 | Method | Purpose |
 |--------|---------|
 | `queued_size()` | Bytes still waiting to play, software plus hardware buffers |
 | `is_active()` | True while any PCM remains queued |
-| `service()` | Per-tick housekeeping; **required** for `sdl2audio` and `pygameaudio` |
+| `service()` | Per-tick housekeeping; **required** for `sdl2_audio` and `pygame_audio` |
 | `clear()` | Abort playback now, discarding queued PCM |
 
 `service()` is not optional decoration for the two SDL backends: partial writes
 are flushed there, and stall recovery only runs from `service()` and `drain()`.
 An app that never ticks will eventually hear PCM stop with data still buffered.
 
+Async overrides must await, including when there is nothing to wait for. An
+`_awrite` that never awaits starves the event loop: a task looping on it never
+yields, so timers never fire and even its own `cancel()` is never delivered.
+
 ## Portability
 
-`audiodev.py` and `sdl2audio.py` run on CPython, MicroPython (unix *and*
+`audiodev/__init__.py` and `sdl2_audio.py` run on CPython, MicroPython (unix *and*
 `micropython.exe`), and CircuitPython, so they are limited to APIs all three
 provide. CPython-only idioms here do not fail at import — they raise at runtime
 on the first write, which is why they survive review.
@@ -114,11 +121,11 @@ on the first write, which is why they survive review.
 Lists are unaffected — `del self._samples[:]` is fine everywhere; only
 `bytearray` (`_coalesce`, `_shadow`, `_pending`) has the restriction.
 
-`pygameaudio.py` and `webaudio.py` cannot run on MicroPython or CircuitPython at
+`pygame_audio.py` and `web_audio.py` cannot run on MicroPython or CircuitPython at
 all (they need pygame-ce and Pyodide's `js` module), so a CPython-only idiom is
-not a bug there. `pygameaudio.py` still uses the portable forms, because it
-mirrors `sdl2audio.py` closely enough to diff — see "Keep it in step with
-`sdl2audio.py`" below. `webaudio.py` shares nothing with them and stays as it is.
+not a bug there. `pygame_audio.py` still uses the portable forms, because it
+mirrors `sdl2_audio.py` closely enough to diff — see "Keep it in step with
+`sdl2_audio.py`" below. `web_audio.py` shares nothing with them and stays as it is.
 
 Verify with the real interpreters rather than by inspection — CPython accepts
 everything above:
@@ -128,26 +135,22 @@ cd pydisplay/src
 for rt in micropython micropython.exe circuitpython; do $rt examples/audio_out_test.py; done
 ```
 
-## `audiodev.py`
+## `audiodev/__init__.py`
 
-Portable contracts, no host dependencies:
+Portable bases, no host dependencies:
 
 - **`AudioFormat(rate, channels, bits, signed=True, byteorder="little")`** —
   validates its arguments and precomputes `frame_size`. Compares by value.
-- **`PCMOutput` / `PCMInput`** — wrap a stream factory (opened lazily on first
-  use), apply integer volume/gain scaling in place, and expose both sync and
-  async calls. `write()` loops until the whole buffer is consumed and raises if
-  a stream makes no progress.
-- **`ToneOutput`** — frequency/duty output for PWM speakers and buzzers.
+- **`PCMOutput` / `PCMInput`** — subclassable bases: volume/gain, session,
+  write-all looping, async surface. `write()` loops until the whole buffer is
+  consumed and raises if a transport makes no progress.
+- **`ToneOutput`** — subclassable frequency/duty base.
 - **`AudioSession`** — coordinates devices sharing a codec or peripheral;
   `acquire()` refuses a second owner unless the session is `duplex`.
-- **`wav_output()` / `wav_input()`** — file-backed streams for tests and hosts
-  with no audio device. `wav_output` finalizes the RIFF sizes on close.
 
-Streams are duck-typed throughout: optional methods are called only when
-present, so a minimal backend needs very little.
+WAV / generator / loopback live in `audiodev.emulated_audio`, not here.
 
-## `sdl2audio.py`
+## `sdl2_audio.py`
 
 SDL2 backend built on `usdl2` (pure Python ctypes/FFI bindings — no C
 extension). Runs on MicroPython, CircuitPython and CPython, and attaches the
@@ -237,13 +240,12 @@ ratio fires on healthy playback, because period quantization alone can read well
 under realtime over a short span; a longer window or lower ratio leaves audible
 slow-motion audio before recovery starts.
 
-`SDLOutputStream` counts its own recoveries so claims stay checkable:
+`SDLPCMOutput` counts its own recoveries so claims stay checkable:
 
 ```python
-stream = device.stream           # PCMOutput -> SDLOutputStream
-stream.recycles                  # rebuilds so far
-stream.lost_bytes                # PCM dropped by recovery; must stay 0
-stream.requeued_bytes            # PCM replayed after a rebuild
+device.recycles                  # rebuilds so far
+device.lost_bytes                # PCM dropped by recovery; must stay 0
+device.requeued_bytes            # PCM replayed after a rebuild
 ```
 
 A healthy long run recycles rarely and loses nothing: 208 s of speech across
@@ -258,7 +260,7 @@ keeps the depth it was tuned for.
 The `queue_ms=150` that `board_devices.audio_in()` still passes is unrelated and
 intentional: capture wants low latency.
 
-## `pygameaudio.py`
+## `pygame_audio.py`
 
 Backend for CPython hosts with pygame-ce installed. It uses **pygame's own SDL**,
 never `usdl2` or the system libSDL2:
@@ -269,7 +271,7 @@ never `usdl2` or the system libSDL2:
 
 Mixing SDL libraries is the one thing that must not change. Driving pygame's
 devices through another copy of SDL means two SDL states in one process; use the
-bundled library or use `sdl2audio`, never both against one device.
+bundled library or use `sdl2_audio`, never both against one device.
 
 `_ensure_pygame()` deliberately calls `pygame.mixer.quit()`. This backend drives
 SDL audio directly, so the mixer would hold a second, unused output device open,
@@ -281,12 +283,12 @@ inside SDL waiting on its callback thread, so `_close_audiodevice_async()` pause
 synchronously — which is what callers actually need — and closes on a daemon
 thread. Do not make it synchronous.
 
-### Keep it in step with `sdl2audio.py`
+### Keep it in step with `sdl2_audio.py`
 
-`PygameOutputStream` mirrors `SDLOutputStream` mechanism for mechanism: rate-based
+`PygamePCMOutput` mirrors `SDLPCMOutput` mechanism for mechanism: rate-based
 stall detection, the hardware-only prebuffer gate, the off-thread rebuild with a
 settle gap, the shadow buffer, and the same `recycles` / `lost_bytes` /
-`requeued_bytes` counters. Every "do not simplify" rule in the `sdl2audio.py`
+`requeued_bytes` counters. Every "do not simplify" rule in the `sdl2_audio.py`
 section above applies here unchanged, and the constants carry the same names and
 values.
 
@@ -296,18 +298,18 @@ work around is in the host's audio sink, not in either library.
 ### Windows: only this backend wants DirectSound
 
 `board_devices` forces `SDL_AUDIODRIVER=directsound` on Windows for
-`pygameaudio` alone. SDL2's default WASAPI backend glitches with pygame's
-small-chunk playback, but `sdl2audio` queues whole buffers and never hit that,
+`pygame_audio` alone. SDL2's default WASAPI backend glitches with pygame's
+small-chunk playback, but `sdl2_audio` queues whole buffers and never hit that,
 and DirectSound keeps a deeper buffer: measured on `micropython.exe` at
 `latency="low"`, DirectSound sits at 185 ms against WASAPI's 55 ms. Forcing it
 for every backend spent that on callers who gained nothing. An explicit
 `SDL_AUDIODRIVER` in the environment still wins in either case.
 
-## `webaudio.py`
+## `web_audio.py`
 
-PyScript backend. `WebOutputStream` converts each write into an `AudioBuffer`
+PyScript backend. `WebPCMOutput` converts each write into an `AudioBuffer`
 and schedules `AudioBufferSourceNode`s back to back against `currentTime`;
-`WebInputStream` captures through `getUserMedia` and a `ScriptProcessorNode`.
+`WebPCMInput` captures through `getUserMedia` and a `ScriptProcessorNode`.
 
 Browser autoplay policy is the thing to know here. A fresh `AudioContext` starts
 `suspended`, and while suspended `currentTime` never advances — a naive wait for
@@ -318,7 +320,27 @@ duration so a later gesture can still play them.
 
 There is no host device to wedge here, so none of the SDL stall machinery exists.
 
-## `androidaudio_session.py`
+## `emulated_audio.py`
+
+CI / no-hardware provider. Never selected by `audiodev.auto`.
+
+- `WavPCMOutput` / `WavPCMInput` — PCM WAV files
+- `GeneratorPCMInput` — sine / square / noise / silence
+- `loopback_pair` — in-memory out→in queue (TTS→STT style)
+- `NullPCMOutput` — discard writes
+
+```python
+from audiodev import AudioFormat
+from audiodev.emulated_audio import audio_in, audio_out, loopback_pair
+
+fmt = AudioFormat(24000, 1, 16)
+out = audio_out(fmt, path="/sd/prompt.wav")
+out.write(pcm_bytes)
+out.close()
+mic = audio_in(path="/sd/prompt.wav")
+```
+
+## `android_audio.py`
 
 `AndroidMediaSession` is a duck-typed `audiodev.AudioSession`. The first
 `open()` / `write()` acquires audio focus and starts a `mediaPlayback` foreground
@@ -327,7 +349,7 @@ playback in the background. It is `duplex`, so several `PCMOutput` instances can
 share one session — focus and the service stay up while any owner is open.
 
 `get_session()` returns a process-wide instance, created once.
-`sdl2audio.audio_out()` attaches it automatically on Android and passes
+`sdl2_audio.audio_out()` attaches it automatically on Android and passes
 `session=None` everywhere else, so acquire and release stay lazy.
 
 Needs pyjnius and a python-for-android service named `mediaplayback` declared
@@ -337,9 +359,10 @@ the import is a no-op.
 
 ## Tests
 
-`tests/test_audiodev.py`, `tests/test_sdl2audio.py` and `tests/test_pygameaudio.py`
-cover these modules against SDL's `dummy` driver, and
-`tests/test_audiodev_latency.py` covers the profile vocabulary on its own:
+`tests/test_audiodev.py`, `tests/test_sdl2_audio.py`, `tests/test_pygame_audio.py`,
+`tests/test_emulated_audio.py` and `tests/test_auto.py` cover these modules
+against SDL's `dummy` driver, and `tests/test_audiodev_latency.py` covers the
+profile vocabulary on its own:
 
 ```bash
 python -m unittest discover -s tests -q
@@ -380,11 +403,11 @@ bytecode in place and a real failure looking green.
 
 | Symptom | Likely cause |
 |---------|--------------|
-| Audio turns to slow motion or silence after ~60 s | The host sink degraded. Check `stream.recycles` — if it is not increasing, `service()` is not being called |
+| Audio turns to slow motion or silence after ~60 s | The host sink degraded. Check `device.recycles` — if it is not increasing, `service()` is not being called |
 | PCM stops with data still buffered | No `service()` tick; partial writes never reach SDL |
 | Callers hang waiting for playback to finish | Something is reporting activity from pause state instead of `queued_size()` |
 | UI freezes for a second or more during playback | A device close/open is running on the caller's thread |
-| Clipped or missing audio right after a recovery | `stream.lost_bytes` is above 0; the shadow buffer is too small for the queue |
+| Clipped or missing audio right after a recovery | `device.lost_bytes` is above 0; the shadow buffer is too small for the queue |
 | `reopen after stall failed` on stderr, then silence | Another process holds the sink. `lost_bytes` records what could not be played; the next write reopens |
 | An asyncio app stops ticking during playback | Something on the async path is blocking rather than awaiting — check `awrite` |
 | Playback wedges within ~30 s under pygame-ce | A second output device is open — most likely `pygame.mixer` was reinitialized |

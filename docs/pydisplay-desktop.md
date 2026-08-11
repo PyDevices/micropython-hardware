@@ -6,12 +6,8 @@ Installed modules:
 - board_config
 - board_devices
 - boarddev
-- audiodev
-- sdl2audio
-- androidaudio_session
+- audiodev (package: bases + sdl2_audio / pygame_audio / web_audio / auto / emulated_audio / android_audio)
 - usdl2
-- pygameaudio
-- webaudio
 
 Source of truth:
 - Runtime modules are generated from canonical sources in this repo

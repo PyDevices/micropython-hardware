@@ -13,14 +13,19 @@
       "github:PyDevices/micropython-hardware/drivers/boarddev.py"
     ],
     [
-      "audiodev.py",
-      "github:PyDevices/micropython-hardware/drivers/audio/audiodev.py"
+      "audiodev/__init__.py",
+      "github:PyDevices/micropython-hardware/drivers/audio/audiodev/__init__.py"
     ],
     [
-      "pygameaudio.py",
-      "github:PyDevices/micropython-hardware/drivers/audio/pygameaudio.py"
+      "audiodev/pygame_audio.py",
+      "github:PyDevices/micropython-hardware/drivers/audio/audiodev/pygame_audio.py"
     ]
   ],
-  "deps": [["displaysys", "latest"]],
+  "deps": [
+    [
+      "displaysys",
+      "latest"
+    ]
+  ],
   "version": "0.1"
 }

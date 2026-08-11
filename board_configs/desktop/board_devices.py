@@ -10,44 +10,14 @@ _BACKEND = None
 DEVICES = frozenset({"audio_out", "audio_in"})
 
 
-def _host_kind():
-    try:
-        import pyscript  # noqa: F401
-
-        return "pyscript"
-    except Exception:
-        pass
-    try:
-        get_ipython()  # noqa: F821
-        return "jupyter"
-    except Exception:
-        return "desktop"
-
-
-def _pygame_available():
-    try:
-        import pygame  # noqa: F401
-
-        return True
-    except Exception:
-        return False
-
-
 def _select_backend():
     global _BACKEND
     if _BACKEND is not None:
         return _BACKEND
-    host = _host_kind()
-    if host == "pyscript":
-        _BACKEND = "webaudio"
-    elif host == "jupyter":
-        _BACKEND = "sdl2audio"
-    elif _pygame_available():
-        _BACKEND = "pygameaudio"
-    else:
-        _BACKEND = "sdl2audio"
+    from audiodev.auto import select_backend
 
-    if _BACKEND == "pygameaudio" and sys.platform == "win32":
+    _BACKEND = select_backend()
+    if _BACKEND == "pygame_audio" and sys.platform == "win32":
         # See board_config.py for the full rationale: SDL2's default Windows
         # WASAPI backend glitches with pygame's small-chunk playback, and
         # DirectSound does not. Duplicated here because an app can init
@@ -55,7 +25,7 @@ def _select_backend():
         # examples/audio_out_test.py), and must land before the first SDL audio
         # init either way.
         #
-        # Only pygameaudio. sdl2audio queues whole buffers with
+        # Only pygame_audio. sdl2_audio queues whole buffers with
         # SDL_QueueAudio and never hit the glitch, and DirectSound keeps a
         # deeper buffer: measured on micropython.exe at latency="low", it holds
         # 185ms against WASAPI's 55ms, which is the difference between playable
@@ -90,13 +60,8 @@ def audio_out(**kwargs):
     ``latency="low"``; the default stays buffered for throughput.
     """
     fmt = _audio_format()
-    backend = _select_backend()
-    if backend == "webaudio":
-        from webaudio import audio_out as _audio_out
-    elif backend == "pygameaudio":
-        from pygameaudio import audio_out as _audio_out
-    else:
-        from sdl2audio import audio_out as _audio_out
+    _select_backend()
+    from audiodev.auto import audio_out as _audio_out
 
     return _audio_out(fmt, **kwargs)
 
@@ -105,14 +70,9 @@ def audio_in(**kwargs):
     """Build the capture device; see :func:`audio_out` for the keyword contract."""
     fmt = _audio_format()
     backend = _select_backend()
-    if backend == "webaudio":
-        from webaudio import audio_in as _audio_in
-    elif backend == "pygameaudio":
-        from pygameaudio import audio_in as _audio_in
-    else:
-        from sdl2audio import audio_in as _audio_in
+    from audiodev.auto import audio_in as _audio_in
 
-    if backend == "sdl2audio":
+    if backend == "sdl2_audio":
         # Shorter than the backend default: capture is consumed live here, so a
         # long queue only adds lag to whatever is listening.
         kwargs.setdefault("queue_ms", 150)

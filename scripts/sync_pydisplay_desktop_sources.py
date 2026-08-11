@@ -5,12 +5,8 @@ The canonical implementation lives in:
 - board_configs/desktop/board_config.py
 - board_configs/desktop/board_devices.py
 - drivers/boarddev.py
-- drivers/audio/audiodev.py
-- drivers/audio/sdl2audio.py
-- drivers/audio/androidaudio_session.py
+- drivers/audio/audiodev/ (package)
 - drivers/usdl2.py
-- drivers/audio/pygameaudio.py
-- drivers/audio/webaudio.py
 
 This script writes a throwaway staging tree so the pip package and MIP package
 stay behaviorally identical.
@@ -24,18 +20,14 @@ import shutil
 import sys
 
 
-MAPPINGS = (
+FILE_MAPPINGS = (
     ("board_configs/desktop/board_config.py", "src/board_config.py"),
     ("board_configs/desktop/board_devices.py", "src/board_devices.py"),
     ("drivers/boarddev.py", "src/boarddev.py"),
-    ("drivers/audio/audiodev.py", "src/audiodev.py"),
-    ("drivers/audio/sdl2audio.py", "src/sdl2audio.py"),
-    ("drivers/audio/androidaudio_session.py", "src/androidaudio_session.py"),
     ("drivers/usdl2.py", "src/usdl2.py"),
-    ("drivers/audio/pygameaudio.py", "src/pygameaudio.py"),
-    ("drivers/audio/webaudio.py", "src/webaudio.py"),
 )
 
+DIR_MAPPINGS = (("drivers/audio/audiodev", "src/audiodev"),)
 
 METADATA_FILES = (
     ("pyproject.toml", "pyproject.toml"),
@@ -43,26 +35,55 @@ METADATA_FILES = (
 )
 
 
+def _copy_dir(src: Path, dst: Path) -> None:
+    if dst.exists():
+        shutil.rmtree(dst)
+    shutil.copytree(src, dst, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+
+
+def _dir_matches(src: Path, dst: Path) -> bool:
+    if not dst.exists():
+        return False
+    src_files = {p.relative_to(src): p.read_bytes() for p in src.rglob("*") if p.is_file()}
+    dst_files = {p.relative_to(dst): p.read_bytes() for p in dst.rglob("*") if p.is_file()}
+    return src_files == dst_files
+
+
 def sync(root: Path, stage_dir: Path, check: bool) -> int:
     changed = []
-    for src_rel, dst_rel in (*MAPPINGS, *METADATA_FILES):
+    for src_rel, dst_rel in FILE_MAPPINGS:
         src = root / src_rel
         dst = stage_dir / dst_rel
         if not src.exists():
             print(f"Missing source file: {src}", file=sys.stderr)
             return 2
-        if not dst.exists():
-            changed.append((src_rel, str(dst.relative_to(stage_dir))))
+        if not dst.exists() or src.read_bytes() != dst.read_bytes():
+            changed.append((src_rel, dst_rel))
             if not check:
                 dst.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(src, dst)
-            continue
 
-        src_bytes = src.read_bytes()
-        dst_bytes = dst.read_bytes()
-        if src_bytes != dst_bytes:
-            changed.append((src_rel, str(dst.relative_to(stage_dir))))
+    for src_rel, dst_rel in DIR_MAPPINGS:
+        src = root / src_rel
+        dst = stage_dir / dst_rel
+        if not src.exists():
+            print(f"Missing source directory: {src}", file=sys.stderr)
+            return 2
+        if not _dir_matches(src, dst):
+            changed.append((src_rel, dst_rel))
             if not check:
+                _copy_dir(src, dst)
+
+    for src_rel, dst_rel in METADATA_FILES:
+        src = root / src_rel
+        dst = stage_dir / dst_rel
+        if not src.exists():
+            print(f"Missing source file: {src}", file=sys.stderr)
+            return 2
+        if not dst.exists() or src.read_bytes() != dst.read_bytes():
+            changed.append((src_rel, dst_rel))
+            if not check:
+                dst.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(src, dst)
 
     if check:

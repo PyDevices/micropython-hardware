@@ -10,7 +10,7 @@ from unittest import mock
 _TESTS = Path(__file__).resolve().parent
 if str(_TESTS) not in sys.path:
     sys.path.insert(0, str(_TESTS))
-import _env  # noqa: E402, F401 — drivers/ + drivers/audio (usdl2, sdl2audio, …)
+import _env  # noqa: E402, F401 — drivers/ + drivers/audio (usdl2, audiodev, …)
 
 ROOT = _env.ROOT
 DESKTOP = ROOT / "board_configs" / "desktop"

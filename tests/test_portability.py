@@ -31,16 +31,18 @@ ROOT = _env.ROOT
 # Must import and run under CPython, MicroPython (unix and micropython.exe), and
 # CircuitPython.
 PORTABLE = (
-    "drivers/audio/audiodev.py",
-    "drivers/audio/sdl2audio.py",
+    "drivers/audio/audiodev/__init__.py",
+    "drivers/audio/audiodev/sdl2_audio.py",
+    "drivers/audio/audiodev/i2s_audio.py",
+    "drivers/audio/audiodev/emulated_audio.py",
     "drivers/usdl2.py",
     "board_configs/desktop/board_config.py",
     "board_configs/desktop/board_devices.py",
 )
 
-# CPython-only (needs pygame-ce), but deliberately close enough to sdl2audio.py
+# CPython-only (needs pygame-ce), but deliberately close enough to sdl2_audio.py
 # to diff, so its buffer handling is held to the same rule.
-MIRRORS = ("drivers/audio/pygameaudio.py",)
+MIRRORS = ("drivers/audio/audiodev/pygame_audio.py",)
 
 INTERPRETERS = ("micropython", "micropython.exe", "circuitpython")
 
@@ -117,7 +119,7 @@ class BytearrayDeletionTests(unittest.TestCase):
 
     def test_list_deletion_is_still_allowed(self):
         """``del self._samples[:]`` is fine -- lists are not restricted."""
-        tree = _parse("drivers/audio/sdl2audio.py")
+        tree = _parse("drivers/audio/audiodev/sdl2_audio.py")
         buffers = bytearray_names(tree)
         deleted = {name for name, _ in deleted_subscripts(tree)}
         self.assertIn("_samples", deleted)

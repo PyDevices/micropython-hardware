@@ -21,8 +21,12 @@
       "github:PyDevices/micropython-hardware/drivers/imu/lis3dh.py"
     ],
     [
-      "audiodev.py",
-      "github:PyDevices/micropython-hardware/drivers/audio/audiodev.py"
+      "audiodev/__init__.py",
+      "github:PyDevices/micropython-hardware/drivers/audio/audiodev/__init__.py"
+    ],
+    [
+      "audiodev/pwm_tone.py",
+      "github:PyDevices/micropython-hardware/drivers/audio/audiodev/pwm_tone.py"
     ]
   ],
   "deps": [

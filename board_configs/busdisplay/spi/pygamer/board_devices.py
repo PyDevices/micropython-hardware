@@ -4,7 +4,7 @@ import sys
 
 DEVICES = frozenset({"pixels", "accelerometer", "sdcard", "battery", "audio_out", "i2c"})
 
-from audiodev import ToneOutput
+from audiodev.pwm_tone import PWMToneOutput
 
 
 def setup_devices(ns):
@@ -74,7 +74,7 @@ def audio_out():
     except ValueError:
         enable = Pin(27, Pin.OUT, value=0)
         speaker = Pin(2)
-    return ToneOutput(
+    return PWMToneOutput(
         lambda: PWM(speaker, freq=440, duty=0),
         power=lambda value: enable.value(value),
     )

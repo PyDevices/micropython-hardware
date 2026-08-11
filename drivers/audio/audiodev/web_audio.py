@@ -35,7 +35,7 @@ async def _asleep_ms(milliseconds):
 
 def _require_browser():
     if AudioContext is None or create_proxy is None:
-        raise ImportError("webaudio requires PyScript / browser JS interop")
+        raise ImportError("web_audio requires PyScript / browser JS interop")
 
 
 def _pcm16_to_f32(buf, channels):
@@ -169,32 +169,30 @@ def _arm_resume_on_gesture(ctx):
         pass
 
 
-class WebOutputStream:
+class WebPCMOutput(PCMOutput):
     """Queued PCM playback via AudioContext + AudioBufferSourceNode."""
 
     def __init__(self, fmt, *, poll_ms=4):
         if fmt.bits != 16 or not fmt.signed or fmt.byteorder != "little":
-            raise ValueError("webaudio playback requires signed 16-bit little-endian PCM")
-        self.format = fmt
+            raise ValueError("web_audio playback requires signed 16-bit little-endian PCM")
+        super().__init__(fmt)
         self.poll_ms = int(poll_ms)
         self._ctx = None
         self._next_time = 0.0
         self._sources = []
 
-    def open(self):
+    def _open(self):
         _require_browser()
         if self._ctx is not None:
-            return self
+            return
         self._ctx = _new_audio_context(self.format.rate)
         state = _try_resume_context(self._ctx)
         if state == "suspended":
             _arm_resume_on_gesture(self._ctx)
-            print("webaudio: AudioContext suspended — click/tap the page to hear audio")
+            print("web_audio: AudioContext suspended — click/tap the page to hear audio")
         self._next_time = float(self._ctx.currentTime)
-        return self
 
-    def write(self, buf):
-        self.open()
+    def _write(self, buf):
         floats = _pcm16_to_f32(buf, self.format.channels)
         frames = len(floats) // self.format.channels
         if frames <= 0:
@@ -220,13 +218,11 @@ class WebOutputStream:
         self._sources.append(source)
         return len(buf)
 
-    async def awrite(self, buf):
-        self.open()
+    async def _awrite(self, buf):
         await _asleep_ms(0)
-        return self.write(buf)
+        return self._write(buf)
 
-    def drain(self):
-        self.open()
+    def _drain(self):
         # Autoplay policy can leave the context suspended; currentTime then
         # never advances and a naive wait would spin forever on WASM.
         if str(self._ctx.state) != "running":
@@ -248,8 +244,7 @@ class WebOutputStream:
                 break
             _sleep_ms(self.poll_ms)
 
-    async def adrain(self):
-        self.open()
+    async def _adrain(self):
         if str(self._ctx.state) != "running":
             _try_resume_context(self._ctx)
             _arm_resume_on_gesture(self._ctx)
@@ -267,7 +262,7 @@ class WebOutputStream:
                 break
             await _asleep_ms(self.poll_ms)
 
-    def close(self):
+    def _close(self):
         for source in self._sources:
             try:
                 source.stop()
@@ -282,15 +277,15 @@ class WebOutputStream:
             self._ctx = None
 
 
-class WebInputStream:
+class WebPCMInput(PCMInput):
     """Microphone capture via getUserMedia + ScriptProcessorNode."""
 
     def __init__(self, fmt, *, poll_ms=4, queue_ms=500, samples=2048):
         if fmt.bits != 16 or not fmt.signed or fmt.byteorder != "little":
-            raise ValueError("webaudio capture requires signed 16-bit little-endian PCM")
+            raise ValueError("web_audio capture requires signed 16-bit little-endian PCM")
         if fmt.channels != 1:
-            raise ValueError("webaudio capture requires mono PCM")
-        self.format = fmt
+            raise ValueError("web_audio capture requires mono PCM")
+        super().__init__(fmt)
         self.poll_ms = int(poll_ms)
         self.samples = int(samples)
         self._queue_limit = max(
@@ -313,10 +308,10 @@ class WebInputStream:
         if overflow > 0:
             del self._pending[: overflow - (overflow % self.format.frame_size)]
 
-    def open(self):
+    def _open(self):
         _require_browser()
         if self._ctx is not None:
-            return self
+            return
         constraints = _media_audio_constraints()
         media = navigator.mediaDevices.getUserMedia(constraints)
         self._stream = _await_js(media)
@@ -328,10 +323,8 @@ class WebInputStream:
         self._processor.onaudioprocess = self._proxy
         self._source.connect(self._processor)
         self._processor.connect(self._ctx.destination)
-        return self
 
-    def readinto(self, buf):
-        self.open()
+    def _readinto(self, buf):
         needed = len(buf)
         while True:
             count = min(needed, len(self._pending))
@@ -342,8 +335,7 @@ class WebInputStream:
                 return count
             _sleep_ms(self.poll_ms)
 
-    async def areadinto(self, buf):
-        self.open()
+    async def _areadinto(self, buf):
         needed = len(buf)
         while True:
             count = min(needed, len(self._pending))
@@ -354,7 +346,7 @@ class WebInputStream:
                 return count
             await _asleep_ms(self.poll_ms)
 
-    def close(self):
+    def _close(self):
         if self._processor is not None:
             try:
                 self._processor.disconnect()
@@ -400,7 +392,7 @@ def audio_out(format=None, *, latency=None, poll_ms=4):
     """
     check_latency(latency)
     fmt = format or AudioFormat(24000, 1, 16)
-    return PCMOutput(lambda: WebOutputStream(fmt, poll_ms=poll_ms), fmt)
+    return WebPCMOutput(fmt, poll_ms=poll_ms)
 
 
 def audio_in(format=None, *, latency=None, poll_ms=4, queue_ms=500, samples=None):
@@ -413,12 +405,9 @@ def audio_in(format=None, *, latency=None, poll_ms=4, queue_ms=500, samples=None
     if samples is None:
         samples = 512 if latency == "low" else 2048
     fmt = format or AudioFormat(24000, 1, 16)
-    return PCMInput(
-        lambda: WebInputStream(
-            fmt,
-            poll_ms=poll_ms,
-            queue_ms=queue_ms,
-            samples=samples,
-        ),
+    return WebPCMInput(
         fmt,
+        poll_ms=poll_ms,
+        queue_ms=queue_ms,
+        samples=samples,
     )

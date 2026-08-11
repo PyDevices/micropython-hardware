@@ -1,126 +1,116 @@
-"""pygame-ce playback and capture backend for the portable :mod:`audiodev` contract.
+"""SDL2 audio backend for :mod:`audiodev` (pure Python, queued audio only).
 
-Uses **pygame's own SDL** only (never ``usdl2`` / system libSDL2):
+Playback pushes PCM with ``SDL_QueueAudio`` and never installs an audio
+callback: SDL's audio thread is not registered with the Python/MicroPython
+runtime, so calling back into the interpreter from it is unsafe (it segfaults
+under MicroPython and fights the GIL under CPython/LVGL).
 
-- **Playback:** ``SDL_QueueAudio`` via ctypes against pygame-ce's bundled
-  ``libSDL2`` — no ``pygame.mixer``, no Python audio callback (avoids the
-  GIL+pause deadlock that freezes the UI under WSLg).
-- **Capture:** ``pygame._sdl2.AudioDevice`` (callback), with async close.
+Four behaviors keep queued playback smooth, all established by measurement on
+WSLg/PulseAudio rather than by preference:
 
-Mixing SDL libraries is the one thing that must not change: pygame-ce links its
-own ``libSDL2``, and driving pygame's devices through ``usdl2``'s copy means two
-SDL states in one process. Load the bundled library (:func:`_pygame_sdl`) or use
-``sdl2audio`` instead — never both against the same device.
+* small writes are coalesced (``coalesce_ms``, 100ms by default) before being
+  handed to SDL;
+* the device stays paused until ``PREBUFFER_MS`` is queued, because starting on
+  a nearly empty queue and then starving it makes PulseAudio stop asking for
+  data;
+* if the device falls far behind realtime, it is reopened and the unplayed PCM is
+  re-queued (see ``STALL_WINDOW_MS``);
+* that reopen runs on a worker thread, because closing a wedged device blocks for
+  over a second and the caller is usually driving a UI.
 
-Before simplifying playback
----------------------------
+Before simplifying any of this
+------------------------------
 
-:class:`PygameOutputStream` deliberately mirrors ``sdl2audio.SDLOutputStream``
-mechanism for mechanism: rate-based stall detection, a hardware-only prebuffer
-gate, an off-thread rebuild with a settle gap, and a shadow buffer for lossless
-recovery. Each exists because the simpler version measurably failed. That module's
-docstring records what each one prevents, and ``README.md`` in this directory has
-the full account.
+Each rule below replaced an obvious, simpler version that measurably failed. The
+failure is named so it can be re-tested instead of rediscovered:
 
-Keep the two in step. When a fix lands in one backend it belongs in the other,
-because the failure they work around is in the host's audio sink, not in either
-library.
+* Detect stalls by **consumption rate over a window**, never by watching queue
+  depth. A caller that tops the queue up replaces every consumed period before
+  the next check sees it, so depth does not fall even when the sink has died.
+* Gate the prebuffer on :meth:`SDLPCMOutput._hw_queued`, never on
+  :meth:`SDLPCMOutput.queued_size`. Counting bytes still sitting in the
+  software buffer let the device start on ~40ms of audio, underrun, and wedge
+  again immediately after every recovery.
+* Keep the reopen off the caller's thread, and keep ``RECOVER_SETTLE_MS``
+  between close and open. A synchronous rebuild stalled the caller's tick for
+  ~1.8s; reopening with no gap handed back the same wedged sink and re-stalled
+  within seconds, in pairs.
+* Size ``_shadow`` to cover everything SDL may still hold. Anything smaller
+  silently drops audio during recovery.
+* Do not let "the device is unpaused" mean playing in
+  :meth:`SDLPCMOutput.is_active` -- it stays unpaused for the life of the
+  device, so callers would wait forever for playback that already finished.
+
+The ``recycles``, ``lost_bytes`` and ``requeued_bytes`` counters exist to keep
+those claims checkable: a healthy long run recycles rarely and loses nothing.
+``README.md`` in this directory has the full account, including how to measure a
+change before making it.
+
+This module also runs on MicroPython (unix and ``micropython.exe``) and
+CircuitPython, so it avoids CPython-only APIs -- notably it consumes buffers with
+``buf[:n] = b""`` rather than ``del buf[:n]``, which those runtimes reject at
+runtime, not at import. See "Portability" in ``README.md``; verify changes by
+running ``examples/audio_out_test.py`` under all three interpreters.
 """
 
-import asyncio
-import collections
-import os
+try:
+    import asyncio
+except ImportError:  # pragma: no cover
+    import uasyncio as asyncio
+
 import sys
-import threading
 import time
-from pathlib import Path
 
 from audiodev import AudioFormat, PCMInput, PCMOutput, check_latency
+import usdl2 as sdl
 
 try:
-    import ctypes
-    from ctypes import c_char_p, c_int, c_uint8, c_uint16, c_uint32, c_void_p
-except ImportError:  # MicroPython
-    ctypes = None
+    import threading
+except ImportError:  # pragma: no cover
+    threading = None
 
 
-def _sleep_ms(milliseconds):
-    time.sleep(milliseconds / 1000)
-
-
-async def _asleep_ms(milliseconds):
-    await asyncio.sleep(milliseconds / 1000)
-
-
-def _ensure_pygame():
-    import pygame
-
-    if not pygame.get_init():
-        pygame.init()
-    # This backend drives SDL audio directly, so ``pygame.mixer`` would hold a
-    # second, unused output device open. Under WSLg two concurrent streams make
-    # the PulseAudio RDP sink stop consuming after ~30s (playback wedges), so
-    # release the mixer device we never use.
-    try:
-        if pygame.mixer.get_init():
-            pygame.mixer.quit()
-    except Exception:
-        pass
-    return pygame
-
-
-def _pygame_audio_format(fmt):
-    """Map :class:`AudioFormat` to a ``pygame._sdl2.audio`` format constant."""
-    from pygame._sdl2 import audio as sdl_audio
-
-    if fmt.bits == 8:
-        return sdl_audio.AUDIO_S8 if fmt.signed else sdl_audio.AUDIO_U8
-    if fmt.bits == 16:
-        if fmt.byteorder == "little":
-            return sdl_audio.AUDIO_S16LSB if fmt.signed else sdl_audio.AUDIO_U16LSB
-        return sdl_audio.AUDIO_S16MSB if fmt.signed else sdl_audio.AUDIO_U16MSB
-    if fmt.bits == 32:
-        if fmt.byteorder == "little":
-            return sdl_audio.AUDIO_S32LSB if fmt.signed else sdl_audio.AUDIO_U32LSB
-        return sdl_audio.AUDIO_S32MSB if fmt.signed else sdl_audio.AUDIO_U32MSB
-    raise ValueError("unsupported pygame audio format %r" % (fmt,))
-
-
-# SDL_AudioFormat integers (match pygame._sdl2 / SDL2 headers).
-_AUDIO_U8 = 0x0008
-_AUDIO_S8 = 0x8008
-_AUDIO_U16LSB = 0x0010
-_AUDIO_S16LSB = 0x8010
-_AUDIO_U16MSB = 0x1010
-_AUDIO_S16MSB = 0x9010
-_AUDIO_S32LSB = 0x8020
-_AUDIO_S32MSB = 0x9020
-
-_SDL = None
-
-# SDL device period (``SDL_AudioSpec.samples``) for playback. Writes are queued
-# rather than callback driven, so device latency is not important.
+# SDL device period (``SDL_AudioSpec.samples``) for playback. Queued audio does
+# not care about device latency, so this is chosen for stall detection: the
+# queue legitimately holds steady for up to one period between SDL's pulls.
 DEFAULT_PLAY_SAMPLES = 4096
 
-# Playback cushion held in SDL's queue.
+# Playback cushion held in SDL's queue. Speech synthesis is bursty, so a couple
+# of seconds keeps the device fed while the next sentence is still being made.
 DEFAULT_PLAY_QUEUE_MS = 2000
 
 # PCM to accumulate in the *software* buffer before handing a piece to SDL.
+# Batching keeps a caller's small writes from becoming one SDL_QueueAudio call
+# each, but a realtime producer waits this long before its first sound.
 DEFAULT_COALESCE_MS = 100
 
-# Playback settings per ``audiodev`` latency profile; see the matching table in
-# sdl2audio.py for why "low" uses these numbers. Only values a caller left unset
-# are taken from here.
+# Playback settings per ``audiodev`` latency profile. Only the values a caller
+# left unset are taken from here.
+#
+# "low" is what this backend defaulted to before queued playback grew stall
+# recovery, and it is chosen for note-to-sound delay rather than throughput:
+#
+# * a 512-sample period is ~21ms at 24kHz instead of ~170ms, so playback starts
+#   and stops on a musical timescale;
+# * queue_ms also shrinks the prebuffer, since ``_prebuffer_bytes`` is capped at
+#   a quarter of the queue -- 250ms of queue means ~62ms of priming, not 500ms;
+# * a 20ms coalesce window is under one 40ms synth chunk, so each chunk reaches
+#   SDL as it is rendered.
+#
+# Measured end to end with a realtime writer: ~59ms of latency against ~416ms
+# for the buffered profile. The tradeoff is real -- a short queue leaves less
+# room to recover from a host sink stall -- so it is opt-in, not the default.
 _PLAY_PROFILES = {
     None: (DEFAULT_PLAY_SAMPLES, DEFAULT_PLAY_QUEUE_MS, DEFAULT_COALESCE_MS),
     "buffered": (DEFAULT_PLAY_SAMPLES, DEFAULT_PLAY_QUEUE_MS, DEFAULT_COALESCE_MS),
     "low": (512, 250, 20),
 }
 
-# Capture profiles: period and queue only.
+# Capture profiles. Recording has no prebuffer or coalescing, so only the period
+# and queue matter.
 _CAPTURE_PROFILES = {
-    None: (512, 500),
-    "buffered": (512, 500),
+    None: (512, 250),
+    "buffered": (512, 250),
     "low": (256, 100),
 }
 
@@ -166,124 +156,83 @@ RECOVER_GRACE_MS = 1500
 RECOVER_SETTLE_MS = 800
 
 
-def _sdl_format_int(fmt):
-    """Map :class:`AudioFormat` to an ``SDL_AudioFormat`` integer.
+def _android_session():
+    """Attach Android media focus/FGS session on first PCM open (lazy).
 
-    Raises for combinations SDL2 has no format for, rather than substituting the
-    nearest one: a silently wrong format is decoded as noise at the wrong speed,
-    which is far harder to recognize than an exception at open time.
+    Non-Android hosts get ``session=None`` (unchanged PCMOutput behavior).
+    On Android the module must be present; acquire/release stay lazy until
+    ``open()`` / ``write()`` via :class:`SDLPCMOutput`.
     """
+    if sys.platform != "android":
+        return None
+    from audiodev.android_audio import get_session
+
+    return get_session()
+
+
+def _sleep_ms(milliseconds):
+    if hasattr(time, "sleep_ms"):
+        time.sleep_ms(milliseconds)
+    else:
+        time.sleep(milliseconds / 1000)
+
+
+async def _asleep_ms(milliseconds):
+    if hasattr(asyncio, "sleep_ms"):
+        await asyncio.sleep_ms(milliseconds)
+    else:
+        await asyncio.sleep(milliseconds / 1000)
+
+
+def _monotonic_ms():
+    if hasattr(time, "ticks_ms"):
+        return time.ticks_ms()
+    return int(time.time() * 1000)
+
+
+def _elapsed_ms(since):
+    if hasattr(time, "ticks_diff"):
+        return time.ticks_diff(_monotonic_ms(), since)
+    return _monotonic_ms() - since
+
+
+def _diff_ms(later, earlier):
+    if hasattr(time, "ticks_diff"):
+        return time.ticks_diff(later, earlier)
+    return later - earlier
+
+
+def _deadline_ms(milliseconds):
+    """A future timestamp comparable with :func:`_elapsed_ms` (ticks-safe)."""
+    if hasattr(time, "ticks_add"):
+        return time.ticks_add(_monotonic_ms(), milliseconds)
+    return _monotonic_ms() + milliseconds
+
+
+def _sdl_format(fmt):
     if fmt.bits == 8:
-        return _AUDIO_S8 if fmt.signed else _AUDIO_U8
-    if fmt.bits == 16:
-        if fmt.byteorder == "little":
-            return _AUDIO_S16LSB if fmt.signed else _AUDIO_U16LSB
-        return _AUDIO_S16MSB if fmt.signed else _AUDIO_U16MSB
-    if fmt.bits == 32:
-        # SDL2 defines only S32 and F32 at 32 bits -- there is no AUDIO_U32.
-        if not fmt.signed:
-            raise ValueError("SDL2 has no unsigned 32-bit format: %r" % (fmt,))
-        return _AUDIO_S32LSB if fmt.byteorder == "little" else _AUDIO_S32MSB
-    raise ValueError("unsupported pygame audio format %r" % (fmt,))
+        return sdl.AUDIO_S8 if fmt.signed else sdl.AUDIO_U8
+    suffix = "LSB" if fmt.byteorder == "little" else "MSB"
+    name = "AUDIO_%s%d%s" % ("S" if fmt.signed else "U", fmt.bits, suffix)
+    value = getattr(sdl, name, None)
+    if value is None:
+        raise ValueError("SDL does not support %r" % fmt)
+    return value
 
 
-def _pygame_sdl():
-    """Load the libSDL2 that pygame-ce already linked (not system usdl2)."""
-    global _SDL
-    if _SDL is not None:
-        return _SDL
-    if ctypes is None:
-        raise OSError("pygameaudio QueueAudio needs ctypes (CPython)")
-    _ensure_pygame()
-    import pygame
-
-    root = Path(pygame.__file__).resolve().parent
-    libs = root.parent / "pygame_ce.libs"
-    candidates = sorted(libs.glob("libSDL2-*.so*")) if libs.is_dir() else []
-    if not candidates:
-        # Windows / alternate layout
-        candidates = sorted(root.glob("**/libSDL2*.dll")) + sorted(
-            (root.parent / "pygame_ce.libs").glob("SDL2*.dll")
-            if (root.parent / "pygame_ce.libs").is_dir()
-            else []
-        )
-    if not candidates:
-        raise OSError("could not find pygame-ce bundled libSDL2")
-    lib = ctypes.CDLL(str(candidates[0]))
-
-    class SDL_AudioSpec(ctypes.Structure):
-        _fields_ = [
-            ("freq", c_int),
-            ("format", c_uint16),
-            ("channels", c_uint8),
-            ("silence", c_uint8),
-            ("samples", c_uint16),
-            ("padding", c_uint16),
-            ("size", c_uint32),
-            ("callback", c_void_p),
-            ("userdata", c_void_p),
-        ]
-
-    lib.SDL_InitSubSystem.argtypes = [c_uint32]
-    lib.SDL_InitSubSystem.restype = c_int
-    lib.SDL_OpenAudioDevice.argtypes = [
-        c_char_p,
-        c_int,
-        ctypes.POINTER(SDL_AudioSpec),
-        ctypes.POINTER(SDL_AudioSpec),
-        c_int,
-    ]
-    lib.SDL_OpenAudioDevice.restype = c_uint32
-    lib.SDL_CloseAudioDevice.argtypes = [c_uint32]
-    lib.SDL_CloseAudioDevice.restype = None
-    lib.SDL_PauseAudioDevice.argtypes = [c_uint32, c_int]
-    lib.SDL_PauseAudioDevice.restype = None
-    lib.SDL_QueueAudio.argtypes = [c_uint32, c_void_p, c_uint32]
-    lib.SDL_QueueAudio.restype = c_int
-    lib.SDL_GetQueuedAudioSize.argtypes = [c_uint32]
-    lib.SDL_GetQueuedAudioSize.restype = c_uint32
-    lib.SDL_ClearQueuedAudio.argtypes = [c_uint32]
-    lib.SDL_ClearQueuedAudio.restype = None
-    lib.SDL_GetError.argtypes = []
-    lib.SDL_GetError.restype = c_char_p
-
-    lib.SDL_AudioSpec = SDL_AudioSpec
-    lib.SDL_INIT_AUDIO = 0x00000010
-    _SDL = lib
-    return lib
+def list_audio_devices(capture=False):
+    """Return SDL playback or capture device names."""
+    count = sdl.SDL_GetNumAudioDevices(bool(capture))
+    if count < 0:
+        raise OSError(sdl.SDL_GetError())
+    return tuple(sdl.SDL_GetAudioDeviceName(index, bool(capture)) for index in range(count))
 
 
-def _close_audiodevice_async(dev):
-    """``AudioDevice.close`` may futex-deadlock — pause sync, close on a daemon.
-
-    Do not make this synchronous. The pause takes effect immediately, which is
-    all a caller actually needs (capture stops), while ``close`` itself can block
-    indefinitely inside SDL waiting on its callback thread. The daemon thread
-    means a stuck close cannot keep the process alive either.
-    """
-    if dev is None:
-        return
-    try:
-        dev.pause(1)
-    except Exception:
-        pass
-
-    def _close_native():
-        try:
-            dev.close()
-        except Exception:
-            pass
-
-    threading.Thread(
-        target=_close_native, name="pygame-audiodevice-close", daemon=True
-    ).start()
-
-
-class PygameOutputStream:
-    """PCM playback via pygame's SDL ``QueueAudio`` (no mixer, no py callback).
+class SDLPCMOutput(PCMOutput):
+    """SDL playback via ``SDL_QueueAudio`` (no audio callback, no mixer).
 
     PCM travels through two buffers: writes land in ``_coalesce`` (software) and
-    are handed to SDL in ~100ms pieces up to ``_queue_limit`` (hardware).
+    are handed to SDL in ``coalesce_ms`` pieces up to ``_queue_limit`` (hardware).
     :meth:`queued_size` reports both, so a caller can treat "queued_size() == 0"
     as end of playback without knowing which buffer holds what.
 
@@ -295,40 +244,37 @@ class PygameOutputStream:
         self,
         fmt,
         *,
-        samples=DEFAULT_PLAY_SAMPLES,
+        device=None,
+        samples=512,
+        queue_ms=250,
         poll_ms=2,
-        queue_ms=DEFAULT_PLAY_QUEUE_MS,
         coalesce_ms=DEFAULT_COALESCE_MS,
+        session=None,
     ):
-        # ~2s HW QueueAudio cushion: moonshine sentence synth often exceeds
-        # the old 400ms limit, which underruns to silence between utterances.
-        self.format = fmt
+        super().__init__(fmt, session=session)
+        self.device_name = device
         self.samples = int(samples)
+        self.queue_ms = int(queue_ms)
         self.poll_ms = int(poll_ms)
+        self.device = 0
         self._bytes_per_second = fmt.rate * fmt.frame_size
-        self._queue_limit = max(
-            fmt.frame_size,
-            self._bytes_per_second * int(queue_ms) // 1000,
-        )
+        self._queue_limit = max(fmt.frame_size, self._bytes_per_second * queue_ms // 1000)
+        # SDL pulls a whole period at a time, so the queue must comfortably hold
+        # several of them no matter what ``queue_ms`` a caller asked for.
+        period_bytes = self.samples * fmt.frame_size
+        self._queue_limit = max(self._queue_limit, 3 * period_bytes)
         self._coalesce = bytearray()
         self.coalesce_ms = int(coalesce_ms)
         self._coalesce_bytes = max(
             fmt.frame_size,
             self._bytes_per_second * self.coalesce_ms // 1000,
         )
-        # Do not start the device on a nearly empty queue: starting on ~40ms and
-        # then starving it makes PulseAudio's RDP sink stop asking for data.
-        # Kept well under the caller's fill watermark so the pump cannot block
-        # while we are still paused.
+        # Kept under the caller's fill watermark so a pump that stops writing at
+        # the watermark cannot leave us paused forever.
         self._prebuffer_bytes = min(
             self._queue_limit // 4,
             max(fmt.frame_size, self._bytes_per_second * PREBUFFER_MS // 1000),
         )
-        self.device = 0
-        self._prime_pause = True
-        self.channel = None  # debug probes
-        self.mode = "queue"
-        period_bytes = self.samples * fmt.frame_size
         period_ms = 1000 * self.samples // max(1, fmt.rate)
         # Long enough that period quantization cannot look like a slow sink: a
         # healthy device delivers whole periods, so a short window can read well
@@ -338,12 +284,15 @@ class PygameOutputStream:
         # Below this the queue may simply be running dry, which says nothing
         # about the device.
         self._min_depth_bytes = 2 * period_bytes
-        # Backstop for callers that ignore ``queued_size()`` backpressure.
+        # Backstop for callers that ignore ``queued_size()`` backpressure: a
+        # rebuild only needs a couple of seconds of headroom here.
         self._max_pending = 4 * self._queue_limit
         # Must cover every byte SDL can still hold, or a rebuild cannot restore
         # the whole unplayed queue.
         self._shadow_limit = self._queue_limit + self._coalesce_bytes
-        self._lock = threading.Lock()
+        self._prime_pause = True
+        self._lock = threading.Lock() if threading is not None else None
+        # True while a worker thread is closing/reopening the device.
         self._recycling = False
         # Cumulative bytes handed to SDL. Progress is measured as
         # ``_queued_total - queued``, not as a drop in queue depth: a caller that
@@ -352,17 +301,24 @@ class PygameOutputStream:
         self._queued_total = 0
         # Trailing (timestamp, consumed) samples spanning ``_stall_window_ms``.
         self._samples = []
-        self._grace_until = 0.0
-        # Copy of the most recently queued PCM (never more than one full device
-        # queue). A recycle discards whatever SDL still held, so the unplayed
-        # tail is re-queued from here instead of being dropped.
+        self._grace_until = None
+        # Copy of the most recently queued PCM (never more than one full queue).
+        # A recycle discards whatever SDL still held, so the unplayed tail is
+        # re-queued from here instead of being dropped.
         self._shadow = bytearray()
         self.recycles = 0
         self.lost_bytes = 0
         self.requeued_bytes = 0
+        self.channel = None  # no mixer; kept for callers that probe for one
+        self.mode = "queue"
 
-    def open(self):
-        """Open the device **paused** and reset progress accounting.
+    # -- device ---------------------------------------------------------------
+
+    def _open(self):
+        self._open_device()
+
+    def _open_device(self):
+        """Open the SDL device **paused** and reset progress accounting.
 
         Opening paused is not an optimization: the device must not start on the
         first small chunk of a flush (see :meth:`_unpause_if_primed`). Progress
@@ -371,43 +327,61 @@ class PygameOutputStream:
         """
         if self.device:
             return self
-        sdl = _pygame_sdl()
         if sdl.SDL_InitSubSystem(sdl.SDL_INIT_AUDIO) != 0:
-            err = sdl.SDL_GetError()
-            raise OSError(err.decode() if err else "SDL_InitSubSystem AUDIO failed")
+            raise OSError(sdl.SDL_GetError())
         spec = sdl.SDL_AudioSpec(
             self.format.rate,
-            _sdl_format_int(self.format),
+            _sdl_format(self.format),
             self.format.channels,
-            0,
-            max(64, int(self.samples)),
-            0,
-            0,
-            None,  # NULL callback → QueueAudio mode
-            None,
+            self.samples,
         )
-        obtained = sdl.SDL_AudioSpec()
-        self.device = sdl.SDL_OpenAudioDevice(
-            None,
-            0,
-            ctypes.byref(spec),
-            ctypes.byref(obtained),
-            0,  # allowed_changes=0 — pin format
-        )
+        self.device = sdl.SDL_OpenAudioDevice(self.device_name, False, spec, None, 0)
         if not self.device:
-            err = sdl.SDL_GetError()
-            raise OSError(err.decode() if err else "SDL_OpenAudioDevice failed")
+            raise OSError(sdl.SDL_GetError())
+        # Stay paused until primed; see PREBUFFER_MS.
         self._prime_pause = True
         self._queued_total = 0
         del self._samples[:]
         sdl.SDL_PauseAudioDevice(self.device, 1)
         return self
 
+    def _close_device(self):
+        """Tear the SDL device down, leaving the software buffers alone."""
+        if self.device:
+            sdl.SDL_PauseAudioDevice(self.device, 1)
+            sdl.SDL_ClearQueuedAudio(self.device)
+            sdl.SDL_CloseAudioDevice(self.device)
+            self.device = 0
+
+    def _close(self):
+        """Close for good, discarding anything still queued.
+
+        Waits out an in-flight rebuild first: that worker owns the device handle
+        and would otherwise reopen it moments after this returns.
+        """
+        self._wait_rebuild()
+        self._close_device()
+        self._coalesce = bytearray()
+        self._shadow = bytearray()
+        self._queued_total = 0
+        del self._samples[:]
+        self._prime_pause = True
+
+    def _wait_rebuild(self, timeout_ms=3000):
+        """Wait out an in-flight rebuild before touching the device."""
+        waited = 0
+        while self._recycling and waited < timeout_ms:
+            _sleep_ms(self.poll_ms)
+            waited += self.poll_ms
+        return not self._recycling
+
+    # -- queue accounting -----------------------------------------------------
+
     def _hw_queued(self):
         """Bytes SDL still holds. The only trustworthy measure of playback."""
         if not self.device:
             return 0
-        return int(_pygame_sdl().SDL_GetQueuedAudioSize(self.device))
+        return int(sdl.SDL_GetQueuedAudioSize(self.device))
 
     def queued_size(self):
         """Bytes still waiting to play, including what has not been handed to SDL.
@@ -421,18 +395,19 @@ class PygameOutputStream:
     def is_active(self):
         """True while PCM is still queued anywhere.
 
-        Deliberately ignores pause state. After the first unpause
-        ``_prime_pause`` stays False for the life of the device, so reading it as
-        "playing" pinned this True forever and hung callers waiting for idle.
+        Deliberately ignores pause state: the device stays unpaused for its whole
+        life, so testing that instead would report playback as active forever and
+        hang callers that wait for idle.
         """
         return self.queued_size() > 0
+
+    # -- writing --------------------------------------------------------------
 
     def _unpause_if_primed(self, force=False):
         """Start playback once ``_prebuffer_bytes`` are queued.
 
-        ``force`` starts on whatever is queued — used when the caller has said
-        there is no more PCM coming (short sounds, flush, drain), so a 40ms beep
-        still plays.
+        ``force`` starts on whatever is queued -- used when the caller has said
+        no more PCM is coming (short sounds, flush, drain), so a 40ms beep plays.
 
         The gate is ``_hw_queued()``, not ``queued_size()``. Counting software
         bytes here is the single easiest way to reintroduce the wedge this whole
@@ -448,7 +423,6 @@ class PygameOutputStream:
             return
         if not force and queued < self._prebuffer_bytes:
             return
-        sdl = _pygame_sdl()
         sdl.SDL_PauseAudioDevice(self.device, 0)
         self._prime_pause = False
         del self._samples[:]
@@ -464,11 +438,12 @@ class PygameOutputStream:
         instead of sleeping. A wait here would block whichever thread or event
         loop happened to be flushing.
         """
-        sdl = _pygame_sdl()
         data = bytes(buf)
-        with self._lock:
+        if self._lock is not None:
+            self._lock.acquire()
+        try:
             if not self.device:
-                self.open()
+                self._open_device()
             rc = sdl.SDL_QueueAudio(self.device, data, len(data))
             if rc == 0:
                 self._queued_total += len(data)
@@ -476,9 +451,11 @@ class PygameOutputStream:
                 if len(self._shadow) > self._shadow_limit:
                     # Slice assignment: MP/CP bytearrays cannot ``del``.
                     self._shadow[: len(self._shadow) - self._shadow_limit] = b""
+        finally:
+            if self._lock is not None:
+                self._lock.release()
         if rc != 0:
-            err = sdl.SDL_GetError()
-            raise OSError(err.decode() if err else "SDL_QueueAudio failed")
+            raise OSError(sdl.SDL_GetError())
 
     def _flush_coalesce(self, force=False):
         """Move buffered PCM into SDL in period-sized pieces.
@@ -513,7 +490,7 @@ class PygameOutputStream:
         # device never begins on the first small chunk of a large flush.
         self._unpause_if_primed(force=force)
 
-    def write(self, buf):
+    def _write(self, buf):
         """Accept PCM, queueing as much as fits. Always consumes all of ``buf``.
 
         Safe to call during a rebuild -- the data is buffered and queued in order
@@ -522,7 +499,7 @@ class PygameOutputStream:
         backstop against callers that ignore :meth:`queued_size` entirely.
         """
         if not self._recycling:
-            self.open()
+            self._open_device()
         if not buf:
             return 0
         waited = 0
@@ -537,7 +514,7 @@ class PygameOutputStream:
         self._flush_coalesce(force=False)
         return len(buf)
 
-    async def awrite(self, buf):
+    async def _awrite(self, buf):
         """Async :meth:`write`: awaits backpressure instead of sleeping through it.
 
         Yields once up front even when there is room. :meth:`write`'s bounded
@@ -549,7 +526,7 @@ class PygameOutputStream:
             return 0
         await _asleep_ms(0)
         if not self._recycling:
-            self.open()
+            self._open_device()
         waited = 0
         while len(self._coalesce) >= self._max_pending and waited < 500:
             await _asleep_ms(self.poll_ms)
@@ -558,6 +535,35 @@ class PygameOutputStream:
         if not self._recycling:
             self._flush_coalesce(force=False)
         return len(buf)
+
+    def clear(self):
+        """Drop queued PCM now (abort); keep the device and re-prime on next write."""
+        self._coalesce = bytearray()
+        if not self.device:
+            return
+        sdl.SDL_PauseAudioDevice(self.device, 1)
+        sdl.SDL_ClearQueuedAudio(self.device)
+        self._prime_pause = True
+        self._shadow = bytearray()
+        self._queued_total = 0
+        del self._samples[:]
+
+    # -- stall recovery -------------------------------------------------------
+
+    def service(self):
+        """Call from the app's tick: flush partial writes and watch for stalls.
+
+        Required, not optional -- stall recovery only happens here and in
+        :meth:`drain`. A no-op during a rebuild, since the worker owns the device
+        and the pending PCM is queued on the next tick.
+        """
+        if self._recycling or not self.device:
+            return
+        if self._coalesce:
+            self._flush_coalesce(force=False)
+        # Failsafe: a pump parked at the fill watermark must not leave us paused.
+        self._unpause_if_primed()
+        self._check_stall()
 
     def _check_stall(self):
         """Recycle the device when it plays back well below realtime.
@@ -573,8 +579,7 @@ class PygameOutputStream:
         """
         if not self.device or self._prime_pause:
             return
-        now = time.time()
-        if now < self._grace_until:
+        if self._grace_until is not None and _elapsed_ms(self._grace_until) < 0:
             del self._samples[:]
             return
         hw = self._hw_queued()
@@ -582,15 +587,16 @@ class PygameOutputStream:
         if hw < self._min_depth_bytes:
             del self._samples[:]
             return
+        now = _monotonic_ms()
         samples = self._samples
-        if not samples or (now - samples[-1][0]) * 1000 >= STALL_SAMPLE_MS:
+        if not samples or _diff_ms(now, samples[-1][0]) >= STALL_SAMPLE_MS:
             samples.append((now, consumed))
-        while len(samples) > 1 and (now - samples[1][0]) * 1000 >= self._stall_window_ms:
+        while len(samples) > 1 and _diff_ms(now, samples[1][0]) >= self._stall_window_ms:
             del samples[0]
-        span = now - samples[0][0]
-        if span * 1000 < self._stall_window_ms:
+        span = _diff_ms(now, samples[0][0])
+        if span < self._stall_window_ms:
             return
-        rate = int((consumed - samples[0][1]) / span)
+        rate = (consumed - samples[0][1]) * 1000 // span
         if rate >= self._min_rate:
             return
         del samples[:]
@@ -616,9 +622,10 @@ class PygameOutputStream:
         del self._samples[:]
         if tail:
             self._coalesce[:0] = tail
-        threading.Thread(
-            target=self._rebuild_device, name="pygame-audio-rebuild", daemon=True
-        ).start()
+        if self._lock is None:
+            self._rebuild_device()
+        else:
+            threading.Thread(target=self._rebuild_device, daemon=True).start()
 
     def _rebuild_device(self, attempts=3):
         """Close, settle, reopen. Runs on the recycle worker thread.
@@ -639,46 +646,25 @@ class PygameOutputStream:
             for _ in range(attempts):
                 _sleep_ms(RECOVER_SETTLE_MS)
                 try:
-                    self.open()
+                    self._open_device()
                     return
                 except Exception as exc:
                     error = exc
             self.lost_bytes += len(self._coalesce)
             self._coalesce[:] = b""
             self._shadow = bytearray()
-            print("[pygameaudio] reopen after stall failed: %s" % (error,))
+            print("[sdl2_audio] reopen after stall failed: %s" % (error,))
         finally:
-            self._grace_until = time.time() + RECOVER_GRACE_MS / 1000.0
+            self._grace_until = _deadline_ms(RECOVER_GRACE_MS)
             self._recycling = False
 
-    def service(self):
-        """Call from the app's tick: flush partial writes and watch for stalls.
-
-        Required, not optional -- stall recovery only happens here and in
-        :meth:`drain`. A no-op during a rebuild, since the worker owns the device
-        and the pending PCM is queued on the next tick.
-        """
-        if self._recycling or not self.device:
-            return
-        if self._coalesce:
-            self._flush_coalesce(force=False)
-        # Failsafe: pump may be blocked at the HW watermark while still paused.
-        self._unpause_if_primed()
-        self._check_stall()
-
-    def _wait_rebuild(self, timeout_ms=3000):
-        """Wait out an in-flight rebuild before touching the device."""
-        waited = 0
-        while self._recycling and waited < timeout_ms:
-            _sleep_ms(self.poll_ms)
-            waited += self.poll_ms
-        return not self._recycling
+    # -- draining -------------------------------------------------------------
 
     def _drain_timeout_ms(self):
         """Real-time playout of what is queued, plus slack.
 
-        Never wait forever: a stalled sink (WSLg RDP sink stops consuming) used
-        to hang the caller indefinitely instead of reporting the stall.
+        Never wait forever: a device that stopped consuming would otherwise hang
+        the caller instead of reporting the stall.
         """
         queued_ms = self.queued_size() * 1000 // max(1, self._bytes_per_second)
         return 2 * queued_ms + 500
@@ -690,9 +676,11 @@ class PygameOutputStream:
         playout budget whenever a recycle happens, so recovering mid-drain does
         not truncate the tail it just re-queued.
         """
-        self._wait_rebuild()
         self.open()
+        self._wait_rebuild()
+        self._open_device()
         self._flush_coalesce(force=True)
+        self._unpause_if_primed(force=True)
         if timeout_ms is None:
             timeout_ms = self._drain_timeout_ms()
         waited = 0
@@ -710,9 +698,11 @@ class PygameOutputStream:
 
     async def adrain(self, timeout_ms=None):
         """Async :meth:`drain`; identical rules, yields instead of sleeping."""
-        self._wait_rebuild()
         self.open()
+        self._wait_rebuild()
+        self._open_device()
         self._flush_coalesce(force=True)
+        self._unpause_if_primed(force=True)
         if timeout_ms is None:
             timeout_ms = self._drain_timeout_ms()
         waited = 0
@@ -727,168 +717,100 @@ class PygameOutputStream:
                 timeout_ms = waited + self._drain_timeout_ms()
         return self.queued_size() == 0
 
-    def clear(self):
-        """Drop queued PCM now (abort); keep the device and re-prime on next write."""
-        self._coalesce = bytearray()
-        if not self.device:
-            return
-        sdl = _pygame_sdl()
-        sdl.SDL_PauseAudioDevice(self.device, 1)
-        sdl.SDL_ClearQueuedAudio(self.device)
-        self._prime_pause = True
-        self._shadow = bytearray()
-        self._queued_total = 0
-        del self._samples[:]
 
-    def _close_device(self):
-        """Tear the SDL device down, leaving the software buffers alone."""
-        if not self.device:
-            return
-        sdl = _pygame_sdl()
-        try:
-            sdl.SDL_PauseAudioDevice(self.device, 1)
-            sdl.SDL_ClearQueuedAudio(self.device)
-            sdl.SDL_CloseAudioDevice(self.device)
-        except Exception:
-            pass
-        self.device = 0
-
-    def close(self):
-        """Close for good, discarding anything still queued.
-
-        Waits out an in-flight rebuild first: that worker owns the device handle
-        and would otherwise reopen it moments after this returns.
-        """
-        self._wait_rebuild()
-        self._close_device()
-        self._coalesce = bytearray()
-        self._shadow = bytearray()
-        self._queued_total = 0
-        del self._samples[:]
-        self._prime_pause = True
-
-
-class PygameInputStream:
-    """Microphone capture via ``pygame._sdl2.AudioDevice``."""
-
-    def __init__(self, fmt, *, device=None, samples=512, poll_ms=2, queue_ms=500):
-        self.format = fmt
+class SDLPCMInput(PCMInput):
+    def __init__(self, fmt, *, device=None, samples=512, queue_ms=250, poll_ms=2):
+        super().__init__(fmt)
         self.device_name = device
         self.samples = int(samples)
+        self.queue_ms = int(queue_ms)
         self.poll_ms = int(poll_ms)
-        self._queue_limit = max(
-            fmt.frame_size,
-            fmt.rate * fmt.frame_size * int(queue_ms) // 1000,
+        self.device = 0
+
+    def _open(self):
+        if self.device:
+            return
+        if sdl.SDL_InitSubSystem(sdl.SDL_INIT_AUDIO) != 0:
+            raise OSError(sdl.SDL_GetError())
+        spec = sdl.SDL_AudioSpec(
+            self.format.rate,
+            _sdl_format(self.format),
+            self.format.channels,
+            self.samples,
         )
-        self._device = None
-        self._lock = threading.Lock()
-        self._chunks = collections.deque()
-        self._pending = bytearray()
-
-    def _callback(self, audiodevice, audiomemoryview):
-        chunk = bytes(audiomemoryview)
-        with self._lock:
-            self._chunks.append(chunk)
-            total = sum(len(item) for item in self._chunks) + len(self._pending)
-            while total > self._queue_limit and self._chunks:
-                dropped = self._chunks.popleft()
-                total -= len(dropped)
-
-    def open(self):
-        if self._device is not None:
-            return self
-        _ensure_pygame()
-        from pygame._sdl2 import audio as sdl_audio
-
-        names = sdl_audio.get_audio_device_names(True)
-        if self.device_name is None and not names:
-            raise OSError("no pygame capture devices available")
-        self._device = sdl_audio.AudioDevice(
-            devicename=self.device_name,
-            iscapture=True,
-            frequency=self.format.rate,
-            audioformat=_pygame_audio_format(self.format),
-            numchannels=self.format.channels,
-            chunksize=self.samples,
-            allowed_changes=0,
-            callback=self._callback,
+        self.device = sdl.SDL_OpenAudioDevice(
+            self.device_name,
+            True,
+            spec,
+            None,
+            0,
         )
-        self._device.pause(0)
-        return self
+        if not self.device:
+            raise OSError(sdl.SDL_GetError())
+        sdl.SDL_PauseAudioDevice(self.device, 0)
 
-    def _take(self, needed):
-        with self._lock:
-            while len(self._pending) < needed and self._chunks:
-                self._pending.extend(self._chunks.popleft())
-            count = min(needed, len(self._pending))
-            count -= count % self.format.frame_size
-            if count <= 0:
-                return b""
-            data = bytes(self._pending[:count])
-            # Slice assignment: MP/CP bytearrays cannot ``del``.
-            self._pending[:count] = b""
-            return data
+    def _close(self):
+        if self.device:
+            sdl.SDL_CloseAudioDevice(self.device)
+            self.device = 0
 
-    def readinto(self, buf):
-        self.open()
+    def _readinto(self, buf):
         needed = len(buf)
-        while True:
-            data = self._take(needed)
-            if data:
-                buf[: len(data)] = data
-                return len(data)
+        while sdl.SDL_GetQueuedAudioSize(self.device) < self.format.frame_size:
             _sleep_ms(self.poll_ms)
+        available = min(needed, sdl.SDL_GetQueuedAudioSize(self.device))
+        available -= available % self.format.frame_size
+        return sdl.SDL_DequeueAudio(self.device, buf, available)
 
-    async def areadinto(self, buf):
-        self.open()
+    async def _areadinto(self, buf):
         needed = len(buf)
-        while True:
-            data = self._take(needed)
-            if data:
-                buf[: len(data)] = data
-                return len(data)
+        while sdl.SDL_GetQueuedAudioSize(self.device) < self.format.frame_size:
             await _asleep_ms(self.poll_ms)
-
-    def close(self):
-        dev = self._device
-        self._device = None
-        with self._lock:
-            self._chunks.clear()
-            self._pending = bytearray()
-        _close_audiodevice_async(dev)
+        available = min(needed, sdl.SDL_GetQueuedAudioSize(self.device))
+        available -= available % self.format.frame_size
+        return sdl.SDL_DequeueAudio(self.device, buf, available)
 
 
 def audio_out(
     format=None,
     *,
+    device=None,
     latency=None,
     samples=None,
-    poll_ms=2,
     queue_ms=None,
     coalesce_ms=None,
+    poll_ms=2,
 ):
-    """Create a pygame-ce-backed PCM playback device (QueueAudio on pygame SDL).
+    """Create an SDL-backed :class:`PCMOutput`.
 
-    ``latency`` picks a profile (see :data:`audiodev.LATENCIES`); ``samples``,
-    ``queue_ms`` and ``coalesce_ms`` given explicitly override it.
+    ``latency`` picks a profile (see :data:`audiodev.LATENCIES`); pass
+    ``"low"`` for interactive callers such as a synth. Any of ``samples``,
+    ``queue_ms`` and ``coalesce_ms`` given explicitly override the profile.
     """
     check_latency(latency)
     default_samples, default_queue_ms, default_coalesce_ms = _PLAY_PROFILES[latency]
     fmt = format or AudioFormat(16000, 2, 16)
-    return PCMOutput(
-        lambda: PygameOutputStream(
-            fmt,
-            samples=default_samples if samples is None else samples,
-            poll_ms=poll_ms,
-            queue_ms=default_queue_ms if queue_ms is None else queue_ms,
-            coalesce_ms=default_coalesce_ms if coalesce_ms is None else coalesce_ms,
-        ),
+    return SDLPCMOutput(
         fmt,
+        device=device,
+        samples=default_samples if samples is None else samples,
+        queue_ms=default_queue_ms if queue_ms is None else queue_ms,
+        coalesce_ms=default_coalesce_ms if coalesce_ms is None else coalesce_ms,
+        poll_ms=poll_ms,
+        session=_android_session(),
     )
 
 
-def audio_in(format=None, *, device=None, latency=None, samples=None, poll_ms=2, queue_ms=None):
-    """Create a pygame-ce-backed PCM capture device via ``_sdl2.AudioDevice``.
+def audio_in(
+    format=None,
+    *,
+    device=None,
+    latency=None,
+    samples=None,
+    queue_ms=None,
+    poll_ms=2,
+):
+    """Create an SDL-backed :class:`PCMInput` using real host capture.
 
     ``latency`` picks a profile as in :func:`audio_out`; ``samples`` and
     ``queue_ms`` given explicitly override it.
@@ -896,13 +818,12 @@ def audio_in(format=None, *, device=None, latency=None, samples=None, poll_ms=2,
     check_latency(latency)
     default_samples, default_queue_ms = _CAPTURE_PROFILES[latency]
     fmt = format or AudioFormat(16000, 1, 16)
-    return PCMInput(
-        lambda: PygameInputStream(
-            fmt,
-            device=device,
-            samples=default_samples if samples is None else samples,
-            poll_ms=poll_ms,
-            queue_ms=default_queue_ms if queue_ms is None else queue_ms,
-        ),
+    return SDLPCMInput(
         fmt,
+        device=device,
+        samples=default_samples if samples is None else samples,
+        queue_ms=default_queue_ms if queue_ms is None else queue_ms,
+        poll_ms=poll_ms,
     )
+
+

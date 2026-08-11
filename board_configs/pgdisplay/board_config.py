@@ -11,11 +11,11 @@ if sys.platform == "win32":
     # with pygame.mixer.Channel's play()/queue() small-chunk playback pattern
     # that produces periodic audible glitches (confirmed: identical PCM output
     # via SDL_AUDIODRIVER=directsound is glitch-free; SDL_QueueAudio-based
-    # output, e.g. drivers/audio/sdl2audio.py, is unaffected on Windows either
+    # output, e.g. audiodev.sdl2_audio, is unaffected on Windows either
     # way). DirectSound is SDL2's own supported alternative Windows backend.
     # Must be set here, before PGDisplay's pg.init() below -- SDL locks in its
     # audio driver at the first SDL_InitSubSystem(SDL_INIT_AUDIO), so setting
-    # this later in drivers/audio/pygameaudio.py (which opens the mixer lazily
+    # this later in audiodev.pygame_audio (which opens the mixer lazily
     # on first audio_out() use, well after PGDisplay has already called
     # pg.init()) is too late.
     # Only when unset, so an explicit user choice still wins.

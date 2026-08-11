@@ -4,7 +4,8 @@ import sys
 
 DEVICES = frozenset({"audio_in", "audio_out", "sdcard", "camera", "i2c", "wlan", "ble"})
 
-from audiodev import AudioFormat, AudioSession, PCMInput, PCMOutput, queue_bytes
+from audiodev import AudioFormat, AudioSession, queue_bytes
+from audiodev.i2s_audio import I2SPCMInput, I2SPCMOutput
 
 _FORMAT = AudioFormat(16000, 2, 16)
 _SESSION = AudioSession(duplex=False)
@@ -66,7 +67,7 @@ def audio_in(*, latency=None, queue_ms=None):
         ibuf=ibuf,
         )
 
-    return PCMInput(
+    return I2SPCMInput(
         stream, _FORMAT, session=_SESSION, codec=codec,
         set_hardware_gain=codec.set_gain, power=codec.enable_input,
     )
@@ -108,7 +109,7 @@ def audio_out(*, latency=None, queue_ms=None):
         codec.enable_output(enable)
         tab5_set_amp(bc.i2c, enable)
 
-    return PCMOutput(
+    return I2SPCMOutput(
         stream, _FORMAT, session=_SESSION, codec=codec,
         set_hardware_volume=codec.set_dac_volume,
         set_hardware_mute=codec.dac_mute, power=power,

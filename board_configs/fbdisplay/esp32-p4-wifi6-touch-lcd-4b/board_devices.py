@@ -14,7 +14,8 @@ _LRCK = 10
 _DSDIN = 9
 _PA_CTRL = 53
 
-from audiodev import AudioFormat, AudioSession, PCMInput, PCMOutput, queue_bytes
+from audiodev import AudioFormat, AudioSession, queue_bytes
+from audiodev.i2s_audio import I2SPCMInput, I2SPCMOutput
 
 # 24 kHz mono PCM. Firmware has no I2S mck= — PWM supplies MCLK.
 # Bring-up (ear-verified): MCLK before ES8311 init; unmute + volume before I2S; MONO.
@@ -147,7 +148,7 @@ def audio_out(*, latency=None, queue_ms=None):
     accepted and ignored.
     """
     ibuf = queue_bytes(_FORMAT, latency, queue_ms, default=_IBUF, minimum=_MIN_IBUF)
-    out = PCMOutput(
+    out = I2SPCMOutput(
         lambda: _output_stream(ibuf),
         _FORMAT,
         session=_SESSION,
@@ -173,7 +174,7 @@ def audio_in(*, latency=None, queue_ms=None):
     ``latency`` / ``queue_ms`` size the I2S ring buffer; see :func:`audio_out`.
     """
     ibuf = queue_bytes(_FORMAT, latency, queue_ms, default=_IBUF, minimum=_MIN_IBUF)
-    return PCMInput(
+    return I2SPCMInput(
         lambda: _input_stream(ibuf),
         _FORMAT,
         session=_INPUT_SESSION,

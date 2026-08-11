@@ -55,16 +55,16 @@ def probe_backend_selection():
     backend = board_devices._select_backend()
     check(
         "selected a backend ({})".format(backend),
-        backend in ("sdl2audio", "pygameaudio", "webaudio"),
+        backend in ("sdl2_audio", "pygame_audio", "web_audio"),
     )
     current = os.getenv("SDL_AUDIODRIVER")
     if preset is not None:
         check("an explicit audio driver still wins", current == preset)
-    elif sys.platform == "win32" and backend == "pygameaudio":
-        check("win32 pygameaudio defaults to directsound", current == "directsound")
+    elif sys.platform == "win32" and backend == "pygame_audio":
+        check("win32 pygame_audio defaults to directsound", current == "directsound")
     else:
         # Every other combination leaves it to SDL: only pygame's small-chunk
-        # playback needs DirectSound, and it costs sdl2audio latency.
+        # playback needs DirectSound, and it costs sdl2_audio latency.
         check("the audio driver is left alone ({})".format(backend), current is None)
 
 
@@ -95,16 +95,15 @@ def probe_buffer_consumption():
     os.putenv("SDL_AUDIODRIVER", "dummy")
 
     from audiodev import AudioFormat
-    import sdl2audio
+    from audiodev import sdl2_audio
 
     fmt = AudioFormat(24000, 1, 16)
-    device = sdl2audio.audio_out(fmt)
+    device = sdl2_audio.audio_out(fmt)
     device.open()
-    stream = device.stream
 
     # Small enough that the first queued piece overflows it, so the trim branch
     # runs without writing megabytes.
-    stream._shadow_limit = 1024
+    device._shadow_limit = 1024
 
     # A recognizable ramp, so the checks below can tell the tail of the buffer
     # from the head -- a slice that trimmed the wrong end would still have the
@@ -113,33 +112,33 @@ def probe_buffer_consumption():
     for value in range(256):
         pattern.append(value)
 
-    piece = stream._coalesce_bytes
+    piece = device._coalesce_bytes
     written = bytearray()
     while len(written) < piece + piece // 2:
         written.extend(pattern)
 
-    stream.write(written)
-    stream.service()
+    device.write(written)
+    device.service()
 
-    check("queued PCM to SDL ({} bytes)".format(stream._queued_total), stream._queued_total > 0)
+    check("queued PCM to SDL ({} bytes)".format(device._queued_total), device._queued_total > 0)
     check(
-        "consumed from the front of _coalesce ({} left)".format(len(stream._coalesce)),
-        len(stream._coalesce) == len(written) - stream._queued_total,
+        "consumed from the front of _coalesce ({} left)".format(len(device._coalesce)),
+        len(device._coalesce) == len(written) - device._queued_total,
     )
     check(
-        "trimmed _shadow to its limit ({} bytes)".format(len(stream._shadow)),
-        len(stream._shadow) <= stream._shadow_limit,
+        "trimmed _shadow to its limit ({} bytes)".format(len(device._shadow)),
+        len(device._shadow) <= device._shadow_limit,
     )
     check(
         "_shadow kept the tail, not the head",
-        bytes(stream._shadow)
-        == bytes(written[: stream._queued_total])[-stream._shadow_limit :],
+        bytes(device._shadow)
+        == bytes(written[: device._queued_total])[-device._shadow_limit :],
     )
 
-    stream.clear()
+    device.clear()
     check(
         "clear() empties both buffers",
-        len(stream._coalesce) == 0 and len(stream._shadow) == 0,
+        len(device._coalesce) == 0 and len(device._shadow) == 0,
     )
     device.close()
 
@@ -149,24 +148,23 @@ def probe_latency_profile():
     os.putenv("SDL_AUDIODRIVER", "dummy")
 
     from audiodev import AudioFormat
-    import sdl2audio
+    from audiodev import sdl2_audio
 
     fmt = AudioFormat(24000, 1, 16)
-    device = sdl2audio.audio_out(fmt, latency="low")
+    device = sdl2_audio.audio_out(fmt, latency="low")
     device.open()
-    stream = device.stream
     check(
-        "low profile shortened the coalesce window ({} bytes)".format(stream._coalesce_bytes),
-        stream._coalesce_bytes < 24000 * 2 * 100 // 1000,
+        "low profile shortened the coalesce window ({} bytes)".format(device._coalesce_bytes),
+        device._coalesce_bytes < 24000 * 2 * 100 // 1000,
     )
-    stream.write(bytes(stream._coalesce_bytes * 2))
-    stream.service()
-    check("low profile queued PCM ({} bytes)".format(stream._queued_total), stream._queued_total > 0)
+    device.write(bytes(device._coalesce_bytes * 2))
+    device.service()
+    check("low profile queued PCM ({} bytes)".format(device._queued_total), device._queued_total > 0)
     device.close()
 
     failed = False
     try:
-        sdl2audio.audio_out(fmt, latency="nope")
+        sdl2_audio.audio_out(fmt, latency="nope")
     except ValueError:
         failed = True
     check("an unknown profile raises instead of falling back", failed)

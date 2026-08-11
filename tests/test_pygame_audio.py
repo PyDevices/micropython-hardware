@@ -14,16 +14,18 @@ import _env  # noqa: E402, F401
 
 os.environ.setdefault("SDL_AUDIODRIVER", "dummy")
 
-from audiodev import AudioFormat  # noqa: E402
-import pygameaudio  # noqa: E402
+from audiodev import AudioFormat, PCMOutput  # noqa: E402
+from audiodev import pygame_audio  # noqa: E402
 
 
 @unittest.skipUnless(importlib.util.find_spec("pygame"), "pygame-ce is not installed")
 class PygameBackendTests(unittest.TestCase):
     def test_sync_and_async_output(self):
         fmt = AudioFormat(8000, 1, 16)
-        output = pygameaudio.audio_out(fmt, samples=128)
+        output = pygame_audio.audio_out(fmt, samples=128)
+        self.assertIsInstance(output, PCMOutput)
         output.write(b"\0\0" * 80)
+        output.service()
         output.drain()
 
         async def play():
@@ -36,17 +38,18 @@ class PygameBackendTests(unittest.TestCase):
 
     def test_audio_in_factory_and_mocked_capture(self):
         fmt = AudioFormat(8000, 1, 16)
-        capture = pygameaudio.audio_in(fmt, poll_ms=1)
+        capture = pygame_audio.audio_in(fmt, poll_ms=1)
         self.assertEqual(capture.format, fmt)
 
-        stream = pygameaudio.PygameInputStream(fmt, poll_ms=1)
+        stream = pygame_audio.PygamePCMInput(fmt, poll_ms=1)
         stream._device = object()  # pretend open
+        stream.is_open = True
         stream._chunks.append(b"\x01\x00\x02\x00")
 
         buf = bytearray(4)
-        self.assertEqual(stream.readinto(buf), 4)
+        self.assertEqual(stream._readinto(buf), 4)
         self.assertEqual(bytes(buf), b"\x01\x00\x02\x00")
-        stream.close()
+        stream._close()
 
 
 if __name__ == "__main__":

@@ -4,7 +4,7 @@ import sys
 
 DEVICES = frozenset({"temperature", "humidity", "pressure", "pixels", "audio_out", "wlan"})
 
-from audiodev import ToneOutput
+from audiodev.pwm_tone import PWMToneOutput
 
 _aht = None
 _bmp = None
@@ -66,7 +66,7 @@ def audio_out():
     """Onboard speaker DAC pin (GPIO42) — PWM/DAC endpoint."""
     from machine import Pin, PWM
 
-    return ToneOutput(lambda: PWM(Pin(42), freq=440, duty=0))
+    return PWMToneOutput(lambda: PWM(Pin(42), freq=440, duty=0))
 
 
 def wlan():

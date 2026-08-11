@@ -1,2 +1,2 @@
-# Required to unittest pygameaudio
+# Required to unittest audiodev.pygame_audio
 pygame-ce

@@ -116,7 +116,7 @@ class Tab5AudioTests(unittest.TestCase):
     def ibuf(self, device):
         device.open()
         try:
-            return device.stream.options["ibuf"]
+            return device.i2s.options["ibuf"]
         finally:
             device.close()
 
