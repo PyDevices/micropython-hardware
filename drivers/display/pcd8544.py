@@ -1,7 +1,4 @@
-try:
-    from displaysys.busdisplay import BusDisplay
-except ImportError:
-    from busdisplay import BusDisplay
+from displaydev.busdisplay import BusDisplay
 
 # SPDX-FileCopyrightText: 2018 Tony DiCola for Adafruit Industries
 # SPDX-FileCopyrightText: 2018 ladyada for Adafruit Industries

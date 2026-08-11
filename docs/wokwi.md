@@ -66,8 +66,8 @@ MICROPYTHON_LIB = "https://PyDevices.github.io/micropython-lib/mip/PyDevices"
 HARDWARE = "github:PyDevices/micropython-hardware"
 PYDISPLAY = "github:PyDevices/pydisplay"
 
-# Board package pulls ili9341/ft6x36/spibus from this repo and displaysys from
-# the MIP index (displaysys → eventsys → multimer).
+# Board package pulls ili9341/ft6x36/spibus from this repo and displaydev from
+# the MIP index (displaydev → eventsys → multimer).
 mip.install(
     HARDWARE + "/board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3/",
     index=MICROPYTHON_LIB,

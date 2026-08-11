@@ -3,7 +3,7 @@
 from machine import Pin
 import rgbmatrix
 
-from displaysys.fbdisplay import FBDisplay
+from displaydev.fbdisplay import FBDisplay
 import eventsys
 
 matrix = rgbmatrix.RGBMatrix(

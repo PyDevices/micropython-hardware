@@ -29,7 +29,7 @@ async contract as hardware devices.
 capture (`getUserMedia`).
 
 Desktop `board_devices` may use `audiodev.auto` for host probe. Fixed host boards
-import a concrete backend. `audiodev` itself does not import `displaysys`.
+import a concrete backend. `audiodev` itself does not import `displaydev`.
 
 ## Emulated devices (CI / no hardware)
 

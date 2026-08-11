@@ -10,7 +10,7 @@ import framebufferio
 import gt911
 import mipidsi
 
-from displaysys.fbdisplay import FBDisplay
+from displaydev.fbdisplay import FBDisplay
 import eventsys
 
 displayio.release_displays()

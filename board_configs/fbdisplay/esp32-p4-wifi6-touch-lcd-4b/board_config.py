@@ -3,12 +3,12 @@
 import time
 
 from gt911 import GT911
+from keypad_gpio import GPIOButtons
 from machine import I2C, Pin
 
-from displaysys.fbdisplay import FBDisplay
+from displaydev.fbdisplay import FBDisplay
 import eventsys
 import keys
-from keypad_gpio import GPIOButtons
 
 try:
     from mipidsi import Bus, Display

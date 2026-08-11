@@ -76,9 +76,9 @@ def probe_env_helpers():
     environment variable, so that path alone would leave this unguarded.
     """
     try:
-        from displaysys import env_get, env_set
+        from displaydev import env_get, env_set
     except ImportError:
-        print("  skip: displaysys is not installed for this interpreter")
+        print("  skip: displaydev is not installed for this interpreter")
         return
 
     name = "PYDEVICES_PROBE_VAR"
@@ -94,8 +94,7 @@ def probe_buffer_consumption():
     # fights whatever else is playing, and this way no audio hardware is needed.
     os.putenv("SDL_AUDIODRIVER", "dummy")
 
-    from audiodev import AudioFormat
-    from audiodev import sdl2_audio
+    from audiodev import AudioFormat, sdl2_audio
 
     fmt = AudioFormat(24000, 1, 16)
     device = sdl2_audio.audio_out(fmt)
@@ -147,8 +146,7 @@ def probe_latency_profile():
     """``latency="low"`` must build and play on every interpreter, not just CPython."""
     os.putenv("SDL_AUDIODRIVER", "dummy")
 
-    from audiodev import AudioFormat
-    from audiodev import sdl2_audio
+    from audiodev import AudioFormat, sdl2_audio
 
     fmt = AudioFormat(24000, 1, 16)
     device = sdl2_audio.audio_out(fmt, latency="low")
@@ -173,9 +171,9 @@ def probe_latency_profile():
 def probe_board_config():
     """``board_config`` is what apps import; it must load headless."""
     try:
-        import displaysys  # noqa: F401
+        import displaydev  # noqa: F401
     except ImportError:
-        print("  skip: displaysys is not installed for this interpreter")
+        print("  skip: displaydev is not installed for this interpreter")
         return
 
     import board_config

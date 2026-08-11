@@ -24,7 +24,7 @@ from displayio import release_displays
 from framebufferio import FramebufferDisplay
 from usb_video import USBFramebuffer
 
-from displaysys.fbdisplay import FBDisplay
+from displaydev.fbdisplay import FBDisplay
 
 release_displays()
 display = FramebufferDisplay(USBFramebuffer(), auto_refresh=True)

@@ -4,7 +4,7 @@ Combination board configuration for desktop, pyscript and jupyter notebook platf
 
 import sys
 
-from displaysys.sdldisplay import SDLDisplay as DTDisplay
+from displaydev.sdldisplay import SDLDisplay as DTDisplay
 import eventsys
 
 width = 320

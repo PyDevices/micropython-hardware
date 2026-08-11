@@ -2,7 +2,7 @@
 Board configuration for Jupyter Notebook.
 """
 
-from displaysys.jndisplay import JNDisplay
+from displaydev.jndisplay import JNDisplay
 import eventsys
 
 width = 320

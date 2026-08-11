@@ -5,7 +5,7 @@ import sys
 import boarddev
 
 if sys.platform == "win32":
-    from displaysys import env_get, env_set
+    from displaydev import env_get, env_set
 
     # See board_config.py for the full rationale (SDL2's default Windows
     # WASAPI backend glitches with pygame.mixer.Channel's small-chunk

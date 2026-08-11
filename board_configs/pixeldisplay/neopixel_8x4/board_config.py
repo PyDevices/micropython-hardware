@@ -3,7 +3,7 @@
 from machine import Pin
 import neopixel
 
-from displaysys.pixeldisplay import PixelDisplay, PixelFramebuffer
+from displaydev.pixeldisplay import PixelDisplay, PixelFramebuffer
 
 pixel_width = 8
 pixel_height = 4

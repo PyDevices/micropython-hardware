@@ -1,7 +1,4 @@
-try:
-    from displaysys.busdisplay import BusDisplay
-except ImportError:
-    from busdisplay import BusDisplay
+from displaydev.busdisplay import BusDisplay
 
 # SPDX-FileCopyrightText: 2017 Scott Shawcroft, written for Adafruit Industries
 # SPDX-FileCopyrightText: Copyright (c) 2021 ladyada for Adafruit Industries
@@ -37,10 +34,6 @@ except ImportError:
 
 from fourwire import FourWire
 from i2cdisplaybus import I2CDisplayBus
-
-
-
-
 
 # Sequence from sh1106 framebuf driver formatted for displayio init
 _INIT_SEQUENCE = (

@@ -2,8 +2,9 @@
 
 import sys
 
+from displaydev import env_bool, env_float, env_int
+from displaydev.auto import AutoDisplay
 import eventsys
-from displaysys import AutoDisplay, env_bool, env_float, env_int
 
 _width = env_int("PYDISPLAY_WIDTH", 320)
 _height = env_int("PYDISPLAY_HEIGHT", 480)

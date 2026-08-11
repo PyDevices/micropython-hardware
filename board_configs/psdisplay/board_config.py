@@ -2,8 +2,8 @@
 Board configuration for PyScript.
 """
 
-from displaysys import env_int
-from displaysys.psdisplay import PSDisplay
+from displaydev import env_int
+from displaydev.psdisplay import PSDisplay
 import eventsys
 
 width = 320

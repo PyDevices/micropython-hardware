@@ -4,7 +4,7 @@ import adafruit_dotstar
 from adafruit_pixel_framebuf import PixelFramebuffer
 import board
 
-from displaysys.pixeldisplay import PixelDisplay
+from displaydev.pixeldisplay import PixelDisplay
 
 pixel_width = 12
 pixel_height = 6

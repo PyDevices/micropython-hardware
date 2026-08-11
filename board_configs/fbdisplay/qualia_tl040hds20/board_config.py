@@ -13,7 +13,7 @@ from ft6x36 import FT6x36
 from machine import I2C, Pin
 from pca9554 import PCA9554
 
-from displaysys.fbdisplay import FBDisplay
+from displaydev.fbdisplay import FBDisplay
 import eventsys
 
 try:

@@ -165,7 +165,7 @@ Draw through `display_drv` only; `_pixel_framebuf` is an internal wiring detail.
 
 [`board_configs/desktop/`](../board_configs/desktop/) — universal non-MCU
 `board_config` for desktop, PyScript, and Jupyter. Host display selection is
-`displaysys.AutoDisplay` (PS / JN / Win→PG→SDL on Windows); the config itself is MCU-shaped
+`displaydev.auto.AutoDisplay` (PS / JN / Win→PG→SDL on Windows); the config itself is MCU-shaped
 eager wiring:
 
 ```python
@@ -193,7 +193,7 @@ geometry from `display_drv`, not module-level names on `board_config`.
 Set the env var **before** `import board_config` (or any import that loads it).
 Truthy: `1`, `true`, `yes`, `on`. Falsey: `0`, `false`, `no`, `off`. Unknown
 values fall back to the desktop default (`False`). Parsing lives in
-[`displaysys.env_bool`](https://github.com/PyDevices/pydisplay/blob/main/src/lib/displaysys/__init__.py).
+[`displaydev.env_bool`](https://github.com/PyDevices/pydisplay/blob/main/src/lib/displaydev/__init__.py).
 
 ```bash
 # Force asyncio timers on desktop (LVGL async smoke, matrix column)

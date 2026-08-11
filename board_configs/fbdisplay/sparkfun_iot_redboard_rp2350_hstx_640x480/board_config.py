@@ -7,7 +7,7 @@ Requires displayif ``picodvi`` (RP2350 HSTX).
 
 from machine import Pin
 
-from displaysys.fbdisplay import FBDisplay
+from displaydev.fbdisplay import FBDisplay
 import eventsys
 
 try:

@@ -1,6 +1,6 @@
 # Display drivers
 
-MicroPython display controller drivers for use with `displaysys.busdisplay.BusDisplay`.
+MicroPython display controller drivers for use with `displaydev.busdisplay.BusDisplay`.
 
 Source: [`drivers/display/`](https://github.com/PyDevices/micropython-hardware/tree/main/drivers/display)
 

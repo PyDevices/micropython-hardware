@@ -2,11 +2,7 @@
 see https://github.com/Xinyuan-LilyGO/lilygo-micropython/tree/master/target/esp32s3/boards/LILYGO_T-RGB/modules
 """
 
-try:
-    from displaysys.busdisplay import BusDisplay
-except ImportError:
-    from busdisplay import BusDisplay
-
+from displaydev.busdisplay import BusDisplay
 
 _INIT_SEQUENCE = [
     (0x11, b"\x00", 120),  # Exit sleep mode

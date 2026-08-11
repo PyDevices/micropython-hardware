@@ -7,7 +7,7 @@ import board
 import displayio
 import picodvi
 
-from displaysys.fbdisplay import FBDisplay
+from displaydev.fbdisplay import FBDisplay
 import eventsys
 
 displayio.release_displays()

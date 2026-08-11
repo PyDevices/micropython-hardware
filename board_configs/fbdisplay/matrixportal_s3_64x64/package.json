@@ -19,7 +19,7 @@
   ],
   "deps": [
     [
-      "displaysys",
+      "displaydev",
       "latest"
     ],
     [

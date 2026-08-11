@@ -8,13 +8,7 @@ try:
 except ImportError:
     from multimer import sleep_ms
 
-try:
-    from displaysys.busdisplay import BusDisplay
-except ImportError:
-    try:
-        from busdisplay import BusDisplay
-    except ImportError:
-        BusDisplay = None
+from displaydev.busdisplay import BusDisplay
 
 _INIT_SEQUENCE = [
     (0xFF, b"\x77\x01\x00\x00\x10", 0),
@@ -128,7 +122,7 @@ if BusDisplay is not None:
 
         Panel registers are initialized via ``lcd_pins`` (3-wire SPI bit-bang).
         Pixel data is sent through ``display_bus`` (RGB parallel panel from
-        ``pydevices/displayif`` ``rgbframebuffer`` + ``displaysys.fbdisplay.FBDisplay``).
+        ``pydevices/displayif`` ``rgbframebuffer`` + ``displaydev.fbdisplay.FBDisplay``).
         """
 
         def __init__(self, lcd_pins, display_bus, *, init_sequence=None, **kwargs):

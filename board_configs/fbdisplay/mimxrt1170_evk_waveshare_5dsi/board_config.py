@@ -3,7 +3,7 @@
 from gt911 import GT911
 from machine import I2C, Pin
 
-from displaysys.fbdisplay import FBDisplay
+from displaydev.fbdisplay import FBDisplay
 import eventsys
 
 try:

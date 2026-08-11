@@ -4,7 +4,7 @@
 """
 Pure-Python Win32 subset for CPython on Windows.
 
-Used by ``displaysys.windisplay``, ``multimer``'s win32 timer backend, and
+Used by ``displaydev.windisplay``, ``multimer``'s win32 timer backend, and
 ``audiodev.win_audio``. Import raises ``ImportError`` unless this is CPython
 on ``win32`` with working ``ctypes.windll``.
 

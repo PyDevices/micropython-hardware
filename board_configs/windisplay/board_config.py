@@ -4,7 +4,7 @@ Board configuration for Win32 (uwin32) desktop display.
 
 import sys
 
-from displaysys.windisplay import WinDisplay as DTDisplay
+from displaydev.windisplay import WinDisplay as DTDisplay
 import eventsys
 
 width = 320

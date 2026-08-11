@@ -23,10 +23,7 @@ Implementation Notes
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/tylercrumpton/CircuitPython_GC9A01.git"
 
-try:
-    from displaysys.busdisplay import BusDisplay
-except ImportError:
-    from busdisplay import BusDisplay
+from displaydev.busdisplay import BusDisplay
 
 _INIT_SEQUENCE = bytearray(
     # Waveshare GC9A01A full bring-up (RP2040-Touch-LCD-1.28 / RP2040-LCD-1.28).

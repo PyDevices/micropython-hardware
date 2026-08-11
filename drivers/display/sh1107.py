@@ -1,7 +1,4 @@
-try:
-    from displaysys.busdisplay import BusDisplay
-except ImportError:
-    from busdisplay import BusDisplay
+from displaydev.busdisplay import BusDisplay
 
 # SPDX-FileCopyrightText: 2017 Scott Shawcroft, written for Adafruit Industries
 # SPDX-FileCopyrightText: Copyright (c) 2020 Mark Roberts for Adafruit Industries
@@ -33,9 +30,10 @@ Implementation Notes
 
 import sys
 
-from busdisplay import BusDisplay as Display
 from fourwire import FourWire
 from micropython import const
+
+from displaydev.busdisplay import BusDisplay as Display
 
 try:
     from typing import Union

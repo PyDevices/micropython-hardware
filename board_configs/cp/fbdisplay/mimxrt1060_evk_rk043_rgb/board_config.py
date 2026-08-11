@@ -9,7 +9,7 @@ import displayio
 import dotclockframebuffer
 import gt911
 
-from displaysys.fbdisplay import FBDisplay
+from displaydev.fbdisplay import FBDisplay
 import eventsys
 
 board.LCD_BACKLIGHT.value = True

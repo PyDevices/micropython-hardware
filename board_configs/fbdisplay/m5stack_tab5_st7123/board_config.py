@@ -7,7 +7,7 @@ from pi4ioe5v import tab5_init_lcd_reset
 from st7123 import ST7123
 from tab5_st7123_init import TAB5_ST7123_INIT
 
-from displaysys.fbdisplay import FBDisplay
+from displaydev.fbdisplay import FBDisplay
 import eventsys
 
 try:

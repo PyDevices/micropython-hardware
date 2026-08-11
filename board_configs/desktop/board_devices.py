@@ -30,7 +30,7 @@ def _select_backend():
         # deeper buffer: measured on micropython.exe at latency="low", it holds
         # 185ms against WASAPI's 55ms, which is the difference between playable
         # and not for an interactive caller.
-        from displaysys import env_get, env_set
+        from displaydev import env_get, env_set
 
         # Only when unset, so an explicit user choice still wins.
         if env_get("SDL_AUDIODRIVER") is None:

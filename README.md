@@ -3,11 +3,11 @@
 Board configs and hardware drivers for [PyDevices](https://github.com/PyDevices)
 on MicroPython and CircuitPython (display, touch, bus, input, …).
 
-This repo holds what used to live under pydisplay’s `board_configs/`,
-`drivers/`, and bus/touch MIP manifests. Shared `lib/events.py` and
-`lib/keys.py` live here (used by both `displaysys` and `eventsys`). The rest of
-the pure-Python core (`displaysys`, `eventsys`, `multimer`, `graphics`) stays in
-[pydisplay](https://github.com/PyDevices/pydisplay).
+This repo holds board configs, hardware drivers, and shared pure-Python
+packages used by both firmware and [pydisplay](https://github.com/PyDevices/pydisplay):
+`drivers/display/displaydev/`, `lib/multimer/`, `lib/events.py`, and
+`lib/keys.py`. `eventsys` stays in pydisplay. Optional host display selection
+is `displaydev.auto` only — backends never import it.
 
 ## Layout
 
@@ -15,8 +15,9 @@ the pure-Python core (`displaysys`, `eventsys`, `multimer`, `graphics`) stays in
 |------|----------|
 | `board_configs/` | MicroPython boards (top level); CircuitPython under `board_configs/cp/` |
 | `drivers/` | Display, touch, bus, joystick, IO expander, input helpers |
-| `lib/` | Shared `events.py` / `keys.py` (MIP `packages/events.json`, `keys.json`) |
-| `packages/` | Shared MIP manifests for bus/touch/chip helpers (`spibus`, `i80bus`, …) |
+| `drivers/display/displaydev/` | Display backends (`BusDisplay`, `SDLDisplay`, …); `auto.py` is convenience only |
+| `lib/` | `events.py`, `keys.py`, `multimer/` (MIP `packages/{events,keys,multimer}.json`) |
+| `packages/` | Shared MIP manifests (`displaydev`, `spibus`, `i80bus`, …) |
 | `docs/` | Hardware documentation (markdown; published on GitHub Pages, not RTD) |
 
 Documentation:

@@ -1,8 +1,6 @@
-try:
-    from displaysys.busdisplay import BusDisplay
-except ImportError:
-    from busdisplay import BusDisplay
 from micropython import const
+
+from displaydev.busdisplay import BusDisplay
 
 _SWRESET = const(0x01)
 _SLPOUT = const(0x11)

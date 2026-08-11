@@ -8,7 +8,7 @@ import gt911
 import mipidsi
 from tab5_ili9881c_init import TAB5_ILI9881C_INIT
 
-from displaysys.fbdisplay import FBDisplay
+from displaydev.fbdisplay import FBDisplay
 import eventsys
 
 displayio.release_displays()

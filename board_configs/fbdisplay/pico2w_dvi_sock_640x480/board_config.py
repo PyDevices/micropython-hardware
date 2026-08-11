@@ -6,7 +6,7 @@ Requires displayif ``picodvi`` (RP2350 HSTX). Wireless via onboard CYW43.
 
 from machine import Pin
 
-from displaysys.fbdisplay import FBDisplay
+from displaydev.fbdisplay import FBDisplay
 import eventsys
 
 try:

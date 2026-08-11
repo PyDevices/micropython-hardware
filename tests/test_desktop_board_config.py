@@ -1,7 +1,7 @@
 """Smoke / contract tests for desktop board_config (MCU-shaped, AutoDisplay)."""
 
-from pathlib import Path
 import os
+from pathlib import Path
 import sys
 import types
 import unittest
@@ -23,11 +23,16 @@ for path in (str(DESKTOP), str(PYDISPLAY_LIB)):
 
 def _purge_board_modules():
     for name in list(sys.modules):
-        if name in (
-            "board_config",
-            "board_devices",
-            "boarddev",
-        ) or name.startswith("board_config.") or name.startswith("board_devices."):
+        if (
+            name
+            in (
+                "board_config",
+                "board_devices",
+                "boarddev",
+            )
+            or name.startswith("board_config.")
+            or name.startswith("board_devices.")
+        ):
             sys.modules.pop(name, None)
 
 
@@ -46,18 +51,24 @@ class DesktopBoardConfigContractTests(unittest.TestCase):
         display.requires_async_timer = False
         runtime = mock.Mock(name="runtime")
 
-        displaysys_mod = types.ModuleType("displaysys")
-        displaysys_mod.AutoDisplay = mock.Mock(return_value=display)
-        displaysys_mod.env_bool = lambda name, default=False: default
-        displaysys_mod.env_float = lambda name, default=0.0: default
-        displaysys_mod.env_int = lambda name, default=0: default
+        displaydev_mod = types.ModuleType("displaydev")
+        displaydev_mod.env_bool = lambda name, default=False: default
+        displaydev_mod.env_float = lambda name, default=0.0: default
+        displaydev_mod.env_int = lambda name, default=0: default
+        displaydev_auto = types.ModuleType("displaydev.auto")
+        displaydev_auto.AutoDisplay = mock.Mock(return_value=display)
+        displaydev_mod.auto = displaydev_auto
 
         eventsys_mod = types.ModuleType("eventsys")
         eventsys_mod.Runtime = mock.Mock(return_value=runtime)
 
         with mock.patch.dict(
             sys.modules,
-            {"displaysys": displaysys_mod, "eventsys": eventsys_mod},
+            {
+                "displaydev": displaydev_mod,
+                "displaydev.auto": displaydev_auto,
+                "eventsys": eventsys_mod,
+            },
         ):
             import board_config
 

@@ -4,7 +4,7 @@ from adafruit_pixel_framebuf import PixelFramebuffer
 import board
 import neopixel
 
-from displaysys.pixeldisplay import PixelDisplay
+from displaydev.pixeldisplay import PixelDisplay
 
 pixel_width = 8
 pixel_height = 4

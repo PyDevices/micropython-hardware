@@ -135,7 +135,7 @@ variant (`C6_WIFI` in inventory fixture #1).
   stuck.
 - **Interesting:** Solid fills looked fine, but `BusDisplay.fill_rect` using
   ST7789 `RAMCONT` (`0x3C`) with CS dropping between strips produced dots /
-  garbage. Fixed in pydisplay `displaysys/busdisplay.py`: per-strip window +
+  garbage. Fixed in pydisplay `displaydev/busdisplay.py`: per-strip window +
   `RAMWR` (`0x2C`) only. Verified with an L geometry under MADCTL `0xC8`.
 
 ### LILYGO T-HMI (I80 ST7789)
@@ -249,7 +249,7 @@ variant (`C6_WIFI` in inventory fixture #1).
 - **displayif notes:** native `spibus` accepts pin **int / name str / Pin** and
   **`soft=True`** (SoftSPI; skip `init()` on each send). Firmware must include
   that SoftSPI path (`SPIBus loaded (SoftSPI)`).
-- **CircuitPython caveats (same shield wiring):** `displaysys` **MemoryError**
+- **CircuitPython caveats (same shield wiring):** `displaydev` **MemoryError**
   on ~35 KiB free heap. `bitbangio.SPI.write` → `OSError: 5`; GPIO SoftSPI
   paint works but is very slow. Prefer MP + native SoftSPI for pydisplay;
   CP is fine for AirLift networking.
@@ -283,7 +283,7 @@ variant (`C6_WIFI` in inventory fixture #1).
 - **Demos verified:** RGB stripes; `simon.py` (graphics + eventsys); headless
   `lv_bindings/tools/test_lvgl_smoke.py`; `lvgl_test.py` (tap-count button on real
   panel via `display_driver`). **`main.py`** boots `lvgl_test.py`.
-- **Setup:** `mpftp put` board_config + `displaysys/{__init__,busdisplay}.py` +
+- **Setup:** `mpftp put` board_config + `displaydev/{__init__,busdisplay}.py` +
   `eventsys` + `multimer` + `display_driver.py` + `ili9341`/`ft6x36` + examples
   (no WiFi on this fixture). Package deps: eventsys + multimer.
 

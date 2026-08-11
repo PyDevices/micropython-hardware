@@ -2,13 +2,11 @@
 The init sequence is written out line by line in .init()
 """
 
-try:
-    from displaysys.busdisplay import BusDisplay
-except ImportError:
-    from busdisplay import BusDisplay
 from time import sleep_ms
 
 from micropython import const
+
+from displaydev.busdisplay import BusDisplay
 
 _SWRESET = const(0x01)
 _SLPOUT = const(0x11)

@@ -11,13 +11,14 @@ Must be set before SDL_Init (inside SDLDisplay).
 
 import sys
 
-from displaysys import env_set
+from displaydev import env_set
 
 # Why: force SDL's KMS/DRM backend before SDLDisplay constructs the window.
 env_set("SDL_VIDEODRIVER", "kmsdrm")
 
 import usdl2
-from displaysys.sdldisplay import SDLDisplay as DTDisplay
+
+from displaydev.sdldisplay import SDLDisplay as DTDisplay
 import eventsys
 
 # Why scale=1.0: KMS modes are typically already panel-native; avoid desktop

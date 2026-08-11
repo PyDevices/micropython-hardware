@@ -34,7 +34,7 @@ Use the sections:
 - "Verify without .venv (python.exe / pip.exe)"
 
 `board_config` constructs `display_drv` and `runtime` at import time (MCU-shaped
-eager wiring via `displaysys.AutoDisplay`). Lazy roles such as `audio_out` /
+eager wiring via `displaydev.auto.AutoDisplay`). Lazy roles such as `audio_out` /
 `audio_in` still come from `board_devices` and allocate on first access.
 Terminal-only apps can `import board_devices` without opening a window.
 

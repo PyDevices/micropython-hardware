@@ -17,7 +17,7 @@ import displayio
 import dotclockframebuffer
 import framebufferio
 
-from displaysys.fbdisplay import FBDisplay
+from displaydev.fbdisplay import FBDisplay
 import eventsys
 
 tft_pins = dict(board.TFT_PINS)

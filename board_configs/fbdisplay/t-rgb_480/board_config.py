@@ -8,7 +8,7 @@ from machine import I2C, Pin
 from st7701 import LCDPins, run_init
 from xl9535 import XL9535
 
-from displaysys.fbdisplay import FBDisplay
+from displaydev.fbdisplay import FBDisplay
 import eventsys
 
 try:
