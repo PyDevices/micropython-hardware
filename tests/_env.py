@@ -3,8 +3,8 @@
 # SPDX-License-Identifier: MIT
 """Put micropython-hardware packages on ``sys.path`` for unit tests.
 
-Import this before ``audiodev`` / ``usdl2`` / ``displaydev`` / ``multimer``
-so the in-repo trees are found without a separate install.
+Import this before ``audiodev`` / ``usdl2`` / ``displaydev`` / ``multimer`` /
+``mip`` so the in-repo trees are found without a separate install.
 """
 
 from pathlib import Path
@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 for _rel in (
     "lib",
+    "utils",
     "drivers",
     "drivers/audio",
     "drivers/display",

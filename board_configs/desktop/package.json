@@ -69,6 +69,10 @@
     [
       "github:PyDevices/micropython-hardware/packages/keys.json",
       "main"
+    ],
+    [
+      "github:PyDevices/micropython-hardware/packages/utils.json",
+      "main"
     ]
   ],
   "version": "0.0",

@@ -1,9 +1,9 @@
 # Tests
 
 Stdlib `unittest` for packages that live in this repo: `displaydev`, `multimer`,
-`events`, `keys`, `boarddev`, `audiodev`, and related drivers.
+`events`, `keys`, `boarddev`, `audiodev`, `utils`, and related drivers.
 
-[`_env.py`](_env.py) puts `lib/`, `drivers/`, `drivers/audio`, and
+[`_env.py`](_env.py) puts `lib/`, `utils/`, `drivers/`, `drivers/audio`, and
 `drivers/display` on `sys.path`.
 
 ## Running
@@ -34,5 +34,6 @@ Do not run audiodev tests while another process is playing audio — see
 | `test_events.py` / `test_keys.py` | shared event types and key codes |
 | `test_boarddev.py` | `boarddev.bind_lazy` |
 | `test_standalone.py` | displaydev and multimer import in isolation |
+| `test_mip_portable.py` | portable `utils/mip.py` |
 | `test_audiodev*.py`, `test_*_audio.py`, `test_auto.py` | audiodev (see audio README) |
 | `test_portability.py` / `test_contract_proof.py` | portable-module constraints |

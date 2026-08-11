@@ -56,7 +56,7 @@ This bundle installs:
 - `audiodev/` (package)
 - `usdl2.py`
 - `uwin32.py` (Windows CPython)
-- plus `displaydev`, `events`, `keys`, `eventsys`, and `multimer` from the PyDevices MIP index
+- plus `displaydev`, `events`, `keys`, `eventsys`, `multimer`, and `utils` (`byteswap`, `mip`, …) from the PyDevices MIP index / this repo's GitHub packages
 
 Display host selection is `displaydev.auto.AutoDisplay` (convenience; boards may import a backend directly):
 - PyScript: `PSDisplay`

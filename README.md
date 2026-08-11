@@ -5,9 +5,10 @@ on MicroPython and CircuitPython (display, touch, bus, input, …).
 
 This repo holds board configs, hardware drivers, and shared pure-Python
 packages used by both firmware and [pydisplay](https://github.com/PyDevices/pydisplay):
-`drivers/display/displaydev/`, `lib/multimer/`, `lib/events.py`, and
-`lib/keys.py`. `eventsys` stays in pydisplay. Optional host display selection
-is `displaydev.auto` only — backends never import it.
+`drivers/display/displaydev/`, `lib/multimer/`, `lib/events.py`,
+`lib/keys.py`, and `utils/` (`byteswap`, `mip`, `viper_tools`, …). `eventsys`
+stays in pydisplay. Optional host display selection is `displaydev.auto` only —
+backends never import it.
 
 ## Layout
 
@@ -17,8 +18,9 @@ is `displaydev.auto` only — backends never import it.
 | `drivers/` | Display, touch, bus, joystick, IO expander, input helpers |
 | `drivers/display/displaydev/` | Display backends (`BusDisplay`, `SDLDisplay`, …); `auto.py` is convenience only |
 | `lib/` | `events.py`, `keys.py`, `multimer/` (MIP `packages/{events,keys,multimer}.json`) |
-| `packages/` | Shared MIP manifests (`displaydev`, `spibus`, `i80bus`, …) |
-| `tests/` | Stdlib unittest for `displaydev`, `multimer`, `events`, `keys`, `audiodev`, `boarddev` |
+| `utils/` | Portable helpers (`byteswap`, `mip`, `viper_tools`, `keypins`, `wifi`, `frame_recorder`, CPython `micropython` shim) |
+| `packages/` | Shared MIP manifests (`displaydev`, `utils`, `spibus`, `i80bus`, …) |
+| `tests/` | Stdlib unittest for `displaydev`, `multimer`, `events`, `keys`, `audiodev`, `boarddev`, `mip` |
 | `docs/` | Hardware documentation (markdown; published on GitHub Pages, not RTD) |
 
 Documentation:

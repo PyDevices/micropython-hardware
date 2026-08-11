@@ -28,7 +28,7 @@ Docs are markdown under `docs/`, published only via GitHub Pages
   `board_config.py` only provides `display_drv`, `runtime`, and eager input
   devices that wire into `runtime` (`touch`, `keypad`, `encoder`, `joystick`)
   using contract names. Non-UI peripherals stay on CP `board` / libraries.
-- Run `SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy python -m unittest discover -s tests` after changing `displaydev`, `multimer`, `events`, `keys`, `audiodev`, or `boarddev`. See `tests/README.md`.
+- Run `SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy python -m unittest discover -s tests` after changing `displaydev`, `multimer`, `events`, `keys`, `audiodev`, `boarddev`, or `utils/`. See `tests/README.md`.
 - Keep MIP `package.json` URLs on
   `github:PyDevices/micropython-hardware/...` for files in this repo,
   including `boarddev.py`, which is localized under `drivers/boarddev.py`
@@ -40,15 +40,18 @@ Docs are markdown under `docs/`, published only via GitHub Pages
   `eventsys` → `events` + `keys` + `multimer`. Board `package.json` needs
   `displaydev` (plus hardware deps like `spibus.json`) and `eventsys` when
   the board imports `eventsys.Runtime`. `events` / `keys` / `displaydev` /
-  `multimer` also have github packages under `packages/` in this repo.
+  `multimer` / `utils` also have github packages under `packages/` in this repo.
+  Portable `utils/` (`byteswap`, `mip`, `viper_tools`, `keypins`, `wifi`,
+  `frame_recorder`, CPython `micropython` shim) is installed via
+  `packages/utils.json`.
   `AutoDisplay` is `displaydev.auto` only — never re-exported from
   `displaydev/__init__.py`. Backends must not import `.auto`.
 
 ## Do not
 
 - Re-introduce pydisplay's `eventsys` tree here. Shared `lib/events.py`,
-  `lib/keys.py`, `lib/multimer/`, and `drivers/display/displaydev/` belong
-  in this repo.
+  `lib/keys.py`, `lib/multimer/`, `utils/`, and `drivers/display/displaydev/`
+  belong in this repo.
 - Import `displaydev.auto` from `displaydev/__init__.py` or any backend.
 - Commit large generated assets unrelated to boards/drivers.
 - Rename the GitHub repo casually — MIP URLs and docs pin this name.
