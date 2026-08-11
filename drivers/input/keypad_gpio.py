@@ -1,9 +1,6 @@
 """GPIO button helper for eventsys KEYPAD on CircuitPython and MicroPython."""
 
-try:
-    from eventsys.keys import Keys
-except ImportError:
-    from keys import Keys
+import keys
 
 
 class GPIOButtons:
@@ -36,4 +33,4 @@ class GPIOButtons:
 
 
 # MagTag / PyBadge style letter keys
-MAGTAG_BUTTON_KEYS = (Keys.K_a, Keys.K_b, Keys.K_c, Keys.K_d)
+MAGTAG_BUTTON_KEYS = (keys.K_a, keys.K_b, keys.K_c, keys.K_d)

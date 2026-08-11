@@ -33,14 +33,17 @@ Docs are markdown under `docs/`, published only via GitHub Pages
   including `boarddev.py`, which is localized under `drivers/boarddev.py`
   (MicroPython boards only; not pulled from pydisplay).
   Pull pydisplay core deps as bare MIP names (`displaysys`, `eventsys`,
-  `multimer`, `pygraphics`) so `mip.install(..., index=PyDevices micropython-lib)`
-  resolves them. `displaysys` → `eventsys` → `multimer` is declared in the
-  micropython-lib package manifests — board `package.json` only needs
-  `displaysys` (plus hardware deps like `spibus.json`).
+  `events`, `keys`, `multimer`, `pygraphics`) so
+  `mip.install(..., index=PyDevices micropython-lib)` resolves them.
+  `displaysys` → `events` + `keys`; `eventsys` → `events` + `keys` + `multimer`.
+  Board `package.json` needs `displaysys` (plus hardware deps like `spibus.json`)
+  and `eventsys` when the board imports `eventsys.Runtime`. `events` / `keys`
+  also have github packages under `packages/` in this repo.
 
 ## Do not
 
-- Re-introduce pure-Python core libraries here (`displaysys`, `eventsys`, …).
+- Re-introduce pydisplay packages here (`displaysys`, `eventsys`, `multimer`).
+  Shared `lib/events.py` and `lib/keys.py` belong in this repo.
 - Commit large generated assets unrelated to boards/drivers.
 - Rename the GitHub repo casually — MIP URLs and docs pin this name.
 - Add `board_devices.py` under `board_configs/cp/`.

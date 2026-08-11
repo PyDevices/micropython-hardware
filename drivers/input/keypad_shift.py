@@ -4,10 +4,7 @@
 
 """74HC165 shift-register keypad helper for PyBadge / PyGamer."""
 
-try:
-    from eventsys.keys import Keys
-except ImportError:
-    from keys import Keys
+import keys
 
 
 def _as_out(pin):
@@ -113,16 +110,16 @@ class ShiftRegisterButtons:
 
 
 PYBADGE_BUTTON_MAP = {
-    "a": (1, Keys.K_a),
-    "b": (0, Keys.K_b),
-    "c": (2, Keys.K_c),
-    "d": (3, Keys.K_d),
+    "a": (1, keys.K_a),
+    "b": (0, keys.K_b),
+    "c": (2, keys.K_c),
+    "d": (3, keys.K_d),
 }
 
 # PyGamer / PyBadge LC shift-register layout (Adafruit): A/B + Start/Select.
 PYGAMER_BUTTON_MAP = {
-    "b": (0, Keys.K_b),
-    "a": (1, Keys.K_a),
-    "start": (2, Keys.K_RETURN),
-    "select": (3, Keys.K_SPACE),
+    "b": (0, keys.K_b),
+    "a": (1, keys.K_a),
+    "start": (2, keys.K_RETURN),
+    "select": (3, keys.K_SPACE),
 }

@@ -3,7 +3,7 @@
     ["keypad_shift.py", "github:PyDevices/micropython-hardware/drivers/input/keypad_shift.py"]
   ],
   "deps": [
-    ["eventsys", "latest"]
+    ["github:PyDevices/micropython-hardware/packages/keys.json", "main"]
   ],
   "version": "0.1"
 }

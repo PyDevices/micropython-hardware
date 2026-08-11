@@ -8,10 +8,7 @@ from spibus import SPIBus
 
 import eventsys
 
-try:
-    from eventsys.keys import Keys
-except ImportError:
-    from keys import Keys
+import keys
 
 display_bus = SPIBus(
     id=2,
@@ -62,11 +59,11 @@ display_drv = ILI9341(
 # Hardkernel ODROID-GO button / joystick map
 keypad = GPIOButtons(
     {
-        "a": (Pin(32, Pin.IN, Pin.PULL_UP), Keys.K_a),
-        "b": (Pin(33, Pin.IN, Pin.PULL_UP), Keys.K_b),
-        "menu": (Pin(13, Pin.IN, Pin.PULL_UP), Keys.K_ESCAPE),
-        "select": (Pin(27, Pin.IN, Pin.PULL_UP), Keys.K_SPACE),
-        "start": (Pin(39, Pin.IN, Pin.PULL_UP), Keys.K_RETURN),
+        "a": (Pin(32, Pin.IN, Pin.PULL_UP), keys.K_a),
+        "b": (Pin(33, Pin.IN, Pin.PULL_UP), keys.K_b),
+        "menu": (Pin(13, Pin.IN, Pin.PULL_UP), keys.K_ESCAPE),
+        "select": (Pin(27, Pin.IN, Pin.PULL_UP), keys.K_SPACE),
+        "start": (Pin(39, Pin.IN, Pin.PULL_UP), keys.K_RETURN),
     }
 )
 joystick = GPIOJoystick(

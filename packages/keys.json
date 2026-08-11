@@ -1,0 +1,9 @@
+{
+  "urls": [
+    [
+      "keys.py",
+      "github:PyDevices/micropython-hardware/lib/keys.py"
+    ]
+  ],
+  "version": "0.0"
+}

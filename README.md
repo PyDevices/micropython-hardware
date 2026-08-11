@@ -4,8 +4,9 @@ Board configs and hardware drivers for [PyDevices](https://github.com/PyDevices)
 on MicroPython and CircuitPython (display, touch, bus, input, …).
 
 This repo holds what used to live under pydisplay’s `board_configs/`,
-`drivers/`, and bus/touch MIP manifests. The pure-Python core (`displaysys`,
-`eventsys`, `graphics`, `boarddev`, …) stays in
+`drivers/`, and bus/touch MIP manifests. Shared `lib/events.py` and
+`lib/keys.py` live here (used by both `displaysys` and `eventsys`). The rest of
+the pure-Python core (`displaysys`, `eventsys`, `multimer`, `graphics`) stays in
 [pydisplay](https://github.com/PyDevices/pydisplay).
 
 ## Layout
@@ -14,6 +15,7 @@ This repo holds what used to live under pydisplay’s `board_configs/`,
 |------|----------|
 | `board_configs/` | MicroPython boards (top level); CircuitPython under `board_configs/cp/` |
 | `drivers/` | Display, touch, bus, joystick, IO expander, input helpers |
+| `lib/` | Shared `events.py` / `keys.py` (MIP `packages/events.json`, `keys.json`) |
 | `packages/` | Shared MIP manifests for bus/touch/chip helpers (`spibus`, `i80bus`, …) |
 | `docs/` | Hardware documentation (markdown; published on GitHub Pages, not RTD) |
 

@@ -7,12 +7,13 @@ Helpers for wiring physical buttons and encoders into `eventsys`.
 Maps GPIO buttons to `eventsys.KEYPAD` key codes.
 
 ```python
+import eventsys
+import keys
 from keypad_gpio import GPIOButtons, MAGTAG_BUTTON_KEYS
-from eventsys.keys import Keys
 
 buttons = GPIOButtons({
-    "a": (board.BUTTON_A, Keys.K_a),
-    "b": (board.BUTTON_B, Keys.K_b),
+    "a": (board.BUTTON_A, keys.K_a),
+    "b": (board.BUTTON_B, keys.K_b),
 })
 
 runtime = eventsys.Runtime(display=display_drv)

@@ -9,10 +9,7 @@ from st7789 import ST7789
 
 import eventsys
 
-try:
-    from eventsys.keys import Keys
-except ImportError:
-    from keys import Keys
+import keys
 
 release_displays()
 
@@ -51,9 +48,9 @@ touch_rotation_table = (0, 0, 0, 0)
 
 keypad = GPIOButtons(
     {
-        "down": (board.BUTTON_DOWN, Keys.K_DOWN),
-        "select": (board.BUTTON_SELECT, Keys.K_RETURN),
-        "up": (board.BUTTON_UP, Keys.K_UP),
+        "down": (board.BUTTON_DOWN, keys.K_DOWN),
+        "select": (board.BUTTON_SELECT, keys.K_RETURN),
+        "up": (board.BUTTON_UP, keys.K_UP),
     }
 )
 

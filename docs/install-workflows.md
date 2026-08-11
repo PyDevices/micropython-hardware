@@ -21,7 +21,7 @@ mip.install(
 Notes:
 - This is the standard MCU flow.
 - When `index=INDEX` is set, package dependencies resolve automatically (for
-  example `displaysys` -> `eventsys` -> `multimer`).
+  example `displaysys` → `events` + `keys`; `eventsys` → `events` + `keys` + `multimer`).
 
 ## Desktop board_config via MIP
 

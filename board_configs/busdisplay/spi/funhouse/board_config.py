@@ -8,10 +8,7 @@ from tt21100 import TT21100
 
 import eventsys
 
-try:
-    from eventsys.keys import Keys
-except ImportError:
-    from keys import Keys
+import keys
 
 display_bus = SPIBus(
     id=1,
@@ -53,9 +50,9 @@ touch_rotation_table = (0, 0, 0, 0)
 # BUTTON_DOWN=3, BUTTON_SELECT=4, BUTTON_UP=5
 keypad = GPIOButtons(
     {
-        "down": (Pin(3, Pin.IN, Pin.PULL_UP), Keys.K_DOWN),
-        "select": (Pin(4, Pin.IN, Pin.PULL_UP), Keys.K_RETURN),
-        "up": (Pin(5, Pin.IN, Pin.PULL_UP), Keys.K_UP),
+        "down": (Pin(3, Pin.IN, Pin.PULL_UP), keys.K_DOWN),
+        "select": (Pin(4, Pin.IN, Pin.PULL_UP), keys.K_RETURN),
+        "up": (Pin(5, Pin.IN, Pin.PULL_UP), keys.K_UP),
     }
 )
 

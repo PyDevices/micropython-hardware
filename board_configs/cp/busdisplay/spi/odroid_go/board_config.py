@@ -11,10 +11,7 @@ from keypad_gpio import GPIOButtons
 
 import eventsys
 
-try:
-    from eventsys.keys import Keys
-except ImportError:
-    from keys import Keys
+import keys
 
 release_displays()
 
@@ -59,11 +56,11 @@ def _pin(*names):
 
 keypad = GPIOButtons(
     {
-        "a": (_btn(_pin("BUTTON_A", "IO32", "D32")), Keys.K_a),
-        "b": (_btn(_pin("BUTTON_B", "IO33", "D33")), Keys.K_b),
-        "menu": (_btn(_pin("BUTTON_MENU", "IO13", "D13")), Keys.K_ESCAPE),
-        "select": (_btn(_pin("BUTTON_SELECT", "IO27", "D27")), Keys.K_SPACE),
-        "start": (_btn(_pin("BUTTON_START", "IO39", "D39")), Keys.K_RETURN),
+        "a": (_btn(_pin("BUTTON_A", "IO32", "D32")), keys.K_a),
+        "b": (_btn(_pin("BUTTON_B", "IO33", "D33")), keys.K_b),
+        "menu": (_btn(_pin("BUTTON_MENU", "IO13", "D13")), keys.K_ESCAPE),
+        "select": (_btn(_pin("BUTTON_SELECT", "IO27", "D27")), keys.K_SPACE),
+        "start": (_btn(_pin("BUTTON_START", "IO39", "D39")), keys.K_RETURN),
     }
 )
 joystick = GPIOJoystick(

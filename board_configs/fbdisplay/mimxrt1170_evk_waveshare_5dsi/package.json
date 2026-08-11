@@ -13,6 +13,18 @@
     [
       "displaysys",
       "latest"
+    ],
+    [
+      "eventsys",
+      "latest"
+    ],
+    [
+      "github:PyDevices/micropython-hardware/packages/events.json",
+      "main"
+    ],
+    [
+      "github:PyDevices/micropython-hardware/packages/keys.json",
+      "main"
     ]
   ],
   "version": "0.1"
