@@ -1,10 +1,10 @@
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""Put micropython-hardware drivers on ``sys.path`` for unit tests.
+"""Put micropython-hardware packages on ``sys.path`` for unit tests.
 
-Import this before ``audiodev`` / ``usdl2`` so the in-repo
-pure-Python ``drivers/usdl2.py`` is found without a separate install.
+Import this before ``audiodev`` / ``usdl2`` / ``displaydev`` / ``multimer``
+so the in-repo trees are found without a separate install.
 """
 
 from pathlib import Path
@@ -23,3 +23,8 @@ for _rel in (
     _path = str(ROOT / _rel)
     if _path not in sys.path:
         sys.path.insert(0, _path)
+
+DISPLAYDEV_DIR = str(ROOT / "drivers" / "display" / "displaydev")
+MULTIMER_DIR = str(ROOT / "lib" / "multimer")
+EVENTS_PY = str(ROOT / "lib" / "events.py")
+KEYS_PY = str(ROOT / "lib" / "keys.py")

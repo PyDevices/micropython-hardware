@@ -18,6 +18,7 @@ is `displaydev.auto` only — backends never import it.
 | `drivers/display/displaydev/` | Display backends (`BusDisplay`, `SDLDisplay`, …); `auto.py` is convenience only |
 | `lib/` | `events.py`, `keys.py`, `multimer/` (MIP `packages/{events,keys,multimer}.json`) |
 | `packages/` | Shared MIP manifests (`displaydev`, `spibus`, `i80bus`, …) |
+| `tests/` | Stdlib unittest for `displaydev`, `multimer`, `events`, `keys`, `audiodev`, `boarddev` |
 | `docs/` | Hardware documentation (markdown; published on GitHub Pages, not RTD) |
 
 Documentation:
@@ -43,6 +44,14 @@ directory via MIP with the PyDevices index and let `deps` resolve automatically.
 MIP/path consistency. The universal desktop config is now
 `board_configs/desktop/` for MIP installs and `pydisplay-desktop` for pip/TestPyPI
 installs, keeping the desktop flow analogous across package managers.
+
+## Tests
+
+```bash
+SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy python -m unittest discover -s tests -v
+```
+
+See [`tests/README.md`](tests/README.md).
 
 ## License
 

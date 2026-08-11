@@ -28,6 +28,7 @@ Docs are markdown under `docs/`, published only via GitHub Pages
   `board_config.py` only provides `display_drv`, `runtime`, and eager input
   devices that wire into `runtime` (`touch`, `keypad`, `encoder`, `joystick`)
   using contract names. Non-UI peripherals stay on CP `board` / libraries.
+- Run `SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy python -m unittest discover -s tests` after changing `displaydev`, `multimer`, `events`, `keys`, `audiodev`, or `boarddev`. See `tests/README.md`.
 - Keep MIP `package.json` URLs on
   `github:PyDevices/micropython-hardware/...` for files in this repo,
   including `boarddev.py`, which is localized under `drivers/boarddev.py`
