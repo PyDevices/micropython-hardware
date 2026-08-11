@@ -36,7 +36,7 @@ directory via MIP with the PyDevices index and let `deps` resolve automatically.
 
 ## Desktop / browser configs
 
-`board_configs/{sdldisplay,pgdisplay,jndisplay,psdisplay}/` remain here for
+`board_configs/{sdldisplay,pgdisplay,windisplay,jndisplay,psdisplay}/` remain here for
 MIP/path consistency. The universal desktop config is now
 `board_configs/desktop/` for MIP installs and `pydisplay-desktop` for pip/TestPyPI
 installs, keeping the desktop flow analogous across package managers.

@@ -157,6 +157,7 @@ Draw through `display_drv` only; `_pixel_framebuf` is an internal wiring detail.
 | `sdldisplay` | CPython / MicroPython Unix — SDL2 (`SDLDisplay`) |
 | `sdldisplay/linux_kms` | Linux KMS/DRM (no X11/Wayland) — `SDL_VIDEODRIVER=kmsdrm` |
 | `pgdisplay` | CPython — PyGame (`PGDisplay`) |
+| `windisplay` | Windows CPython — native Win32 (`WinDisplay` + `audiodev.win_audio`) |
 | `jndisplay` | Jupyter Notebook |
 | `psdisplay` | PyScript browser |
 
@@ -164,7 +165,7 @@ Draw through `display_drv` only; `_pixel_framebuf` is an internal wiring detail.
 
 [`board_configs/desktop/`](../board_configs/desktop/) — universal non-MCU
 `board_config` for desktop, PyScript, and Jupyter. Host display selection is
-`displaysys.AutoDisplay` (PS / JN / PG→SDL); the config itself is MCU-shaped
+`displaysys.AutoDisplay` (PS / JN / Win→PG→SDL on Windows); the config itself is MCU-shaped
 eager wiring:
 
 ```python

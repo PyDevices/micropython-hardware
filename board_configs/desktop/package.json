@@ -39,6 +39,14 @@
     [
       "audiodev/emulated_audio.py",
       "github:PyDevices/micropython-hardware/drivers/audio/audiodev/emulated_audio.py"
+    ],
+    [
+      "audiodev/win_audio.py",
+      "github:PyDevices/micropython-hardware/drivers/audio/audiodev/win_audio.py"
+    ],
+    [
+      "uwin32.py",
+      "github:PyDevices/micropython-hardware/drivers/uwin32.py"
     ]
   ],
   "deps": [

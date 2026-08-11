@@ -1,0 +1,9 @@
+{
+  "urls": [
+    [
+      "uwin32.py",
+      "github:PyDevices/micropython-hardware/drivers/uwin32.py"
+    ]
+  ],
+  "version": "0.1"
+}

@@ -7,6 +7,7 @@ The canonical implementation lives in:
 - drivers/boarddev.py
 - drivers/audio/audiodev/ (package)
 - drivers/usdl2.py
+- drivers/uwin32.py
 
 This script writes a throwaway staging tree so the pip package and MIP package
 stay behaviorally identical.
@@ -25,6 +26,7 @@ FILE_MAPPINGS = (
     ("board_configs/desktop/board_devices.py", "src/board_devices.py"),
     ("drivers/boarddev.py", "src/boarddev.py"),
     ("drivers/usdl2.py", "src/usdl2.py"),
+    ("drivers/uwin32.py", "src/uwin32.py"),
 )
 
 DIR_MAPPINGS = (("drivers/audio/audiodev", "src/audiodev"),)

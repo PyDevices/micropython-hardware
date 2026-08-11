@@ -55,7 +55,7 @@ def probe_backend_selection():
     backend = board_devices._select_backend()
     check(
         "selected a backend ({})".format(backend),
-        backend in ("sdl2_audio", "pygame_audio", "web_audio"),
+        backend in ("sdl2_audio", "pygame_audio", "web_audio", "win_audio"),
     )
     current = os.getenv("SDL_AUDIODRIVER")
     if preset is not None:

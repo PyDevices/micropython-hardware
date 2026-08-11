@@ -10,6 +10,7 @@ selector only — backends never import it.
 | `audiodev` | all | `AudioFormat`, `PCMOutput` / `PCMInput` / `ToneOutput` bases, latency helpers |
 | `audiodev.sdl2_audio` | desktop MicroPython, CircuitPython, CPython, Jupyter | SDL2 queued PCM through `usdl2` |
 | `audiodev.pygame_audio` | CPython desktop with pygame-ce installed | Queued PCM on pygame-ce's bundled SDL |
+| `audiodev.win_audio` | Windows CPython | WASAPI shared-mode queued PCM through `uwin32` |
 | `audiodev.web_audio` | PyScript / browser | Web Audio playback, `getUserMedia` capture |
 | `audiodev.i2s_audio` | MCU | `machine.I2S` adapter |
 | `audiodev.pwm_tone` | MCU | PWM / buzzer adapter |
@@ -18,8 +19,9 @@ selector only — backends never import it.
 | `audiodev.auto` | host convenience | Probe-based `audio_out` / `audio_in` |
 
 Apps typically use `board_config.audio_out`. Board configs may import a concrete
-backend or `audiodev.auto`. Desktop `board_devices` uses auto after applying the
-Windows DirectSound env (composition only — audiodev does not import displaysys).
+backend or `audiodev.auto`. Desktop `board_devices` uses auto (DirectSound env
+only when the selected backend is `pygame_audio`). `audiodev.auto` prefers
+`win_audio` on Windows CPython when `uwin32` imports, before pygame/SDL.
 
 This package does not import `displaysys`, `multimer`, or `eventsys`.
 
@@ -40,8 +42,8 @@ contract; do not add a fourth spelling for one of them.
 |---------|---------|----------|
 | `latency` | Profile name: `None`/`"buffered"` or `"low"` (see `audiodev.LATENCIES`) | host PCM backends |
 | `samples` | Device block size in frames (SDL's `AudioSpec.samples`, Web Audio's `ScriptProcessorNode` size) | host PCM (capture only for `web_audio`) |
-| `queue_ms` | Playable audio the queue may hold | `sdl2_audio`, `pygame_audio`, `emulated_audio` loopback |
-| `coalesce_ms` | How much PCM to batch in software before handing a piece to the device | `sdl2_audio`, `pygame_audio` |
+| `queue_ms` | Playable audio the queue may hold | `sdl2_audio`, `pygame_audio`, `win_audio`, `emulated_audio` loopback |
+| `coalesce_ms` | How much PCM to batch in software before handing a piece to the device | `sdl2_audio`, `pygame_audio`, `win_audio` |
 | `poll_ms` | Sleep between polls while blocked | host PCM backends |
 | `device` | Host device name | `sdl2_audio`, `pygame_audio` (capture) |
 
@@ -93,7 +95,7 @@ Queued hosts override these methods on the device itself (safe no-ops on MCU):
 |--------|---------|
 | `queued_size()` | Bytes still waiting to play, software plus hardware buffers |
 | `is_active()` | True while any PCM remains queued |
-| `service()` | Per-tick housekeeping; **required** for `sdl2_audio` and `pygame_audio` |
+| `service()` | Per-tick housekeeping; **required** for `sdl2_audio`, `pygame_audio`, and `win_audio` |
 | `clear()` | Abort playback now, discarding queued PCM |
 
 `service()` is not optional decoration for the two SDL backends: partial writes
@@ -260,6 +262,17 @@ keeps the depth it was tuned for.
 The `queue_ms=150` that `board_devices.audio_in()` still passes is unrelated and
 intentional: capture wants low latency.
 
+## `win_audio.py`
+
+WASAPI shared-mode backend for Windows CPython, through `uwin32`. Import fails
+unless `uwin32` loads.
+
+Playback and capture are queued/pull (`GetBuffer` / `ReleaseBuffer`) with
+`AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM`. There is no Python audio-thread callback.
+`audiodev.auto` selects this before pygame when `uwin32` is importable.
+
+Keyword arguments are the shared set in [Buffering options](#buffering-options).
+
 ## `pygame_audio.py`
 
 Backend for CPython hosts with pygame-ce installed. It uses **pygame's own SDL**,
@@ -360,7 +373,8 @@ the import is a no-op.
 ## Tests
 
 `tests/test_audiodev.py`, `tests/test_sdl2_audio.py`, `tests/test_pygame_audio.py`,
-`tests/test_emulated_audio.py` and `tests/test_auto.py` cover these modules
+`tests/test_win_audio.py`, `tests/test_emulated_audio.py` and `tests/test_auto.py`
+cover these modules
 against SDL's `dummy` driver, and `tests/test_audiodev_latency.py` covers the
 profile vocabulary on its own:
 

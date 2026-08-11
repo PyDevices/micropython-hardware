@@ -18,6 +18,7 @@ board configs. Prefer single-file modules; MIP manifests live under `../packages
 | `codec/es8388.py` | ES8388 DAC init (Tab5) |
 | `audio/audiodev/` | Portable PCM/tone package (`PCMOutput` bases + backends) |
 | `usdl2.py` | Pure-Python SDL2 ctypes/ffi binding for desktop SDL |
+| `uwin32.py` | Pure-Python Win32/WASAPI ctypes binding for Windows CPython |
 | `power/battery_adc.py` | ADC + divider → volts |
 | `bus/rs485.py` | UART (+ optional DE) |
 | `bus/canbus.py` | `machine.CAN` helper when firmware exposes TWAI |

@@ -55,17 +55,20 @@ This bundle installs:
 - `boarddev.py`
 - `audiodev/` (package)
 - `usdl2.py`
+- `uwin32.py` (Windows CPython)
 - plus `displaysys`, `eventsys`, and `multimer` from the PyDevices MIP index
 
-Display host selection is `displaysys.AutoDisplay`:
+Display host selection is `displaysys.AutoDisplay` (convenience; boards may import a backend directly):
 - PyScript: `PSDisplay`
 - Jupyter: `JNDisplay`
-- Desktop CPython/MicroPython unix/windows: `PGDisplay` first, then `SDLDisplay` fallback
+- Windows CPython: `WinDisplay` first, then `PGDisplay`, then `SDLDisplay`
+- Other desktop: `PGDisplay` first, then `SDLDisplay`
 
-Audio (in `board_devices`) follows the same host probe:
+Audio (in `board_devices` via `audiodev.auto`) follows the same host probe:
 - PyScript: `web_audio`
 - Jupyter: `sdl2_audio` (kernel host)
-- Desktop: `import pygame` → `pygame_audio`, else `sdl2_audio`
+- Windows CPython with `uwin32`: `win_audio`
+- else `import pygame` → `pygame_audio`, else `sdl2_audio`
 
 Terminal-only apps (no display) can `import board_devices` and call
 `audio_out()` / `audio_in()` without opening a window.

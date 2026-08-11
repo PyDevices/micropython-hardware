@@ -81,6 +81,7 @@ Expected files from the desktop board package:
 - `boarddev.py`
 - `audiodev/` (package)
 - `usdl2.py`
+- `uwin32.py` (Windows CPython)
 
 CircuitPython note:
 - Our `micropython-lib` clone/index does not build CircuitPython-compatible

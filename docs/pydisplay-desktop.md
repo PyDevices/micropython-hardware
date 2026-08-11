@@ -6,8 +6,9 @@ Installed modules:
 - board_config
 - board_devices
 - boarddev
-- audiodev (package: bases + sdl2_audio / pygame_audio / web_audio / auto / emulated_audio / android_audio)
+- audiodev (package: bases + sdl2_audio / pygame_audio / web_audio / win_audio / auto / emulated_audio / android_audio)
 - usdl2
+- uwin32 (Windows CPython)
 
 Source of truth:
 - Runtime modules are generated from canonical sources in this repo

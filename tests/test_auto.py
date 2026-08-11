@@ -17,10 +17,17 @@ from audiodev import auto  # noqa: E402
 class AutoSelectTests(unittest.TestCase):
     def test_pygame_xor_sdl2_on_desktop(self):
         with mock.patch.object(auto, "host_kind", return_value="desktop"):
-            with mock.patch.object(auto, "_pygame_available", return_value=True):
-                self.assertEqual(auto.select_backend(), "pygame_audio")
-            with mock.patch.object(auto, "_pygame_available", return_value=False):
-                self.assertEqual(auto.select_backend(), "sdl2_audio")
+            with mock.patch.object(auto, "_uwin32_available", return_value=False):
+                with mock.patch.object(auto, "_pygame_available", return_value=True):
+                    self.assertEqual(auto.select_backend(), "pygame_audio")
+                with mock.patch.object(auto, "_pygame_available", return_value=False):
+                    self.assertEqual(auto.select_backend(), "sdl2_audio")
+
+    def test_win_audio_before_pygame(self):
+        with mock.patch.object(auto, "host_kind", return_value="desktop"):
+            with mock.patch.object(auto, "_uwin32_available", return_value=True):
+                with mock.patch.object(auto, "_pygame_available", return_value=True):
+                    self.assertEqual(auto.select_backend(), "win_audio")
 
     def test_pyscript_and_jupyter(self):
         with mock.patch.object(auto, "host_kind", return_value="pyscript"):
@@ -38,6 +45,7 @@ class AutoSelectTests(unittest.TestCase):
             "pwm_tone.py",
             "android_audio.py",
             "emulated_audio.py",
+            "win_audio.py",
             "__init__.py",
         ):
             tree = ast.parse((root / name).read_text())
