@@ -171,7 +171,6 @@ publish_package() {
     copy_tree "$source" "$package_dir/$package"
     write_manifest "$package" "$package_dir/manifest.py" package
     cp "$readme" "$package_dir/README.md"
-    build_and_upload "$package" "$package_dir/manifest.py"
 }
 
 publish_module() {
@@ -187,7 +186,6 @@ $(summary "$package").
 
 Canonical source: [micropython-hardware/lib/$package.py](https://github.com/PyDevices/micropython-hardware/blob/main/lib/$package.py).
 EOF
-    build_and_upload "$package" "$package_dir/manifest.py"
 }
 
 # The new source-of-truth collection replaces the stale pydisplay package tree.
@@ -197,6 +195,12 @@ mkdir -p "$DEST_DIR"
 
 for package in displaydev audiodev eventsys multimer; do publish_package "$package"; done
 for package in events keys; do publish_module "$package"; done
+
+# Build only after the complete collection exists, so require() can resolve
+# sibling PyDevices packages while generating each TestPyPI project.
+for package in displaydev audiodev eventsys multimer events keys; do
+    build_and_upload "$package" "$DEST_DIR/$package/manifest.py"
+done
 
 find "$DEST_DIR" -type d -name __pycache__ -prune -exec rm -rf {} +
 
