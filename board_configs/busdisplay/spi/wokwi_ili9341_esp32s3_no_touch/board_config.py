@@ -3,7 +3,6 @@
 from ili9341 import ILI9341
 from spibus import SPIBus
 
-import eventsys
 
 # SPI(1) = IDF SPI2 IOMUX pins (11/12/13). See wokwi_ili9341_ft6x36_esp32s3.
 display_bus = SPIBus(
@@ -36,4 +35,3 @@ display_drv = ILI9341(
     power_pin=None,
     power_on_high=True,
 )
-runtime = None

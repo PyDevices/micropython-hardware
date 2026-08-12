@@ -1,26 +1,29 @@
-# pydisplay-desktop
+# pydevices-desktop
 
-Desktop bundle for non-MCU hosts using PyDevices display/runtime modules.
+Desktop board and host-adapter bundle for non-MCU PyDevices applications.
 
 Installed modules:
 - board_config
 - board_devices
 - boarddev
-- audiodev (package: bases + sdl2_audio / pygame_audio / web_audio / win_audio / auto / emulated_audio / android_audio)
 - usdl2
 - uwin32 (Windows CPython)
+
+It depends on `pydevices-displaydev` and `pydevices-audiodev`. The optional
+`pydevices-eventsys` application traffic controller is installed separately by
+applications that want it; LVGL does not require it.
 
 Source of truth:
 - Runtime modules are generated from canonical sources in this repo
   (`board_configs/desktop/` and `drivers/`).
-- Use `scripts/sync_pydisplay_desktop_sources.py` to stage package files for
+- Use `scripts/sync_pydevices_desktop_sources.py` to stage package files for
   build/publish and avoid drift between MIP and pip behavior.
 
 This package is intended to provide a single pip-installable desktop config
 bundle while core runtime libraries continue to come from PyDevices packages.
 
 `board_config.py` ownership for packaged desktop installs lives here
-(`pydisplay-desktop`), analogous to the MIP desktop bundle in
+(`pydevices-desktop`), analogous to the MIP desktop bundle in
 `board_configs/desktop`.
 
 ## Install (TestPyPI)
@@ -29,12 +32,12 @@ Install and verification flows are centralized here:
 [install-workflows.md](install-workflows.md)
 
 Use the sections:
-- "pydisplay-desktop via pip"
+- "pydevices-desktop via pip"
 - "Verify with .venv"
 - "Verify without .venv (python.exe / pip.exe)"
 
-`board_config` constructs `display_drv` and `runtime` at import time (MCU-shaped
-eager wiring via `displaydev.auto.AutoDisplay`). Lazy roles such as `audio_out` /
+`board_config` constructs `display_drv` and exports neutral host/input callables
+via `displaydev.auto.AutoDisplay`; it does not create an event runtime. Lazy roles such as `audio_out` /
 `audio_in` still come from `board_devices` and allocate on first access.
 Terminal-only apps can `import board_devices` without opening a window.
 
@@ -56,5 +59,5 @@ Use the repository-level tag scripts, consistent with other PyDevices repos:
 
 	./scripts/publish_release_tag.sh --push
 
-Pushing a `vX.Y.Z` tag triggers `.github/workflows/publish-pydisplay-desktop.yml`,
+Pushing a `vX.Y.Z` tag triggers `.github/workflows/publish-pydevices.yml`,
 which sets the package version from the tag and uploads to TestPyPI.

@@ -5,7 +5,6 @@ from ili9341 import ILI9341
 from machine import I2C, Pin
 from spibus import SPIBus
 
-import eventsys
 
 # SPI(1) = IDF SPI2 IOMUX pins (11/12/13). Avoid GPIO 35/36/37 — those are
 # Octal-PSRAM / MicroPython SPI(2) defaults and break on many S3 modules;
@@ -41,8 +40,4 @@ i2c = I2C(0, sda=Pin(7), scl=Pin(6), freq=100_000)
 touch = FT6x36(i2c)
 touch_rotation_table = (6, 3, 0, 5)
 
-runtime = eventsys.Runtime(
-    displays=[display_drv],
-    touch_read=touch.get_positions,
-    touch_rotation_table=touch_rotation_table,
-)
+touch_read = touch.get_positions

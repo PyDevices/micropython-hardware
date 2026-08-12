@@ -5,7 +5,6 @@ from displayio import release_displays
 from fourwire import FourWire
 from gc9a01 import GC9A01
 
-import eventsys
 
 release_displays()
 
@@ -33,4 +32,3 @@ display_drv = GC9A01(
     backlight_pin=board.GP10,
     backlight_on_high=True,
 )
-runtime = None

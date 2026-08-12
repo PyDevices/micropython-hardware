@@ -14,7 +14,6 @@ from machine import I2C, Pin
 from pca9554 import PCA9554
 
 from displaydev.fbdisplay import FBDisplay
-import eventsys
 
 try:
     import dotclockframebuffer
@@ -100,11 +99,7 @@ display_drv = FBDisplay(fb)
 touch = FT6x36(i2c, address=0x48)
 touch_rotation_table = (0, 0, 0, 0)
 
-runtime = eventsys.Runtime(
-    displays=[display_drv],
-    touch_read=touch.get_positions,
-    touch_rotation_table=touch_rotation_table,
-)
+touch_read = touch.get_positions
 
 def _keypad_read():
     # Qualia expander buttons: active-low inputs on io_expander pins 5/6.
@@ -117,7 +112,7 @@ def _keypad_read():
     return pressed
 
 
-runtime.add_keypad(read=_keypad_read)
+keypad_read = _keypad_read
 
 from board_devices import DEVICES, setup_devices
 

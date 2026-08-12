@@ -8,7 +8,6 @@ from pi4ioe5v import tab5_init_lcd_reset
 from tab5_ili9881c_init import TAB5_ILI9881C_INIT
 
 from displaydev.fbdisplay import FBDisplay
-import eventsys
 
 try:
     from mipidsi import Bus, Display
@@ -59,11 +58,7 @@ touch_rotation_table = (0, 0, 0, 0)
 
 display_drv = FBDisplay(fb)
 
-runtime = eventsys.Runtime(
-    displays=[display_drv],
-    touch_read=touch.read_points,
-    touch_rotation_table=touch_rotation_table,
-)
+touch_read = touch.read_points
 
 from board_devices import DEVICES, setup_devices
 

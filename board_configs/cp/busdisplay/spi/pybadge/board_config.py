@@ -6,7 +6,6 @@ from fourwire import FourWire
 from keypad_gpio import MAGTAG_BUTTON_KEYS, GPIOButtons
 from st7789 import ST7789
 
-import eventsys
 
 release_displays()
 
@@ -39,5 +38,4 @@ keypad = GPIOButtons(
     }
 )
 
-runtime = eventsys.Runtime(displays=[display_drv])
-runtime.add_keypad(read=keypad.read)
+keypad_read = keypad.read

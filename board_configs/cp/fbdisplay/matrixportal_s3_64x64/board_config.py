@@ -5,7 +5,6 @@ import displayio
 import rgbmatrix
 
 from displaydev.fbdisplay import FBDisplay
-import eventsys
 
 displayio.release_displays()
 
@@ -30,4 +29,3 @@ matrix = rgbmatrix.RGBMatrix(
 fb = matrix
 
 display_drv = FBDisplay(fb, width=64, height=64)
-runtime = None

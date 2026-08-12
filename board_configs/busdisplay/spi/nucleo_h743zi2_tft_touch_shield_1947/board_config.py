@@ -18,7 +18,6 @@ from ili9341 import ILI9341
 from machine import I2C, Pin
 from spibus import SPIBus
 
-import eventsys
 
 # SoftSPI is too slow for games; HW SPI1 shares Arduino header pins.
 USE_SOFTSPI = False
@@ -74,11 +73,7 @@ i2c = I2C(1, freq=100_000)
 touch = FT6x36(i2c)
 touch_rotation_table = (6, 3, 0, 5)
 
-runtime = eventsys.Runtime(
-    displays=[display_drv],
-    touch_read=touch.get_positions,
-    touch_rotation_table=touch_rotation_table,
-)
+touch_read = touch.get_positions
 
 from board_devices import DEVICES, setup_devices
 

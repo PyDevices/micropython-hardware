@@ -7,7 +7,6 @@ from displayio import release_displays
 from fourwire import FourWire
 from st7789 import ST7789
 
-import eventsys
 
 release_displays()
 
@@ -57,5 +56,5 @@ def encoder_button_func():
     return not _encoder_button.value
 
 
-runtime = eventsys.Runtime(displays=[display_drv])
-runtime.add_encoder(read=encoder_read_func, button_read=encoder_button_func)
+encoder_read = encoder_read_func
+encoder_button_read = encoder_button_func

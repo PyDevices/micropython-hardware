@@ -21,10 +21,6 @@
     [
       "github:PyDevices/micropython-hardware/packages/i80bus.json",
       "main"
-    ],
-    [
-      "eventsys",
-      "latest"
     ]
   ],
   "version": "0.2",

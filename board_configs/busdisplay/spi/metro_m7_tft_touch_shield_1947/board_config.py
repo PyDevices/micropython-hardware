@@ -1,6 +1,6 @@
 """Metro M7 + Adafruit 2.8\" TFT Touch Shield (cap) product 1947.
 
-ILI9341 SPI, CS=D10 DC=D9. FT6206 on I2C(0). runtime=None (64KiB heap).
+ILI9341 SPI, CS=D10 DC=D9. FT6206 on I2C(0). event traffic controller omitted (64KiB heap).
 
 Toggle USE_SOFTSPI below when changing shield SPI jumpers:
   True  - solder 11/SO/SI (D11-D13), cut ICSP -> SoftSPI
@@ -67,8 +67,8 @@ gc.collect()
 
 i2c = I2C(0, freq=100_000)
 touch = FT6x36(i2c)
+touch_read = touch.get_positions
 touch_rotation_table = (6, 3, 0, 5)
-runtime = None
 
 from board_devices import DEVICES, setup_devices
 

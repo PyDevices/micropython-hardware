@@ -5,7 +5,6 @@ from displayio import release_displays
 from paralleldisplaybus import ParallelBus
 from st7789 import ST7789
 
-import eventsys
 
 release_displays()
 
@@ -39,4 +38,3 @@ display_drv = ST7789(
     backlight_pin=board.D38,
     backlight_on_high=True,
 )
-runtime = None

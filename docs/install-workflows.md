@@ -1,7 +1,7 @@
 # Install workflows
 
 Canonical install and verification flows for MicroPython MCU board configs,
-desktop `board_config`, and `pydisplay-desktop`.
+desktop `board_config`, and `pydevices-desktop`.
 
 ## MicroPython MCU board_config via MIP
 
@@ -127,16 +127,16 @@ print(board_config.__file__)
 print(board_devices.__file__)
 ```
 
-## pydisplay-desktop via pip
+## pydevices-desktop via pip
 
-Install `pydisplay-desktop` directly from TestPyPI (not through another repo's
+Install `pydevices-desktop` directly from TestPyPI (not through another repo's
 `requirements.txt`).
 
 ```bash
 python -m pip install \
     --index-url https://test.pypi.org/simple/ \
     --extra-index-url https://pypi.org/simple \
-    pydisplay-desktop
+    pydevices-desktop
 ```
 
 Verify:
@@ -154,12 +154,13 @@ python -m pip install --upgrade pip
 python -m pip install \
     --index-url https://test.pypi.org/simple/ \
     --extra-index-url https://pypi.org/simple \
-    pydisplay-desktop
+    pydevices-desktop
 python - <<'PY'
 import board_config
 print(board_config.__file__)
 print('display_drv', type(board_config.display_drv).__name__)
-print('runtime', board_config.runtime is not None)
+print('host_read', callable(board_config.host_read))
+print('runtime in board_config', hasattr(board_config, 'runtime'))  # False
 print('DEVICES', board_config.DEVICES)
 PY
 ```
@@ -170,19 +171,20 @@ PY
 python.exe -m pip install --user \
     --index-url https://test.pypi.org/simple/ \
     --extra-index-url https://pypi.org/simple \
-    pydisplay-desktop
+    pydevices-desktop
 
 # Optional refresh to force current TestPyPI artifact ownership
 python.exe -m pip install --user \
     --index-url https://test.pypi.org/simple/ \
     --force-reinstall --no-deps \
-    pydisplay-desktop
+    pydevices-desktop
 
 python.exe - <<'PY'
 import board_config
 print(board_config.__file__)
 print('display_drv', type(board_config.display_drv).__name__)
-print('runtime', board_config.runtime is not None)
+print('host_read', callable(board_config.host_read))
+print('runtime in board_config', hasattr(board_config, 'runtime'))  # False
 print('DEVICES', board_config.DEVICES)
 PY
 ```

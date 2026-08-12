@@ -14,12 +14,12 @@ This package is published as a pure-Python wheel to TestPyPI.
 pip install \
   -i https://test.pypi.org/simple/ \
   --extra-index-url https://pypi.org/simple/ \
-  displaydev
+  pydevices-displaydev
 ```
 
 Why both indexes: [two-index pip install](https://pydisplay.readthedocs.io/en/latest/publishing-micropython-lib/#two-index-pip-install-required).
 
-For desktop SDL, also install [`pydisplay-desktop`](https://test.pypi.org/project/pydisplay-desktop/) with the same two-index pattern (bundles `usdl2` and the desktop `board_config`). For PyGame, install `pygame-ce` from PyPI (`import pygame`).
+For desktop SDL, also install [`pydevices-desktop`](https://test.pypi.org/project/pydevices-desktop/) with the same two-index pattern (bundles `usdl2` and the desktop `board_config`). For PyGame, install `pygame-ce` from PyPI (`import pygame`).
 
 ### MicroPython (MIP)
 
@@ -31,10 +31,10 @@ mip.install("displaydev", index="https://PyDevices.github.io/micropython-lib/mip
 
 ## Quick start
 
-Apps normally import a `board_config` (from micropython-hardware / `pydisplay-desktop`) that wires the display and `eventsys.Runtime`:
+Apps normally import a hardware-only `board_config` (from micropython-hardware / `pydevices-desktop`):
 
 ```python
-from board_config import display_drv, runtime
+from board_config import display_drv
 
 display_drv.fill(0)
 display_drv.fill_rect(10, 10, 40, 40, 0xF800)
@@ -68,14 +68,17 @@ use the desktop bundle from micropython-hardware
 - MCU (`BusDisplay`, `FBDisplay`) and host backends (SDL, PyGame, Jupyter, PyScript)
 - `displaydev.auto.AutoDisplay` / `host_kind` for desktop-like host selection (board_config remains the app import surface)
 
-Host backends use [pydisplay-events](https://test.pypi.org/project/pydisplay-events/) and [pydisplay-keys](https://test.pypi.org/project/pydisplay-keys/) for event records and key codes (`import events` / `import keys`). Install [eventsys](https://test.pypi.org/project/eventsys/) separately when you need `Runtime` / host event polling.
+Host backends use `pydevices-events` and `pydevices-keys` for event records and
+key codes (`import events` / `import keys`). Install `pydevices-eventsys`
+separately when the application chooses that traffic controller.
 
 ## Links
 
 - [Documentation — Displays](https://pydisplay.readthedocs.io/en/latest/concepts/displays/)
 - [Source](https://github.com/PyDevices/micropython-hardware/tree/main/drivers/display/displaydev)
 - [Issues](https://github.com/PyDevices/micropython-hardware/issues)
-- Related: [pydisplay-events](https://test.pypi.org/project/pydisplay-events/), [pydisplay-keys](https://test.pypi.org/project/pydisplay-keys/), [eventsys](https://test.pypi.org/project/eventsys/), [multimer](https://test.pypi.org/project/multimer/), [pygraphics](https://test.pypi.org/project/pygraphics/), [pydisplay-desktop](https://test.pypi.org/project/pydisplay-desktop/)
+- Related: `pydevices-events`, `pydevices-keys`, `pydevices-eventsys`,
+  `pydevices-multimer`, `pydevices-pygraphics`, `pydevices-desktop`
 
 ## License
 

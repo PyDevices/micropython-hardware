@@ -5,7 +5,6 @@ from machine import I2C, Pin
 from spibus import SPIBus
 from st7796 import ST7796
 
-import eventsys
 
 display_bus = SPIBus(
     id=1,
@@ -57,11 +56,7 @@ i2c = I2C(0, sda=Pin(5), scl=Pin(6), freq=100_000)
 touch = CST226(i2c, irq_pin=21, rst_pin=13)
 touch_rotation_table = (0, 5, 6, 3)
 
-runtime = eventsys.Runtime(
-    displays=[display_drv],
-    touch_read=touch.get_point,
-    touch_rotation_table=touch_rotation_table,
-)
+touch_read = touch.get_point
 
 from board_devices import DEVICES, setup_devices
 

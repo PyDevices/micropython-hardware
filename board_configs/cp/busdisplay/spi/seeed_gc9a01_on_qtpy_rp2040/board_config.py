@@ -6,7 +6,6 @@ from displayio import release_displays
 from fourwire import FourWire
 from gc9a01 import GC9A01
 
-import eventsys
 
 release_displays()
 
@@ -43,8 +42,4 @@ def _touch_points():
 
 touch_rotation_table = (0, 5, 6, 3)
 
-runtime = eventsys.Runtime(
-    displays=[display_drv],
-    touch_read=_touch_points,
-    touch_rotation_table=touch_rotation_table,
-)
+touch_read = _touch_points

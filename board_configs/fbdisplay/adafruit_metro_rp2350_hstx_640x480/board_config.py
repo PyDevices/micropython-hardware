@@ -3,7 +3,6 @@
 from machine import Pin
 
 from displaydev.fbdisplay import FBDisplay
-import eventsys
 
 try:
     from picodvi import Framebuffer
@@ -25,5 +24,3 @@ fb = Framebuffer(
 )
 
 display_drv = FBDisplay(fb)
-
-runtime = None

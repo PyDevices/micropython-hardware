@@ -5,7 +5,6 @@ from displayio import release_displays
 from i2cdisplaybus import I2CDisplayBus
 from ssd1306 import SSD1306
 
-import eventsys
 
 release_displays()
 
@@ -17,4 +16,3 @@ display_drv = SSD1306(
     height=32,
     rotation=0,
 )
-runtime = None

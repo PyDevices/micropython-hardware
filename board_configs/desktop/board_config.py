@@ -4,7 +4,6 @@ import sys
 
 from displaydev import env_bool, env_float, env_int
 from displaydev.auto import AutoDisplay
-import eventsys
 
 _width = env_int("PYDISPLAY_WIDTH", 320)
 _height = env_int("PYDISPLAY_HEIGHT", 480)
@@ -19,11 +18,8 @@ display_drv = AutoDisplay(
     title="{} on {}".format(sys.implementation.name, sys.platform),
 )
 
-runtime = eventsys.Runtime(
-    displays=[display_drv],
-    host_read=display_drv.get_events,
-    timer_async=env_bool("PYDISPLAY_TIMER_ASYNC", display_drv.requires_async_timer),
-)
+host_read = display_drv.get_events
+timer_async = env_bool("PYDISPLAY_TIMER_ASYNC", display_drv.requires_async_timer)
 
 display_drv.fill(0)
 

@@ -5,7 +5,6 @@ from machine import SPI, Pin
 from st7789 import ST7789
 from xpt2046 import Touch
 
-import eventsys
 
 # LilyGO power rails (reed-switch / battery path).
 Pin(14, Pin.OUT, value=1)  # PWR_ON
@@ -99,11 +98,7 @@ def _touch_read():
 _REVERSE_Y = 0b100
 touch_rotation_table = (_REVERSE_Y, _REVERSE_Y, _REVERSE_Y, _REVERSE_Y)
 
-runtime = eventsys.Runtime(
-    displays=[display_drv],
-    touch_read=_touch_read,
-    touch_rotation_table=touch_rotation_table,
-)
+touch_read = _touch_read
 
 from board_devices import DEVICES, setup_devices
 

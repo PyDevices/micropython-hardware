@@ -1,6 +1,7 @@
 # Board configs
 
-Every pydisplay app needs a `board_config.py` that wires up the display, input devices, and optional [Runtime](https://pydisplay.readthedocs.io/en/latest/concepts/runtime/).
+Every PyDevices app needs a `board_config.py` that describes its display and
+input hardware without selecting an application event system.
 
 For the stable end-device role names (`touch`, `wlan`, …), lazy `DEVICES`
 discovery, and the touch duck-type, see **[Board devices](board-devices.md)**.
@@ -10,8 +11,9 @@ discovery, and the touch duck-type, see **[Board devices](board-devices.md)**.
 Typically:
 
 - A `display_drv` object (BusDisplay, SDLDisplay, PGDisplay, FBDisplay, etc.)
-- A `runtime` object (`eventsys.Runtime(...)`) when the display needs periodic present or input dispatch; `None` on MCU display-only boards
-- Optional input devices wired into `runtime` (e.g. `touch`, `keypad`, `encoder`, `joystick`)
+- Neutral input callables when present: `host_read`, `touch_read`,
+  `keypad_read`, `encoder_read`, and related options
+- Raw input hardware where useful (`touch`, `keypad`, `encoder`, `joystick`)
 - Optional setup (backlight pins, buses). On **MicroPython**, lazy extras move
   to `board_devices` under the [board devices contract](board-devices.md). On
   **CircuitPython**, there is no `board_devices` — use the native `board`
@@ -165,19 +167,27 @@ Draw through `display_drv` only; `_pixel_framebuf` is an internal wiring detail.
 
 [`board_configs/desktop/`](../board_configs/desktop/) — universal non-MCU
 `board_config` for desktop, PyScript, and Jupyter. Host display selection is
-`displaydev.auto.AutoDisplay` (PS / JN / Win→PG→SDL on Windows); the config itself is MCU-shaped
-eager wiring:
+`displaydev.auto.AutoDisplay` (PS / JN / Win→PG→SDL on Windows); the config
+exports hardware only:
 
 ```python
 display_drv = AutoDisplay(...)
-runtime = eventsys.Runtime(
-    displays=[display_drv],
-    host_read=display_drv.get_events,
-    timer_async=env_bool("PYDISPLAY_TIMER_ASYNC", display_drv.requires_async_timer),
-)
+host_read = display_drv.get_events
+timer_async = env_bool("PYDISPLAY_TIMER_ASYNC", display_drv.requires_async_timer)
 ```
 
-| Branch | `display_drv.requires_async_timer` | `runtime.timer_async` default |
+An application opting into `eventsys` then creates its own traffic controller:
+
+```python
+import board_config
+import eventsys
+
+runtime = eventsys.Runtime.from_board_config(board_config)
+```
+
+LVGL instead creates an independent coordinator in `display_driver`.
+
+| Branch | `display_drv.requires_async_timer` | `timer_async` export |
 |--------|-----------------------------------|-------------------------------|
 | PyScript / Jupyter | `True` | `True` (default; **`PYDISPLAY_TIMER_ASYNC=0` → Runtime raises**) |
 | PG/SDL desktop | `False` | `False` unless **`PYDISPLAY_TIMER_ASYNC`** is set |
@@ -193,15 +203,15 @@ geometry from `display_drv`, not module-level names on `board_config`.
 Set the env var **before** `import board_config` (or any import that loads it).
 Truthy: `1`, `true`, `yes`, `on`. Falsey: `0`, `false`, `no`, `off`. Unknown
 values fall back to the desktop default (`False`). Parsing lives in
-[`displaydev.env_bool`](https://github.com/PyDevices/pydisplay/blob/main/src/lib/displaydev/__init__.py).
+[`displaydev.env_bool`](https://github.com/PyDevices/micropython-hardware/blob/main/drivers/display/displaydev/__init__.py).
 
 ```bash
 # Force asyncio timers on desktop (LVGL async smoke, matrix column)
 PYDISPLAY_TIMER_ASYNC=1 python my_example.py
 ```
 
-Per-board configs under `board_configs/` pass `timer_async=` explicitly in
-their `Runtime(...)` call; they do not read this env var unless you wire it in.
+Per-board configs under `board_configs/` may export `timer_async`; they never
+construct a runtime.
 
 ## Custom config
 

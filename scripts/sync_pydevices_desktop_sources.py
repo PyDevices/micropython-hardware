@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-"""Generate pydisplay-desktop staging package from canonical MIP sources.
+"""Generate pydevices-desktop staging package from canonical MIP sources.
 
 The canonical implementation lives in:
 - board_configs/desktop/board_config.py
 - board_configs/desktop/board_devices.py
 - drivers/boarddev.py
-- drivers/audio/audiodev/ (package)
 - drivers/usdl2.py
 - drivers/uwin32.py
 
@@ -29,11 +28,11 @@ FILE_MAPPINGS = (
     ("drivers/uwin32.py", "src/uwin32.py"),
 )
 
-DIR_MAPPINGS = (("drivers/audio/audiodev", "src/audiodev"),)
+DIR_MAPPINGS = ()
 
 METADATA_FILES = (
     ("pyproject.toml", "pyproject.toml"),
-    ("docs/pydisplay-desktop.md", "README.md"),
+    ("docs/pydevices-desktop.md", "README.md"),
 )
 
 
@@ -90,19 +89,19 @@ def sync(root: Path, stage_dir: Path, check: bool) -> int:
 
     if check:
         if changed:
-            print(f"pydisplay-desktop staging files are out of sync in {stage_dir}:")
+            print(f"pydevices-desktop staging files are out of sync in {stage_dir}:")
             for src_rel, dst_rel in changed:
                 print(f"  {dst_rel} <- {src_rel}")
             return 1
-        print(f"pydisplay-desktop staging files are in sync in {stage_dir}.")
+        print(f"pydevices-desktop staging files are in sync in {stage_dir}.")
         return 0
 
     if changed:
-        print(f"Synced pydisplay-desktop staging files in {stage_dir}:")
+        print(f"Synced pydevices-desktop staging files in {stage_dir}:")
         for src_rel, dst_rel in changed:
             print(f"  {dst_rel} <- {src_rel}")
     else:
-        print(f"pydisplay-desktop staging files already in sync in {stage_dir}.")
+        print(f"pydevices-desktop staging files already in sync in {stage_dir}.")
     return 0
 
 
@@ -115,7 +114,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--stage-dir",
-        default=".pydisplay-desktop-build",
+        default=".pydevices-desktop-build",
         help="Throwaway staging directory to generate/update.",
     )
     args = parser.parse_args()

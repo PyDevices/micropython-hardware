@@ -3,7 +3,6 @@
 from spibus import SPIBus
 from st7735r_1 import ST7735R
 
-import eventsys
 
 display_bus = SPIBus(
     id=1,
@@ -50,4 +49,3 @@ display_drv = ST7735R(
         "reset_high": False,
     },
 )
-runtime = None

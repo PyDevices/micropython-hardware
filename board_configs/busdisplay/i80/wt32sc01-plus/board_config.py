@@ -5,7 +5,6 @@ from i80bus import I80Bus
 from machine import I2C, Pin
 from st7796 import ST7796
 
-import eventsys
 
 # The WT32-SC01 Plus has the reset pins of the display IC and the touch IC both
 # tied to pin 4.  Controlling this pin with the display driver can lead to an
@@ -45,11 +44,7 @@ i2c = I2C(0, sda=Pin(6), scl=Pin(5), frequency=100_000)
 touch = FT6x36(i2c)
 touch_rotation_table = None
 
-runtime = eventsys.Runtime(
-    displays=[display_drv],
-    touch_read=touch.get_positions,
-    touch_rotation_table=touch_rotation_table,
-)
+touch_read = touch.get_positions
 
 from board_devices import DEVICES, setup_devices
 

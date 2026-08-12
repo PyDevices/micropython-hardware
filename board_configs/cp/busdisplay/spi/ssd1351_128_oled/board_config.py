@@ -5,7 +5,6 @@ from displayio import release_displays
 from fourwire import FourWire
 from ssd1351 import SSD1351
 
-import eventsys
 
 release_displays()
 
@@ -23,4 +22,3 @@ display_drv = SSD1351(
     height=128,
     rotation=0,
 )
-runtime = None

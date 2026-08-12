@@ -18,7 +18,6 @@ import dotclockframebuffer
 import framebufferio
 
 from displaydev.fbdisplay import FBDisplay
-import eventsys
 
 tft_pins = dict(board.TFT_PINS)
 
@@ -107,13 +106,9 @@ class _Keypad:
 
 keypad = _Keypad()
 
-runtime = eventsys.Runtime(
-    displays=[display_drv],
-    touch_read=_touch_points,
-    touch_rotation_table=touch_rotation_table,
-    # Sync + multimer polling Timer: CircuitPython has no machine.Timer and
-    # (on this build) no frozen asyncio — timer_async would use _mpasyncio and
-    # leave LVGL unarmed / blank after ``import lv_test_timer``.
-    timer_async=False,
-)
-runtime.add_keypad(read=keypad.read)
+touch_read = _touch_points
+# Sync + multimer polling Timer: CircuitPython has no machine.Timer and
+# (on this build) no frozen asyncio — timer_async would use _mpasyncio and
+# leave LVGL unarmed / blank after ``import lv_test_timer``.
+timer_async = False
+keypad_read = keypad.read

@@ -7,7 +7,6 @@ Requires displayif ``picodvi`` (RP2350 HSTX). Wireless via onboard CYW43.
 from machine import Pin
 
 from displaydev.fbdisplay import FBDisplay
-import eventsys
 
 try:
     from picodvi import Framebuffer
@@ -33,7 +32,6 @@ fb = Framebuffer(
 
 display_drv = FBDisplay(fb)
 
-runtime = None
 
 from board_devices import DEVICES, setup_devices
 

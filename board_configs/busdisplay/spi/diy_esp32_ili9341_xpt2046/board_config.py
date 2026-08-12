@@ -5,7 +5,6 @@ from machine import SPI, Pin
 from spibus import SPIBus
 from xpt2046 import Touch
 
-import eventsys
 
 display_bus = SPIBus(
     id=1,
@@ -70,8 +69,4 @@ touch.calibrate(
 
 touch_rotation_table = (0, 0, 0, 4)
 
-runtime = eventsys.Runtime(
-    displays=[display_drv],
-    touch_read=touch.get_touch,
-    touch_rotation_table=touch_rotation_table,
-)
+touch_read = touch.get_touch

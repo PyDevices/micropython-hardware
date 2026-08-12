@@ -10,7 +10,6 @@ import dotclockframebuffer
 import gt911
 
 from displaydev.fbdisplay import FBDisplay
-import eventsys
 
 board.LCD_BACKLIGHT.value = True
 
@@ -82,8 +81,4 @@ def _touch_points():
 
 touch_rotation_table = (0, 0, 0, 0)
 
-runtime = eventsys.Runtime(
-    displays=[display_drv],
-    touch_read=_touch_points,
-    touch_rotation_table=touch_rotation_table,
-)
+touch_read = _touch_points

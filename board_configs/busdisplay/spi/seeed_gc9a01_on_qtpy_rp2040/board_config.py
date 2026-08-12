@@ -5,7 +5,6 @@ from gc9a01 import GC9A01
 from machine import I2C, Pin
 from spibus import SPIBus
 
-import eventsys
 
 display_bus = SPIBus(
     id=0,
@@ -53,8 +52,4 @@ i2c = I2C(0, sda=Pin(24), scl=Pin(25), freq=100_000)
 touch = CHSC6X(i2c, irq_pin=5)
 touch_rotation_table = (0, 5, 6, 3)
 
-runtime = eventsys.Runtime(
-    displays=[display_drv],
-    touch_read=touch.touch_read,
-    touch_rotation_table=touch_rotation_table,
-)
+touch_read = touch.touch_read

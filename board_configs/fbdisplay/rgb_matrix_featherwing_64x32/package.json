@@ -11,10 +11,6 @@
       "latest"
     ],
     [
-      "eventsys",
-      "latest"
-    ],
-    [
       "github:PyDevices/micropython-hardware/packages/events.json",
       "main"
     ],

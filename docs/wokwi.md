@@ -67,7 +67,8 @@ HARDWARE = "github:PyDevices/micropython-hardware"
 PYDISPLAY = "github:PyDevices/pydisplay"
 
 # Board package pulls ili9341/ft6x36/spibus from this repo and displaydev from
-# the MIP index (displaydev → eventsys → multimer).
+# the MIP index (displaydev → events + keys). Install optional eventsys in the
+# application when the example uses that traffic controller.
 mip.install(
     HARDWARE + "/board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3/",
     index=MICROPYTHON_LIB,

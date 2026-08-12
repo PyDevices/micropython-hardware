@@ -6,7 +6,6 @@ from gpiojoystick import GPIOJoystick
 from spibus import SPIBus
 from st7789 import ST7789
 
-import eventsys
 
 display_bus = SPIBus(
     id=0,
@@ -54,9 +53,9 @@ try:
 except ValueError:
     i2c = I2C(1, sda=Pin(12), scl=Pin(13), freq=400_000)
 
-runtime = eventsys.Runtime(displays=[display_drv])
-runtime.add_keypad(read=keypad.read)
-runtime.add_joystick(joystick_driver=joystick, emulate_digital=[[0, 1]])
+keypad_read = keypad.read
+joystick_driver = joystick
+joystick_emulate_digital = [[0, 1]]
 
 from board_devices import DEVICES, setup_devices
 

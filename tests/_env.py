@@ -25,7 +25,16 @@ for _rel in (
     if _path not in sys.path:
         sys.path.insert(0, _path)
 
+PATH_ENTRIES = [
+    str(ROOT / "lib"),
+    str(ROOT / "utils"),
+    str(ROOT / "drivers"),
+    str(ROOT / "drivers" / "display"),
+    str(ROOT / "drivers" / "audio"),
+]
+
 DISPLAYDEV_DIR = str(ROOT / "drivers" / "display" / "displaydev")
 MULTIMER_DIR = str(ROOT / "lib" / "multimer")
+EVENTSYS_DIR = str(ROOT / "lib" / "eventsys")
 EVENTS_PY = str(ROOT / "lib" / "events.py")
 KEYS_PY = str(ROOT / "lib" / "keys.py")

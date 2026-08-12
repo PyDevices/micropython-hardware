@@ -5,7 +5,6 @@ from machine import ADC, Pin
 from spibus import SPIBus
 from st7789 import ST7789
 
-import eventsys
 
 display_bus = SPIBus(
     id=1,
@@ -57,8 +56,8 @@ joystick = GPIOJoystick(
 )
 
 
-runtime = eventsys.Runtime(displays=[display_drv])
-runtime.add_joystick(joystick_driver=joystick, emulate_digital=[[0, 1]])
+joystick_driver = joystick
+joystick_emulate_digital = [[0, 1]]
 
 from board_devices import DEVICES, setup_devices
 

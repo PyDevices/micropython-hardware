@@ -8,7 +8,6 @@ from displayio import release_displays
 from fourwire import FourWire
 from gc9a01 import GC9A01
 
-import eventsys
 
 release_displays()
 
@@ -63,9 +62,3 @@ try:
 except Exception:
     touch = None
     touch_read = None
-
-runtime = eventsys.Runtime(
-    displays=[display_drv],
-    touch_read=touch_read,
-    touch_rotation_table=touch_rotation_table,
-)

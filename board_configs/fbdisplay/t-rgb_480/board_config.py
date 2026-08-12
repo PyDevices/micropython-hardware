@@ -9,7 +9,6 @@ from st7701 import LCDPins, run_init
 from xl9535 import XL9535
 
 from displaydev.fbdisplay import FBDisplay
-import eventsys
 
 try:
     import dotclockframebuffer
@@ -89,11 +88,7 @@ touch = CST8XX(
 )
 touch_rotation_table = (0, 0, 0, 0)
 
-runtime = eventsys.Runtime(
-    displays=[display_drv],
-    touch_read=touch.get_positions,
-    touch_rotation_table=touch_rotation_table,
-)
+touch_read = touch.get_positions
 
 from board_devices import DEVICES, setup_devices
 

@@ -4,7 +4,6 @@ from gt911 import GT911
 from machine import I2C, Pin
 
 from displaydev.fbdisplay import FBDisplay
-import eventsys
 
 try:
     from mipidsi import Bus, Display
@@ -47,8 +46,4 @@ touch_rotation_table = (0, 0, 0, 0)
 
 display_drv = FBDisplay(fb)
 
-runtime = eventsys.Runtime(
-    displays=[display_drv],
-    touch_read=touch.read_points,
-    touch_rotation_table=touch_rotation_table,
-)
+touch_read = touch.read_points

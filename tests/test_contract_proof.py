@@ -132,17 +132,18 @@ class TestGraduatedBoardLayout(unittest.TestCase):
                 names = _assigned_names(bc_tree)
 
                 self.assertIn("display_drv", names)
-                self.assertIn("runtime", names)
+                self.assertNotIn("runtime", names)
+                self.assertNotIn("eventsys", bc.read_text())
                 self.assertTrue(_has_call(bc_tree, "setup_devices"))
                 if expect.get("eager_touch"):
                     self.assertIn("touch", names)
-                    if "runtime = None" not in bc.read_text():
-                        self.assertIn("touch_read=", bc.read_text())
+                    self.assertIn("touch_read", names)
                 if expect.get("eager_encoder"):
                     self.assertIn("encoder", names)
-                    self.assertTrue(_has_call(bc_tree, "add_encoder"))
+                    self.assertIn("encoder_read", names)
+                    self.assertIn("encoder_button_read", names)
                 if expect.get("eager_keypad"):
-                    self.assertTrue(_has_call(bc_tree, "add_keypad"))
+                    self.assertIn("keypad_read", names)
 
                 text = bd.read_text()
                 self.assertIn("DEVICES = frozenset", text)
@@ -178,7 +179,7 @@ class TestGraduatedBindLazy(unittest.TestCase):
                 spec.loader.exec_module(mod)
 
                 self.assertEqual(set(mod.DEVICES), expect["devices"])
-                ns = {"display_drv": object(), "runtime": object()}
+                ns = {"display_drv": object()}
                 mod.setup_devices(ns)
                 self.assertIn("__getattr__", ns)
 

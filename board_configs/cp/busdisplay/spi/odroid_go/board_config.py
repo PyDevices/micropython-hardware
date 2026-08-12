@@ -9,7 +9,6 @@ from gpiojoystick import GPIOJoystick
 from ili9341 import ILI9341
 from keypad_gpio import GPIOButtons
 
-import eventsys
 
 import keys
 
@@ -71,6 +70,6 @@ joystick = GPIOJoystick(
     ],
 )
 
-runtime = eventsys.Runtime(displays=[display_drv])
-runtime.add_keypad(read=keypad.read)
-runtime.add_joystick(joystick_driver=joystick, emulate_digital=[[0, 1]])
+keypad_read = keypad.read
+joystick_driver = joystick
+joystick_emulate_digital = [[0, 1]]

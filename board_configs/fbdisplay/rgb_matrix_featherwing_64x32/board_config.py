@@ -4,7 +4,6 @@ from machine import Pin
 import rgbmatrix
 
 from displaydev.fbdisplay import FBDisplay
-import eventsys
 
 matrix = rgbmatrix.RGBMatrix(
     width=64,
@@ -18,5 +17,3 @@ matrix = rgbmatrix.RGBMatrix(
 )
 
 display_drv = FBDisplay(matrix, width=64, height=32)
-
-runtime = None

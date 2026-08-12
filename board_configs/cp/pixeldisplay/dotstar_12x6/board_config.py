@@ -25,5 +25,3 @@ _pixel_framebuf = PixelFramebuffer(
 )
 
 display_drv = PixelDisplay(_pixel_framebuf)
-
-runtime = None

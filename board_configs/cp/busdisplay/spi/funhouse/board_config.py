@@ -7,7 +7,6 @@ from fourwire import FourWire
 from keypad_gpio import GPIOButtons
 from st7789 import ST7789
 
-import eventsys
 
 import keys
 
@@ -54,9 +53,5 @@ keypad = GPIOButtons(
     }
 )
 
-runtime = eventsys.Runtime(
-    displays=[display_drv],
-    touch_read=_touch_points,
-    touch_rotation_table=touch_rotation_table,
-)
-runtime.add_keypad(read=keypad.read)
+touch_read = _touch_points
+keypad_read = keypad.read

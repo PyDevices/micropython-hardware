@@ -8,7 +8,6 @@ from fourwire import FourWire
 from gpiojoystick import GPIOJoystick
 from st7789 import ST7789
 
-import eventsys
 
 release_displays()
 
@@ -60,5 +59,5 @@ joystick = GPIOJoystick(
     ],
 )
 
-runtime = eventsys.Runtime(displays=[display_drv])
-runtime.add_joystick(joystick_driver=joystick, emulate_digital=[[0, 1]])
+joystick_driver = joystick
+joystick_emulate_digital = [[0, 1]]

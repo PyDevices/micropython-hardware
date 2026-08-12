@@ -5,7 +5,6 @@ from displayio import release_displays
 from fourwire import FourWire
 from st7735 import ST7735
 
-import eventsys
 
 release_displays()
 
@@ -34,4 +33,3 @@ display_drv = ST7735(
     reset_pin=board.D1,
     reset_high=True,
 )
-runtime = None

@@ -1,0 +1,187 @@
+name: Publish PyDevices packages
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Semver X.Y.Z (optional when running from a vX.Y.Z tag)
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  publish-desktop:
+    runs-on: ubuntu-latest
+    if: github.repository == 'PyDevices/micropython-hardware'
+    env:
+      STAGE_DIR: .pydevices-desktop-build
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve release version
+        id: version
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          normalize() {
+            local v="${1#v}"
+            v="$(echo "$v" | tr -d '[:space:]')"
+            if [[ ! "$v" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
+              echo "Invalid semver: $1 (expected X.Y.Z)" >&2
+              exit 1
+            fi
+            echo "$v"
+          }
+
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            VERSION="$(normalize "${GITHUB_REF_NAME}")"
+          elif [[ -n "${INPUT_VERSION:-}" ]]; then
+            VERSION="$(normalize "$INPUT_VERSION")"
+          else
+            TAG="$(git describe --tags --exact-match 2>/dev/null || true)"
+            if [[ -z "$TAG" ]]; then
+              echo "Set the version input or run this workflow from a vX.Y.Z tag." >&2
+              exit 1
+            fi
+            VERSION="$(normalize "$TAG")"
+          fi
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Publishing pydevices-desktop $VERSION"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install build tooling
+        run: python -m pip install --upgrade build twine
+
+      - name: Sync pydevices-desktop sources from canonical MIP files
+        run: |
+          rm -rf "$STAGE_DIR"
+          python scripts/sync_pydevices_desktop_sources.py --stage-dir "$STAGE_DIR"
+
+      - name: Set package version from tag
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          version = "${{ steps.version.outputs.version }}"
+          path = Path("${{ env.STAGE_DIR }}/pyproject.toml")
+          text = path.read_text(encoding="utf-8")
+          new_text, count = re.subn(
+              r'(?m)^version\s*=\s*"[^"]+"\s*$',
+              f'version = "{version}"',
+              text,
+              count=1,
+          )
+          if count != 1:
+              raise SystemExit("Failed to set version in pyproject.toml")
+          path.write_text(new_text, encoding="utf-8")
+          print(f"Set package version to {version}")
+          PY
+
+      - name: Build and validate artifacts
+        working-directory: ${{ env.STAGE_DIR }}
+        run: |
+          python -m build
+          python -m twine check dist/*
+
+      - name: Upload to TestPyPI
+        working-directory: ${{ env.STAGE_DIR }}
+        env:
+          TESTPYPI_API_TOKEN: ${{ secrets.TESTPYPI_API_TOKEN }}
+        run: |
+          if [[ -z "${TESTPYPI_API_TOKEN:-}" ]]; then
+            echo "Missing TESTPYPI_API_TOKEN secret." >&2
+            exit 1
+          fi
+          TWINE_USERNAME=__token__ TWINE_PASSWORD="$TESTPYPI_API_TOKEN" \
+            python -m twine upload --repository testpypi --verbose dist/*
+
+  publish-core:
+    runs-on: ubuntu-latest
+    if: github.repository == 'PyDevices/micropython-hardware'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve release version
+        id: version
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          elif [[ -n "${INPUT_VERSION:-}" ]]; then
+            VERSION="${INPUT_VERSION#v}"
+          else
+            TAG="$(git describe --tags --exact-match 2>/dev/null || true)"
+            if [[ -z "$TAG" ]]; then
+              echo "Set the version input or run this workflow from a vX.Y.Z tag." >&2
+              exit 1
+            fi
+            VERSION="${TAG#v}"
+          fi
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
+            echo "Invalid semver: $VERSION" >&2
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v4
+        with:
+          repository: PyDevices/micropython-lib
+          ref: PyDevices
+          path: micropython-lib
+          token: ${{ secrets.MICROPYTHON_LIB_DEPLOY_TOKEN }}
+
+      - uses: actions/checkout@v4
+        with:
+          repository: micropython/micropython
+          path: micropython
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install publish tooling
+        run: python -m pip install --upgrade hatch twine
+
+      - name: Configure micropython-lib push
+        run: |
+          git -C micropython-lib config user.name 'github-actions[bot]'
+          git -C micropython-lib config user.email 'github-actions[bot]@users.noreply.github.com'
+          git -C micropython-lib remote set-url origin \
+            "https://x-access-token:${{ secrets.MICROPYTHON_LIB_DEPLOY_TOKEN }}@github.com/PyDevices/micropython-lib.git"
+
+      - name: Sync MIP sources and publish TestPyPI packages
+        env:
+          MICROPYTHON_LIB_DIR: ${{ github.workspace }}/micropython-lib
+          MICROPYTHON_DIR: ${{ github.workspace }}/micropython
+          PYDEVICES_VERSION: ${{ steps.version.outputs.version }}
+          TESTPYPI_API_TOKEN: ${{ secrets.TESTPYPI_API_TOKEN }}
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          ./scripts/publish_sync_packages.sh \
+            --commit-message "pydevices: Release v${VERSION} (${GITHUB_SHA::7})." \
+            --push
+
+      - name: Build and publish MIP index
+        env:
+          MICROPYTHON_LIB_DIR: ${{ github.workspace }}/micropython-lib
+          MICROPYTHON_DIR: ${{ github.workspace }}/micropython
+          MIP_INDEX_OUTPUT: /tmp/mip-index
+        run: ./scripts/publish_mip_ghpages.sh

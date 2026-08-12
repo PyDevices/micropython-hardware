@@ -9,7 +9,6 @@ from gpiojoystick import GPIOJoystick
 from keypad_shift import PYGAMER_BUTTON_MAP, ShiftRegisterButtons
 from st7789 import ST7789
 
-import eventsys
 
 release_displays()
 
@@ -49,6 +48,6 @@ joystick = GPIOJoystick(
     ],
 )
 
-runtime = eventsys.Runtime(displays=[display_drv])
-runtime.add_keypad(read=keypad.read)
-runtime.add_joystick(joystick_driver=joystick, emulate_digital=[[0, 1]])
+keypad_read = keypad.read
+joystick_driver = joystick
+joystick_emulate_digital = [[0, 1]]

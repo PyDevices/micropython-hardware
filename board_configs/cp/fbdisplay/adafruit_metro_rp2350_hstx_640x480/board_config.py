@@ -5,7 +5,6 @@ import displayio
 import picodvi
 
 from displaydev.fbdisplay import FBDisplay
-import eventsys
 
 displayio.release_displays()
 
@@ -24,5 +23,3 @@ fb = picodvi.Framebuffer(
 )
 
 display_drv = FBDisplay(fb)
-
-runtime = None

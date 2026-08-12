@@ -8,7 +8,6 @@ Requires displayif ``picodvi`` (RP2350 HSTX). Same display wiring as Pico 2 W
 from machine import Pin
 
 from displaydev.fbdisplay import FBDisplay
-import eventsys
 
 try:
     from picodvi import Framebuffer
@@ -34,7 +33,6 @@ fb = Framebuffer(
 
 display_drv = FBDisplay(fb)
 
-runtime = None
 
 from board_devices import DEVICES, setup_devices
 

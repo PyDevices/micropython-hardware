@@ -4,7 +4,6 @@ from gc9a01 import GC9A01
 from machine import I2C, Pin
 from spibus import SPIBus
 
-import eventsys
 
 display_bus = SPIBus(
     id=1,
@@ -72,11 +71,6 @@ except Exception:
     touch = None
     touch_read = None
 
-runtime = eventsys.Runtime(
-    displays=[display_drv],
-    touch_read=touch_read,
-    touch_rotation_table=touch_rotation_table,
-)
 
 from board_devices import DEVICES, setup_devices
 

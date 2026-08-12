@@ -5,9 +5,8 @@
 # next_release_version.sh (highest vX.Y.Z tag + 1 patch). Pushing the tag
 # triggers this repo's publish workflow.
 #
-# Before tagging, pre-bumps the pydisplay-desktop floor in sibling
-# pydisplay/requirements.txt (packages this tag publishes) and commits there
-# when needed, so pydisplay does not need a post-publish floor commit.
+# Before tagging, pre-bumps every distribution published by this repo in the
+# sibling pydisplay/requirements.txt and commits there when needed.
 #
 # Usage:
 #   ./scripts/publish_release_tag.sh                # auto version; create tag
@@ -36,8 +35,10 @@ Create an annotated git tag vVERSION on the current commit.
   --push      Push pydisplay floors (if committed), this branch, and the tag
   --dry-run   Print the version / floor bump; do not commit or tag
 
-Before tagging, bumps pydisplay/requirements.txt ``pydisplay-desktop`` to
-VERSION (sibling repo; override with PYDISPLAY_ROOT).
+Before tagging, bumps the `pydevices-events`, `pydevices-keys`,
+`pydevices-multimer`, `pydevices-displaydev`, `pydevices-audiodev`,
+`pydevices-eventsys`, and `pydevices-desktop` floors to VERSION in the sibling
+pydisplay checkout (override with PYDISPLAY_ROOT).
 
 Examples:
   ./scripts/publish_release_tag.sh --push
@@ -134,7 +135,7 @@ else
 fi
 
 PYDISPLAY_ROOT="$(resolve_pydisplay_root)"
-echo "Pre-bump pydisplay-desktop>=${VERSION} in ${PYDISPLAY_ROOT}/requirements.txt"
+echo "Pre-bump micropython-hardware TestPyPI distributions to >=${VERSION} in ${PYDISPLAY_ROOT}/requirements.txt"
 
 if [[ "$DRY_RUN" -eq 1 ]]; then
     echo "Dry run — would bump pydisplay floors, commit there if needed, then create tag $TAG here"
@@ -148,22 +149,29 @@ fi
 
 python3 "$PYDISPLAY_ROOT/scripts/refresh-requirements.py" \
     --path "$PYDISPLAY_ROOT/requirements.txt" \
-    --set "pydisplay-desktop=${VERSION}"
+    --set \
+    "pydevices-events=${VERSION}" \
+    "pydevices-keys=${VERSION}" \
+    "pydevices-multimer=${VERSION}" \
+    "pydevices-displaydev=${VERSION}" \
+    "pydevices-audiodev=${VERSION}" \
+    "pydevices-eventsys=${VERSION}" \
+    "pydevices-desktop=${VERSION}"
 
 if ! git -C "$PYDISPLAY_ROOT" diff --quiet -- requirements.txt; then
     git -C "$PYDISPLAY_ROOT" add requirements.txt
     git -C "$PYDISPLAY_ROOT" commit -m "$(cat <<EOF
-Bump pydisplay-desktop TestPyPI floor for v${VERSION}.
+Bump micropython-hardware TestPyPI floors for v${VERSION}.
 
 EOF
 )"
-    echo "Committed pydisplay requirements.txt floor bump for pydisplay-desktop $VERSION"
+    echo "Committed pydisplay requirements.txt floors for micropython-hardware $VERSION"
     if [[ "$DO_PUSH" -eq 1 ]]; then
         git -C "$PYDISPLAY_ROOT" push origin HEAD
         echo "Pushed pydisplay HEAD"
     fi
 else
-    echo "pydisplay-desktop floor already at $VERSION; no pydisplay floor commit"
+    echo "micropython-hardware floors already at $VERSION; no pydisplay floor commit"
 fi
 
 git tag -a "$TAG" -m "Release $VERSION"

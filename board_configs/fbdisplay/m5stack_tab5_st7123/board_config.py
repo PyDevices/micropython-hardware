@@ -8,7 +8,6 @@ from st7123 import ST7123
 from tab5_st7123_init import TAB5_ST7123_INIT
 
 from displaydev.fbdisplay import FBDisplay
-import eventsys
 
 try:
     from mipidsi import Bus, Display
@@ -56,11 +55,7 @@ touch_rotation_table = (0, 0, 0, 0)
 
 display_drv = FBDisplay(fb)
 
-runtime = eventsys.Runtime(
-    displays=[display_drv],
-    touch_read=touch.read_points,
-    touch_rotation_table=touch_rotation_table,
-)
+touch_read = touch.read_points
 
 from board_devices import DEVICES, setup_devices
 

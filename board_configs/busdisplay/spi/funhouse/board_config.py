@@ -6,7 +6,6 @@ from spibus import SPIBus
 from st7789 import ST7789
 from tt21100 import TT21100
 
-import eventsys
 
 import keys
 
@@ -56,12 +55,8 @@ keypad = GPIOButtons(
     }
 )
 
-runtime = eventsys.Runtime(
-    displays=[display_drv],
-    touch_read=_touch_points,
-    touch_rotation_table=touch_rotation_table,
-)
-runtime.add_keypad(read=keypad.read)
+touch_read = _touch_points
+keypad_read = keypad.read
 
 from board_devices import DEVICES, setup_devices
 

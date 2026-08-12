@@ -20,7 +20,6 @@ CircuitPython sibling: none (use ``paralleldisplaybus`` on a CP board with I80).
 from ili9341 import ILI9341
 from machine import Pin
 
-import eventsys
 
 try:
     from i80bus import I80Bus
@@ -60,7 +59,6 @@ display_drv = ILI9341(
     power_on_high=True,
 )
 
-runtime = None
 
 from board_devices import DEVICES, setup_devices
 

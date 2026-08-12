@@ -9,6 +9,31 @@ import io
 import _env  # noqa: F401
 
 
+def scripted(*values):
+    """Return a zero-arg callable that yields ``values`` one poll at a time."""
+    box = {"i": 0, "values": list(values)}
+
+    def read():
+        i = box["i"]
+        seq = box["values"]
+        if i < len(seq):
+            box["i"] = i + 1
+            return seq[i]
+        return seq[-1] if seq else None
+
+    return read
+
+
+class FakeDisplay:
+    """Minimal display driver stand-in used by ``eventsys`` device tests."""
+
+    def __init__(self, width=320, height=240, rotation=0):
+        self.width = width
+        self.height = height
+        self.rotation = rotation
+        self.touch_device = None
+
+
 class FakeFrameBuffer:
     """A minimal stand-in for a CircuitPython ``FrameBuffer``.
 

@@ -14,7 +14,7 @@ This package is published as a pure-Python wheel to TestPyPI.
 pip install \
   -i https://test.pypi.org/simple/ \
   --extra-index-url https://pypi.org/simple/ \
-  multimer
+  pydevices-multimer
 ```
 
 Why both indexes: [two-index pip install](https://pydisplay.readthedocs.io/en/latest/publishing-micropython-lib/#two-index-pip-install-required).
@@ -91,14 +91,15 @@ without usdl2** (that port has no `threading`). Desktop GUI vs console
 selection matrices live in the
 [multimer concept doc](https://pydisplay.readthedocs.io/en/latest/concepts/multimer/#desktop-auto-selection-matrix).
 
-App keep-alive loops live on [eventsys.Runtime](https://test.pypi.org/project/eventsys/) (`run_forever`, `run`, `run_async`).
+Optional app keep-alive loops are available from `pydevices-eventsys`
+(`eventsys.Runtime`); LVGL owns its own coordinator.
 
 ## Links
 
 - [Documentation — multimer](https://pydisplay.readthedocs.io/en/latest/concepts/multimer/)
 - [Source](https://github.com/PyDevices/micropython-hardware/tree/main/lib/multimer)
 - [Issues](https://github.com/PyDevices/micropython-hardware/issues)
-- Related: [eventsys](https://test.pypi.org/project/eventsys/)
+- Related: `pydevices-eventsys`
 
 ## License
 

@@ -231,8 +231,8 @@ variant (`C6_WIFI` in inventory fixture #1).
 - **Pins:** CS=`D10`, DC=`D9`; hold `ESP_CS` and SD `D4` high when unused.
   Named pins (`"D9"`) work; numeric GPIO ids often fail on mimxrt.
 - **Touch:** FT6206 @ `0x38` on `I2C(0)`; `touch_rotation_table = (6, 3, 0, 5)`.
-  `runtime = None` — OCRAM heap ~**64 KiB**; eventsys / LVGL / full `.py`
-  stacks do not fit.
+  no event traffic controller is created by the board config; OCRAM heap is
+  ~**64 KiB**, so eventsys / LVGL / full `.py` stacks do not fit.
 - **AirLift (onboard NINA):** MicroPython `network.WLAN` = `nina` over
   **SPI(0)** @ 8 MHz (`ESP_CS` / `ESP_BUSY` / `ESP_RESET` / `ESP_GPIO0`).
   Join + DNS work; **TCP sockets failed** with `fd=-1` / `OSError: 0` on

@@ -10,10 +10,11 @@ Target wiring (see [Board devices — touch duck-type](board-devices.md#touch-du
 
 - `touch` — driver object with `read_points()` → `()` when up, else a sequence of
   `(x, y[, id[, …]])`
-- `runtime = eventsys.Runtime(..., touch_read=touch.read_points, …)`
+- `touch_read = touch.read_points` (neutral application-facing adapter)
 - optional `touch_rotation_table` — maps display rotation to touch orientation
 
-Apps use `runtime.touch_dev` (and `.points` for multipoint), not the raw driver.
+Apps pass these exports to their chosen coordinator. `eventsys.Runtime` exposes
+`runtime.touch_dev`; LVGL creates its own pointer adapter.
 Do not collapse multi-touch to `points[0]` in the board file — return the full
 `read_points()` sequence (or a sequence-preserving map).
 

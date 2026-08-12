@@ -9,8 +9,8 @@ drivers live in
 
 **CircuitPython** (`board_configs/cp/`) does **not** use `board_devices.py` or
 lazy `DEVICES`. CP already exposes pins/buses via the native `board` module.
-CP `board_config.py` only constructs `display_drv`, `runtime`, and eager UI
-inputs wired into `runtime` (`touch`, `keypad`, `encoder`, `joystick`). Do not
+CP `board_config.py` only constructs `display_drv` and eager UI hardware
+(`touch`, `keypad`, `encoder`, `joystick`) with neutral read aliases. Do not
 `from board_config import …` inside CP configs.
 
 ## Specials (always these names)
@@ -18,7 +18,7 @@ inputs wired into `runtime` (`touch`, `keypad`, `encoder`, `joystick`). Do not
 | Symbol | Required | Notes |
 |--------|----------|-------|
 | `display_drv` | yes | Display backend |
-| `runtime` | when `display_drv.needs_refresh` | [`eventsys.Runtime`](https://pydisplay.readthedocs.io/en/latest/concepts/runtime/); may be `None` on display-only MCU boards |
+| `host_read`, `touch_read`, … | when present | Neutral callables consumed by the app's chosen coordinator |
 
 ## Optional end-device roles
 
@@ -26,10 +26,10 @@ Omit the name entirely when the hardware is absent. Canonical symbols:
 
 | Role | Symbol | Wiring |
 |------|--------|--------|
-| Touch | `touch` | Eager in `board_config`; wire into `Runtime`; apps use `runtime.touch_dev` |
-| Keypad | `keypad` | All board buttons (not encoder click); apps use `runtime.keypad_dev` |
-| Encoder | `encoder` | Includes click; apps use `runtime.encoder_dev` |
-| Joystick | `joystick` | Separate from keypad; apps use `runtime.joystick_dev` |
+| Touch | `touch` + `touch_read` | Eager raw driver plus neutral read callable |
+| Keypad | `keypad` + `keypad_read` | All board buttons (not encoder click) |
+| Encoder | `encoder` + `encoder_read` | Includes optional `encoder_button_read` |
+| Joystick | `joystick` + `joystick_driver` | Separate from keypad |
 | Addressable LEDs | `pixels` | NeoPixel / DotStar / APA102 |
 | Discrete LED | `led` | Primary user LED only |
 | Motion | `accelerometer`, `gyroscope`, `magnetometer` | Separate; omit missing axes |
@@ -60,9 +60,8 @@ and tooling USB / UART bridges. Apps may still use those stacks directly.
 ## Discovery
 
 - **Eager UI roles** (`touch`, `keypad`, `encoder`, `joystick`, …): constructed in
-  `board_config` and wired into `runtime`. Apps discover them through
-  `runtime` (e.g. `runtime.touch_dev is not None`) — not via
-  `hasattr(board_config, "touch")` or direct driver access.
+  `board_config` with conventional neutral aliases. Applications hand those
+  aliases to their chosen coordinator.
 - **Lazy roles:** `DEVICES` lists **only** names constructed by `board_devices`.
   Apps check `"name" in board_config.DEVICES` before access so probing does not
   allocate. (`hasattr` on a lazy name may construct — do not use it for discovery.)
@@ -80,7 +79,7 @@ from board_devices import DEVICES, setup_devices
 setup_devices(globals())
 ```
 
-Shared boilerplate is [`boarddev`](https://github.com/PyDevices/pydisplay/blob/main/src/lib/boarddev.py) under `src/lib/`
+Shared boilerplate is [`boarddev`](https://github.com/PyDevices/micropython-hardware/blob/main/drivers/boarddev.py) under `drivers/`
 (name signals *devices*, not `board_config`). Typical
 `board_devices.setup_devices` is a thin wrapper around `boarddev.bind_lazy`.
 A board may replace `setup_devices` and skip `boarddev` entirely.
@@ -91,7 +90,7 @@ There is **no** separate `board_hardware` module.
 
 | Bus shared with… | Lives in |
 |------------------|----------|
-| UI devices (`display_drv`, `touch`, `keypad`, `encoder`, `joystick`, anything wired into `runtime`) | `board_config` |
+| UI devices (`display_drv`, `touch`, `keypad`, `encoder`, `joystick`) | `board_config` |
 | Only non-UI lazy devices (e.g. SPI for `sdcard` + `radio`) | `board_devices` (optional) |
 
 Lazy factories import UI-shared buses from `board_config` when needed
@@ -111,8 +110,8 @@ Rename consistently even before lazy devices exist:
 
 ## Touch duck-type
 
-`board_config.touch` is the **driver object** used when wiring `Runtime`. Apps
-interact via `runtime.touch_dev` / LVGL, not the raw driver.
+`board_config.touch` is the raw **driver object**; `board_config.touch_read` is
+the neutral callable used by an application coordinator.
 
 1. **`touch.read_points()`** → `()` when up, else a sequence of
    `(x, y[, id[, …]])`. Never a bare `(x, y)` from this method (ambiguous with
@@ -132,7 +131,10 @@ and [Touch drivers](touch-drivers.md).
 
 ```python
 import board_config as board
-from board_config import display_drv, runtime
+from board_config import display_drv
+import eventsys
+
+runtime = eventsys.Runtime.from_board_config(board)
 
 display_drv.fill(0)
 

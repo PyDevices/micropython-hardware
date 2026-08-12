@@ -5,7 +5,6 @@ from i80bus import I80Bus
 from ili9341 import ILI9341
 from machine import I2C, Pin
 
-import eventsys
 
 reset = Pin(12, Pin.OUT, value=1)
 display_bus = I80Bus(
@@ -39,8 +38,4 @@ i2c = I2C(0, sda=Pin(16), scl=Pin(17), frequency=100_000)
 touch = FT6x36(i2c)
 touch_rotation_table = None
 
-runtime = eventsys.Runtime(
-    displays=[display_drv],
-    touch_read=touch.get_positions,
-    touch_rotation_table=touch_rotation_table,
-)
+touch_read = touch.get_positions

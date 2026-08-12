@@ -5,7 +5,6 @@ from displayio import release_displays
 from i2cdisplaybus import I2CDisplayBus
 from sh1107 import SH1107
 
-import eventsys
 
 release_displays()
 
@@ -17,4 +16,3 @@ display_drv = SH1107(
     height=64,
     rotation=0,
 )
-runtime = None

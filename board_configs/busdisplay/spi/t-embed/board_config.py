@@ -4,7 +4,6 @@ from machine import Encoder, Pin
 from spibus import SPIBus
 from st7789 import ST7789
 
-import eventsys
 
 # Keep peripherals powered (LilyGO PIN_POWER_ON).
 Pin(46, Pin.OUT, value=1)
@@ -61,8 +60,8 @@ def encoder_button_func():
     return not encoder_button.value()
 
 
-runtime = eventsys.Runtime(displays=[display_drv])
-runtime.add_encoder(read=encoder_read_func, button_read=encoder_button_func)
+encoder_read = encoder_read_func
+encoder_button_read = encoder_button_func
 
 from board_devices import DEVICES, setup_devices
 

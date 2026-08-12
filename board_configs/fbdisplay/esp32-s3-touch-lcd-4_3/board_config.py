@@ -12,7 +12,6 @@ from gt911 import GT911
 from machine import I2C, Pin
 
 from displaydev.fbdisplay import FBDisplay
-import eventsys
 
 try:
     import dotclockframebuffer
@@ -89,8 +88,8 @@ _H = tft_timings["height"]
 def _map_touch_points():
     """GT911 reports landscape values with axes reflected over the diagonal.
 
-    Corner calibration (eventsys_touch_coords): TL/BR/center OK; TR↔BL.
-    Plain eventsys SWAP_XY is not enough on a non-square panel — rescale
+    Corner calibration (touch coordinates): TL/BR/center OK; TR↔BL.
+    A plain SWAP_XY is not enough on a non-square panel — rescale
     after the swap so coords stay in 0..width / 0..height.
     """
     points = touch.read_points()
@@ -107,11 +106,7 @@ def _map_touch_points():
 
 touch_rotation_table = (0, 0, 0, 0)
 
-runtime = eventsys.Runtime(
-    displays=[display_drv],
-    touch_read=_map_touch_points,
-    touch_rotation_table=touch_rotation_table,
-)
+touch_read = _map_touch_points
 
 from board_devices import DEVICES, setup_devices
 

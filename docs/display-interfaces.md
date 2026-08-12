@@ -30,14 +30,13 @@ MicroPython RGB/HUB75/DSI/DVI drivers live in **pydevices/displayif**, wired fro
 
 ## Touch
 
-Touch controllers live in `drivers/touch/`. CircuitPython shims are under `drivers/touch/circuitpython/`. Every applicable `board_config.py` should wire touch via the runtime constructor:
+Touch controllers live in `drivers/touch/`. CircuitPython shims are under
+`drivers/touch/circuitpython/`. Every applicable `board_config.py` exports a
+neutral callable:
 
 ```python
-runtime = eventsys.Runtime(
-    display=display_drv,
-    touch_read=touch.read_points,
-    touch_rotation_table=touch_rotation_table,  # when default mapping is wrong
-)
+touch_read = touch.read_points
+touch_rotation_table = (...)  # when default mapping is wrong
 ```
 
 See [Runtime — touch read contract](https://pydisplay.readthedocs.io/en/latest/concepts/runtime/#touch-read-contract) and

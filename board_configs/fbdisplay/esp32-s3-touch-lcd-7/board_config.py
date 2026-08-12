@@ -12,7 +12,6 @@ from gt911 import GT911
 from machine import I2C, Pin
 
 from displaydev.fbdisplay import FBDisplay
-import eventsys
 
 try:
     import dotclockframebuffer
@@ -83,11 +82,7 @@ touch = GT911(
 
 touch_rotation_table = (0, 0, 0, 0)
 
-runtime = eventsys.Runtime(
-    displays=[display_drv],
-    touch_read=touch.read_points,
-    touch_rotation_table=touch_rotation_table,
-)
+touch_read = touch.read_points
 
 from board_devices import DEVICES, setup_devices
 

@@ -5,7 +5,7 @@
   <script>try{if(localStorage.getItem('pydevices-theme')==='light'){document.documentElement.setAttribute('data-theme','light');}}catch(e){}</script>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>micropython-hardware — PyDevices</title>
-  <meta name="description" content="Board configs, drivers, and hardware docs for PyDevices — mip and pip install on MicroPython, CircuitPython, and desktop.">
+  <meta name="description" content="Canonical PyDevices board configs, drivers, and cross-platform display, audio, event, and timer packages for MicroPython, CircuitPython, and CPython.">
   <link rel="icon" type="image/svg+xml" href="https://pydevices.github.io/assets/img/logo.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,17 +33,19 @@
       <h1>micropython-hardware</h1>
     </div>
     <p>
-      Board configs, display/touch drivers, and hardware docs for MicroPython and CircuitPython.
-      Install board packages with <code>mip</code> on MicroPython (and CP-compatible paths via the MIP index),
-      or <code>pip</code> for desktop configs such as <code>pydisplay-desktop</code>.
-      Documentation is markdown in this repo, published here on GitHub Pages
-      (not Read the Docs). pydisplay core API docs stay on
-      <a href="https://pydisplay.readthedocs.io">pydisplay.readthedocs.io</a>.
+      The canonical PyDevices product source: portable <code>displaydev</code> and
+      <code>audiodev</code>, optional <code>eventsys</code>, timers, event primitives,
+      board configs, and hardware drivers. Install unprefixed packages with
+      <code>mip</code> on MicroPython, or namespaced <code>pydevices-*</code>
+      distributions from TestPyPI on CPython. The
+      <a href="https://github.com/PyDevices/pydisplay">pydisplay</a> repo shows the
+      product in complete examples, PyScript apps, and notebooks.
     </p>
     <div class="cta">
       <a class="btn primary" href="https://github.com/PyDevices/micropython-hardware">Source on GitHub</a>
+      <a class="btn" href="install-workflows.html">Install</a>
+      <a class="btn" href="publishing.html">Publishing</a>
       <a class="btn" href="device-matrix.html">Device matrix</a>
-      <a class="btn" href="board-devices.html">Board devices contract</a>
     </div>
   </section>
 
@@ -56,6 +58,18 @@
       <li>
         <a href="audio.html">Portable audio</a>
         <p>PCM <code>audio_out</code>/<code>audio_in</code>, host backends, and WAV file devices.</p>
+      </li>
+      <li>
+        <a href="install-workflows.html">Install workflows</a>
+        <p>Install and verify board configs and portable packages with MIP or pip.</p>
+      </li>
+      <li>
+        <a href="publishing.html">Publishing</a>
+        <p>TestPyPI/MIP naming, ownership, release tags, and the publication pipeline.</p>
+      </li>
+      <li>
+        <a href="pydevices-desktop.html">Desktop bundle</a>
+        <p>The universal desktop board config and its <code>pydevices-desktop</code> distribution.</p>
       </li>
       <li>
         <a href="board-configs.html">Board configs</a>

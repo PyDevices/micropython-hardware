@@ -3,7 +3,6 @@
 from spibus import SPIBus
 from ssd1351 import SSD1351
 
-import eventsys
 
 display_bus = SPIBus(
     id=0,
@@ -22,4 +21,3 @@ display_drv = SSD1351(
     height=128,
     rotation=0,
 )
-runtime = None

@@ -3,7 +3,6 @@
 from gc9a01 import GC9A01
 from spibus import SPIBus
 
-import eventsys
 
 display_bus = SPIBus(
     id=1,
@@ -49,7 +48,6 @@ display_drv = GC9A01(
         "backlight_on_high": True,
     },
 )
-runtime = None
 
 from board_devices import DEVICES, setup_devices
 

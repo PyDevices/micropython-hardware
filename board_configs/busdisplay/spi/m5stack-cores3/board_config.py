@@ -5,7 +5,6 @@ from ili9341 import ILI9341
 from machine import I2C, Pin
 from spibus import SPIBus
 
-import eventsys
 
 display_bus = SPIBus(
     id=1,
@@ -40,11 +39,7 @@ i2c = I2C(0, sda=Pin(12), scl=Pin(11), freq=100_000)
 touch = FT6x36(i2c)
 touch_rotation_table = None
 
-runtime = eventsys.Runtime(
-    displays=[display_drv],
-    touch_read=touch.get_positions,
-    touch_rotation_table=touch_rotation_table,
-)
+touch_read = touch.get_positions
 
 from board_devices import DEVICES, setup_devices
 

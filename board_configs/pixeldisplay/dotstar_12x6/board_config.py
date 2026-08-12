@@ -12,5 +12,3 @@ pixels = dotstar.DotStar(Pin(13), Pin(11), pixel_width * pixel_height, bpp=3)
 
 _pixel_framebuf = PixelFramebuffer(pixels, pixel_width, pixel_height, alternating=False)
 display_drv = PixelDisplay(_pixel_framebuf)
-
-runtime = None

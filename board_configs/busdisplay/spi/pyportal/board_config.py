@@ -5,7 +5,6 @@ from machine import I2C, Pin
 from spibus import SPIBus
 from tt21100 import TT21100
 
-import eventsys
 
 display_bus = SPIBus(
     id=0,
@@ -41,11 +40,7 @@ def _touch_points():
 
 touch_rotation_table = (0, 0, 0, 0)
 
-runtime = eventsys.Runtime(
-    displays=[display_drv],
-    touch_read=_touch_points,
-    touch_rotation_table=touch_rotation_table,
-)
+touch_read = _touch_points
 
 from board_devices import DEVICES, setup_devices
 
