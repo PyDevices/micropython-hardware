@@ -2,7 +2,7 @@
   "urls": [
     [
       "es8311.py",
-      "github:PyDevices/micropython-hardware/drivers/codec/es8311.py"
+      "github:PyDevices/pydevices/drivers/codec/es8311.py"
     ]
   ],
   "version": "0.1"

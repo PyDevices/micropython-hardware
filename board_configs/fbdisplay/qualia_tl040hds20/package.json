@@ -2,23 +2,23 @@
   "urls": [
     [
       "board_config.py",
-      "github:PyDevices/micropython-hardware/board_configs/fbdisplay/qualia_tl040hds20/board_config.py"
+      "github:PyDevices/pydevices/board_configs/fbdisplay/qualia_tl040hds20/board_config.py"
     ],
     [
       "board_devices.py",
-      "github:PyDevices/micropython-hardware/board_configs/fbdisplay/qualia_tl040hds20/board_devices.py"
+      "github:PyDevices/pydevices/board_configs/fbdisplay/qualia_tl040hds20/board_devices.py"
     ],
     [
       "boarddev.py",
-      "github:PyDevices/micropython-hardware/drivers/boarddev.py"
+      "github:PyDevices/pydevices/drivers/boarddev.py"
     ],
     [
       "ft6x36.py",
-      "github:PyDevices/micropython-hardware/drivers/touch/ft6x36.py"
+      "github:PyDevices/pydevices/drivers/touch/ft6x36.py"
     ],
     [
       "pca9554.py",
-      "github:PyDevices/micropython-hardware/drivers/io_expander/pca9554.py"
+      "github:PyDevices/pydevices/drivers/io_expander/pca9554.py"
     ]
   ],
   "deps": [
@@ -27,18 +27,14 @@
       "latest"
     ],
     [
-      "github:PyDevices/pydisplay/packages/displayif.json",
+      "github:PyDevices/pydevices/packages/events.json",
       "main"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/events.json",
-      "main"
-    ],
-    [
-      "github:PyDevices/micropython-hardware/packages/keys.json",
+      "github:PyDevices/pydevices/packages/keys.json",
       "main"
     ]
   ],
   "version": "0.1",
-  "notes": "Split board_config + board_devices (board devices contract). boarddev from pydisplay."
+  "notes": "Split board_config + board_devices (board devices contract). Product-owned boarddev."
 }

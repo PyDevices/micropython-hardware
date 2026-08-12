@@ -2,31 +2,31 @@
   "urls": [
     [
       "board_config.py",
-      "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/hallowing_m4/board_config.py"
+      "github:PyDevices/pydevices/board_configs/busdisplay/spi/hallowing_m4/board_config.py"
     ],
     [
       "st7735.py",
-      "github:PyDevices/micropython-hardware/drivers/display/st7735.py"
+      "github:PyDevices/pydevices/drivers/display/st7735.py"
     ],
     [
       "board_devices.py",
-      "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/hallowing_m4/board_devices.py"
+      "github:PyDevices/pydevices/board_configs/busdisplay/spi/hallowing_m4/board_devices.py"
     ],
     [
       "boarddev.py",
-      "github:PyDevices/micropython-hardware/drivers/boarddev.py"
+      "github:PyDevices/pydevices/drivers/boarddev.py"
     ],
     [
       "lis3dh.py",
-      "github:PyDevices/micropython-hardware/drivers/imu/lis3dh.py"
+      "github:PyDevices/pydevices/drivers/imu/lis3dh.py"
     ],
     [
       "audiodev/__init__.py",
-      "github:PyDevices/micropython-hardware/drivers/audio/audiodev/__init__.py"
+      "github:PyDevices/pydevices/drivers/audio/audiodev/__init__.py"
     ],
     [
       "audiodev/pwm_tone.py",
-      "github:PyDevices/micropython-hardware/drivers/audio/audiodev/pwm_tone.py"
+      "github:PyDevices/pydevices/drivers/audio/audiodev/pwm_tone.py"
     ]
   ],
   "deps": [
@@ -35,15 +35,15 @@
       "latest"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/spibus.json",
+      "github:PyDevices/pydevices/packages/spibus.json",
       "main"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/events.json",
+      "github:PyDevices/pydevices/packages/events.json",
       "main"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/keys.json",
+      "github:PyDevices/pydevices/packages/keys.json",
       "main"
     ]
   ],

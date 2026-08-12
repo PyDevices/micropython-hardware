@@ -2,35 +2,35 @@
   "urls": [
     [
       "board_config.py",
-      "github:PyDevices/micropython-hardware/board_configs/fbdisplay/esp32-s3-touch-lcd-4_3/board_config.py"
+      "github:PyDevices/pydevices/board_configs/fbdisplay/esp32-s3-touch-lcd-4_3/board_config.py"
     ],
     [
       "board_devices.py",
-      "github:PyDevices/micropython-hardware/board_configs/fbdisplay/esp32-s3-touch-lcd-4_3/board_devices.py"
+      "github:PyDevices/pydevices/board_configs/fbdisplay/esp32-s3-touch-lcd-4_3/board_devices.py"
     ],
     [
       "boarddev.py",
-      "github:PyDevices/micropython-hardware/drivers/boarddev.py"
+      "github:PyDevices/pydevices/drivers/boarddev.py"
     ],
     [
       "ch422g.py",
-      "github:PyDevices/micropython-hardware/drivers/io_expander/ch422g.py"
+      "github:PyDevices/pydevices/drivers/io_expander/ch422g.py"
     ],
     [
       "gt911.py",
-      "github:PyDevices/micropython-hardware/drivers/touch/gt911.py"
+      "github:PyDevices/pydevices/drivers/touch/gt911.py"
     ],
     [
       "sdcard.py",
-      "github:PyDevices/micropython-hardware/drivers/storage/sdcard.py"
+      "github:PyDevices/pydevices/drivers/storage/sdcard.py"
     ],
     [
       "rs485.py",
-      "github:PyDevices/micropython-hardware/drivers/bus/rs485.py"
+      "github:PyDevices/pydevices/drivers/bus/rs485.py"
     ],
     [
       "canbus.py",
-      "github:PyDevices/micropython-hardware/drivers/bus/canbus.py"
+      "github:PyDevices/pydevices/drivers/bus/canbus.py"
     ]
   ],
   "deps": [
@@ -39,18 +39,14 @@
       "latest"
     ],
     [
-      "github:PyDevices/pydisplay/packages/displayif.json",
+      "github:PyDevices/pydevices/packages/events.json",
       "main"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/events.json",
-      "main"
-    ],
-    [
-      "github:PyDevices/micropython-hardware/packages/keys.json",
+      "github:PyDevices/pydevices/packages/keys.json",
       "main"
     ]
   ],
   "version": "0.2",
-  "notes": "Split board_config + board_devices (board devices contract). boarddev from pydisplay."
+  "notes": "Split board_config + board_devices (board devices contract). Product-owned boarddev."
 }

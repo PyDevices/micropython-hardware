@@ -2,43 +2,43 @@
   "urls": [
     [
       "board_config.py",
-      "github:PyDevices/micropython-hardware/board_configs/fbdisplay/m5stack_tab5_ili9881c/board_config.py"
+      "github:PyDevices/pydevices/board_configs/fbdisplay/m5stack_tab5_ili9881c/board_config.py"
     ],
     [
       "gt911.py",
-      "github:PyDevices/micropython-hardware/drivers/touch/gt911.py"
+      "github:PyDevices/pydevices/drivers/touch/gt911.py"
     ],
     [
       "pi4ioe5v.py",
-      "github:PyDevices/micropython-hardware/drivers/io_expander/pi4ioe5v.py"
+      "github:PyDevices/pydevices/drivers/io_expander/pi4ioe5v.py"
     ],
     [
       "tab5_ili9881c_init.py",
-      "github:PyDevices/micropython-hardware/drivers/display/tab5_ili9881c_init.py"
+      "github:PyDevices/pydevices/drivers/display/tab5_ili9881c_init.py"
     ],
     [
       "board_devices.py",
-      "github:PyDevices/micropython-hardware/board_configs/fbdisplay/m5stack_tab5_ili9881c/board_devices.py"
+      "github:PyDevices/pydevices/board_configs/fbdisplay/m5stack_tab5_ili9881c/board_devices.py"
     ],
     [
       "boarddev.py",
-      "github:PyDevices/micropython-hardware/drivers/boarddev.py"
+      "github:PyDevices/pydevices/drivers/boarddev.py"
     ],
     [
       "es7210.py",
-      "github:PyDevices/micropython-hardware/drivers/codec/es7210.py"
+      "github:PyDevices/pydevices/drivers/codec/es7210.py"
     ],
     [
       "es8388.py",
-      "github:PyDevices/micropython-hardware/drivers/codec/es8388.py"
+      "github:PyDevices/pydevices/drivers/codec/es8388.py"
     ],
     [
       "audiodev/__init__.py",
-      "github:PyDevices/micropython-hardware/drivers/audio/audiodev/__init__.py"
+      "github:PyDevices/pydevices/drivers/audio/audiodev/__init__.py"
     ],
     [
       "audiodev/i2s_audio.py",
-      "github:PyDevices/micropython-hardware/drivers/audio/audiodev/i2s_audio.py"
+      "github:PyDevices/pydevices/drivers/audio/audiodev/i2s_audio.py"
     ]
   ],
   "deps": [
@@ -47,11 +47,11 @@
       "latest"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/events.json",
+      "github:PyDevices/pydevices/packages/events.json",
       "main"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/keys.json",
+      "github:PyDevices/pydevices/packages/keys.json",
       "main"
     ]
   ],

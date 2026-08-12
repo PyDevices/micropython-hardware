@@ -17,7 +17,7 @@ permissions:
 jobs:
   publish-desktop:
     runs-on: ubuntu-latest
-    if: github.repository == 'PyDevices/micropython-hardware'
+    if: github.repository == 'PyDevices/pydevices'
     env:
       STAGE_DIR: .pydevices-desktop-build
     steps:
@@ -110,7 +110,7 @@ jobs:
 
   publish-core:
     runs-on: ubuntu-latest
-    if: github.repository == 'PyDevices/micropython-hardware'
+    if: github.repository == 'PyDevices/pydevices'
     steps:
       - uses: actions/checkout@v4
         with:

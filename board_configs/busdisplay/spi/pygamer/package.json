@@ -2,47 +2,47 @@
   "urls": [
     [
       "board_config.py",
-      "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/pygamer/board_config.py"
+      "github:PyDevices/pydevices/board_configs/busdisplay/spi/pygamer/board_config.py"
     ],
     [
       "board_devices.py",
-      "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/pygamer/board_devices.py"
+      "github:PyDevices/pydevices/board_configs/busdisplay/spi/pygamer/board_devices.py"
     ],
     [
       "boarddev.py",
-      "github:PyDevices/micropython-hardware/drivers/boarddev.py"
+      "github:PyDevices/pydevices/drivers/boarddev.py"
     ],
     [
       "st7789.py",
-      "github:PyDevices/micropython-hardware/drivers/display/st7789.py"
+      "github:PyDevices/pydevices/drivers/display/st7789.py"
     ],
     [
       "keypad_shift.py",
-      "github:PyDevices/micropython-hardware/drivers/input/keypad_shift.py"
+      "github:PyDevices/pydevices/drivers/input/keypad_shift.py"
     ],
     [
       "gpiojoystick.py",
-      "github:PyDevices/micropython-hardware/drivers/joystick/gpiojoystick.py"
+      "github:PyDevices/pydevices/drivers/joystick/gpiojoystick.py"
     ],
     [
       "lis3dh.py",
-      "github:PyDevices/micropython-hardware/drivers/imu/lis3dh.py"
+      "github:PyDevices/pydevices/drivers/imu/lis3dh.py"
     ],
     [
       "sdcard.py",
-      "github:PyDevices/micropython-hardware/drivers/storage/sdcard.py"
+      "github:PyDevices/pydevices/drivers/storage/sdcard.py"
     ],
     [
       "battery_adc.py",
-      "github:PyDevices/micropython-hardware/drivers/power/battery_adc.py"
+      "github:PyDevices/pydevices/drivers/power/battery_adc.py"
     ],
     [
       "audiodev/__init__.py",
-      "github:PyDevices/micropython-hardware/drivers/audio/audiodev/__init__.py"
+      "github:PyDevices/pydevices/drivers/audio/audiodev/__init__.py"
     ],
     [
       "audiodev/pwm_tone.py",
-      "github:PyDevices/micropython-hardware/drivers/audio/audiodev/pwm_tone.py"
+      "github:PyDevices/pydevices/drivers/audio/audiodev/pwm_tone.py"
     ]
   ],
   "deps": [
@@ -51,15 +51,15 @@
       "latest"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/spibus.json",
+      "github:PyDevices/pydevices/packages/spibus.json",
       "main"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/events.json",
+      "github:PyDevices/pydevices/packages/events.json",
       "main"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/keys.json",
+      "github:PyDevices/pydevices/packages/keys.json",
       "main"
     ]
   ],

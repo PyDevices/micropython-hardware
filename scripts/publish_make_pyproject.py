@@ -40,9 +40,9 @@ from email.utils import parseaddr
 
 DEFAULT_AUTHOR = "micropython-lib <contact@micropython.org>"
 DEFAULT_LICENSE = "MIT"
-HOME_PAGE = "https://github.com/PyDevices/micropython-hardware"
-DOCS_PAGE = "https://pydevices.github.io/micropython-hardware/"
-ISSUES_PAGE = "https://github.com/PyDevices/micropython-hardware/issues"
+HOME_PAGE = "https://github.com/PyDevices/pydevices"
+DOCS_PAGE = "https://pydevices.github.io/pydevices/"
+ISSUES_PAGE = "https://github.com/PyDevices/pydevices/issues"
 TESTPYPI = "https://test.pypi.org/simple/"
 
 

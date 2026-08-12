@@ -1,10 +1,10 @@
-# micropython-hardware
+# pydevices
 
 Board configs and hardware drivers for [PyDevices](https://github.com/PyDevices)
 on MicroPython and CircuitPython (display, touch, bus, input, …).
 
 This repo holds board configs, hardware drivers, and shared pure-Python
-packages used by both firmware and [pydisplay](https://github.com/PyDevices/pydisplay):
+packages used by both firmware and [pydevices-examples](https://github.com/PyDevices/pydevices-examples):
 `displaydev`, `audiodev`, optional `eventsys`, `multimer`, `events`, and `keys`.
 This repo is their canonical source and publisher. Optional host display
 selection is `displaydev.auto` only — backends never import it.
@@ -23,11 +23,11 @@ selection is `displaydev.auto` only — backends never import it.
 | `docs/` | Hardware documentation (markdown; published on GitHub Pages, not RTD) |
 
 Documentation:
-[pydevices.github.io/micropython-hardware](https://pydevices.github.io/micropython-hardware/)
+[pydevices.github.io/pydevices](https://pydevices.github.io/pydevices/)
 (board configs, board-devices contract, drivers, inventories, device matrix).
 
 Graduated campaign boards use the
-[board devices contract](https://pydevices.github.io/micropython-hardware/board-devices.html):
+[board devices contract](https://pydevices.github.io/pydevices/board-devices.html):
 eager UI hardware in `board_config.py`, lazy extras in `board_devices.py` via
 the local `boarddev`. Event coordination belongs to the application.
 

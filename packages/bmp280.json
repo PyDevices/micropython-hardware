@@ -2,7 +2,7 @@
   "urls": [
     [
       "bmp280.py",
-      "github:PyDevices/micropython-hardware/drivers/env/bmp280.py"
+      "github:PyDevices/pydevices/drivers/env/bmp280.py"
     ]
   ],
   "version": "1.0.0"

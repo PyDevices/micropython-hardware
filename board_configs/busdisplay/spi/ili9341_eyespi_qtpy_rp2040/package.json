@@ -2,15 +2,15 @@
   "urls": [
     [
       "board_config.py",
-      "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/ili9341_eyespi_qtpy_rp2040/board_config.py"
+      "github:PyDevices/pydevices/board_configs/busdisplay/spi/ili9341_eyespi_qtpy_rp2040/board_config.py"
     ],
     [
       "ili9341.py",
-      "github:PyDevices/micropython-hardware/drivers/display/ili9341.py"
+      "github:PyDevices/pydevices/drivers/display/ili9341.py"
     ],
     [
       "ft6x36.py",
-      "github:PyDevices/micropython-hardware/drivers/touch/ft6x36.py"
+      "github:PyDevices/pydevices/drivers/touch/ft6x36.py"
     ]
   ],
   "deps": [
@@ -19,15 +19,15 @@
       "latest"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/spibus.json",
+      "github:PyDevices/pydevices/packages/spibus.json",
       "main"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/events.json",
+      "github:PyDevices/pydevices/packages/events.json",
       "main"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/keys.json",
+      "github:PyDevices/pydevices/packages/keys.json",
       "main"
     ]
   ],

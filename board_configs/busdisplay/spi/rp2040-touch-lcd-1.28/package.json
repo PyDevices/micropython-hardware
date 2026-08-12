@@ -2,31 +2,31 @@
   "urls": [
     [
       "board_config.py",
-      "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/rp2040-touch-lcd-1.28/board_config.py"
+      "github:PyDevices/pydevices/board_configs/busdisplay/spi/rp2040-touch-lcd-1.28/board_config.py"
     ],
     [
       "board_devices.py",
-      "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/rp2040-touch-lcd-1.28/board_devices.py"
+      "github:PyDevices/pydevices/board_configs/busdisplay/spi/rp2040-touch-lcd-1.28/board_devices.py"
     ],
     [
       "boarddev.py",
-      "github:PyDevices/micropython-hardware/drivers/boarddev.py"
+      "github:PyDevices/pydevices/drivers/boarddev.py"
     ],
     [
       "gc9a01.py",
-      "github:PyDevices/micropython-hardware/drivers/display/gc9a01.py"
+      "github:PyDevices/pydevices/drivers/display/gc9a01.py"
     ],
     [
       "cst8xx.py",
-      "github:PyDevices/micropython-hardware/drivers/touch/cst8xx.py"
+      "github:PyDevices/pydevices/drivers/touch/cst8xx.py"
     ],
     [
       "qmi8658.py",
-      "github:PyDevices/micropython-hardware/drivers/imu/qmi8658.py"
+      "github:PyDevices/pydevices/drivers/imu/qmi8658.py"
     ],
     [
       "battery_adc.py",
-      "github:PyDevices/micropython-hardware/drivers/power/battery_adc.py"
+      "github:PyDevices/pydevices/drivers/power/battery_adc.py"
     ]
   ],
   "deps": [
@@ -35,14 +35,14 @@
       "latest"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/events.json",
+      "github:PyDevices/pydevices/packages/events.json",
       "main"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/keys.json",
+      "github:PyDevices/pydevices/packages/keys.json",
       "main"
     ]
   ],
   "version": "0.2",
-  "notes": "Split board_config + board_devices (board devices contract). boarddev from pydisplay."
+  "notes": "Split board_config + board_devices (board devices contract). Product-owned boarddev."
 }

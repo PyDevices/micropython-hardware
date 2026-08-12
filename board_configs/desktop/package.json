@@ -2,51 +2,51 @@
   "urls": [
     [
       "board_config.py",
-      "github:PyDevices/micropython-hardware/board_configs/desktop/board_config.py"
+      "github:PyDevices/pydevices/board_configs/desktop/board_config.py"
     ],
     [
       "board_devices.py",
-      "github:PyDevices/micropython-hardware/board_configs/desktop/board_devices.py"
+      "github:PyDevices/pydevices/board_configs/desktop/board_devices.py"
     ],
     [
       "boarddev.py",
-      "github:PyDevices/micropython-hardware/drivers/boarddev.py"
+      "github:PyDevices/pydevices/drivers/boarddev.py"
     ],
     [
       "audiodev/__init__.py",
-      "github:PyDevices/micropython-hardware/drivers/audio/audiodev/__init__.py"
+      "github:PyDevices/pydevices/drivers/audio/audiodev/__init__.py"
     ],
     [
       "audiodev/auto.py",
-      "github:PyDevices/micropython-hardware/drivers/audio/audiodev/auto.py"
+      "github:PyDevices/pydevices/drivers/audio/audiodev/auto.py"
     ],
     [
       "audiodev/sdl2_audio.py",
-      "github:PyDevices/micropython-hardware/drivers/audio/audiodev/sdl2_audio.py"
+      "github:PyDevices/pydevices/drivers/audio/audiodev/sdl2_audio.py"
     ],
     [
       "audiodev/pygame_audio.py",
-      "github:PyDevices/micropython-hardware/drivers/audio/audiodev/pygame_audio.py"
+      "github:PyDevices/pydevices/drivers/audio/audiodev/pygame_audio.py"
     ],
     [
       "audiodev/web_audio.py",
-      "github:PyDevices/micropython-hardware/drivers/audio/audiodev/web_audio.py"
+      "github:PyDevices/pydevices/drivers/audio/audiodev/web_audio.py"
     ],
     [
       "audiodev/android_audio.py",
-      "github:PyDevices/micropython-hardware/drivers/audio/audiodev/android_audio.py"
+      "github:PyDevices/pydevices/drivers/audio/audiodev/android_audio.py"
     ],
     [
       "audiodev/emulated_audio.py",
-      "github:PyDevices/micropython-hardware/drivers/audio/audiodev/emulated_audio.py"
+      "github:PyDevices/pydevices/drivers/audio/audiodev/emulated_audio.py"
     ],
     [
       "audiodev/win_audio.py",
-      "github:PyDevices/micropython-hardware/drivers/audio/audiodev/win_audio.py"
+      "github:PyDevices/pydevices/drivers/audio/audiodev/win_audio.py"
     ],
     [
       "uwin32.py",
-      "github:PyDevices/micropython-hardware/drivers/uwin32.py"
+      "github:PyDevices/pydevices/drivers/uwin32.py"
     ]
   ],
   "deps": [
@@ -55,19 +55,19 @@
       "latest"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/usdl2.json",
+      "github:PyDevices/pydevices/packages/usdl2.json",
       "main"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/events.json",
+      "github:PyDevices/pydevices/packages/events.json",
       "main"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/keys.json",
+      "github:PyDevices/pydevices/packages/keys.json",
       "main"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/utils.json",
+      "github:PyDevices/pydevices/packages/utils.json",
       "main"
     ]
   ],

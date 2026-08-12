@@ -2,7 +2,7 @@
   "urls": [
     [
       "keys.py",
-      "github:PyDevices/micropython-hardware/lib/keys.py"
+      "github:PyDevices/pydevices/lib/keys.py"
     ]
   ],
   "version": "0.0"

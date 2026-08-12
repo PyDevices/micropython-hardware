@@ -3,7 +3,7 @@
 #
 # Requires:
 #   MICROPYTHON_LIB_DIR   checkout of PyDevices/micropython-lib (PyDevices branch)
-#   PYDEVICES_DIR         micropython-hardware root (default: parent of scripts/)
+#   PYDEVICES_DIR         pydevices root (default: parent of scripts/)
 #
 # Optional:
 #   MICROPYTHON_DIR       micropython source for mpy-cross (default: /tmp/micropython)
@@ -76,7 +76,7 @@ git diff --staged --quiet && {
     echo "No MIP index changes to publish"
     exit 0
 }
-git commit -m "pydevices: Update mip/$MIP_SUBDIR from micropython-hardware ${SHA}."
+git commit -m "pydevices: Update mip/$MIP_SUBDIR from pydevices ${SHA}."
 
 if [[ "$NEW_BRANCH" -eq 0 ]]; then
     git pull --rebase origin gh-pages

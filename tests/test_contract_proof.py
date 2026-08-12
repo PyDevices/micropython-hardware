@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""Structural smoke tests for graduated boards in micropython-hardware."""
+"""Structural smoke tests for graduated boards in pydevices."""
 
 from __future__ import annotations
 
@@ -13,10 +13,10 @@ import sys
 import unittest
 
 HW = Path(__file__).resolve().parents[1]
-# boarddev.py is localized under drivers/ (not pulled from the pydisplay repo).
+# boarddev.py is localized under drivers/ as a product-owned helper.
 LIB = HW / "drivers"
 
-# Graduated campaign boards: name -> path under micropython-hardware/board_configs/
+# Graduated campaign boards: name -> path under pydevices/board_configs/
 EXPECTED = {
     "esp32-p4-wifi6-touch-lcd-4b": {
         "path": "fbdisplay/esp32-p4-wifi6-touch-lcd-4b",
@@ -115,7 +115,7 @@ def _assigned_names(tree: ast.AST) -> set[str]:
     return names
 
 
-@unittest.skipUnless(HW.is_dir(), "sibling micropython-hardware clone required")
+@unittest.skipUnless(HW.is_dir(), "sibling pydevices clone required")
 class TestGraduatedBoardLayout(unittest.TestCase):
     def test_each_board_files_and_ast(self):
         for name, expect in EXPECTED.items():
@@ -157,11 +157,11 @@ class TestGraduatedBoardLayout(unittest.TestCase):
                 self.assertIn("board_devices.py", urls)
                 self.assertIn("boarddev.py", urls)
                 joined = " ".join(u[1] for u in meta["urls"])
-                self.assertIn("micropython-hardware/", joined)
-                self.assertIn("micropython-hardware/drivers/boarddev.py", joined)
+                self.assertIn("pydevices/", joined)
+                self.assertIn("pydevices/drivers/boarddev.py", joined)
 
 
-@unittest.skipUnless(HW.is_dir(), "sibling micropython-hardware clone required")
+@unittest.skipUnless(HW.is_dir(), "sibling pydevices clone required")
 class TestGraduatedBindLazy(unittest.TestCase):
     def test_bind_lazy_and_devices_membership(self):
         if str(LIB) not in sys.path:

@@ -6,7 +6,7 @@
 ``test_portability.py`` runs this under every non-CPython interpreter it can
 find. It is also useful by hand::
 
-    cd micropython-hardware
+    cd pydevices
     micropython tests/portability_probe.py
     micropython.exe tests/portability_probe.py
     circuitpython tests/portability_probe.py

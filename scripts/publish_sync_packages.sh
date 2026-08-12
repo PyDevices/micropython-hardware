@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Publish the canonical PyDevices Python packages from micropython-hardware.
+# Publish the canonical PyDevices Python packages from pydevices.
 #
 # TestPyPI distributions are named pydevices-<mip-name>. MIP package names and
 # Python import names remain unprefixed (displaydev, audiodev, eventsys, ...).
@@ -184,11 +184,11 @@ publish_module() {
 
 $(summary "$package").
 
-Canonical source: [micropython-hardware/lib/$package.py](https://github.com/PyDevices/micropython-hardware/blob/main/lib/$package.py).
+Canonical source: [pydevices/lib/$package.py](https://github.com/PyDevices/pydevices/blob/main/lib/$package.py).
 EOF
 }
 
-# The new source-of-truth collection replaces the stale pydisplay package tree.
+# The new source-of-truth collection replaces the stale legacy pydisplay package tree.
 rm -rf "$DEST_DIR"
 rm -rf "$LEGACY_DEST_DIR"
 mkdir -p "$DEST_DIR"

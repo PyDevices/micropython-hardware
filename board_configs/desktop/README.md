@@ -25,7 +25,7 @@ Run from the directory that should own `./lib`:
 # Shared with CircuitPython (source .py)
 micropython -m mip install --no-mpy -t lib \
   -i https://PyDevices.github.io/micropython-lib/mip/PyDevices \
-  github:PyDevices/micropython-hardware/board_configs/desktop
+  github:PyDevices/pydevices/board_configs/desktop
 
 # MicroPython-only (precompiled .mpy) — omit --no-mpy
 # micropython -m mip install -t lib -i … github:…/board_configs/desktop

@@ -1,6 +1,6 @@
 # Driver inventory
 
-Status of display and touch drivers vendored into pydisplay from Adafruit and Community bundles.
+Status of display and touch drivers vendored into PyDevices from Adafruit and community bundles.
 
 Regenerate display drivers:
 
@@ -51,21 +51,21 @@ python3 scripts/vendor_circuitpython_drivers.py --all
 
 | File | Source | Status |
 |------|--------|--------|
-| `keypad_gpio.py` | pydisplay | in repo |
-| `keypad_shift.py` | pydisplay (74HC165) | in repo |
+| `keypad_gpio.py` | PyDevices | in repo |
+| `keypad_shift.py` | PyDevices (74HC165) | in repo |
 
 ## Touch
 
 | File | Source | Status |
 |------|--------|--------|
-| `ft6x36.py` | pydisplay MP | in repo |
-| `tt21100.py` | pydisplay MP | in repo |
-| `stmpe610.py` | pydisplay MP (SPI) | in repo |
-| `xpt2046.py` | pydisplay MP | in repo |
-| `gt911.py` | pydisplay MP | in repo |
-| `cst8xx.py` | pydisplay MP | in repo |
-| `cst226.py` | pydisplay MP | in repo |
-| `chsc6x.py` | pydisplay MP | in repo |
+| `ft6x36.py` | PyDevices MP | in repo |
+| `tt21100.py` | PyDevices MP | in repo |
+| `stmpe610.py` | PyDevices MP (SPI) | in repo |
+| `xpt2046.py` | PyDevices MP | in repo |
+| `gt911.py` | PyDevices MP | in repo |
+| `cst8xx.py` | PyDevices MP | in repo |
+| `cst226.py` | PyDevices MP | in repo |
+| `chsc6x.py` | PyDevices MP | in repo |
 | `circuitpython/adafruit_focaltouch.py` | Adafruit shim | in repo |
 | `circuitpython/adafruit_ft5336.py` | Adafruit | vendored |
 | `circuitpython/adafruit_tsc2007.py` | Adafruit | vendored |

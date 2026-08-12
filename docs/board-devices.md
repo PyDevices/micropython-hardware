@@ -5,7 +5,7 @@ stable role names, and a clear split between eager UI devices and lazy extras.
 
 This is the **target** contract for **MicroPython** boards. Board configs and
 drivers live in
-[`micropython-hardware`](https://github.com/PyDevices/micropython-hardware).
+[`pydevices`](https://github.com/PyDevices/pydevices).
 
 **CircuitPython** (`board_configs/cp/`) does **not** use `board_devices.py` or
 lazy `DEVICES`. CP already exposes pins/buses via the native `board` module.
@@ -79,7 +79,7 @@ from board_devices import DEVICES, setup_devices
 setup_devices(globals())
 ```
 
-Shared boilerplate is [`boarddev`](https://github.com/PyDevices/micropython-hardware/blob/main/drivers/boarddev.py) under `drivers/`
+Shared boilerplate is [`boarddev`](https://github.com/PyDevices/pydevices/blob/main/drivers/boarddev.py) under `drivers/`
 (name signals *devices*, not `board_config`). Typical
 `board_devices.setup_devices` is a thin wrapper around `boarddev.bind_lazy`.
 A board may replace `setup_devices` and skip `boarddev` entirely.
@@ -153,12 +153,12 @@ if "wlan" in board.DEVICES:
 ## Rollout
 
 Board configs and drivers live in
-[`PyDevices/micropython-hardware`](https://github.com/PyDevices/micropython-hardware).
+[`PyDevices/pydevices`](https://github.com/PyDevices/pydevices).
 MicroPython campaign + product boards use the split layout
 (`board_config.py` + `board_devices.py`). CircuitPython twins under `cp/` stay
 single-file (eager UI only).
 
-| In micropython-hardware now | Still to do |
+| In pydevices now | Still to do |
 |-----------------------------|-------------|
 | MP split layout for matrix product boards | Fill remaining lazy factories (`NotImplementedError`) |
 | CP eager UI parity (`touch` / `keypad` / `encoder` / `joystick`) | Optional MP Feather DVI config; CP non-UI stays on `board` |

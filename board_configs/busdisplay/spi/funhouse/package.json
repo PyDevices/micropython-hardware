@@ -2,47 +2,47 @@
   "urls": [
     [
       "board_config.py",
-      "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/funhouse/board_config.py"
+      "github:PyDevices/pydevices/board_configs/busdisplay/spi/funhouse/board_config.py"
     ],
     [
       "board_devices.py",
-      "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/funhouse/board_devices.py"
+      "github:PyDevices/pydevices/board_configs/busdisplay/spi/funhouse/board_devices.py"
     ],
     [
       "boarddev.py",
-      "github:PyDevices/micropython-hardware/drivers/boarddev.py"
+      "github:PyDevices/pydevices/drivers/boarddev.py"
     ],
     [
       "st7789.py",
-      "github:PyDevices/micropython-hardware/drivers/display/st7789.py"
+      "github:PyDevices/pydevices/drivers/display/st7789.py"
     ],
     [
       "tt21100.py",
-      "github:PyDevices/micropython-hardware/drivers/touch/tt21100.py"
+      "github:PyDevices/pydevices/drivers/touch/tt21100.py"
     ],
     [
       "keypad_gpio.py",
-      "github:PyDevices/micropython-hardware/drivers/input/keypad_gpio.py"
+      "github:PyDevices/pydevices/drivers/input/keypad_gpio.py"
     ],
     [
       "dotstar.py",
-      "github:PyDevices/micropython-hardware/drivers/led/dotstar.py"
+      "github:PyDevices/pydevices/drivers/led/dotstar.py"
     ],
     [
       "ahtx0.py",
-      "github:PyDevices/micropython-hardware/drivers/env/ahtx0.py"
+      "github:PyDevices/pydevices/drivers/env/ahtx0.py"
     ],
     [
       "bmp280.py",
-      "github:PyDevices/micropython-hardware/drivers/env/bmp280.py"
+      "github:PyDevices/pydevices/drivers/env/bmp280.py"
     ],
     [
       "audiodev/__init__.py",
-      "github:PyDevices/micropython-hardware/drivers/audio/audiodev/__init__.py"
+      "github:PyDevices/pydevices/drivers/audio/audiodev/__init__.py"
     ],
     [
       "audiodev/pwm_tone.py",
-      "github:PyDevices/micropython-hardware/drivers/audio/audiodev/pwm_tone.py"
+      "github:PyDevices/pydevices/drivers/audio/audiodev/pwm_tone.py"
     ]
   ],
   "deps": [
@@ -51,15 +51,15 @@
       "latest"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/spibus.json",
+      "github:PyDevices/pydevices/packages/spibus.json",
       "main"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/events.json",
+      "github:PyDevices/pydevices/packages/events.json",
       "main"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/keys.json",
+      "github:PyDevices/pydevices/packages/keys.json",
       "main"
     ]
   ],

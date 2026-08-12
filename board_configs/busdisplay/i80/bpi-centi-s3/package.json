@@ -2,24 +2,24 @@
   "urls": [
     [
       "board_config.py",
-      "github:PyDevices/micropython-hardware/board_configs/busdisplay/i80/bpi-centi-s3/board_config.py"
+      "github:PyDevices/pydevices/board_configs/busdisplay/i80/bpi-centi-s3/board_config.py"
     ],
     [
       "st7789.py",
-      "github:PyDevices/micropython-hardware/drivers/display/st7789.py"
+      "github:PyDevices/pydevices/drivers/display/st7789.py"
     ],
     [
       "board_devices.py",
-      "github:PyDevices/micropython-hardware/board_configs/busdisplay/i80/bpi-centi-s3/board_devices.py"
+      "github:PyDevices/pydevices/board_configs/busdisplay/i80/bpi-centi-s3/board_devices.py"
     ],
     [
       "boarddev.py",
-      "github:PyDevices/micropython-hardware/drivers/boarddev.py"
+      "github:PyDevices/pydevices/drivers/boarddev.py"
     ]
   ],
   "deps": [
     [
-      "github:PyDevices/micropython-hardware/packages/i80bus.json",
+      "github:PyDevices/pydevices/packages/i80bus.json",
       "main"
     ]
   ],

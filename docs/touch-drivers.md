@@ -2,7 +2,7 @@
 
 Touch controller helpers for `board_config.py`.
 
-Source: [`drivers/touch/`](https://github.com/PyDevices/micropython-hardware/tree/main/drivers/touch)
+Source: [`drivers/touch/`](https://github.com/PyDevices/pydevices/tree/main/drivers/touch)
 
 ## board_config.py contract
 
@@ -26,9 +26,9 @@ See any working board config (e.g. `wokwi_ili9341_ft6x36_esp32s3` or
 Board packages include the touch driver when needed. Individual install:
 
 ```python
-mip.install("github:PyDevices/micropython-hardware/packages/tt21100.json", target="./")
-mip.install("github:PyDevices/micropython-hardware/packages/stmpe610.json", target="./")
-mip.install("github:PyDevices/micropython-hardware/drivers/touch/ft6x36.py", target="./drivers/touch")
+mip.install("github:PyDevices/pydevices/packages/tt21100.json", target="./")
+mip.install("github:PyDevices/pydevices/packages/stmpe610.json", target="./")
+mip.install("github:PyDevices/pydevices/drivers/touch/ft6x36.py", target="./drivers/touch")
 ```
 
 Micropython-lib index packages: `ft6x36`, `xpt2046`, `cst226`, `tt21100`, `stmpe610`, etc.

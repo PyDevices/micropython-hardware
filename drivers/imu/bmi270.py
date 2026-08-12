@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: 2023 Arduino SA
-# SPDX-FileCopyrightText: 2026 PyDevices (vendored into micropython-hardware)
+# SPDX-FileCopyrightText: 2026 PyDevices (vendored into pydevices)
 #
 # SPDX-License-Identifier: MIT
 #

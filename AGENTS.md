@@ -1,10 +1,10 @@
-# AGENTS.md — micropython-hardware
+# AGENTS.md — pydevices
 
 Canonical PyDevices product/source repository. Owns **board configs**,
 **hardware drivers**, portable libraries (`displaydev`, `audiodev`, optional
 `eventsys`, `multimer`, `events`, `keys`), and pip/MIP publishing.
 Docs are markdown under `docs/`, published only via GitHub Pages
-([pydevices.github.io/micropython-hardware](https://pydevices.github.io/micropython-hardware/))
+([pydevices.github.io/pydevices](https://pydevices.github.io/pydevices/))
 — not Read the Docs. Build locally with `./scripts/build_pages.sh` (needs
 `pandoc`).
 
@@ -21,7 +21,7 @@ Docs are markdown under `docs/`, published only via GitHub Pages
   paths.
 - **MicroPython** board devices contract: `board_config.py` (eager UI hardware) +
   `board_devices.py` (`DEVICES`, lazy factories) + `setup_devices(globals())`
-  using pydisplay `boarddev`. Pin wiring for lazy extras lives in
+  using the product-owned `boarddev`. Pin wiring for lazy extras lives in
   `board_devices` factories.
 - **CircuitPython** (`board_configs/cp/`): **no** `board_devices.py`, **no**
   `DEVICES` / `setup_devices`, and **no** `from board_config import …`.
@@ -32,9 +32,9 @@ Docs are markdown under `docs/`, published only via GitHub Pages
   peripherals stay on CP `board` / libraries.
 - Run `SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy python -m unittest discover -s tests` after changing `displaydev`, `multimer`, `events`, `keys`, `audiodev`, `boarddev`, or `utils/`. See `tests/README.md`.
 - Keep MIP `package.json` URLs on
-  `github:PyDevices/micropython-hardware/...` for files in this repo,
+  `github:PyDevices/pydevices/...` for files in this repo,
   including `boarddev.py`, which is localized under `drivers/boarddev.py`
-  (MicroPython boards only; not pulled from pydisplay).
+  (MicroPython boards only; all sources are product-owned).
   MIP names and Python imports remain unprefixed (`displaydev`, `audiodev`,
   `eventsys`, `events`, `keys`, `multimer`). TestPyPI distribution names are
   always `pydevices-*`. `displaydev` → `events` + `keys`; optional `eventsys`
@@ -58,5 +58,5 @@ Docs are markdown under `docs/`, published only via GitHub Pages
 
 ## Local layout
 
-Typical clone: `~/gh/pydevices/micropython-hardware` next to
-`~/gh/pydevices/pydisplay`.
+Typical clone: `~/gh/pydevices/pydevices` next to
+`~/gh/pydevices/pydevices-examples`.

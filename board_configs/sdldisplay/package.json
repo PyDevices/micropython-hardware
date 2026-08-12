@@ -2,7 +2,7 @@
   "urls": [
     [
       "board_config.py",
-      "github:PyDevices/micropython-hardware/board_configs/sdldisplay/board_config.py"
+      "github:PyDevices/pydevices/board_configs/sdldisplay/board_config.py"
     ]
   ],
   "deps": [
@@ -11,15 +11,15 @@
       "latest"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/usdl2.json",
+      "github:PyDevices/pydevices/packages/usdl2.json",
       "main"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/events.json",
+      "github:PyDevices/pydevices/packages/events.json",
       "main"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/keys.json",
+      "github:PyDevices/pydevices/packages/keys.json",
       "main"
     ]
   ],

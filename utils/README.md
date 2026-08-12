@@ -1,11 +1,11 @@
 # Utils
 
-Portable helpers shared by board configs and [pydisplay](https://github.com/PyDevices/pydisplay).
+Portable helpers shared by board configs and [pydevices-examples](https://github.com/PyDevices/pydevices-examples).
 Install onto `utils/` (or `.` if that directory is already on `sys.path`):
 
 ```python
 import mip
-mip.install("github:PyDevices/micropython-hardware/packages/utils.json", target="./utils")
+mip.install("github:PyDevices/pydevices/packages/utils.json", target="./utils")
 ```
 
 | Module | Role |

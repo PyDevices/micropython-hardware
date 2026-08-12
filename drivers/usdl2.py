@@ -951,7 +951,7 @@ if _use_ffi:
     # trampoline crashes the moment SDL's timer thread calls it. So on
     # MicroPython, timers are cooperative/software instead of real SDL ones:
     # SDL_AddTimer() just records a deadline, and SDL_PumpEvents()/
-    # SDL_PollEvent() -- already polled regularly by pydisplay's event loop,
+    # SDL_PollEvent() -- already polled regularly by the application's event loop,
     # on a safe/registered thread -- fire any due callbacks in-line.
     import time
 

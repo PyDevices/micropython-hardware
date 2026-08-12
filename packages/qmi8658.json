@@ -2,7 +2,7 @@
   "urls": [
     [
       "qmi8658.py",
-      "github:PyDevices/micropython-hardware/drivers/imu/qmi8658.py"
+      "github:PyDevices/pydevices/drivers/imu/qmi8658.py"
     ]
   ],
   "version": "0.1"

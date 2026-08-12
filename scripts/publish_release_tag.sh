@@ -6,7 +6,7 @@
 # triggers this repo's publish workflow.
 #
 # Before tagging, pre-bumps every distribution published by this repo in the
-# sibling pydisplay/requirements.txt and commits there when needed.
+# sibling pydevices-examples/requirements.txt and commits there when needed.
 #
 # Usage:
 #   ./scripts/publish_release_tag.sh                # auto version; create tag
@@ -16,7 +16,7 @@
 #
 # Preview the next version:  ./scripts/next_release_version.sh --verbose
 #
-# Override sibling checkout: PYDISPLAY_ROOT=/path/to/pydisplay
+# Override sibling checkout: PYDEVICES_EXAMPLES_ROOT=/path/to/pydevices-examples
 
 set -euo pipefail
 
@@ -32,13 +32,13 @@ Create an annotated git tag vVERSION on the current commit.
 
   VERSION     Optional semver X.Y.Z. When omitted, computed by
               scripts/next_release_version.sh (highest tag + 1 patch).
-  --push      Push pydisplay floors (if committed), this branch, and the tag
+  --push      Push pydevices-examples floors (if committed), this branch, and the tag
   --dry-run   Print the version / floor bump; do not commit or tag
 
 Before tagging, bumps the `pydevices-events`, `pydevices-keys`,
 `pydevices-multimer`, `pydevices-displaydev`, `pydevices-audiodev`,
 `pydevices-eventsys`, and `pydevices-desktop` floors to VERSION in the sibling
-pydisplay checkout (override with PYDISPLAY_ROOT).
+pydevices-examples checkout (override with PYDEVICES_EXAMPLES_ROOT).
 
 Examples:
   ./scripts/publish_release_tag.sh --push
@@ -94,22 +94,22 @@ fi
 
 TAG="v$VERSION"
 
-resolve_pydisplay_root() {
-    if [[ -n "${PYDISPLAY_ROOT:-}" ]]; then
-        printf '%s\n' "$(cd "$PYDISPLAY_ROOT" && pwd)"
+resolve_examples_root() {
+    if [[ -n "${PYDEVICES_EXAMPLES_ROOT:-}" ]]; then
+        printf '%s\n' "$(cd "$PYDEVICES_EXAMPLES_ROOT" && pwd)"
         return
     fi
-    local sibling="$SOURCE_REPO/../pydisplay"
+    local sibling="$SOURCE_REPO/../pydevices-examples"
     if [[ -d "$sibling/scripts" && -f "$sibling/requirements.txt" ]]; then
         printf '%s\n' "$(cd "$sibling" && pwd)"
         return
     fi
-    local home_sibling="${HOME}/gh/pydevices/pydisplay"
+    local home_sibling="${HOME}/gh/pydevices/pydevices-examples"
     if [[ -d "$home_sibling/scripts" && -f "$home_sibling/requirements.txt" ]]; then
         printf '%s\n' "$(cd "$home_sibling" && pwd)"
         return
     fi
-    echo "Error: pydisplay checkout not found (set PYDISPLAY_ROOT)." >&2
+    echo "Error: pydevices-examples checkout not found (set PYDEVICES_EXAMPLES_ROOT)." >&2
     return 1
 }
 
@@ -134,21 +134,21 @@ else
     echo "Version: ${VERSION} (explicit)"
 fi
 
-PYDISPLAY_ROOT="$(resolve_pydisplay_root)"
-echo "Pre-bump micropython-hardware TestPyPI distributions to >=${VERSION} in ${PYDISPLAY_ROOT}/requirements.txt"
+PYDEVICES_EXAMPLES_ROOT="$(resolve_examples_root)"
+echo "Pre-bump pydevices TestPyPI distributions to >=${VERSION} in ${PYDEVICES_EXAMPLES_ROOT}/requirements.txt"
 
 if [[ "$DRY_RUN" -eq 1 ]]; then
-    echo "Dry run — would bump pydisplay floors, commit there if needed, then create tag $TAG here"
+    echo "Dry run — would bump pydevices-examples floors, commit there if needed, then create tag $TAG here"
     exit 0
 fi
 
-if ! git -C "$PYDISPLAY_ROOT" diff --quiet || ! git -C "$PYDISPLAY_ROOT" diff --cached --quiet; then
-    echo "Error: pydisplay working tree has uncommitted changes; commit or stash before tagging." >&2
+if ! git -C "$PYDEVICES_EXAMPLES_ROOT" diff --quiet || ! git -C "$PYDEVICES_EXAMPLES_ROOT" diff --cached --quiet; then
+    echo "Error: pydevices-examples working tree has uncommitted changes; commit or stash before tagging." >&2
     exit 1
 fi
 
-python3 "$PYDISPLAY_ROOT/scripts/refresh-requirements.py" \
-    --path "$PYDISPLAY_ROOT/requirements.txt" \
+python3 "$PYDEVICES_EXAMPLES_ROOT/scripts/refresh-requirements.py" \
+    --path "$PYDEVICES_EXAMPLES_ROOT/requirements.txt" \
     --set \
     "pydevices-events=${VERSION}" \
     "pydevices-keys=${VERSION}" \
@@ -158,20 +158,20 @@ python3 "$PYDISPLAY_ROOT/scripts/refresh-requirements.py" \
     "pydevices-eventsys=${VERSION}" \
     "pydevices-desktop=${VERSION}"
 
-if ! git -C "$PYDISPLAY_ROOT" diff --quiet -- requirements.txt; then
-    git -C "$PYDISPLAY_ROOT" add requirements.txt
-    git -C "$PYDISPLAY_ROOT" commit -m "$(cat <<EOF
-Bump micropython-hardware TestPyPI floors for v${VERSION}.
+if ! git -C "$PYDEVICES_EXAMPLES_ROOT" diff --quiet -- requirements.txt; then
+    git -C "$PYDEVICES_EXAMPLES_ROOT" add requirements.txt
+    git -C "$PYDEVICES_EXAMPLES_ROOT" commit -m "$(cat <<EOF
+Bump pydevices TestPyPI floors for v${VERSION}.
 
 EOF
 )"
-    echo "Committed pydisplay requirements.txt floors for micropython-hardware $VERSION"
+    echo "Committed pydevices-examples requirements.txt floors for pydevices $VERSION"
     if [[ "$DO_PUSH" -eq 1 ]]; then
-        git -C "$PYDISPLAY_ROOT" push origin HEAD
-        echo "Pushed pydisplay HEAD"
+        git -C "$PYDEVICES_EXAMPLES_ROOT" push origin HEAD
+        echo "Pushed pydevices-examples HEAD"
     fi
 else
-    echo "micropython-hardware floors already at $VERSION; no pydisplay floor commit"
+    echo "pydevices floors already at $VERSION; no pydevices-examples floor commit"
 fi
 
 git tag -a "$TAG" -m "Release $VERSION"

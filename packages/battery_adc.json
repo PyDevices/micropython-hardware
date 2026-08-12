@@ -2,7 +2,7 @@
   "urls": [
     [
       "battery_adc.py",
-      "github:PyDevices/micropython-hardware/drivers/power/battery_adc.py"
+      "github:PyDevices/pydevices/drivers/power/battery_adc.py"
     ]
   ],
   "version": "0.1"

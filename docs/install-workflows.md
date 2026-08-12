@@ -13,7 +13,7 @@ import mip
 
 INDEX = "https://PyDevices.github.io/micropython-lib/mip/PyDevices"
 mip.install(
-    "github:PyDevices/micropython-hardware/board_configs/busdisplay/i80/t-display-s3",
+    "github:PyDevices/pydevices/board_configs/busdisplay/i80/t-display-s3",
     index=INDEX,
 )
 ```
@@ -43,7 +43,7 @@ MicroPython-only (precompiled `.mpy`):
 ```bash
 micropython -m mip install -t lib \
   -i https://PyDevices.github.io/micropython-lib/mip/PyDevices \
-  github:PyDevices/micropython-hardware/board_configs/desktop
+  github:PyDevices/pydevices/board_configs/desktop
 ```
 
 Shared with CircuitPython (source `.py`):
@@ -51,7 +51,7 @@ Shared with CircuitPython (source `.py`):
 ```bash
 micropython -m mip install --no-mpy -t lib \
   -i https://PyDevices.github.io/micropython-lib/mip/PyDevices \
-  github:PyDevices/micropython-hardware/board_configs/desktop
+  github:PyDevices/pydevices/board_configs/desktop
 ```
 
 Same commands with `micropython.exe` on Windows. Pin a branch with
@@ -65,7 +65,7 @@ import mip
 
 INDEX = "https://PyDevices.github.io/micropython-lib/mip/PyDevices"
 mip.install(
-    "github:PyDevices/micropython-hardware/board_configs/desktop",
+    "github:PyDevices/pydevices/board_configs/desktop",
     index=INDEX,
     target="lib",
     mpy=False,  # omit for MicroPython-only .mpy installs
@@ -113,7 +113,7 @@ Run from your target working directory (for example `/tmp/my-cpy-run`):
 ```bash
 micropython -m mip install --no-mpy -t lib \
   -i https://PyDevices.github.io/micropython-lib/mip/PyDevices \
-  github:PyDevices/micropython-hardware/board_configs/desktop
+  github:PyDevices/pydevices/board_configs/desktop
 ```
 
 Then run CircuitPython from that same directory so it imports from `./lib`.

@@ -2,11 +2,11 @@
   "urls": [
     [
       "board_config.py",
-      "github:PyDevices/micropython-hardware/board_configs/busdisplay/i2c/sh1107_oled_128x64/board_config.py"
+      "github:PyDevices/pydevices/board_configs/busdisplay/i2c/sh1107_oled_128x64/board_config.py"
     ],
     [
       "sh1107.py",
-      "github:PyDevices/micropython-hardware/drivers/display/sh1107.py"
+      "github:PyDevices/pydevices/drivers/display/sh1107.py"
     ]
   ],
   "deps": [
@@ -15,15 +15,15 @@
       "latest"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/i2cbus.json",
+      "github:PyDevices/pydevices/packages/i2cbus.json",
       "main"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/events.json",
+      "github:PyDevices/pydevices/packages/events.json",
       "main"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/keys.json",
+      "github:PyDevices/pydevices/packages/keys.json",
       "main"
     ]
   ],

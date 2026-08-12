@@ -2,7 +2,7 @@
   "urls": [
     [
       "lis3dh.py",
-      "github:PyDevices/micropython-hardware/drivers/imu/lis3dh.py"
+      "github:PyDevices/pydevices/drivers/imu/lis3dh.py"
     ]
   ],
   "version": "1.0.0"

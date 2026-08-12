@@ -1,6 +1,6 @@
 # Drivers
 
-Hardware helpers for [micropython-hardware](https://github.com/PyDevices/micropython-hardware)
+Hardware helpers for [pydevices](https://github.com/PyDevices/pydevices)
 board configs. Prefer single-file modules; MIP manifests live under `../packages/`.
 
 | Path | Role |

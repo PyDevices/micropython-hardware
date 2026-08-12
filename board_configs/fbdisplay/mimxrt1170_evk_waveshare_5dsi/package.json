@@ -2,11 +2,11 @@
   "urls": [
     [
       "board_config.py",
-      "github:PyDevices/micropython-hardware/board_configs/fbdisplay/mimxrt1170_evk_waveshare_5dsi/board_config.py"
+      "github:PyDevices/pydevices/board_configs/fbdisplay/mimxrt1170_evk_waveshare_5dsi/board_config.py"
     ],
     [
       "gt911.py",
-      "github:PyDevices/micropython-hardware/drivers/touch/gt911.py"
+      "github:PyDevices/pydevices/drivers/touch/gt911.py"
     ]
   ],
   "deps": [
@@ -15,11 +15,11 @@
       "latest"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/events.json",
+      "github:PyDevices/pydevices/packages/events.json",
       "main"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/keys.json",
+      "github:PyDevices/pydevices/packages/keys.json",
       "main"
     ]
   ],

@@ -2,11 +2,11 @@
   "urls": [
     [
       "board_config.py",
-      "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/ssd1351_128_oled/board_config.py"
+      "github:PyDevices/pydevices/board_configs/busdisplay/spi/ssd1351_128_oled/board_config.py"
     ],
     [
       "ssd1351.py",
-      "github:PyDevices/micropython-hardware/drivers/display/ssd1351.py"
+      "github:PyDevices/pydevices/drivers/display/ssd1351.py"
     ]
   ],
   "deps": [
@@ -15,15 +15,15 @@
       "latest"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/spibus.json",
+      "github:PyDevices/pydevices/packages/spibus.json",
       "main"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/events.json",
+      "github:PyDevices/pydevices/packages/events.json",
       "main"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/keys.json",
+      "github:PyDevices/pydevices/packages/keys.json",
       "main"
     ]
   ],

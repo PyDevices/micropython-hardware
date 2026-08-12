@@ -1,12 +1,12 @@
-# TFT_eSPI parity (Arduino) vs pydisplay / displayif
+# TFT_eSPI parity (Arduino) vs PyDevices / displayif
 
-[TFT_eSPI](https://github.com/Bodmer/TFT_eSPI) is an Arduino graphics library with per-board `User_Setup` pin tables and many chip drivers. pydisplay splits the same problem across **bus drivers**, **chip drivers**, and **displayif** accelerated scanout.
+[TFT_eSPI](https://github.com/Bodmer/TFT_eSPI) is an Arduino graphics library with per-board `User_Setup` pin tables and many chip drivers. PyDevices splits the same problem across **bus drivers**, **chip drivers**, and **displayif** accelerated scanout.
 
 This document states what is **implemented**, what uses **Python fallbacks**, and what is **out of scope** (document only).
 
 ## Bus-level mapping
 
-| TFT_eSPI mode | pydisplay (Python) | displayif (MicroPython C) | Notes |
+| TFT_eSPI mode | PyDevices (Python) | displayif (MicroPython C) | Notes |
 |---------------|-------------------|---------------------------|-------|
 | SPI (`SPI_FREQUENCY`, `TFT_*`) | `spibus.SPIBus` + chip driver (`ili9341`, `st7789`, …) | `spibus` cmod | Full parity for SPI TFT init + pixel push via `BusDisplay` |
 | 8-bit parallel 8080 (`TFT_D0`…`TFT_D7`, `TFT_WR`) | `drivers/bus/i80bus.py` (viper GPIO bitbang) | **rp2:** PIO+DMA `i80bus`; **esp32-S3:** `esp_lcd` I80; **mimxrt1062:** FlexIO MCULCD; **samd51:** GPIO bitbang (`common/i80bus`) | Native path preferred when flashed; Python path works without displayif |
@@ -60,7 +60,7 @@ This document states what is **implemented**, what uses **Python fallbacks**, an
 
 ## Chip drivers (TFT_eSPI `SetupNNN_*`)
 
-TFT_eSPI bundles dozens of controller init tables. pydisplay **vendors CircuitPython displayio chip drivers** (`ili9341`, `st7701`, `gc9a01`, …) and wires them through `BusDisplay` — equivalent role, different file layout. Adding a new panel is a **driver + board_config** pair, not a `User_Setup.h` edit.
+TFT_eSPI bundles dozens of controller init tables. PyDevices **vendors CircuitPython displayio chip drivers** (`ili9341`, `st7701`, `gc9a01`, …) and wires them through `BusDisplay` — equivalent role, different file layout. Adding a new panel is a **driver + board_config** pair, not a `User_Setup.h` edit.
 
 ## Board config coverage (MP + CP)
 
@@ -78,7 +78,7 @@ TFT_eSPI bundles dozens of controller init tables. pydisplay **vendors CircuitPy
 
 ## When not to port TFT_eSPI features
 
-- **ESP8266** — out of pydisplay scope
+- **ESP8266** — out of PyDevices scope
 - **AVR** — out of scope
 - **PSRAM-less ESP32** large framebuffers — hardware limit; use smaller buffers or SPI TFT
 - **ST7123 Tab5** on MicroPython — use `m5stack_tab5_st7123`; hardware validation pending

@@ -2,7 +2,7 @@
   "urls": [
     [
       "board_config.py",
-      "github:PyDevices/micropython-hardware/board_configs/fbdisplay/adafruit_metro_rp2350_hstx_640x480/board_config.py"
+      "github:PyDevices/pydevices/board_configs/fbdisplay/adafruit_metro_rp2350_hstx_640x480/board_config.py"
     ]
   ],
   "deps": [
@@ -11,15 +11,11 @@
       "latest"
     ],
     [
-      "github:PyDevices/pydisplay/packages/picodvi.json",
+      "github:PyDevices/pydevices/packages/events.json",
       "main"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/events.json",
-      "main"
-    ],
-    [
-      "github:PyDevices/micropython-hardware/packages/keys.json",
+      "github:PyDevices/pydevices/packages/keys.json",
       "main"
     ]
   ],

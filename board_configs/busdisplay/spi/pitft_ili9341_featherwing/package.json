@@ -2,23 +2,23 @@
   "urls": [
     [
       "board_config.py",
-      "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/pitft_ili9341_featherwing/board_config.py"
+      "github:PyDevices/pydevices/board_configs/busdisplay/spi/pitft_ili9341_featherwing/board_config.py"
     ],
     [
       "ili9341.py",
-      "github:PyDevices/micropython-hardware/drivers/display/ili9341.py"
+      "github:PyDevices/pydevices/drivers/display/ili9341.py"
     ],
     [
       "stmpe610.py",
-      "github:PyDevices/micropython-hardware/drivers/touch/stmpe610.py"
+      "github:PyDevices/pydevices/drivers/touch/stmpe610.py"
     ],
     [
       "board_devices.py",
-      "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/pitft_ili9341_featherwing/board_devices.py"
+      "github:PyDevices/pydevices/board_configs/busdisplay/spi/pitft_ili9341_featherwing/board_devices.py"
     ],
     [
       "boarddev.py",
-      "github:PyDevices/micropython-hardware/drivers/boarddev.py"
+      "github:PyDevices/pydevices/drivers/boarddev.py"
     ]
   ],
   "deps": [
@@ -27,15 +27,15 @@
       "latest"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/spibus.json",
+      "github:PyDevices/pydevices/packages/spibus.json",
       "main"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/events.json",
+      "github:PyDevices/pydevices/packages/events.json",
       "main"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/keys.json",
+      "github:PyDevices/pydevices/packages/keys.json",
       "main"
     ]
   ],

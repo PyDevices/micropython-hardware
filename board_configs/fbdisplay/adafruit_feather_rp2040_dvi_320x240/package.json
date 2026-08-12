@@ -2,7 +2,7 @@
   "urls": [
     [
       "board_config.py",
-      "github:PyDevices/micropython-hardware/board_configs/fbdisplay/adafruit_feather_rp2040_dvi_320x240/board_config.py"
+      "github:PyDevices/pydevices/board_configs/fbdisplay/adafruit_feather_rp2040_dvi_320x240/board_config.py"
     ]
   ],
   "deps": [
@@ -11,11 +11,11 @@
       "latest"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/events.json",
+      "github:PyDevices/pydevices/packages/events.json",
       "main"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/keys.json",
+      "github:PyDevices/pydevices/packages/keys.json",
       "main"
     ]
   ],

@@ -2,31 +2,31 @@
   "urls": [
     [
       "byteswap.py",
-      "github:PyDevices/micropython-hardware/utils/byteswap.py"
+      "github:PyDevices/pydevices/utils/byteswap.py"
     ],
     [
       "frame_recorder.py",
-      "github:PyDevices/micropython-hardware/utils/frame_recorder.py"
+      "github:PyDevices/pydevices/utils/frame_recorder.py"
     ],
     [
       "keypins.py",
-      "github:PyDevices/micropython-hardware/utils/keypins.py"
+      "github:PyDevices/pydevices/utils/keypins.py"
     ],
     [
       "micropython.py",
-      "github:PyDevices/micropython-hardware/utils/micropython.py"
+      "github:PyDevices/pydevices/utils/micropython.py"
     ],
     [
       "mip.py",
-      "github:PyDevices/micropython-hardware/utils/mip.py"
+      "github:PyDevices/pydevices/utils/mip.py"
     ],
     [
       "viper_tools.py",
-      "github:PyDevices/micropython-hardware/utils/viper_tools.py"
+      "github:PyDevices/pydevices/utils/viper_tools.py"
     ],
     [
       "wifi.py",
-      "github:PyDevices/micropython-hardware/utils/wifi.py"
+      "github:PyDevices/pydevices/utils/wifi.py"
     ]
   ],
   "version": "0.0"

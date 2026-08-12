@@ -1,11 +1,11 @@
 # Publishing
 
-`micropython-hardware` is the canonical source and release owner for the
+`pydevices` is the canonical source and release owner for the
 portable PyDevices core. A single release tag publishes the core packages to
 TestPyPI, syncs their unprefixed MIP packages into the PyDevices
 `micropython-lib` fork, and rebuilds the PyDevices MIP index.
 
-`pydisplay` is the examples and integration showcase. It consumes these
+`pydevices-examples` is the examples and integration showcase. It consumes these
 packages, but does not publish them.
 
 ## Package names
@@ -86,7 +86,7 @@ The next core release is normally created from a clean `main` checkout with:
 
 Omit `X.Y.Z` to use the next patch version reported by
 `scripts/next_release_version.sh`. The helper updates the package floors in the
-sibling `pydisplay/requirements.txt` when needed, commits that change, creates
+sibling `pydevices-examples/requirements.txt` when needed, commits that change, creates
 an annotated `vX.Y.Z` tag, and pushes it.
 
 The tag starts `.github/workflows/publish-pydevices.yml`. Its jobs:
@@ -104,7 +104,7 @@ The workflow requires these repository secrets:
 
 Before tagging, run the unit tests and the publisher in a temporary/staging
 mode, confirm the `micropython-lib` sync diff, and make sure both this repo and
-the sibling `pydisplay` checkout are clean. Published versions cannot be
+the sibling `pydevices-examples` checkout are clean. Published versions cannot be
 replaced on TestPyPI; use a new version to correct a release.
 
 The companion repositories own their own tags and publishing workflows. Their

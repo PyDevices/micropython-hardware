@@ -1,15 +1,15 @@
-# Pydisplay display boards (bring-up notes)
+# PyDevices display boards (bring-up notes)
 
-Bring-up notes for **pydisplay `board_config`s** — panel resolution, touch,
+Bring-up notes for **PyDevices `board_config`s** — panel resolution, touch,
 interface module, and quirks — for boards exercised in the July 2026 DotClock /
 `mipidsi` / busdisplay (`spibus` / `i80bus`) + LVGL (`lv_test_timer`) campaign.
 
 Paths are under
-[`micropython-hardware`](https://github.com/PyDevices/micropython-hardware)
+[`pydevices`](https://github.com/PyDevices/pydevices)
 `board_configs/fbdisplay/<name>/` unless a `busdisplay/…` path is given.
 Device roles (eager / lazy):
 [`device-matrix.md`](device-matrix.md)
-([Pages](https://pydevices.github.io/micropython-hardware/)).
+([Pages](https://pydevices.github.io/pydevices/)).
 Native drivers live in pydevices **displayif** (`displayif.DotClockFramebuffer`
 or `mipidsi`). Soft-reset / scanout lessons:
 [displayif `docs/SOFT_RESET_AND_BRINGUP.md`](https://github.com/PyDevices/displayif/blob/main/docs/SOFT_RESET_AND_BRINGUP.md).
@@ -251,7 +251,7 @@ variant (`C6_WIFI` in inventory fixture #1).
   that SoftSPI path (`SPIBus loaded (SoftSPI)`).
 - **CircuitPython caveats (same shield wiring):** `displaydev` **MemoryError**
   on ~35 KiB free heap. `bitbangio.SPI.write` → `OSError: 5`; GPIO SoftSPI
-  paint works but is very slow. Prefer MP + native SoftSPI for pydisplay;
+  paint works but is very slow. Prefer MP + native SoftSPI for PyDevices;
   CP is fine for AirLift networking.
 - **Demos:** stripes / `ili9341` over SoftSPI; Simon needs a slim path (no
   eventsys). LVGL unlikely without frozen/slim runtime.
@@ -304,7 +304,7 @@ already sets `refresh_cb=display_drv.show`.
 
 ---
 
-*Seeded 2026-07-20 from the pydisplay + displayif bring-up chat; T-Embed /
+*Seeded 2026-07-20 from the PyDevices + displayif bring-up chat; T-Embed /
 T-HMI busdisplay notes expanded 2026-07-21; Waveshare RP2040-Touch-LCD-1.28
 added 2026-07-21; Adafruit Metro M7 + TFT Touch Shield 1947 added 2026-07-21;
 ST NUCLEO-H743ZI2 + TFT Touch Shield 1947 added 2026-07-21.

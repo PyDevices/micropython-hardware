@@ -2,60 +2,60 @@
   "urls": [
     [
       "displaydev/__init__.py",
-      "github:PyDevices/micropython-hardware/drivers/display/displaydev/__init__.py"
+      "github:PyDevices/pydevices/drivers/display/displaydev/__init__.py"
     ],
     [
       "displaydev/_domkeys.py",
-      "github:PyDevices/micropython-hardware/drivers/display/displaydev/_domkeys.py"
+      "github:PyDevices/pydevices/drivers/display/displaydev/_domkeys.py"
     ],
     [
       "displaydev/androidsdl.py",
-      "github:PyDevices/micropython-hardware/drivers/display/displaydev/androidsdl.py"
+      "github:PyDevices/pydevices/drivers/display/displaydev/androidsdl.py"
     ],
     [
       "displaydev/auto.py",
-      "github:PyDevices/micropython-hardware/drivers/display/displaydev/auto.py"
+      "github:PyDevices/pydevices/drivers/display/displaydev/auto.py"
     ],
     [
       "displaydev/busdisplay.py",
-      "github:PyDevices/micropython-hardware/drivers/display/displaydev/busdisplay.py"
+      "github:PyDevices/pydevices/drivers/display/displaydev/busdisplay.py"
     ],
     [
       "displaydev/fbdisplay.py",
-      "github:PyDevices/micropython-hardware/drivers/display/displaydev/fbdisplay.py"
+      "github:PyDevices/pydevices/drivers/display/displaydev/fbdisplay.py"
     ],
     [
       "displaydev/jndisplay.py",
-      "github:PyDevices/micropython-hardware/drivers/display/displaydev/jndisplay.py"
+      "github:PyDevices/pydevices/drivers/display/displaydev/jndisplay.py"
     ],
     [
       "displaydev/pgdisplay.py",
-      "github:PyDevices/micropython-hardware/drivers/display/displaydev/pgdisplay.py"
+      "github:PyDevices/pydevices/drivers/display/displaydev/pgdisplay.py"
     ],
     [
       "displaydev/pixeldisplay.py",
-      "github:PyDevices/micropython-hardware/drivers/display/displaydev/pixeldisplay.py"
+      "github:PyDevices/pydevices/drivers/display/displaydev/pixeldisplay.py"
     ],
     [
       "displaydev/psdisplay.py",
-      "github:PyDevices/micropython-hardware/drivers/display/displaydev/psdisplay.py"
+      "github:PyDevices/pydevices/drivers/display/displaydev/psdisplay.py"
     ],
     [
       "displaydev/sdldisplay.py",
-      "github:PyDevices/micropython-hardware/drivers/display/displaydev/sdldisplay.py"
+      "github:PyDevices/pydevices/drivers/display/displaydev/sdldisplay.py"
     ],
     [
       "displaydev/windisplay.py",
-      "github:PyDevices/micropython-hardware/drivers/display/displaydev/windisplay.py"
+      "github:PyDevices/pydevices/drivers/display/displaydev/windisplay.py"
     ]
   ],
   "deps": [
     [
-      "github:PyDevices/micropython-hardware/packages/events.json",
+      "github:PyDevices/pydevices/packages/events.json",
       "main"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/keys.json",
+      "github:PyDevices/pydevices/packages/keys.json",
       "main"
     ]
   ],

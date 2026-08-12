@@ -32,7 +32,7 @@ grep -q "^version = \"$VERSION\"$" "$STAGE_DIR/pyproject.toml" || {
   exit 1
 }
 
-rm -rf "$STAGE_DIR/build" "$STAGE_DIR/dist" "$STAGE_DIR/src/pydisplay_desktop.egg-info"
+rm -rf "$STAGE_DIR/build" "$STAGE_DIR/dist" "$STAGE_DIR/src/pydevices_desktop.egg-info"
 (
   cd "$STAGE_DIR"
   "$PYTHON_BIN" -m build

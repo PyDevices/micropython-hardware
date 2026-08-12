@@ -6,7 +6,7 @@ Technical reference for the in-repo Wokwi project. For setup steps, see **[Wokwi
 
 | Path | Role |
 |------|------|
-| [`wokwi/`](https://github.com/PyDevices/pydisplay/tree/main/web/wokwi) | `main.py`, `diagram.json` — core packages + `testris` |
+| [`wokwi/`](https://github.com/PyDevices/pydevices-examples/tree/main/web/wokwi) | `main.py`, `diagram.json` — core packages + `testris` |
 
 ---
 
@@ -20,7 +20,7 @@ Technical reference for the in-repo Wokwi project. For setup steps, see **[Wokwi
 
 ### Pin wiring
 
-Matches [`wokwi_ili9341_ft6x36_esp32s3/board_config.py`](https://github.com/PyDevices/micropython-hardware/blob/main/board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3/board_config.py):
+Matches [`wokwi_ili9341_ft6x36_esp32s3/board_config.py`](https://github.com/PyDevices/pydevices/blob/main/board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3/board_config.py):
 
 | Signal | GPIO | `diagram.json` part / pin |
 |--------|------|---------------------------|
@@ -41,9 +41,9 @@ Display part id in `diagram.json`: **`lcd1`** (`board-ili9341-cap-touch`).
 
 ---
 
-## FT6206 (Wokwi) vs FT6X36 (pydisplay driver)
+## FT6206 (Wokwi) vs FT6X36 (PyDevices driver)
 
-Wokwi’s cap-touch board simulates an **FT6206** I2C controller. pydisplay’s board config uses the **FT6X36** driver (`ft6x36.py`) — same FT6xx family and register-style protocol. No board_config change is expected; if touch behaves oddly, compare with real hardware and file an issue.
+Wokwi’s cap-touch board simulates an **FT6206** I2C controller. The PyDevices board config uses the **FT6X36** driver (`ft6x36.py`) — same FT6xx family and register-style protocol. No board_config change is expected; if touch behaves oddly, compare with real hardware and file an issue.
 
 ---
 
@@ -57,25 +57,25 @@ If you need a specific MicroPython build, copy the current `env` value from the 
 
 ## MIP install pattern
 
-mip.install pattern in [`wokwi/main.py`](https://github.com/PyDevices/pydisplay/blob/main/web/wokwi/main.py):
+mip.install pattern in [`wokwi/main.py`](https://github.com/PyDevices/pydevices-examples/blob/main/web/wokwi/main.py):
 
 ```python
 import mip
 
 MICROPYTHON_LIB = "https://PyDevices.github.io/micropython-lib/mip/PyDevices"
-HARDWARE = "github:PyDevices/micropython-hardware"
-PYDISPLAY = "github:PyDevices/pydisplay"
+PYDEVICES = "github:PyDevices/pydevices"
+PYDEVICES_EXAMPLES = "github:PyDevices/pydevices-examples"
 
 # Board package pulls ili9341/ft6x36/spibus from this repo and displaydev from
 # the MIP index (displaydev → events + keys). Install optional eventsys in the
 # application when the example uses that traffic controller.
 mip.install(
-    HARDWARE + "/board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3/",
+    PYDEVICES + "/board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3/",
     index=MICROPYTHON_LIB,
     target=".",
 )
 mip.install("pygraphics", index=MICROPYTHON_LIB, target=".")
-mip.install(PYDISPLAY + "/src/examples/testris.py", target=".")
+mip.install(PYDEVICES + "/src/examples/testris.py", target=".")
 
 import testris
 ```
@@ -86,7 +86,7 @@ import testris
 
 ```python
 mip.install(
-    "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/wokwi_ili9341_esp32s3_no_touch"
+    "github:PyDevices/pydevices/board_configs/busdisplay/spi/wokwi_ili9341_esp32s3_no_touch"
 )
 ```
 
@@ -100,6 +100,6 @@ Use a display-only `diagram.json` (no touch I2C wires) with that config.
 |-------|-------|
 | Blank LCD, no traceback | Usually missing `LED`/`RST`→3V3 on `board-ili9341-cap-touch`, or SPI on GPIO 35/36/37 @ 60 MHz — use the pin table above |
 | `TouchKeypad` IndexError on last row | Wokwi simulator quirk; may not reproduce on hardware |
-| Old hosted wokwi.com project IDs | May be stale; use in-repo [`wokwi/`](https://github.com/PyDevices/pydisplay/tree/main/web/wokwi) |
+| Old hosted wokwi.com project IDs | May be stale; use in-repo [`wokwi/`](https://github.com/PyDevices/pydevices-examples/tree/main/web/wokwi) |
 
 See also [Troubleshooting](../troubleshooting.md).

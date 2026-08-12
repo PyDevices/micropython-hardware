@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""Put micropython-hardware packages on ``sys.path`` for unit tests.
+"""Put pydevices packages on ``sys.path`` for unit tests.
 
 Import this before ``audiodev`` / ``usdl2`` / ``displaydev`` / ``multimer`` /
 ``mip`` so the in-repo trees are found without a separate install.

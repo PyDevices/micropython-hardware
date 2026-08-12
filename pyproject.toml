@@ -22,8 +22,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/PyDevices/micropython-hardware"
-Repository = "https://github.com/PyDevices/micropython-hardware"
+Homepage = "https://github.com/PyDevices/pydevices"
+Repository = "https://github.com/PyDevices/pydevices"
 
 [tool.setuptools]
 package-dir = { "" = "src" }

@@ -2,23 +2,23 @@
   "urls": [
     [
       "board_config.py",
-      "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/t-dongle-s3/board_config.py"
+      "github:PyDevices/pydevices/board_configs/busdisplay/spi/t-dongle-s3/board_config.py"
     ],
     [
       "st7735.py",
-      "github:PyDevices/micropython-hardware/drivers/display/st7735.py"
+      "github:PyDevices/pydevices/drivers/display/st7735.py"
     ],
     [
       "board_devices.py",
-      "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/t-dongle-s3/board_devices.py"
+      "github:PyDevices/pydevices/board_configs/busdisplay/spi/t-dongle-s3/board_devices.py"
     ],
     [
       "boarddev.py",
-      "github:PyDevices/micropython-hardware/drivers/boarddev.py"
+      "github:PyDevices/pydevices/drivers/boarddev.py"
     ],
     [
       "dotstar.py",
-      "github:PyDevices/micropython-hardware/drivers/led/dotstar.py"
+      "github:PyDevices/pydevices/drivers/led/dotstar.py"
     ]
   ],
   "deps": [
@@ -27,15 +27,15 @@
       "latest"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/spibus.json",
+      "github:PyDevices/pydevices/packages/spibus.json",
       "main"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/events.json",
+      "github:PyDevices/pydevices/packages/events.json",
       "main"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/keys.json",
+      "github:PyDevices/pydevices/packages/keys.json",
       "main"
     ]
   ],

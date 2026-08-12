@@ -2,27 +2,27 @@
   "urls": [
     [
       "board_config.py",
-      "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/metro_m7_tft_touch_shield_1947/board_config.py"
+      "github:PyDevices/pydevices/board_configs/busdisplay/spi/metro_m7_tft_touch_shield_1947/board_config.py"
     ],
     [
       "board_devices.py",
-      "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/metro_m7_tft_touch_shield_1947/board_devices.py"
+      "github:PyDevices/pydevices/board_configs/busdisplay/spi/metro_m7_tft_touch_shield_1947/board_devices.py"
     ],
     [
       "boarddev.py",
-      "github:PyDevices/micropython-hardware/drivers/boarddev.py"
+      "github:PyDevices/pydevices/drivers/boarddev.py"
     ],
     [
       "ili9341.py",
-      "github:PyDevices/micropython-hardware/drivers/display/ili9341.py"
+      "github:PyDevices/pydevices/drivers/display/ili9341.py"
     ],
     [
       "ft6x36.py",
-      "github:PyDevices/micropython-hardware/drivers/touch/ft6x36.py"
+      "github:PyDevices/pydevices/drivers/touch/ft6x36.py"
     ],
     [
       "sdcard.py",
-      "github:PyDevices/micropython-hardware/drivers/storage/sdcard.py"
+      "github:PyDevices/pydevices/drivers/storage/sdcard.py"
     ]
   ],
   "deps": [
@@ -31,14 +31,14 @@
       "latest"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/events.json",
+      "github:PyDevices/pydevices/packages/events.json",
       "main"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/keys.json",
+      "github:PyDevices/pydevices/packages/keys.json",
       "main"
     ]
   ],
   "version": "0.2",
-  "notes": "Split board_config + board_devices (board devices contract). boarddev from pydisplay."
+  "notes": "Split board_config + board_devices (board devices contract). Product-owned boarddev."
 }

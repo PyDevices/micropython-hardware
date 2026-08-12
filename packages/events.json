@@ -2,7 +2,7 @@
   "urls": [
     [
       "events.py",
-      "github:PyDevices/micropython-hardware/lib/events.py"
+      "github:PyDevices/pydevices/lib/events.py"
     ]
   ],
   "version": "0.0"

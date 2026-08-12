@@ -20,7 +20,7 @@ Typically:
   module for non-UI peripherals.
 
 Configs live in
-[`PyDevices/micropython-hardware`](https://github.com/PyDevices/micropython-hardware)
+[`PyDevices/pydevices`](https://github.com/PyDevices/pydevices)
 (`board_configs/`). Each MicroPython directory with a `package.json` can be installed via MIP:
 
 See the canonical commands and verification steps in
@@ -173,7 +173,7 @@ exports hardware only:
 ```python
 display_drv = AutoDisplay(...)
 host_read = display_drv.get_events
-timer_async = env_bool("PYDISPLAY_TIMER_ASYNC", display_drv.requires_async_timer)
+timer_async = env_bool("PYDEVICES_TIMER_ASYNC", display_drv.requires_async_timer)
 ```
 
 An application opting into `eventsys` then creates its own traffic controller:
@@ -189,25 +189,25 @@ LVGL instead creates an independent coordinator in `display_driver`.
 
 | Branch | `display_drv.requires_async_timer` | `timer_async` export |
 |--------|-----------------------------------|-------------------------------|
-| PyScript / Jupyter | `True` | `True` (default; **`PYDISPLAY_TIMER_ASYNC=0` → Runtime raises**) |
-| PG/SDL desktop | `False` | `False` unless **`PYDISPLAY_TIMER_ASYNC`** is set |
+| PyScript / Jupyter | `True` | `True` (default; **`PYDEVICES_TIMER_ASYNC=0` → Runtime raises**) |
+| PG/SDL desktop | `False` | `False` unless **`PYDEVICES_TIMER_ASYNC`** is set |
 
 `eventsys.Runtime` rejects `timer_async=False` when any attached display has
 `requires_async_timer` (PS/JN), so a forced sync override fails at construction
 instead of hanging.
 
-Panel size overrides (before `import board_config`): `PYDISPLAY_WIDTH`,
-`PYDISPLAY_HEIGHT`, `PYDISPLAY_ROTATION`, `PYDISPLAY_SCALE`. Apps should read
+Panel size overrides (before `import board_config`): `PYDEVICES_WIDTH`,
+`PYDEVICES_HEIGHT`, `PYDEVICES_ROTATION`, `PYDEVICES_SCALE`. Apps should read
 geometry from `display_drv`, not module-level names on `board_config`.
 
 Set the env var **before** `import board_config` (or any import that loads it).
 Truthy: `1`, `true`, `yes`, `on`. Falsey: `0`, `false`, `no`, `off`. Unknown
 values fall back to the desktop default (`False`). Parsing lives in
-[`displaydev.env_bool`](https://github.com/PyDevices/micropython-hardware/blob/main/drivers/display/displaydev/__init__.py).
+[`displaydev.env_bool`](https://github.com/PyDevices/pydevices/blob/main/drivers/display/displaydev/__init__.py).
 
 ```bash
 # Force asyncio timers on desktop (LVGL async smoke, matrix column)
-PYDISPLAY_TIMER_ASYNC=1 python my_example.py
+PYDEVICES_TIMER_ASYNC=1 python my_example.py
 ```
 
 Per-board configs under `board_configs/` may export `timer_async`; they never
@@ -215,4 +215,4 @@ construct a runtime.
 
 ## Custom config
 
-Copy the closest match, edit pin assignments and driver imports, and test with `import pydisplay_demo`. See the [**pydisplay_demo** guide](../examples/pydisplay_demo.md) for a walkthrough of the recommended smoke test.
+Copy the closest match, edit pin assignments and driver imports, and test with `import pydevices_demo`. See the [**pydevices_demo** guide](../examples/pydevices_demo.md) for a walkthrough of the recommended smoke test.

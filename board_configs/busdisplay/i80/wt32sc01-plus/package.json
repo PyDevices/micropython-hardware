@@ -2,32 +2,32 @@
   "urls": [
     [
       "board_config.py",
-      "github:PyDevices/micropython-hardware/board_configs/busdisplay/i80/wt32sc01-plus/board_config.py"
+      "github:PyDevices/pydevices/board_configs/busdisplay/i80/wt32sc01-plus/board_config.py"
     ],
     [
       "st7796.py",
-      "github:PyDevices/micropython-hardware/drivers/display/st7796.py"
+      "github:PyDevices/pydevices/drivers/display/st7796.py"
     ],
     [
       "ft6x36.py",
-      "github:PyDevices/micropython-hardware/drivers/touch/ft6x36.py"
+      "github:PyDevices/pydevices/drivers/touch/ft6x36.py"
     ],
     [
       "board_devices.py",
-      "github:PyDevices/micropython-hardware/board_configs/busdisplay/i80/wt32sc01-plus/board_devices.py"
+      "github:PyDevices/pydevices/board_configs/busdisplay/i80/wt32sc01-plus/board_devices.py"
     ],
     [
       "boarddev.py",
-      "github:PyDevices/micropython-hardware/drivers/boarddev.py"
+      "github:PyDevices/pydevices/drivers/boarddev.py"
     ],
     [
       "sdcard.py",
-      "github:PyDevices/micropython-hardware/drivers/storage/sdcard.py"
+      "github:PyDevices/pydevices/drivers/storage/sdcard.py"
     ]
   ],
   "deps": [
     [
-      "github:PyDevices/micropython-hardware/packages/i80bus.json",
+      "github:PyDevices/pydevices/packages/i80bus.json",
       "main"
     ]
   ],

@@ -10,7 +10,7 @@ Related inventories (keep concerns separate):
 |-----|------|
 | [board-inventory.md](board-inventory.md) | Physical Detect fixtures (#) — chip, flash, runtime |
 | [firmware-fixtures.md](firmware-fixtures.md) | Detect probe notes / esptool details |
-| [pydisplay-display-boards.md](pydisplay-display-boards.md) | Display bring-up quirks (panel, touch, soft-reset) |
+| [display-boards.md](display-boards.md) | Display bring-up quirks (panel, touch, soft-reset) |
 | **This file** | Fixture # ↔ product ↔ `board_config` ↔ eager / lazy roles |
 
 Paths below are relative to `board_configs/` and are **MicroPython** trees
@@ -85,7 +85,7 @@ contract surface.
 
 ### Inventory fixtures without a product `board_config`
 
-Detect capture only — no dedicated pydisplay product config to retrofit.
+Detect capture only — no dedicated PyDevices product config to retrofit.
 Shield / host rows above already cover Metro M7 (#5) and Nucleo (#25) with
 display shields.
 
@@ -109,7 +109,7 @@ display shields.
 ```python
 import mip
 mip.install(
-    "github:PyDevices/micropython-hardware/board_configs/<path>"
+    "github:PyDevices/pydevices/board_configs/<path>"
 )
 ```
 

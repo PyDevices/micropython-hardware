@@ -2,15 +2,15 @@
   "urls": [
     [
       "board_config.py",
-      "github:PyDevices/micropython-hardware/board_configs/fbdisplay/pico2w_dvi_sock_640x480/board_config.py"
+      "github:PyDevices/pydevices/board_configs/fbdisplay/pico2w_dvi_sock_640x480/board_config.py"
     ],
     [
       "board_devices.py",
-      "github:PyDevices/micropython-hardware/board_configs/fbdisplay/pico2w_dvi_sock_640x480/board_devices.py"
+      "github:PyDevices/pydevices/board_configs/fbdisplay/pico2w_dvi_sock_640x480/board_devices.py"
     ],
     [
       "boarddev.py",
-      "github:PyDevices/micropython-hardware/drivers/boarddev.py"
+      "github:PyDevices/pydevices/drivers/boarddev.py"
     ]
   ],
   "deps": [
@@ -19,15 +19,11 @@
       "latest"
     ],
     [
-      "github:PyDevices/pydisplay/packages/picodvi.json",
+      "github:PyDevices/pydevices/packages/events.json",
       "main"
     ],
     [
-      "github:PyDevices/micropython-hardware/packages/events.json",
-      "main"
-    ],
-    [
-      "github:PyDevices/micropython-hardware/packages/keys.json",
+      "github:PyDevices/pydevices/packages/keys.json",
       "main"
     ]
   ],
