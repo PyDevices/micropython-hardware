@@ -7,6 +7,7 @@ The canonical implementation lives in:
 - drivers/boarddev.py
 - drivers/usdl2.py
 - drivers/uwin32.py
+- utils/micropython.py
 
 This script writes a throwaway staging tree so the pip package and MIP package
 stay behaviorally identical.
@@ -15,10 +16,9 @@ stay behaviorally identical.
 from __future__ import annotations
 
 import argparse
-from pathlib import Path
 import shutil
 import sys
-
+from pathlib import Path
 
 FILE_MAPPINGS = (
     ("board_configs/desktop/board_config.py", "src/board_config.py"),
@@ -26,6 +26,7 @@ FILE_MAPPINGS = (
     ("drivers/boarddev.py", "src/boarddev.py"),
     ("drivers/usdl2.py", "src/usdl2.py"),
     ("drivers/uwin32.py", "src/uwin32.py"),
+    ("utils/micropython.py", "src/micropython.py"),
 )
 
 DIR_MAPPINGS = ()

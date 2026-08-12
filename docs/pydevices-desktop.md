@@ -6,6 +6,7 @@ Installed modules:
 - board_config
 - board_devices
 - boarddev
+- micropython (CPython compatibility shim)
 - usdl2
 - uwin32 (Windows CPython)
 
