@@ -29,6 +29,9 @@ jobs:
         with:
           python-version: '3.13'
 
+      - name: Install SDL runtime
+        run: sudo apt-get update && sudo apt-get install -y libsdl2-2.0-0
+
       - name: Run stdlib unittest suite
         env:
           SDL_VIDEODRIVER: dummy
