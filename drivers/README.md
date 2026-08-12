@@ -27,5 +27,5 @@ board configs. Prefer single-file modules; MIP manifests live under `../packages
 Use `machine.SDCard` for SDMMC/SDIO slots; use `sdcard.py` for SPI CS paths.
 
 The audio backends subclass the `audiodev` bases and carry host-specific workarounds
-that are easy to undo by accident — read [`audio/README.md`](audio/README.md)
-before changing them.
+that are easy to undo by accident — read the
+[`audiodev` README](../lib/audiodev/README.md) before changing them.

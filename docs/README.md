@@ -5,11 +5,17 @@ https://pydevices.github.io/pydevices/
 
 | Doc | HTML |
 |-----|------|
+| [architecture.md](architecture.md) | [architecture.html](https://pydevices.github.io/pydevices/architecture.html) |
+| [application-runtime.md](application-runtime.md) | [application-runtime.html](https://pydevices.github.io/pydevices/application-runtime.html) |
 | [audio.md](audio.md) | [audio.html](https://pydevices.github.io/pydevices/audio.html) |
 | [board-configs.md](board-configs.md) | [board-configs.html](https://pydevices.github.io/pydevices/board-configs.html) |
 | [board-peripherals.md](board-peripherals.md) | [board-peripherals.html](https://pydevices.github.io/pydevices/board-peripherals.html) |
 | [device-matrix.md](device-matrix.md) | [device-matrix.html](https://pydevices.github.io/pydevices/device-matrix.html) |
 | [display-drivers.md](display-drivers.md) | [display-drivers.html](https://pydevices.github.io/pydevices/display-drivers.html) |
+| [displaydev.md](displaydev.md) | [displaydev.html](https://pydevices.github.io/pydevices/displaydev.html) |
+| [displaydev-internals.md](displaydev-internals.md) | [displaydev-internals.html](https://pydevices.github.io/pydevices/displaydev-internals.html) |
+| [eventsys.md](eventsys.md) | [eventsys.html](https://pydevices.github.io/pydevices/eventsys.html) |
+| [multimer.md](multimer.md) | [multimer.html](https://pydevices.github.io/pydevices/multimer.html) |
 | [touch-drivers.md](touch-drivers.md) | [touch-drivers.html](https://pydevices.github.io/pydevices/touch-drivers.html) |
 | [display-interfaces.md](display-interfaces.md) | [display-interfaces.html](https://pydevices.github.io/pydevices/display-interfaces.html) |
 | [install-workflows.md](install-workflows.md) | [install-workflows.html](https://pydevices.github.io/pydevices/install-workflows.html) |

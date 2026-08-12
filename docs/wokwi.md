@@ -1,6 +1,7 @@
 # Wokwi hardware reference
 
-Technical reference for the in-repo Wokwi project. For setup steps, see **[Wokwi simulator guide](../guides/wokwi.md)**.
+Technical reference for the in-repo Wokwi project. For setup steps, see the
+**[Wokwi simulator guide](https://pydisplay.readthedocs.io/en/latest/guides/wokwi/)**.
 
 ## Project layout
 
@@ -102,4 +103,4 @@ Use a display-only `diagram.json` (no touch I2C wires) with that config.
 | `TouchKeypad` IndexError on last row | Wokwi simulator quirk; may not reproduce on hardware |
 | Old hosted wokwi.com project IDs | May be stale; use in-repo [`wokwi/`](https://github.com/PyDevices/pydevices-examples/tree/main/web/wokwi) |
 
-See also [Troubleshooting](../troubleshooting.md).
+See also the application [troubleshooting guide](https://pydisplay.readthedocs.io/en/latest/troubleshooting/).

@@ -24,7 +24,7 @@ Board config packages install the drivers they need. To install individually:
 mip.install("github:PyDevices/pydevices/drivers/display/st7789.py", target="./drivers/display")
 ```
 
-Precompiled drivers are also on the [micropython-lib index](../installation/mip-micropython-lib.md) (e.g. `mip.install("st7789", index=...)`).
+Precompiled drivers are also on the [PyDevices MIP index](install-workflows.md) (e.g. `mip.install("st7789", index=...)`).
 
 ## CircuitPython
 

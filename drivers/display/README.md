@@ -8,4 +8,4 @@ display_drivers
 OLED and community displayio drivers are vendored from Adafruit and Community bundles.
 Run `python3 scripts/vendor_circuitpython_drivers.py --all` to refresh from upstream.
 
-See [driver inventory](../../docs/hardware/driver-inventory.md) and [display interfaces](../../docs/hardware/display-interfaces.md).
+See [driver inventory](../../docs/driver-inventory.md) and [display interfaces](../../docs/display-interfaces.md).

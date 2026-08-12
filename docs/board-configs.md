@@ -215,4 +215,7 @@ construct a runtime.
 
 ## Custom config
 
-Copy the closest match, edit pin assignments and driver imports, and test with `import pydevices_demo`. See the [**pydevices_demo** guide](../examples/pydevices_demo.md) for a walkthrough of the recommended smoke test.
+Copy the closest match, edit pin assignments and driver imports, and test with
+`import pydevices_demo`. See the
+[**pydevices_demo** guide](https://pydisplay.readthedocs.io/en/latest/examples/pydevices-demo/)
+for a walkthrough of the recommended smoke test.

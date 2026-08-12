@@ -12,7 +12,7 @@ Device roles (eager / lazy):
 ([Pages](https://pydevices.github.io/pydevices/)).
 Native drivers live in pydevices **displayif** (`displayif.DotClockFramebuffer`
 or `mipidsi`). Soft-reset / scanout lessons:
-[displayif `docs/SOFT_RESET_AND_BRINGUP.md`](https://github.com/PyDevices/displayif/blob/main/docs/SOFT_RESET_AND_BRINGUP.md).
+[displayif `docs/soft-reset-and-bring-up.md`](https://github.com/PyDevices/displayif/blob/main/docs/soft-reset-and-bring-up.md).
 
 Typical MicroPython flash for the ESP32-S3 RGB boards below:
 `ESP32_GENERIC_S3` + **`SPIRAM_OCT`** (8 MB octal PSRAM). P4 uses its own board
@@ -291,7 +291,7 @@ variant (`C6_WIFI` in inventory fixture #1).
 
 ## DotClock knobs (cross-cutting)
 
-Do not conflate these (full write-up in displayif `docs/SOFT_RESET_AND_BRINGUP.md`):
+Do not conflate these (full write-up in displayif `docs/soft-reset-and-bring-up.md`):
 
 | Knob | Role |
 |------|------|
