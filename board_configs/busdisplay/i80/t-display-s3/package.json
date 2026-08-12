@@ -9,8 +9,8 @@
       "github:PyDevices/pydevices/drivers/display/st7789.py"
     ],
     [
-      "board_devices.py",
-      "github:PyDevices/pydevices/board_configs/busdisplay/i80/t-display-s3/board_devices.py"
+      "board_peripherals.py",
+      "github:PyDevices/pydevices/board_configs/busdisplay/i80/t-display-s3/board_peripherals.py"
     ],
     [
       "boarddev.py",

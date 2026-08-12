@@ -63,6 +63,6 @@ def encoder_button_func():
 encoder_read = encoder_read_func
 encoder_button_read = encoder_button_func
 
-from board_devices import DEVICES, setup_devices
+from board_peripherals import PERIPHERALS, load_peripherals
 
-setup_devices(globals())
+load_peripherals(globals())

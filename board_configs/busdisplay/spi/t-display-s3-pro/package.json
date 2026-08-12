@@ -13,8 +13,8 @@
       "github:PyDevices/pydevices/drivers/touch/cst226.py"
     ],
     [
-      "board_devices.py",
-      "github:PyDevices/pydevices/board_configs/busdisplay/spi/t-display-s3-pro/board_devices.py"
+      "board_peripherals.py",
+      "github:PyDevices/pydevices/board_configs/busdisplay/spi/t-display-s3-pro/board_peripherals.py"
     ],
     [
       "boarddev.py",

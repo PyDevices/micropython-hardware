@@ -11,7 +11,7 @@ Both layers are here because neither is sufficient alone:
   proves the code runs there. Both idioms import fine under CPython *and* under
   MicroPython; they raise on first use, so nothing short of running them helps.
 
-See "Portability" in ``drivers/audio/README.md`` for the reasoning.
+See "Portability" in ``lib/audiodev/README.md`` for the reasoning.
 """
 
 import ast
@@ -31,18 +31,18 @@ ROOT = _env.ROOT
 # Must import and run under CPython, MicroPython (unix and micropython.exe), and
 # CircuitPython.
 PORTABLE = (
-    "drivers/audio/audiodev/__init__.py",
-    "drivers/audio/audiodev/sdl2_audio.py",
-    "drivers/audio/audiodev/i2s_audio.py",
-    "drivers/audio/audiodev/emulated_audio.py",
+    "lib/audiodev/__init__.py",
+    "lib/audiodev/sdl2_audio.py",
+    "lib/audiodev/i2s_audio.py",
+    "lib/audiodev/emulated_audio.py",
     "drivers/usdl2.py",
     "board_configs/desktop/board_config.py",
-    "board_configs/desktop/board_devices.py",
+    "board_configs/desktop/board_peripherals.py",
 )
 
 # CPython-only (needs pygame-ce), but deliberately close enough to sdl2_audio.py
 # to diff, so its buffer handling is held to the same rule.
-MIRRORS = ("drivers/audio/audiodev/pygame_audio.py",)
+MIRRORS = ("lib/audiodev/pygame_audio.py",)
 
 INTERPRETERS = ("micropython", "micropython.exe", "circuitpython")
 
@@ -119,7 +119,7 @@ class BytearrayDeletionTests(unittest.TestCase):
 
     def test_list_deletion_is_still_allowed(self):
         """``del self._samples[:]`` is fine -- lists are not restricted."""
-        tree = _parse("drivers/audio/audiodev/sdl2_audio.py")
+        tree = _parse("lib/audiodev/sdl2_audio.py")
         buffers = bytearray_names(tree)
         deleted = {name for name, _ in deleted_subscripts(tree)}
         self.assertIn("_samples", deleted)

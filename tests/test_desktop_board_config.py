@@ -10,7 +10,7 @@ from unittest import mock
 _TESTS = Path(__file__).resolve().parent
 if str(_TESTS) not in sys.path:
     sys.path.insert(0, str(_TESTS))
-import _env  # noqa: E402, F401 — drivers/ + drivers/audio (usdl2, audiodev, …)
+import _env  # noqa: E402, F401 — lib/ + drivers/ (audiodev, usdl2, …)
 
 ROOT = _env.ROOT
 DESKTOP = ROOT / "board_configs" / "desktop"
@@ -26,11 +26,11 @@ def _purge_board_modules():
             name
             in (
                 "board_config",
-                "board_devices",
+                "board_peripherals",
                 "boarddev",
             )
             or name.startswith("board_config.")
-            or name.startswith("board_devices.")
+            or name.startswith("board_peripherals.")
         ):
             sys.modules.pop(name, None)
 
@@ -69,11 +69,11 @@ class DesktopBoardConfigContractTests(unittest.TestCase):
         self.assertIs(board_config.host_read, display.get_events)
         self.assertFalse(board_config.timer_async)
         self.assertFalse(hasattr(board_config, "runtime"))
-        self.assertEqual(board_config.DEVICES, frozenset({"audio_out", "audio_in"}))
-        import board_devices
+        self.assertEqual(board_config.PERIPHERALS, frozenset({"audio_out", "audio_in"}))
+        import board_peripherals
 
-        self.assertTrue(callable(board_devices.audio_out))
-        self.assertTrue(callable(board_devices.audio_in))
+        self.assertTrue(callable(board_peripherals.audio_out))
+        self.assertTrue(callable(board_peripherals.audio_in))
         self.assertNotIn("width", board_config.__dict__)
         self.assertNotIn("height", board_config.__dict__)
         display.fill.assert_called_once_with(0)
@@ -93,8 +93,8 @@ class DesktopBoardConfigHeadlessSmoke(unittest.TestCase):
 
         self.assertTrue(hasattr(board_config, "display_drv"))
         self.assertFalse(hasattr(board_config, "runtime"))
-        self.assertIn("audio_out", board_config.DEVICES)
-        self.assertIn("audio_in", board_config.DEVICES)
+        self.assertIn("audio_out", board_config.PERIPHERALS)
+        self.assertIn("audio_in", board_config.PERIPHERALS)
         self.assertTrue(hasattr(board_config.display_drv, "width"))
         self.assertTrue(hasattr(board_config.display_drv, "height"))
         self.assertTrue(callable(board_config.display_drv.get_events))

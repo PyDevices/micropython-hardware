@@ -14,8 +14,8 @@ class TestBindLazy(unittest.TestCase):
     def _make_devices_mod(self, **factories):
         import types
 
-        mod = types.ModuleType("fake_board_devices")
-        mod.DEVICES = frozenset(factories)
+        mod = types.ModuleType("fake_board_peripherals")
+        mod.PERIPHERALS = frozenset(factories)
         for name, factory in factories.items():
             setattr(mod, name, factory)
         return mod

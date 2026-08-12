@@ -37,7 +37,7 @@ Create an annotated git tag vVERSION on the current commit.
 
 Before tagging, bumps the `pydevices-events`, `pydevices-keys`,
 `pydevices-multimer`, `pydevices-displaydev`, `pydevices-audiodev`,
-`pydevices-eventsys`, and `pydevices-desktop` floors to VERSION in the sibling
+`pydevices-eventsys` and `pydevices-desktop` floors to VERSION in the sibling
 pydevices-examples checkout (override with PYDEVICES_EXAMPLES_ROOT).
 
 Examples:

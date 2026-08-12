@@ -7,7 +7,7 @@ https://pydevices.github.io/pydevices/
 |-----|------|
 | [audio.md](audio.md) | [audio.html](https://pydevices.github.io/pydevices/audio.html) |
 | [board-configs.md](board-configs.md) | [board-configs.html](https://pydevices.github.io/pydevices/board-configs.html) |
-| [board-devices.md](board-devices.md) | [board-devices.html](https://pydevices.github.io/pydevices/board-devices.html) |
+| [board-peripherals.md](board-peripherals.md) | [board-peripherals.html](https://pydevices.github.io/pydevices/board-peripherals.html) |
 | [device-matrix.md](device-matrix.md) | [device-matrix.html](https://pydevices.github.io/pydevices/device-matrix.html) |
 | [display-drivers.md](display-drivers.md) | [display-drivers.html](https://pydevices.github.io/pydevices/display-drivers.html) |
 | [touch-drivers.md](touch-drivers.md) | [touch-drivers.html](https://pydevices.github.io/pydevices/touch-drivers.html) |

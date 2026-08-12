@@ -3,8 +3,7 @@
 Stdlib `unittest` for packages that live in this repo: `displaydev`, `multimer`,
 `events`, `keys`, `boarddev`, `audiodev`, `utils`, and related drivers.
 
-[`_env.py`](_env.py) puts `lib/`, `utils/`, `drivers/`, `drivers/audio`, and
-`drivers/display` on `sys.path`.
+[`_env.py`](_env.py) puts `lib/`, `utils/`, and `drivers/` on `sys.path`.
 
 ## Running
 
@@ -15,7 +14,7 @@ SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy python -m unittest discover -s tests
 ```
 
 Do not run audiodev tests while another process is playing audio — see
-[drivers/audio/README.md](../drivers/audio/README.md#tests).
+[lib/audiodev/README.md](../lib/audiodev/README.md#tests).
 
 ## What is covered
 

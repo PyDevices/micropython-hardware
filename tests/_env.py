@@ -16,8 +16,6 @@ for _rel in (
     "lib",
     "utils",
     "drivers",
-    "drivers/audio",
-    "drivers/display",
     "drivers/codec",
     "drivers/io_expander",
 ):
@@ -30,10 +28,9 @@ PATH_ENTRIES = [
     str(ROOT / "utils"),
     str(ROOT / "drivers"),
     str(ROOT / "drivers" / "display"),
-    str(ROOT / "drivers" / "audio"),
 ]
 
-DISPLAYDEV_DIR = str(ROOT / "drivers" / "display" / "displaydev")
+DISPLAYDEV_DIR = str(ROOT / "lib" / "displaydev")
 MULTIMER_DIR = str(ROOT / "lib" / "multimer")
 EVENTSYS_DIR = str(ROOT / "lib" / "eventsys")
 EVENTS_PY = str(ROOT / "lib" / "events.py")

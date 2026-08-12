@@ -5,8 +5,8 @@
       "github:PyDevices/pydevices/board_configs/busdisplay/i80/t-hmi/board_config.py"
     ],
     [
-      "board_devices.py",
-      "github:PyDevices/pydevices/board_configs/busdisplay/i80/t-hmi/board_devices.py"
+      "board_peripherals.py",
+      "github:PyDevices/pydevices/board_configs/busdisplay/i80/t-hmi/board_peripherals.py"
     ],
     [
       "boarddev.py",

@@ -3,8 +3,8 @@
 Every PyDevices app needs a `board_config.py` that describes its display and
 input hardware without selecting an application event system.
 
-For the stable end-device role names (`touch`, `wlan`, …), lazy `DEVICES`
-discovery, and the touch duck-type, see **[Board devices](board-devices.md)**.
+For the stable end-device role names (`touch`, `wlan`, …), lazy `PERIPHERALS`
+discovery, and the touch duck-type, see **[Board peripherals](board-peripherals.md)**.
 
 ## What board_config.py provides
 
@@ -15,8 +15,8 @@ Typically:
   `keypad_read`, `encoder_read`, and related options
 - Raw input hardware where useful (`touch`, `keypad`, `encoder`, `joystick`)
 - Optional setup (backlight pins, buses). On **MicroPython**, lazy extras move
-  to `board_devices` under the [board devices contract](board-devices.md). On
-  **CircuitPython**, there is no `board_devices` — use the native `board`
+  to `board_peripherals` under the [board peripherals contract](board-peripherals.md). On
+  **CircuitPython**, there is no `board_peripherals` — use the native `board`
   module for non-UI peripherals.
 
 Configs live in
@@ -31,7 +31,7 @@ Standard MCU pattern: install the matching `board_config` directory and let
 
 CircuitPython configs live under `board_configs/cp/` with the same bus layout and
 directory names as MicroPython (no `cp_` prefix, no `package.json` / MIP, no
-`board_devices.py`). MicroPython configs stay at the top level of
+`board_peripherals.py`). MicroPython configs stay at the top level of
 `board_configs/` (not under an `mp/` folder).
 
 ## Picking a config
@@ -203,7 +203,7 @@ geometry from `display_drv`, not module-level names on `board_config`.
 Set the env var **before** `import board_config` (or any import that loads it).
 Truthy: `1`, `true`, `yes`, `on`. Falsey: `0`, `false`, `no`, `off`. Unknown
 values fall back to the desktop default (`False`). Parsing lives in
-[`displaydev.env_bool`](https://github.com/PyDevices/pydevices/blob/main/drivers/display/displaydev/__init__.py).
+[`displaydev.env_bool`](https://github.com/PyDevices/pydevices/blob/main/lib/displaydev/__init__.py).
 
 ```bash
 # Force asyncio timers on desktop (LVGL async smoke, matrix column)

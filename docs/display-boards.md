@@ -135,7 +135,7 @@ variant (`C6_WIFI` in inventory fixture #1).
   stuck.
 - **Interesting:** Solid fills looked fine, but `BusDisplay.fill_rect` using
   ST7789 `RAMCONT` (`0x3C`) with CS dropping between strips produced dots /
-  garbage. Fixed in `drivers/display/displaydev/busdisplay.py`: per-strip window +
+  garbage. Fixed in `lib/displaydev/busdisplay.py`: per-strip window +
   `RAMWR` (`0x2C`) only. Verified with an L geometry under MADCTL `0xC8`.
 
 ### LILYGO T-HMI (I80 ST7789)

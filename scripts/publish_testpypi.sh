@@ -13,6 +13,7 @@ fi
 
 PYTHON_BIN="${PYTHON_BIN:-python3}"
 STAGE_DIR="${PYDEVICES_DESKTOP_STAGE_DIR:-.pydevices-desktop-build}"
+BUNDLE_DIR="${PYDEVICES_BUNDLE_STAGE_DIR:-.pydevices-bundle-build}"
 
 VERSION="${PYDEVICES_VERSION:-}"
 if [[ -z "$VERSION" ]]; then
@@ -35,6 +36,21 @@ grep -q "^version = \"$VERSION\"$" "$STAGE_DIR/pyproject.toml" || {
 rm -rf "$STAGE_DIR/build" "$STAGE_DIR/dist" "$STAGE_DIR/src/pydevices_desktop.egg-info"
 (
   cd "$STAGE_DIR"
+  "$PYTHON_BIN" -m build
+  "$PYTHON_BIN" -m twine check dist/*
+  TWINE_USERNAME=__token__ TWINE_PASSWORD="$TESTPYPI_API_TOKEN" \
+    "$PYTHON_BIN" -m twine upload --repository testpypi --verbose dist/*
+)
+
+rm -rf "$BUNDLE_DIR"
+cp -R release/pydevices "$BUNDLE_DIR"
+sed -i -E "s/0\.0\.1/$VERSION/g" "$BUNDLE_DIR/pyproject.toml"
+grep -q "^version = \"$VERSION\"$" "$BUNDLE_DIR/pyproject.toml" || {
+  echo "Error: failed to set pydevices bundle version $VERSION" >&2
+  exit 1
+}
+(
+  cd "$BUNDLE_DIR"
   "$PYTHON_BIN" -m build
   "$PYTHON_BIN" -m twine check dist/*
   TWINE_USERNAME=__token__ TWINE_PASSWORD="$TESTPYPI_API_TOKEN" \

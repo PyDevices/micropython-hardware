@@ -28,7 +28,7 @@ async contract as hardware devices.
 `audiodev.web_audio` provides PyScript / browser playback (`AudioContext`) and
 capture (`getUserMedia`).
 
-Desktop `board_devices` may use `audiodev.auto` for host probe. Fixed host boards
+Desktop `board_peripherals` may use `audiodev.auto` for host probe. Fixed host boards
 import a concrete backend. `audiodev` itself does not import `displaydev`.
 
 ## Emulated devices (CI / no hardware)

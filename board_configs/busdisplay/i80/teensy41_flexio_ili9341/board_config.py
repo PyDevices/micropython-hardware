@@ -60,6 +60,6 @@ display_drv = ILI9341(
 )
 
 
-from board_devices import DEVICES, setup_devices
+from board_peripherals import PERIPHERALS, load_peripherals
 
-setup_devices(globals())
+load_peripherals(globals())

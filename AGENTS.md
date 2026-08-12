@@ -19,12 +19,12 @@ Docs are markdown under `docs/`, published only via GitHub Pages
 - Prefer vendored single-file drivers (micropython-lib / reputable GitHub) for
   shared chips. Use `machine.SDCard` for SDMMC/SDIO and `sdcard.py` for SPI CS
   paths.
-- **MicroPython** board devices contract: `board_config.py` (eager UI hardware) +
-  `board_devices.py` (`DEVICES`, lazy factories) + `setup_devices(globals())`
+- **MicroPython** board peripherals contract: `board_config.py` (eager UI hardware) +
+  `board_peripherals.py` (`PERIPHERALS`, lazy factories) + `load_peripherals(globals())`
   using the product-owned `boarddev`. Pin wiring for lazy extras lives in
-  `board_devices` factories.
-- **CircuitPython** (`board_configs/cp/`): **no** `board_devices.py`, **no**
-  `DEVICES` / `setup_devices`, and **no** `from board_config import …`.
+  `board_peripherals` factories.
+- **CircuitPython** (`board_configs/cp/`): **no** `board_peripherals.py`, **no**
+  `PERIPHERALS` / `load_peripherals`, and **no** `from board_config import …`.
   CircuitPython already has the native `board` module for pins/buses. CP
   `board_config.py` provides `display_drv`, eager input hardware, and neutral
   read aliases (`touch_read`, `keypad_read`, `encoder_read`, and so on). Board
@@ -54,7 +54,7 @@ Docs are markdown under `docs/`, published only via GitHub Pages
 - Import `displaydev.auto` from `displaydev/__init__.py` or any backend.
 - Commit large generated assets unrelated to boards/drivers.
 - Rename the GitHub repo casually — MIP URLs and docs pin this name.
-- Add `board_devices.py` under `board_configs/cp/`.
+- Add `board_peripherals.py` under `board_configs/cp/`.
 
 ## Local layout
 

@@ -6,7 +6,7 @@ Source: [`drivers/touch/`](https://github.com/PyDevices/pydevices/tree/main/driv
 
 ## board_config.py contract
 
-Target wiring (see [Board devices — touch duck-type](board-devices.md#touch-duck-type)):
+Target wiring (see [Board peripherals — touch duck-type](board-peripherals.md#touch-duck-type)):
 
 - `touch` — driver object with `read_points()` → `()` when up, else a sequence of
   `(x, y[, id[, …]])`

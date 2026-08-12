@@ -77,7 +77,7 @@ If you want local script-first installs in the current directory, use
 
 Expected files from the desktop board package:
 - `board_config.py`
-- `board_devices.py`
+- `board_peripherals.py`
 - `boarddev.py`
 - `audiodev/` (package)
 - `usdl2.py`
@@ -93,11 +93,11 @@ Quick verification (catches omitted split files):
 
 ```python
 import board_config
-import board_devices
+import board_peripherals
 
 print(board_config.__file__)
-print(board_devices.__file__)
-print(board_config.DEVICES)
+print(board_peripherals.__file__)
+print(board_config.PERIPHERALS)
 ```
 
 ## CircuitPython-compatible install via MicroPython `mip`
@@ -122,9 +122,9 @@ Quick check:
 
 ```python
 import board_config
-import board_devices
+import board_peripherals
 print(board_config.__file__)
-print(board_devices.__file__)
+print(board_peripherals.__file__)
 ```
 
 ## pydevices-desktop via pip
@@ -161,7 +161,7 @@ print(board_config.__file__)
 print('display_drv', type(board_config.display_drv).__name__)
 print('host_read', callable(board_config.host_read))
 print('runtime in board_config', hasattr(board_config, 'runtime'))  # False
-print('DEVICES', board_config.DEVICES)
+print('PERIPHERALS', board_config.PERIPHERALS)
 PY
 ```
 
@@ -185,7 +185,7 @@ print(board_config.__file__)
 print('display_drv', type(board_config.display_drv).__name__)
 print('host_read', callable(board_config.host_read))
 print('runtime in board_config', hasattr(board_config, 'runtime'))  # False
-print('DEVICES', board_config.DEVICES)
+print('PERIPHERALS', board_config.PERIPHERALS)
 PY
 ```
 

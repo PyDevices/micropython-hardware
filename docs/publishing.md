@@ -16,13 +16,14 @@ conventions.
 
 | Canonical source | TestPyPI distribution | Python import / MIP name |
 |---|---|---|
-| `drivers/display/displaydev/` | `pydevices-displaydev` | `displaydev` |
-| `drivers/audio/audiodev/` | `pydevices-audiodev` | `audiodev` |
+| `lib/displaydev/` | `pydevices-displaydev` | `displaydev` |
+| `lib/audiodev/` | `pydevices-audiodev` | `audiodev` |
 | `lib/eventsys/` | `pydevices-eventsys` | `eventsys` |
 | `lib/multimer/` | `pydevices-multimer` | `multimer` |
 | `lib/events.py` | `pydevices-events` | `events` |
 | `lib/keys.py` | `pydevices-keys` | `keys` |
 | `board_configs/desktop/` plus shared sources | `pydevices-desktop` | `board_config` and its dependencies |
+| `release/pydevices/` | `pydevices` | portable MIP bundle `pydevices` |
 
 `eventsys` is an optional application-level event traffic controller. Board
 configs do not construct it. Non-LVGL applications may instantiate it (or
@@ -46,7 +47,7 @@ TestPyPI does not mirror dependencies from PyPI, so use both indexes:
 python -m pip install \
   --index-url https://test.pypi.org/simple/ \
   --extra-index-url https://pypi.org/simple \
-  pydevices-displaydev pydevices-audiodev pydevices-desktop
+  'pydevices[desktop]'
 ```
 
 Install `pydevices-eventsys` only when the application wants that event
@@ -92,7 +93,7 @@ an annotated `vX.Y.Z` tag, and pushes it.
 The tag starts `.github/workflows/publish-pydevices.yml`. Its jobs:
 
 1. Build and upload the six core TestPyPI distributions.
-2. Build and upload `pydevices-desktop`.
+2. Build and upload `pydevices` and `pydevices-desktop`.
 3. Sync canonical sources and manifests to
    `PyDevices/micropython-lib` under `micropython/pydevices/`.
 4. Build and publish the MIP index to the `gh-pages` branch.

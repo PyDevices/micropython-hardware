@@ -40,7 +40,7 @@ touch_rotation_table = (...)  # when default mapping is wrong
 ```
 
 See [Runtime — touch read contract](https://pydisplay.readthedocs.io/en/latest/concepts/runtime/#touch-read-contract) and
-[Board devices](board-devices.md).
+[Board peripherals](board-peripherals.md).
 
 ## Vendoring drivers
 

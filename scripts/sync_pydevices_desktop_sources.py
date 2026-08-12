@@ -3,7 +3,7 @@
 
 The canonical implementation lives in:
 - board_configs/desktop/board_config.py
-- board_configs/desktop/board_devices.py
+- board_configs/desktop/board_peripherals.py
 - drivers/boarddev.py
 - drivers/usdl2.py
 - drivers/uwin32.py
@@ -22,7 +22,7 @@ from pathlib import Path
 
 FILE_MAPPINGS = (
     ("board_configs/desktop/board_config.py", "src/board_config.py"),
-    ("board_configs/desktop/board_devices.py", "src/board_devices.py"),
+    ("board_configs/desktop/board_peripherals.py", "src/board_peripherals.py"),
     ("drivers/boarddev.py", "src/boarddev.py"),
     ("drivers/usdl2.py", "src/usdl2.py"),
     ("drivers/uwin32.py", "src/uwin32.py"),

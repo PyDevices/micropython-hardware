@@ -122,7 +122,7 @@ class TestGraduatedBoardLayout(unittest.TestCase):
             with self.subTest(board=name):
                 d = HW / "board_configs" / expect["path"]
                 bc = d / "board_config.py"
-                bd = d / "board_devices.py"
+                bd = d / "board_peripherals.py"
                 pkg = d / "package.json"
                 self.assertTrue(bc.is_file(), bc)
                 self.assertTrue(bd.is_file(), bd)
@@ -134,7 +134,7 @@ class TestGraduatedBoardLayout(unittest.TestCase):
                 self.assertIn("display_drv", names)
                 self.assertNotIn("runtime", names)
                 self.assertNotIn("eventsys", bc.read_text())
-                self.assertTrue(_has_call(bc_tree, "setup_devices"))
+                self.assertTrue(_has_call(bc_tree, "load_peripherals"))
                 if expect.get("eager_touch"):
                     self.assertIn("touch", names)
                     self.assertIn("touch_read", names)
@@ -146,15 +146,15 @@ class TestGraduatedBoardLayout(unittest.TestCase):
                     self.assertIn("keypad_read", names)
 
                 text = bd.read_text()
-                self.assertIn("DEVICES = frozenset", text)
-                self.assertIn("def setup_devices", text)
+                self.assertIn("PERIPHERALS = frozenset", text)
+                self.assertIn("def load_peripherals", text)
                 for role in expect["devices"]:
                     self.assertIn("def {}(".format(role), text)
 
                 meta = json.loads(pkg.read_text())
                 urls = {u[0] for u in meta["urls"]}
                 self.assertIn("board_config.py", urls)
-                self.assertIn("board_devices.py", urls)
+                self.assertIn("board_peripherals.py", urls)
                 self.assertIn("boarddev.py", urls)
                 joined = " ".join(u[1] for u in meta["urls"])
                 self.assertIn("pydevices/", joined)
@@ -170,7 +170,7 @@ class TestGraduatedBindLazy(unittest.TestCase):
 
         for name, expect in EXPECTED.items():
             with self.subTest(board=name):
-                path = HW / "board_configs" / expect["path"] / "board_devices.py"
+                path = HW / "board_configs" / expect["path"] / "board_peripherals.py"
                 mod_name = "hw_{}_devices".format(name.replace("-", "_"))
                 spec = importlib.util.spec_from_file_location(mod_name, path)
                 mod = importlib.util.module_from_spec(spec)
@@ -178,15 +178,15 @@ class TestGraduatedBindLazy(unittest.TestCase):
                 assert spec.loader is not None
                 spec.loader.exec_module(mod)
 
-                self.assertEqual(set(mod.DEVICES), expect["devices"])
+                self.assertEqual(set(mod.PERIPHERALS), expect["devices"])
                 ns = {"display_drv": object()}
-                mod.setup_devices(ns)
+                mod.load_peripherals(ns)
                 self.assertIn("__getattr__", ns)
 
                 with self.assertRaises(AttributeError):
                     ns["__getattr__"]("not_a_role")
 
-                for role in sorted(mod.DEVICES):
+                for role in sorted(mod.PERIPHERALS):
                     ns.pop(role, None)
                     try:
                         obj = ns["__getattr__"](role)

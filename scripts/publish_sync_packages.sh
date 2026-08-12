@@ -105,17 +105,13 @@ requires() {
 
 source_dir() {
     case "$1" in
-        displaydev) echo "$SOURCE_REPO/drivers/display/displaydev" ;;
-        audiodev) echo "$SOURCE_REPO/drivers/audio/audiodev" ;;
-        eventsys | multimer) echo "$SOURCE_REPO/lib/$1" ;;
+        displaydev | audiodev | eventsys | multimer) echo "$SOURCE_REPO/lib/$1" ;;
     esac
 }
 
 readme_path() {
     case "$1" in
-        displaydev) echo "$SOURCE_REPO/drivers/display/displaydev/README.md" ;;
-        audiodev) echo "$SOURCE_REPO/drivers/audio/README.md" ;;
-        eventsys | multimer) echo "$SOURCE_REPO/lib/$1/README.md" ;;
+        displaydev | audiodev | eventsys | multimer) echo "$SOURCE_REPO/lib/$1/README.md" ;;
     esac
 }
 
@@ -188,6 +184,25 @@ Canonical source: [pydevices/lib/$package.py](https://github.com/PyDevices/pydev
 EOF
 }
 
+publish_bundle() {
+    local package_dir="$DEST_DIR/pydevices"
+    echo "Processing pydevices bundle -> pydevices"
+    mkdir -p "$package_dir"
+    cat > "$package_dir/manifest.py" <<EOF
+metadata(
+    description="Portable display, audio, event, and timing foundations for PyDevices",
+    version="$VERSION",
+    author="$AUTHOR",
+    license="$LICENSE",
+    pypi_publish="pydevices",
+)
+require("displaydev")
+require("audiodev")
+require("multimer")
+EOF
+    cp "$SOURCE_REPO/release/pydevices/README.md" "$package_dir/README.md"
+}
+
 # The new source-of-truth collection replaces the stale legacy pydisplay package tree.
 rm -rf "$DEST_DIR"
 rm -rf "$LEGACY_DEST_DIR"
@@ -195,6 +210,7 @@ mkdir -p "$DEST_DIR"
 
 for package in displaydev audiodev eventsys multimer; do publish_package "$package"; done
 for package in events keys; do publish_module "$package"; done
+publish_bundle
 
 # Build only after the complete collection exists, so require() can resolve
 # sibling PyDevices packages while generating each TestPyPI project.

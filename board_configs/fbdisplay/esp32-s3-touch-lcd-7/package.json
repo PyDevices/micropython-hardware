@@ -5,8 +5,8 @@
       "github:PyDevices/pydevices/board_configs/fbdisplay/esp32-s3-touch-lcd-7/board_config.py"
     ],
     [
-      "board_devices.py",
-      "github:PyDevices/pydevices/board_configs/fbdisplay/esp32-s3-touch-lcd-7/board_devices.py"
+      "board_peripherals.py",
+      "github:PyDevices/pydevices/board_configs/fbdisplay/esp32-s3-touch-lcd-7/board_peripherals.py"
     ],
     [
       "boarddev.py",
@@ -48,5 +48,5 @@
     ]
   ],
   "version": "0.2",
-  "notes": "Split board_config + board_devices (board devices contract). Product-owned boarddev."
+  "notes": "Split board_config + board_peripherals (board peripherals contract). Product-owned boarddev."
 }

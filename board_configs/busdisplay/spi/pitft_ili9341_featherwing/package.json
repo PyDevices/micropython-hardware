@@ -13,8 +13,8 @@
       "github:PyDevices/pydevices/drivers/touch/stmpe610.py"
     ],
     [
-      "board_devices.py",
-      "github:PyDevices/pydevices/board_configs/busdisplay/spi/pitft_ili9341_featherwing/board_devices.py"
+      "board_peripherals.py",
+      "github:PyDevices/pydevices/board_configs/busdisplay/spi/pitft_ili9341_featherwing/board_peripherals.py"
     ],
     [
       "boarddev.py",

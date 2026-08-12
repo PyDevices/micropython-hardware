@@ -102,6 +102,6 @@ keypad = GPIOButtons({"boot": (Pin(35, Pin.IN, Pin.PULL_UP), keys.K_LCTRL)})
 touch_read = touch.read_points
 keypad_read = keypad.read
 
-from board_devices import DEVICES, setup_devices
+from board_peripherals import PERIPHERALS, load_peripherals
 
-setup_devices(globals())
+load_peripherals(globals())

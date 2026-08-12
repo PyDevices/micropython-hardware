@@ -5,8 +5,8 @@
       "github:PyDevices/pydevices/board_configs/desktop/board_config.py"
     ],
     [
-      "board_devices.py",
-      "github:PyDevices/pydevices/board_configs/desktop/board_devices.py"
+      "board_peripherals.py",
+      "github:PyDevices/pydevices/board_configs/desktop/board_peripherals.py"
     ],
     [
       "boarddev.py",
@@ -14,35 +14,35 @@
     ],
     [
       "audiodev/__init__.py",
-      "github:PyDevices/pydevices/drivers/audio/audiodev/__init__.py"
+      "github:PyDevices/pydevices/lib/audiodev/__init__.py"
     ],
     [
       "audiodev/auto.py",
-      "github:PyDevices/pydevices/drivers/audio/audiodev/auto.py"
+      "github:PyDevices/pydevices/lib/audiodev/auto.py"
     ],
     [
       "audiodev/sdl2_audio.py",
-      "github:PyDevices/pydevices/drivers/audio/audiodev/sdl2_audio.py"
+      "github:PyDevices/pydevices/lib/audiodev/sdl2_audio.py"
     ],
     [
       "audiodev/pygame_audio.py",
-      "github:PyDevices/pydevices/drivers/audio/audiodev/pygame_audio.py"
+      "github:PyDevices/pydevices/lib/audiodev/pygame_audio.py"
     ],
     [
       "audiodev/web_audio.py",
-      "github:PyDevices/pydevices/drivers/audio/audiodev/web_audio.py"
+      "github:PyDevices/pydevices/lib/audiodev/web_audio.py"
     ],
     [
       "audiodev/android_audio.py",
-      "github:PyDevices/pydevices/drivers/audio/audiodev/android_audio.py"
+      "github:PyDevices/pydevices/lib/audiodev/android_audio.py"
     ],
     [
       "audiodev/emulated_audio.py",
-      "github:PyDevices/pydevices/drivers/audio/audiodev/emulated_audio.py"
+      "github:PyDevices/pydevices/lib/audiodev/emulated_audio.py"
     ],
     [
       "audiodev/win_audio.py",
-      "github:PyDevices/pydevices/drivers/audio/audiodev/win_audio.py"
+      "github:PyDevices/pydevices/lib/audiodev/win_audio.py"
     ],
     [
       "uwin32.py",
@@ -72,5 +72,5 @@
     ]
   ],
   "version": "0.0",
-  "notes": "Universal non-MCU board package with split board_config + board_devices for desktop, Jupyter, and PyScript runtimes."
+  "notes": "Universal non-MCU board package with split board_config + board_peripherals for desktop, Jupyter, and PyScript runtimes."
 }

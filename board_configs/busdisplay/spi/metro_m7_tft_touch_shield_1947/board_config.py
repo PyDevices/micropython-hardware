@@ -70,6 +70,6 @@ touch = FT6x36(i2c)
 touch_read = touch.get_positions
 touch_rotation_table = (6, 3, 0, 5)
 
-from board_devices import DEVICES, setup_devices
+from board_peripherals import PERIPHERALS, load_peripherals
 
-setup_devices(globals())
+load_peripherals(globals())

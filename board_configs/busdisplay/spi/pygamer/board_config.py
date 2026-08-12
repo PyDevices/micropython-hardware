@@ -57,6 +57,6 @@ keypad_read = keypad.read
 joystick_driver = joystick
 joystick_emulate_digital = [[0, 1]]
 
-from board_devices import DEVICES, setup_devices
+from board_peripherals import PERIPHERALS, load_peripherals
 
-setup_devices(globals())
+load_peripherals(globals())

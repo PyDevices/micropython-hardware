@@ -28,4 +28,4 @@ Repository = "https://github.com/PyDevices/pydevices"
 [tool.setuptools]
 package-dir = { "" = "src" }
 packages = []
-py-modules = ["board_config", "board_devices", "boarddev", "micropython", "usdl2", "uwin32"]
+py-modules = ["board_config", "board_peripherals", "boarddev", "micropython", "usdl2", "uwin32"]

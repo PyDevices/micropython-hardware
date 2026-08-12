@@ -4,7 +4,7 @@ Desktop board and host-adapter bundle for non-MCU PyDevices applications.
 
 Installed modules:
 - board_config
-- board_devices
+- board_peripherals
 - boarddev
 - micropython (CPython compatibility shim)
 - usdl2
@@ -39,8 +39,8 @@ Use the sections:
 
 `board_config` constructs `display_drv` and exports neutral host/input callables
 via `displaydev.auto.AutoDisplay`; it does not create an event runtime. Lazy roles such as `audio_out` /
-`audio_in` still come from `board_devices` and allocate on first access.
-Terminal-only apps can `import board_devices` without opening a window.
+`audio_in` still come from `board_peripherals` and allocate on first access.
+Terminal-only apps can `import board_peripherals` without opening a window.
 
 ## Publish to TestPyPI
 

@@ -5,8 +5,8 @@
       "github:PyDevices/pydevices/board_configs/busdisplay/spi/pygamer/board_config.py"
     ],
     [
-      "board_devices.py",
-      "github:PyDevices/pydevices/board_configs/busdisplay/spi/pygamer/board_devices.py"
+      "board_peripherals.py",
+      "github:PyDevices/pydevices/board_configs/busdisplay/spi/pygamer/board_peripherals.py"
     ],
     [
       "boarddev.py",
@@ -38,11 +38,11 @@
     ],
     [
       "audiodev/__init__.py",
-      "github:PyDevices/pydevices/drivers/audio/audiodev/__init__.py"
+      "github:PyDevices/pydevices/lib/audiodev/__init__.py"
     ],
     [
       "audiodev/pwm_tone.py",
-      "github:PyDevices/pydevices/drivers/audio/audiodev/pwm_tone.py"
+      "github:PyDevices/pydevices/lib/audiodev/pwm_tone.py"
     ]
   ],
   "deps": [

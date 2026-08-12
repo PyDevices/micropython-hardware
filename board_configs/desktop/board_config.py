@@ -23,6 +23,6 @@ timer_async = env_bool("PYDEVICES_TIMER_ASYNC", display_drv.requires_async_timer
 
 display_drv.fill(0)
 
-from board_devices import DEVICES, setup_devices
+from board_peripherals import PERIPHERALS, load_peripherals
 
-setup_devices(globals())
+load_peripherals(globals())

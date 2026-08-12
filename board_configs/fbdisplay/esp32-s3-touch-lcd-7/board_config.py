@@ -84,6 +84,6 @@ touch_rotation_table = (0, 0, 0, 0)
 
 touch_read = touch.read_points
 
-from board_devices import DEVICES, setup_devices
+from board_peripherals import PERIPHERALS, load_peripherals
 
-setup_devices(globals())
+load_peripherals(globals())

@@ -92,7 +92,7 @@ class ESP32P4AudioTests(unittest.TestCase):
         sys.modules["board_config"] = types.SimpleNamespace(i2c=cls.i2c)
         sys.modules["boarddev"] = types.SimpleNamespace(bind_lazy=lambda *args: None)
         sys.modules["machine"] = types.SimpleNamespace(I2S=FakeI2S, Pin=FakePin, PWM=FakePWM)
-        spec = importlib.util.spec_from_file_location("p4_board_devices", BOARD / "board_devices.py")
+        spec = importlib.util.spec_from_file_location("p4_board_peripherals", BOARD / "board_peripherals.py")
         cls.board = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(cls.board)
 

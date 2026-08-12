@@ -81,7 +81,7 @@ def load_board(name):
     sys.modules["boarddev"] = types.SimpleNamespace(bind_lazy=lambda *args: None)
     sys.modules["machine"] = types.SimpleNamespace(I2S=FakeI2S, Pin=FakePin, I2C=FakeI2C_Type)
     try:
-        path = ROOT / "board_configs" / "fbdisplay" / name / "board_devices.py"
+        path = ROOT / "board_configs" / "fbdisplay" / name / "board_peripherals.py"
         spec = importlib.util.spec_from_file_location("tab5_%s" % name, path)
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)

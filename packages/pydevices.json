@@ -1,0 +1,8 @@
+{
+  "deps": [
+    ["displaydev", "latest"],
+    ["audiodev", "latest"],
+    ["multimer", "latest"]
+  ],
+  "version": "0.0"
+}

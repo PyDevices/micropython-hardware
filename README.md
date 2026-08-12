@@ -9,14 +9,17 @@ packages used by both firmware and [pydevices-examples](https://github.com/PyDev
 This repo is their canonical source and publisher. Optional host display
 selection is `displaydev.auto` only — backends never import it.
 
+The portable TestPyPI bundle is `pydevices`; add its `desktop` extra or install
+exactly one MIP board package when a board selection is needed.
+
 ## Layout
 
 | Path | Contents |
 |------|----------|
 | `board_configs/` | MicroPython boards (top level); CircuitPython under `board_configs/cp/` |
 | `drivers/` | Display, touch, bus, joystick, IO expander, input helpers |
-| `drivers/display/displaydev/` | Display backends (`BusDisplay`, `SDLDisplay`, …); `auto.py` is convenience only |
-| `lib/` | `eventsys/`, `events.py`, `keys.py`, `multimer/` |
+| `lib/displaydev/` | Display backends (`BusDisplay`, `SDLDisplay`, …); `auto.py` is convenience only |
+| `lib/` | `audiodev/`, `displaydev/`, `eventsys/`, `events.py`, `keys.py`, `multimer/` |
 | `utils/` | Portable helpers (`byteswap`, `mip`, `viper_tools`, `keypins`, `wifi`, `frame_recorder`, CPython `micropython` shim) |
 | `packages/` | Shared MIP manifests (`displaydev`, `utils`, `spibus`, `i80bus`, …) |
 | `tests/` | Stdlib unittest for `displaydev`, `multimer`, `events`, `keys`, `audiodev`, `boarddev`, `mip` |
@@ -24,11 +27,11 @@ selection is `displaydev.auto` only — backends never import it.
 
 Documentation:
 [pydevices.github.io/pydevices](https://pydevices.github.io/pydevices/)
-(board configs, board-devices contract, drivers, inventories, device matrix).
+(board configs, board-peripherals contract, drivers, inventories, device matrix).
 
 Graduated campaign boards use the
-[board devices contract](https://pydevices.github.io/pydevices/board-devices.html):
-eager UI hardware in `board_config.py`, lazy extras in `board_devices.py` via
+[board peripherals contract](https://pydevices.github.io/pydevices/board-peripherals.html):
+eager UI hardware in `board_config.py`, lazy extras in `board_peripherals.py` via
 the local `boarddev`. Event coordination belongs to the application.
 
 ## Install (MIP)

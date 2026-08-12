@@ -13,7 +13,7 @@ import _env  # noqa: E402, F401
 
 class DisplaydevAutoImportTests(unittest.TestCase):
     def test_backends_do_not_import_auto(self):
-        root = _env.ROOT / "drivers" / "display" / "displaydev"
+        root = _env.ROOT / "lib" / "displaydev"
         for name in (
             "sdldisplay.py",
             "pgdisplay.py",

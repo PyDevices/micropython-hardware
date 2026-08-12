@@ -36,7 +36,7 @@ class AutoSelectTests(unittest.TestCase):
             self.assertEqual(auto.select_backend(), "sdl2_audio")
 
     def test_backends_do_not_import_auto(self):
-        root = _env.ROOT / "drivers" / "audio" / "audiodev"
+        root = _env.ROOT / "lib" / "audiodev"
         for name in (
             "sdl2_audio.py",
             "pygame_audio.py",

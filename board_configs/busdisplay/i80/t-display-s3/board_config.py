@@ -43,6 +43,6 @@ display_drv = ST7789(
     power_on_high=True,
 )
 
-from board_devices import DEVICES, setup_devices
+from board_peripherals import PERIPHERALS, load_peripherals
 
-setup_devices(globals())
+load_peripherals(globals())

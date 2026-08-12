@@ -2,51 +2,51 @@
   "urls": [
     [
       "displaydev/__init__.py",
-      "github:PyDevices/pydevices/drivers/display/displaydev/__init__.py"
+      "github:PyDevices/pydevices/lib/displaydev/__init__.py"
     ],
     [
       "displaydev/_domkeys.py",
-      "github:PyDevices/pydevices/drivers/display/displaydev/_domkeys.py"
+      "github:PyDevices/pydevices/lib/displaydev/_domkeys.py"
     ],
     [
       "displaydev/androidsdl.py",
-      "github:PyDevices/pydevices/drivers/display/displaydev/androidsdl.py"
+      "github:PyDevices/pydevices/lib/displaydev/androidsdl.py"
     ],
     [
       "displaydev/auto.py",
-      "github:PyDevices/pydevices/drivers/display/displaydev/auto.py"
+      "github:PyDevices/pydevices/lib/displaydev/auto.py"
     ],
     [
       "displaydev/busdisplay.py",
-      "github:PyDevices/pydevices/drivers/display/displaydev/busdisplay.py"
+      "github:PyDevices/pydevices/lib/displaydev/busdisplay.py"
     ],
     [
       "displaydev/fbdisplay.py",
-      "github:PyDevices/pydevices/drivers/display/displaydev/fbdisplay.py"
+      "github:PyDevices/pydevices/lib/displaydev/fbdisplay.py"
     ],
     [
       "displaydev/jndisplay.py",
-      "github:PyDevices/pydevices/drivers/display/displaydev/jndisplay.py"
+      "github:PyDevices/pydevices/lib/displaydev/jndisplay.py"
     ],
     [
       "displaydev/pgdisplay.py",
-      "github:PyDevices/pydevices/drivers/display/displaydev/pgdisplay.py"
+      "github:PyDevices/pydevices/lib/displaydev/pgdisplay.py"
     ],
     [
       "displaydev/pixeldisplay.py",
-      "github:PyDevices/pydevices/drivers/display/displaydev/pixeldisplay.py"
+      "github:PyDevices/pydevices/lib/displaydev/pixeldisplay.py"
     ],
     [
       "displaydev/psdisplay.py",
-      "github:PyDevices/pydevices/drivers/display/displaydev/psdisplay.py"
+      "github:PyDevices/pydevices/lib/displaydev/psdisplay.py"
     ],
     [
       "displaydev/sdldisplay.py",
-      "github:PyDevices/pydevices/drivers/display/displaydev/sdldisplay.py"
+      "github:PyDevices/pydevices/lib/displaydev/sdldisplay.py"
     ],
     [
       "displaydev/windisplay.py",
-      "github:PyDevices/pydevices/drivers/display/displaydev/windisplay.py"
+      "github:PyDevices/pydevices/lib/displaydev/windisplay.py"
     ]
   ],
   "deps": [

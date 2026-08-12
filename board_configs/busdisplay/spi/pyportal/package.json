@@ -5,8 +5,8 @@
       "github:PyDevices/pydevices/board_configs/busdisplay/spi/pyportal/board_config.py"
     ],
     [
-      "board_devices.py",
-      "github:PyDevices/pydevices/board_configs/busdisplay/spi/pyportal/board_devices.py"
+      "board_peripherals.py",
+      "github:PyDevices/pydevices/board_configs/busdisplay/spi/pyportal/board_peripherals.py"
     ],
     [
       "boarddev.py",
@@ -26,11 +26,11 @@
     ],
     [
       "audiodev/__init__.py",
-      "github:PyDevices/pydevices/drivers/audio/audiodev/__init__.py"
+      "github:PyDevices/pydevices/lib/audiodev/__init__.py"
     ],
     [
       "audiodev/pwm_tone.py",
-      "github:PyDevices/pydevices/drivers/audio/audiodev/pwm_tone.py"
+      "github:PyDevices/pydevices/lib/audiodev/pwm_tone.py"
     ]
   ],
   "deps": [
@@ -52,5 +52,5 @@
     ]
   ],
   "version": "0.2",
-  "notes": "Split board_devices; sdcard/radio/audio/i2c/wlan."
+  "notes": "Split board_peripherals; sdcard/radio/audio/i2c/wlan."
 }

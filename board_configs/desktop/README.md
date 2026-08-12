@@ -49,11 +49,11 @@ runtime = eventsys.Runtime.from_board_config(board_config)
 
 `display_drv` is constructed at import time (same shape as MCU board configs).
 Applications instantiate an event runtime only when they need one. Lazy audio
-roles still come from `board_devices`.
+roles still come from `board_peripherals`.
 
 This bundle installs:
 - `board_config.py`
-- `board_devices.py`
+- `board_peripherals.py`
 - `boarddev.py`
 - `audiodev/` (package)
 - `usdl2.py`
@@ -69,11 +69,11 @@ Display host selection is `displaydev.auto.AutoDisplay` (convenience; boards may
 - Windows CPython: `WinDisplay` first, then `PGDisplay`, then `SDLDisplay`
 - Other desktop: `PGDisplay` first, then `SDLDisplay`
 
-Audio (in `board_devices` via `audiodev.auto`) follows the same host probe:
+Audio (in `board_peripherals` via `audiodev.auto`) follows the same host probe:
 - PyScript: `web_audio`
 - Jupyter: `sdl2_audio` (kernel host)
 - Windows CPython with `uwin32`: `win_audio`
 - else `import pygame` → `pygame_audio`, else `sdl2_audio`
 
-Terminal-only apps (no display) can `import board_devices` and call
+Terminal-only apps (no display) can `import board_peripherals` and call
 `audio_out()` / `audio_in()` without opening a window.

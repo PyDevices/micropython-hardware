@@ -17,4 +17,5 @@ dist/
 .DS_Store
 _site/
 .pydevices-desktop-build/
+.pydevices-bundle-build/
 python/

@@ -27,7 +27,7 @@ import sys
 _SLASH = __file__.replace("\\", "/")
 ROOT = _SLASH.rsplit("/", 1)[0] + "/.." if "/" in _SLASH else ".."
 
-for _rel in ("drivers", "drivers/audio", "board_configs/desktop"):
+for _rel in ("drivers", "lib", "board_configs/desktop"):
     sys.path.insert(0, ROOT + "/" + _rel)
 
 # Headless, and set before SDL initializes either subsystem. Done here rather
@@ -50,9 +50,9 @@ def probe_backend_selection():
     """``_select_backend()`` used to reach ``os.environ`` and die on win32."""
     preset = os.getenv("SDL_AUDIODRIVER")
 
-    import board_devices
+    import board_peripherals
 
-    backend = board_devices._select_backend()
+    backend = board_peripherals._select_backend()
     check(
         "selected a backend ({})".format(backend),
         backend in ("sdl2_audio", "pygame_audio", "web_audio", "win_audio"),
@@ -179,8 +179,8 @@ def probe_board_config():
     import board_config
 
     check("board_config built a display", hasattr(board_config, "display_drv"))
-    check("board_config built a runtime", hasattr(board_config, "runtime"))
-    check("board_config bound the audio roles", "audio_out" in board_config.DEVICES)
+    check("board_config leaves runtime policy to the app", not hasattr(board_config, "runtime"))
+    check("board_config bound the audio roles", "audio_out" in board_config.PERIPHERALS)
 
 
 def main():

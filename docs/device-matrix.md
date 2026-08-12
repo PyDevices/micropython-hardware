@@ -1,8 +1,8 @@
 # Device matrix
 
 Campaign and product boards in this repo use the
-[board devices contract](board-devices.md): eager UI in `board_config.py`, lazy
-extras in `board_devices.py` (`DEVICES`).
+[board peripherals contract](board-peripherals.md): eager UI in `board_config.py`, lazy
+extras in `board_peripherals.py` (`PERIPHERALS`).
 
 Related inventories (keep concerns separate):
 
@@ -14,17 +14,17 @@ Related inventories (keep concerns separate):
 | **This file** | Fixture # ↔ product ↔ `board_config` ↔ eager / lazy roles |
 
 Paths below are relative to `board_configs/` and are **MicroPython** trees
-(with `board_devices`). CircuitPython twins under `cp/` are eager-UI only
+(with `board_peripherals`). CircuitPython twins under `cp/` are eager-UI only
 (`display_drv` / `runtime` / `touch` / `keypad` / `encoder` / `joystick`) —
-no lazy `DEVICES` (use native `board` for the rest).
+no lazy `PERIPHERALS` (use native `board` for the rest).
 
 ---
 
 ## Campaign matrix
 
-First-wave display campaign. Lazy column is the live `DEVICES` set.
+First-wave display campaign. Lazy column is the live `PERIPHERALS` set.
 
-| Product | Inventory # | `board_config` path | Eager UI | Lazy `DEVICES` |
+| Product | Inventory # | `board_config` path | Eager UI | Lazy `PERIPHERALS` |
 |---------|-------------|---------------------|----------|----------------|
 | Waveshare ESP32-P4-WIFI6-Touch-LCD-4B | [#1](board-inventory.md) | `fbdisplay/esp32-p4-wifi6-touch-lcd-4b` | `touch` | `audio_out`, `audio_in`, `sdcard`, `camera`, `radio`, `wlan`, `ble`, `usb_device` |
 | Adafruit Qualia S3 + TL040HDS20 | [#8](board-inventory.md) | `fbdisplay/qualia_tl040hds20` | `touch`, `keypad`, `io_expander` | `wlan`, `ble` |
@@ -41,18 +41,18 @@ First-wave display campaign. Lazy column is the live `DEVICES` set.
 when present; they are omitted from the Eager column for brevity.
 
 P4 WIFI6-Touch-LCD-4B has no ethernet PHY (ETH is a different SKU); `camera`
-stays in `DEVICES` as a CSI stub.
+stays in `PERIPHERALS` as a CSI stub.
 
 ---
 
 ## Product matrix (MP retrofit)
 
 Sensor-rich / inventory-linked products. All rows below have
-`board_devices.py` unless noted. Some factories still raise
-`NotImplementedError` until chip drivers land — the `DEVICES` set is the
+`board_peripherals.py` unless noted. Some factories still raise
+`NotImplementedError` until chip drivers land — the `PERIPHERALS` set is the
 contract surface.
 
-| Product | Inventory # | `board_config` path (MP) | Eager UI | Lazy `DEVICES` | Notes |
+| Product | Inventory # | `board_config` path (MP) | Eager UI | Lazy `PERIPHERALS` | Notes |
 |---------|-------------|--------------------------|----------|----------------|-------|
 | Adafruit FunHouse | [#13](board-inventory.md) | `busdisplay/spi/funhouse` | `touch`, `keypad` | `temperature`, `humidity`, `pressure`, `pixels`, `audio_out`, `wlan` | no BLE on ESP32-S2 |
 | Adafruit PyGamer | [#27](board-inventory.md) | `busdisplay/spi/pygamer` | `joystick`, `keypad` | `pixels`, `accelerometer`, `sdcard`, `battery`, `audio_out`, `i2c` | |
@@ -121,14 +121,14 @@ listed in that board’s `package.json` `deps`.
 
 ## Notes
 
-- Lazy roles listed in `DEVICES` may still raise `NotImplementedError` until
+- Lazy roles listed in `PERIPHERALS` may still raise `NotImplementedError` until
   factories are filled — the set is the contract surface, not a completeness
   guarantee.
 - Boards without an Inventory # were not part of the 2026-07-18 Detect fixture
   capture (or are common products kept for the matrix).
 - `bt` (Classic) is omitted unless a product is known to expose BR/EDR.
-- Light / ALS sensors have no contract role yet — omit from `DEVICES`.
+- Light / ALS sensors have no contract role yet — omit from `PERIPHERALS`.
 - Metro M7 inventory [#5](board-inventory.md) is the host; the campaign path is
   the host + Adafruit TFT shield 1947.
 - Generic OLED breakouts and EyeSPI stacks are not enumerated here unless
-  they expose meaningful non-display `DEVICES` roles.
+  they expose meaningful non-display `PERIPHERALS` roles.
