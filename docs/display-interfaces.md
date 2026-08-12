@@ -1,6 +1,6 @@
 # Display interfaces
 
-Maps hardware interface types to pydisplay `displaydev` backends and pydevices/displayif work for MicroPython parity.
+Maps hardware interface types to PyDevices `displaydev` backends and displayif work for MicroPython parity.
 
 ## Interface matrix
 
