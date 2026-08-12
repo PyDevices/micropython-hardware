@@ -278,10 +278,10 @@ variant (`C6_WIFI` in inventory fixture #1).
   (6, 3, 0, 5)`. Heap ~**450 KiB** free at idle; Simon / LVGL fit with eventsys
   + multimer + `display_driver` (~370 KiB free while running).
 - **Firmware:** custom `NUCLEO_H743ZI2` with **displayif** (stm32 port: spibus
-  + notimpl stubs), **graphics**, **lvgl** (`lv_micropython_cmod`). Flash via
+  + notimpl stubs), **graphics**, **lvgl** (`lvgl-micropython`). Flash via
   ST-Link MSD (`NOD_H743ZI2` / `firmware.bin`). Inventory fixture **#25**.
 - **Demos verified:** RGB stripes; `simon.py` (graphics + eventsys); headless
-  `lv_bindings/tools/test_lvgl_smoke.py`; `lvgl_test.py` (tap-count button on real
+  `lvgl-bindings/tools/test_lvgl_smoke.py`; `lvgl_test.py` (tap-count button on real
   panel via `display_driver`). **`main.py`** boots `lvgl_test.py`.
 - **Setup:** `mpftp put` board_config + `displaydev/{__init__,busdisplay}.py` +
   `eventsys` + `multimer` + `display_driver.py` + `ili9341`/`ft6x36` + examples
