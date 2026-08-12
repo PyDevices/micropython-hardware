@@ -106,7 +106,7 @@ jobs:
             exit 1
           fi
           TWINE_USERNAME=__token__ TWINE_PASSWORD="$TESTPYPI_API_TOKEN" \
-            python -m twine upload --repository testpypi --verbose dist/*
+            python -m twine upload --repository testpypi --skip-existing --verbose dist/*
 
   publish-core:
     runs-on: ubuntu-latest

@@ -156,9 +156,9 @@ build_and_upload() {
     (cd "$out" && hatch build)
     if [[ -n "${TESTPYPI_API_TOKEN:-}" ]]; then
         TWINE_USERNAME=__token__ TWINE_PASSWORD="$TESTPYPI_API_TOKEN" \
-            twine upload --repository testpypi --verbose "$out"/dist/*
+            twine upload --repository testpypi --skip-existing --verbose "$out"/dist/*
     else
-        twine upload --repository testpypi --verbose "$out"/dist/*
+        twine upload --repository testpypi --skip-existing --verbose "$out"/dist/*
     fi
 }
 
