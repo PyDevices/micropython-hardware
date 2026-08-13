@@ -87,18 +87,32 @@ runtime.add_joystick(joystick_driver=drv)
 runtime.add_encoder(read=pos_read, button_read=btn_read, button=2)
 ```
 
-## App loop
+## App loop & `run_forever()`
 
-The supplied coordinator can dispatch callbacks and own the loop:
+The supplied coordinator can manage the application loop:
 
 ```python
 def on_click(event):
     ...
 
-
 runtime.on(runtime.events.MOUSEBUTTONDOWN, on_click)
 runtime.run_forever()
 ```
+
+### How `runtime.run_forever()` Behaves
+
+`runtime.run_forever()` automatically adapts its behavior based on the runtime environment and timer model:
+
+1. **Interactive REPL (`python -i`, `micropython -i`, MCU prompt)**:
+   - When running with hardware interrupts or signal-based timers (`machine.Timer`, Linux `librt`, Windows `uwin32`), `run_forever()` **immediately returns**.
+   - The interactive prompt (`>>>`) stays open for live debugging and introspection while the UI continues running and responding to inputs in the background.
+
+2. **Standalone Desktop CLI (`python app.py`)**:
+   - In non-interactive desktop scripts, `run_forever()` **sleeps in a keep-alive loop** until a quit event occurs.
+   - This prevents the desktop OS process from exiting immediately after drawing the initial window.
+
+3. **Async / Cooperative / Pumped Modes (`asyncio`, CircuitPython, Browser)**:
+   - `run_forever()` runs the event loop continuously to pump timer ticks and process queued events.
 
 Or an application can explicitly poll:
 
@@ -112,6 +126,7 @@ while not runtime.quit_requested:
 Hosted displays that set `needs_refresh` are presented by the coordinator.
 Display-only MCU applications can omit `eventsys` entirely and call
 `display_drv.show()` according to their own policy.
+
 
 ## `timer_async`
 

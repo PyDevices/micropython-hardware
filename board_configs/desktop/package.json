@@ -11,42 +11,6 @@
     [
       "boarddev.py",
       "github:PyDevices/pydevices/drivers/boarddev.py"
-    ],
-    [
-      "audiodev/__init__.py",
-      "github:PyDevices/pydevices/lib/audiodev/__init__.py"
-    ],
-    [
-      "audiodev/auto.py",
-      "github:PyDevices/pydevices/lib/audiodev/auto.py"
-    ],
-    [
-      "audiodev/sdl2_audio.py",
-      "github:PyDevices/pydevices/lib/audiodev/sdl2_audio.py"
-    ],
-    [
-      "audiodev/pygame_audio.py",
-      "github:PyDevices/pydevices/lib/audiodev/pygame_audio.py"
-    ],
-    [
-      "audiodev/web_audio.py",
-      "github:PyDevices/pydevices/lib/audiodev/web_audio.py"
-    ],
-    [
-      "audiodev/android_audio.py",
-      "github:PyDevices/pydevices/lib/audiodev/android_audio.py"
-    ],
-    [
-      "audiodev/emulated_audio.py",
-      "github:PyDevices/pydevices/lib/audiodev/emulated_audio.py"
-    ],
-    [
-      "audiodev/win_audio.py",
-      "github:PyDevices/pydevices/lib/audiodev/win_audio.py"
-    ],
-    [
-      "uwin32.py",
-      "github:PyDevices/pydevices/drivers/uwin32.py"
     ]
   ],
   "deps": [
@@ -55,22 +19,39 @@
       "latest"
     ],
     [
-      "github:PyDevices/pydevices/packages/usdl2.json",
-      "main"
+      "audiodev",
+      "latest"
     ],
     [
-      "github:PyDevices/pydevices/packages/events.json",
-      "main"
+      "multimer",
+      "latest"
     ],
     [
-      "github:PyDevices/pydevices/packages/keys.json",
-      "main"
+      "eventsys",
+      "latest"
     ],
     [
-      "github:PyDevices/pydevices/packages/utils.json",
-      "main"
+      "uwin32",
+      "latest"
+    ],
+    [
+      "usdl2",
+      "latest"
+    ],
+    [
+      "events",
+      "latest"
+    ],
+    [
+      "keys",
+      "latest"
+    ],
+    [
+      "utils",
+      "latest"
     ]
   ],
   "version": "0.0",
   "notes": "Universal non-MCU board package with split board_config + board_peripherals for desktop, Jupyter, and PyScript runtimes."
 }
+

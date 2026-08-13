@@ -16,7 +16,9 @@ https://pydevices.github.io/pydevices/
 | [displaydev-internals.md](displaydev-internals.md) | [displaydev-internals.html](https://pydevices.github.io/pydevices/displaydev-internals.html) |
 | [eventsys.md](eventsys.md) | [eventsys.html](https://pydevices.github.io/pydevices/eventsys.html) |
 | [multimer.md](multimer.md) | [multimer.html](https://pydevices.github.io/pydevices/multimer.html) |
+| [multimer-internals.md](multimer-internals.md) | [multimer-internals.html](https://pydevices.github.io/pydevices/multimer-internals.html) |
 | [touch-drivers.md](touch-drivers.md) | [touch-drivers.html](https://pydevices.github.io/pydevices/touch-drivers.html) |
+
 | [display-interfaces.md](display-interfaces.md) | [display-interfaces.html](https://pydevices.github.io/pydevices/display-interfaces.html) |
 | [install-workflows.md](install-workflows.md) | [install-workflows.html](https://pydevices.github.io/pydevices/install-workflows.html) |
 | [publishing.md](publishing.md) | [publishing.html](https://pydevices.github.io/pydevices/publishing.html) |
@@ -27,6 +29,4 @@ https://pydevices.github.io/pydevices/
 | [display-boards.md](display-boards.md) | [display-boards.html](https://pydevices.github.io/pydevices/display-boards.html) |
 | [wokwi.md](wokwi.md) | [wokwi.html](https://pydevices.github.io/pydevices/wokwi.html) |
 | [tft-espi-parity.md](tft-espi-parity.md) | [tft-espi-parity.html](https://pydevices.github.io/pydevices/tft-espi-parity.html) |
-
-pydevices-examples application integration and example documentation remains on
-[pydisplay.readthedocs.io](https://pydisplay.readthedocs.io).
+Companion application examples and gallery showcases are hosted in [pydevices-examples](https://github.com/PyDevices/pydevices-examples).

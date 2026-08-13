@@ -56,13 +56,19 @@ and verification examples.
 
 ## Install with MIP
 
-MIP packages are published without the `pydevices-` prefix at:
+In the MicroPython ecosystem, `https://micropython.org/pi/v2` serves as the default package index for `mip` (analogous to PyPI in CPython), fed by upstream `micropython/micropython-lib`.
+
+For PyDevices, the [`PyDevices/micropython-lib`](https://github.com/PyDevices/micropython-lib) fork acts as the dedicated distribution and aggregation hub. PyDevices packages are synchronized into this fork, where CI builds and hosts the custom PyDevices MIP package index at:
 
 ```text
 https://PyDevices.github.io/micropython-lib/mip/PyDevices
 ```
 
-For example:
+This index hosts **both `.py` (source) and `.mpy` (precompiled bytecode)** artifacts:
+- **`.mpy` (precompiled)**: Delivered by default for MicroPython targets for faster import speeds and reduced RAM consumption on microcontrollers.
+- **`.py` (source)**: Available for development, inspection, or multi-runtime workflows when installing with `--no-mpy` / `mpy=False`.
+
+Example install pointing to the PyDevices index:
 
 ```python
 import mip
@@ -73,9 +79,7 @@ mip.install(
 )
 ```
 
-Board package manifests normally declare their own driver and library
-dependencies. They intentionally do not declare `eventsys`; the application
-owns that choice and its lifecycle.
+Board package manifests declare their own driver and library dependencies within the index. They intentionally do not declare `eventsys`; the application owns that choice and its lifecycle.
 
 ## Release the core
 
@@ -96,7 +100,8 @@ The tag starts `.github/workflows/publish-pydevices.yml`. Its jobs:
 2. Build and upload `pydevices` and `pydevices-desktop`.
 3. Sync canonical sources and manifests to
    `PyDevices/micropython-lib` under `micropython/pydevices/`.
-4. Build and publish the MIP index to the `gh-pages` branch.
+4. Compile `.mpy` artifacts, package `.py` sources, build the MIP index manifests, and publish to the `gh-pages` branch.
+
 
 The workflow requires these repository secrets:
 

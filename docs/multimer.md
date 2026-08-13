@@ -1,6 +1,72 @@
 # multimer
 
-Cross-platform periodic timers with a `machine.Timer`-compatible API. One import covers sync timers, async timers, millisecond ticks, sleep, and optional main-loop helpers.
+Cross-platform periodic timers with a `machine.Timer`-compatible API. One import covers hardware interrupts, signal-based timers, async timers, millisecond ticks, and application lifecycle helpers.
+
+---
+
+## Key Concepts: Hardware Interrupts & Signal Timers
+
+Timers in `multimer` operate under two primary models:
+
+1. **Hardware Interrupts & Signal-Based Timers (`multimer.uses_signals() == True`)**:
+   - **MicroPython (`machine.Timer`)**: Driven by hardware timer peripherals and MCU interrupts.
+   - **Desktop Linux (`librt`) & Windows (`uwin32`)**: Driven by OS signals and alertable timer APC queues.
+   - **How it works**: The hardware or operating system delivers periodic callbacks automatically to the main thread in the background. You do **not** need a manual `while True` loop to make the timer tick.
+   
+2. **Async & Pumped Timers (`multimer.uses_signals() == False`)**:
+   - **CircuitPython**: Does not provide `machine.Timer` or low-level signal FFI, so it relies on cooperative `asyncio` or sleep-pump loops.
+   - **Threaded / Polling fallbacks**: Require an active sleep pump (`multimer.sleep_ms()`) on the main thread to receive and execute queued callbacks.
+   - **Web / Browser (PyScript / Pyodide)**: Driven cooperatively by the browser's JavaScript event loop.
+
+## Default Non-Async Timer Backend by Runtime / Target
+
+The table below shows the default non-async timer backend selected by `multimer.Timer` for each environment:
+
+| Runtime / Host | Target Platform | Default Timer Backend | Mechanism | `uses_signals()` |
+|---|---|---|---|---|
+| **MicroPython** | MCU Boards | `machine.Timer` | Hardware timer interrupts | **`True`** |
+| **CircuitPython** | MCU Boards | `polling` | Cooperative sleep pump | **`False`** |
+| **CPython** | Linux (`python`) | `librt` | POSIX real-time signals (SIGALRM/SIGRT) | **`True`** |
+| **MicroPython** | Linux (`micropython`) | `librt` | POSIX real-time signals (SIGALRM/SIGRT) | **`True`** |
+| **CircuitPython** | Linux (`circuitpython`) | `sdl2` / `polling` | Pumped sleep loop | **`False`** |
+| **CPython** | Windows (`python.exe`) | `win32` (`uwin32.py`) | Waitable Timer APCs (alertable `SleepEx`) | **`True`** |
+| **MicroPython** | Windows (`micropython.exe`) | `sdl2` / `polling` | Pumped sleep loop | **`False`** |
+| **CPython** | Android (`python`) | `threading` | Background worker thread with queue drain | **`False`** |
+
+> **Developer & Internals Guide:** For an in-depth breakdown of FFI (`ctypes`/`ffi`), threading support, and SDL2 bridging across all platforms, see [Timer backend internals & platform capabilities](multimer-internals.md).
+>
+> **Note on `asyncio` / `AsyncTimer`:** All runtimes support `asyncio` (via `AsyncTimer`). When using `asyncio`, the behavior is identical across all platforms: the timer is cooperative and requires an active event loop (`asyncio.run()`) to advance.
+
+
+---
+
+## Runtime Execution Matrix (Non-Async Timers)
+
+The table below explains when an active loop is needed and how `runtime.run_forever()` behaves across environments when using standard (non-async) timers:
+
+| Platform / Environment | Timer Backend Type | Execution Mode | Does `run_forever()` Loop? | Why / Operational Behavior |
+|---|---|---|---|---|
+| **MCU (MicroPython)** | `machine.Timer` (Hardware Interrupt) | Interactive REPL / Script | **No** (returns immediately) | Hardware timer interrupts run in the background. The board stays active at the `>>>` prompt while the UI updates continuously. |
+| **MCU (CircuitPython)** | Pumped / Polling (no `machine.Timer` or signals) | Script / Event Loop | **Yes** (pumps event loop) | CircuitPython lacks `machine.Timer` and signal FFI; it requires an active sleep-pump loop. |
+| **Desktop** (Linux `librt`, Windows `uwin32` / `python.exe`) | Signal / APC Timer (`uses_signals() == True`) | Interactive REPL (`python -i` / `python.exe -i`) | **No** (returns immediately) | Signals/APCs are delivered to the main thread in the background. The interactive prompt keeps Python open for live introspection. |
+| **Desktop** (Linux `librt`, Windows `uwin32` / `python.exe`) | Signal / APC Timer (`uses_signals() == True`) | Standalone Script (`python app.py`) | **Yes** (keep-alive sleep) | Without a keep-alive loop, the desktop process terminates immediately upon reaching EOF after drawing the initial window. |
+| **Android** (`python`) | Threading / Queue (`uses_signals() == False`) | Standalone / Activity | **Yes** (sleep pump) | Requires an active sleep pump on the main thread to receive worker thread callbacks. |
+| **Desktop** (Fallback / Threading / Polling) | Non-signal (`uses_signals() == False`) | Standalone / REPL | **Yes** (sleep pump) | Requires an active sleep pump to deliver queued callbacks to the main thread. |
+
+
+
+---
+
+## Interactive REPL Workflow
+
+One of the most powerful features of hardware interrupt and signal-based timers is the **Interactive REPL**:
+When you run a script interactively (`python -i`, `micropython -i`, or on a microcontroller prompt):
+1. The script initializes the display and starts the background timer.
+2. The script constructs the UI and reaches EOF (the bottom of the script).
+3. Python drops directly into the interactive `>>>` prompt.
+4. **The UI stays fully active and responsive in the background!** Timer animations continue running and touch/click inputs respond while you inspect objects and test code live in the REPL.
+
+---
 
 ## Public surface
 
@@ -30,9 +96,6 @@ from multimer import (
 
 Mode constants live on the timer class (`Timer.PERIODIC`, `Timer.ONE_SHOT`), not on the module.
 
-There is **no** public queue-drain API; timer backends deliver callbacks without an app-level `pump` step.
-App keep-alive lives on `eventsys.Runtime` (`runtime.run_forever()`, `runtime.run()`, `runtime.run_async()`).
-
 ## Quick start — sync
 
 ```python
@@ -49,7 +112,7 @@ while True:
     multimer.sleep_ms(1)
 ```
 
-On hosted pydevices-examples apps, prefer `runtime.run_forever()` (or `runtime.poll()` in a custom loop) instead of a bare busy loop — see [Runtime](application-runtime.md).
+On standalone desktop applications or non-signal targets, use `runtime.run_forever()` (or `runtime.poll()` in a custom loop) — see [Runtime](application-runtime.md).
 
 ## Quick start — async
 
@@ -58,6 +121,7 @@ import multimer
 import board_config
 import eventsys
 from multimer import asyncio
+
 
 runtime = eventsys.Runtime.from_board_config(board_config)
 

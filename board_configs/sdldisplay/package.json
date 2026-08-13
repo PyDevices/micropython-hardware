@@ -11,17 +11,18 @@
       "latest"
     ],
     [
-      "github:PyDevices/pydevices/packages/usdl2.json",
-      "main"
+      "usdl2",
+      "latest"
     ],
     [
-      "github:PyDevices/pydevices/packages/events.json",
-      "main"
+      "events",
+      "latest"
     ],
     [
-      "github:PyDevices/pydevices/packages/keys.json",
-      "main"
+      "keys",
+      "latest"
     ]
   ],
   "version": "0.1"
 }
+

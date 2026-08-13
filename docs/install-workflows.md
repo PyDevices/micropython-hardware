@@ -20,45 +20,44 @@ mip.install(
 
 Notes:
 - This is the standard MCU flow.
-- When `index=INDEX` is set, package dependencies resolve automatically (for
-  example `displaydev` → `events` + `keys`; `eventsys` → `events` + `keys` + `multimer`).
+- The default index in `mip` is upstream `https://micropython.org/pi/v2`. By passing `index="https://PyDevices.github.io/micropython-lib/mip/PyDevices"`, `mip` resolves packages from the PyDevices custom package index (built from the `PyDevices/micropython-lib` fork).
+- When `index=INDEX` is set, dependencies resolve automatically (for example `displaydev` → `events` + `keys`; `eventsys` → `events` + `keys` + `multimer`).
+- The PyDevices index hosts both precompiled `.mpy` bytecode and raw `.py` sources.
 
 ## Desktop board_config via MIP
 
-Preferred for desktop-like hosts with `micropython` or `micropython.exe`: the
-`-m mip` CLI. Run from the directory that should own `./lib` (for example
-`~/.micropython`, or `/tmp` for a scratch install). Always pass `-i` so deps
-resolve from the PyDevices index (without it, deps fall back to
-`micropython.org/pi/v2` and fail).
+Preferred for desktop-like hosts with `micropython` or `micropython.exe`: the `-m mip` CLI. 
 
-**`--no-mpy` vs precompiled `.mpy`:**
-- Omit `--no-mpy` when the install is for MicroPython only — mip downloads
-  precompiled `.mpy` from the index (smaller / faster imports).
-- Pass `--no-mpy` when the same `lib/` tree will also be used by CircuitPython
-  (preferred for shared installs). CircuitPython cannot load MicroPython
-  `.mpy` files.
-
-MicroPython-only (precompiled `.mpy`):
+To set up a local desktop simulation workspace, create your preferred directory (such as `~/.micropython` or `%USERPROFILE%\.micropython`), `cd` into it, and run `mip` targeting the `lib` folder:
 
 ```bash
-micropython -m mip install -t lib \
-  -i https://PyDevices.github.io/micropython-lib/mip/PyDevices \
-  github:PyDevices/pydevices/board_configs/desktop
+# On Linux / macOS
+mkdir -p ~/.micropython && cd ~/.micropython
+micropython -m mip install --target lib --index https://PyDevices.github.io/micropython-lib/mip/PyDevices github:PyDevices/pydevices/board_configs/desktop
+
+# On Windows (cmd.exe)
+mkdir "%USERPROFILE%\.micropython" && cd "%USERPROFILE%\.micropython"
+micropython.exe -m mip install --target lib --index https://PyDevices.github.io/micropython-lib/mip/PyDevices github:PyDevices/pydevices/board_configs/desktop
 ```
+
+#### Preferred Environment Variables
+For details on the preferred `PYTHONPATH` and `MICROPYPATH` environment variables and the rationale behind their layout, see [Preferred Path Configuration in the flagship pydevices README](../../README.md#preferred-path-configuration).
+
+
+
+**`--no-mpy` vs precompiled `.mpy`:**
+- Omit `--no-mpy` when the install is for MicroPython only — `mip` downloads precompiled `.mpy` bytecode from the PyDevices index for faster imports and lower RAM usage.
+- Pass `--no-mpy` when source inspection is needed or when the same `lib/` tree will also be used by CircuitPython (preferred for shared installs). CircuitPython cannot load MicroPython `.mpy` files.
 
 Shared with CircuitPython (source `.py`):
 
 ```bash
-micropython -m mip install --no-mpy -t lib \
-  -i https://PyDevices.github.io/micropython-lib/mip/PyDevices \
+micropython -m mip install --no-mpy --target lib \
+  --index https://PyDevices.github.io/micropython-lib/mip/PyDevices \
   github:PyDevices/pydevices/board_configs/desktop
 ```
 
-Same commands with `micropython.exe` on Windows. Pin a branch with
-`…/desktop@main` if you want an explicit ref.
-
-REPL equivalent (shared / source install shown; drop `mpy=False` for
-precompiled):
+REPL equivalent (shared / source install shown; drop `mpy=False` for precompiled):
 
 ```python
 import mip
@@ -72,16 +71,20 @@ mip.install(
 )
 ```
 
-If you want local script-first installs in the current directory, use
-`-t .` / `target="."` instead of `lib`.
+Expected files and directories in `lib/` after desktop board package installation:
+- `board_config.py` (Source)
+- `board_peripherals.py` (Source)
+- `boarddev.py` (Source)
+- `displaydev/` (Compiled `.mpy` or source `.py`)
+- `audiodev/` (Compiled `.mpy` or source `.py`)
+- `multimer/` (Compiled `.mpy` or source `.py`)
+- `eventsys/` (Compiled `.mpy` or source `.py`)
+- `uwin32.mpy` / `uwin32.py`
+- `usdl2.mpy` / `usdl2.py`
+- `events.mpy` / `events.py`
+- `keys.mpy` / `keys.py`
+- `utils/` (Compiled `.mpy` or source `.py`)
 
-Expected files from the desktop board package:
-- `board_config.py`
-- `board_peripherals.py`
-- `boarddev.py`
-- `audiodev/` (package)
-- `usdl2.py`
-- `uwin32.py` (Windows CPython)
 
 CircuitPython note:
 - Our `micropython-lib` clone/index does not build CircuitPython-compatible

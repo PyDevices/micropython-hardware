@@ -1,113 +1,86 @@
 # Architecture
 
-PyDevices separates reusable product code from application examples:
+`pydevices` is the flagship product layer, owning portable hardware interfaces, driver abstractions, board wiring contracts, and releases.
 
-- [`pydevices`](https://github.com/PyDevices/pydevices)
-  owns portable interfaces, hardware drivers, board wiring, and releases.
-- `pydevices-examples` owns examples, application helpers, integration docs, and the
-  PyScript/PWA gallery.
+Applications build directly on the **PyDevices Board Contract** and core packages (`displaydev`, `audiodev`, `eventsys`, `multimer`). Downstream showcases like `pydevices-examples` consume this layer as companion sample code.
 
 ## Component diagram
 
 ```mermaid
 flowchart TB
-  subgraph product [pydevices product]
-    BC[board_config.py]
-    DD[displaydev]
-    AD[audiodev]
+  subgraph product [pydevices Flagship Core]
+    BC[board_config.py - Eager UI Hardware]
+    BP[board_peripherals.py / boarddev - Lazy Extras]
+    DD[displaydev - Display Abstraction]
+    AD[audiodev - Audio Abstraction]
     EV[events and keys]
-    MT[multimer]
-    ES[eventsys optional]
-    DR[board configs and drivers]
+    MT[multimer - Portable Timers]
+    ES[eventsys - Optional Event Dispatcher]
+    DR[Hardware & Bus Drivers]
   end
-  subgraph coordinator [application-owned coordinator]
-    AR[app_runtime for non-LVGL]
-    LR[display_driver for LVGL]
+  subgraph app [Application / GUI Layer]
+    APP[Custom Application / User GUI]
+    AR[eventsys.Runtime / App Loop]
+    LR[display_driver - LVGL Coordinator]
   end
-  subgraph showcase [pydevices-examples showcase]
-    EX[examples]
-    UT[application utilities]
-    PW[PyScript gallery and PWA]
+  subgraph showcase [Companion Showcase]
+    EX[pydevices-examples Gallery & Demos]
   end
 
   DR --> BC
   BC --> DD
   BC --> AD
+  BC -.-> BP
   EV --> ES
   MT --> ES
+
+  BC --> APP
+  DD --> APP
+  BP --> APP
+
   BC --> AR
   ES --> AR
   BC --> LR
   MT --> LR
+
+  APP --> EX
   AR --> EX
   LR --> EX
-  DD --> EX
-  AD --> EX
-  EX --> PW
-  UT --> EX
 ```
 
-## Responsibilities
+## Core Responsibilities
 
 | Piece | Role |
 |---|---|
-| `board_config.py` | Creates hardware interfaces such as `display_drv` and exports neutral input/timing capabilities. It does not create an application runtime. |
-| `displaydev` | Cross-platform display interfaces and desktop/browser backends. |
-| `audiodev` | Cross-platform audio output/input interfaces and host backends. |
-| `events` / `keys` | Shared event types, key codes, modifiers, and matching helpers. |
-| `multimer` | Cross-platform `Timer`, `AsyncTimer`, ticks, sleep, and asyncio exposure. |
-| `eventsys` | Optional event traffic controller for applications that want the supplied dispatcher and input adapters. |
-| `app_runtime` | pydevices-examples's non-LVGL opt-in: creates an `eventsys.Runtime` from the selected board config and adds gallery test behavior. |
-| `display_driver` | LVGL-specific coordinator shared by the binding repos; bridges LVGL to `displaydev` and `multimer` without importing `eventsys`. |
-| `utils` | Example helpers and third-party GUI integration adapters. |
+| `board_config.py` | Primary Board Contract: initializes eager UI hardware (`display_drv`, touch, buttons) and exports neutral capability flags. |
+| `board_peripherals.py` / `boarddev` | Board Contract extension: provides lazy, on-demand access to extra hardware (sensors, battery monitors, external storage). |
+| `displaydev` | Cross-platform display interfaces (`BusDisplay`, `FBDisplay`, `SDLDisplay`, `PyScriptDisplay`). |
+| `audiodev` | Cross-platform audio output/input interfaces (`I2SAudio`, `SDLAudio`). |
+| `events` / `keys` | Neutral event definitions, key codes, modifier keys, and touch gestures. |
+| `multimer` | Cross-platform timing primitives (`Timer`, `AsyncTimer`, ticks, sleep). |
+| `eventsys` | Optional event traffic controller and input queue for applications using native PyDevices dispatch. |
+| `display_driver` | LVGL coordinator bridging LVGL widgets to `displaydev` and `multimer`. |
 
-## Non-LVGL boot sequence
+## Standard Application Boot Sequence
 
-1. Install the product packages and a board config.
+1. Install `pydevices` or your board's `board_config` via MIP or pip.
 2. Import `display_drv` from `board_config`.
-3. Import `runtime` from pydevices-examples's `app_runtime`, or create your own
-   `eventsys.Runtime.from_board_config(board_config)`.
-4. Build the UI, register callbacks, and run the coordinator.
+3. Draw directly or bind your choice of UI toolkit (`pdwidgets`, `lvgl`, or raw framebuffers).
+4. Run your application event loop.
 
 ```python
 from board_config import display_drv
-from app_runtime import runtime
 
-display_drv.fill_rect(0, 0, 10, 10, 0xF800)
+# Draw to the display hardware
+display_drv.fill_rect(0, 0, 100, 50, 0xF800)
 display_drv.show()
-
-
-def on_click(event):
-    ...
-
-
-runtime.on(runtime.events.MOUSEBUTTONDOWN, on_click)
-runtime.run_forever()
 ```
-
-`eventsys` is optional product functionality: applications may supply a
-different dispatcher or event loop instead.
-
-## LVGL boot sequence
-
-LVGL applications import the coordinator supplied with the binding:
-
-```python
-from board_config import display_drv
-from display_driver import runtime
-
-runtime.run_forever()
-```
-
-The LVGL coordinator owns tick/task handling, display presentation, input-device
-adapters, and quit lifecycle. It consumes neutral board-config exports and
-`multimer`; it does not depend on `eventsys`.
 
 ## Where to go next
 
-- [Runtime](application-runtime.md) — optional eventsys application coordination
-- [Events](eventsys.md) — event model and devices
-- [Displays](displaydev.md) — display interfaces
-- [multimer](multimer.md) — portable timers
-- [Board configs](https://pydevices.github.io/pydevices/board-configs.html) — hardware wiring
-- [Examples](https://pydisplay.readthedocs.io/en/latest/examples/) — complete applications
+- [Board Contract Specification](board-peripherals.md) — eager vs lazy board hardware
+- [Board Config Inventory](board-configs.md) — supported MCU & desktop boards
+- [Display Drivers](displaydev.md) — display interfaces and backends
+- [multimer](multimer.md) — portable timers and async support
+- [Companion Demos](https://pydevices.github.io/pydevices-examples/) — sample applications
+
