@@ -4,22 +4,13 @@
   <meta charset="utf-8">
   <script>try{if(localStorage.getItem('pydevices-theme')==='light'){document.documentElement.setAttribute('data-theme','light');}}catch(e){}</script>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>pydevices — PyDevices</title>
-  <meta name="description" content="Canonical PyDevices board configs, drivers, and cross-platform display, audio, event, and timer packages for MicroPython, CircuitPython, and CPython.">
+  <title>pydevices — Core Hardware Engine &amp; Board Contract</title>
+  <meta name="description" content="The core PyDevices hardware driver engine: board contract specification, displaydev, audiodev, boarddev, and cross-runtime drivers.">
   <link rel="icon" type="image/svg+xml" href="https://pydevices.github.io/assets/img/logo.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap">
-  <link rel="stylesheet" href="https://pydevices.github.io/assets/css/site.css">
-<style>
-    .doc-list { list-style: none; padding: 0; margin: 0 0 2.5rem; }
-    .doc-list li {
-      border-bottom: 1px solid color-mix(in srgb, currentColor 14%, transparent);
-      padding: 0.85rem 0;
-    }
-    .doc-list a { font-family: "Space Grotesk", system-ui, sans-serif; font-weight: 600; }
-    .doc-list p { margin: 0.25rem 0 0; opacity: 0.8; font-size: 0.95rem; }
-  </style>
+  <link rel="stylesheet" href="./vendor/pydevices-chrome/site.css">
 </head>
 <body>
   <div id="pydevices-site-header"></div>
@@ -27,98 +18,118 @@
   <section class="hero wrap">
     <div class="hero-lead">
       <div class="hero-brand">
-        <div class="logo-badge product-mark"><img src="https://pydevices.github.io/assets/img/products/pydevices.svg" alt="pydevices" width="112" height="112"></div>
-        <span class="eyebrow">PyDevices / pydevices</span>
+        <div class="logo-badge product-mark" style="background: linear-gradient(135deg, var(--tier-1-amber), #d97706);"><img src="https://pydevices.github.io/assets/img/products/pydevices.svg" alt="pydevices" width="112" height="112"></div>
+        <span class="eyebrow">pydevices</span>
       </div>
-      <h1>pydevices</h1>
+      <h1>pydevices — Core hardware driver engine &amp; board contract.</h1>
     </div>
-    <p>
-      The flagship PyDevices core product: hardware display and audio drivers, the PyDevices Board Contract (<code>board_config.py</code> and <code>board_peripherals.py</code>), optional <code>eventsys</code>, timers, and cross-runtime compatibility across MicroPython, CircuitPython, CPython, PyScript, and Android.
-    </p>
+    <p><code>pydevices</code> is the core product of the PyDevices ecosystem. It establishes the standardized <strong>PyDevices Board Contract</strong> (<code>board_config.py</code>), lazy peripheral management (<code>boarddev</code>), eager UI hardware initialization, and unified display abstractions (<code>displaydev</code>) across MicroPython, CircuitPython, CPython, PyScript, and Android.</p>
+    
     <div class="cta">
-      <a class="btn primary" href="board-peripherals.html">Board Contract Spec</a>
-      <a class="btn" href="install-workflows.html">Install Workflows</a>
-      <a class="btn" href="board-configs.html">Board Configs</a>
-      <a class="btn" href="device-matrix.html">Device Matrix</a>
-      <a class="btn" href="https://github.com/PyDevices/pydevices">GitHub Source</a>
+      <a class="btn primary" style="background: #24292e; color: #fff; border-color: #24292e;" href="https://github.com/PyDevices/pydevices">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.9a3.4 3.4 0 0 0-1-2.6c3-.3 6-1.5 6-6.5a5 5 0 0 0-1.4-3.5 4.6 4.6 0 0 0-.1-3.5s-1.1-.3-3.5 1.3a12 12 0 0 0-6 0C6.6 1.7 5.5 2 5.5 2a4.6 4.6 0 0 0-.1 3.5A5 5 0 0 0 4 9c0 5 3 6.2 6 6.5a3.4 3.4 0 0 0-1 2.6V22"/></svg>
+        GitHub Repo
+      </a>
+      <a class="btn" style="border-color: #0284c7; color: #0284c7;" href="https://pydevices.readthedocs.io">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        Read the Docs
+      </a>
+      <a class="btn" style="border-color: var(--tier-4-purple); color: var(--tier-4-purple);" href="https://pydevices.github.io/pydevices-examples/pyscript/">PyScript Demos</a>
+      <a class="btn" style="border-color: var(--tier-5-steel); color: var(--tier-5-steel);" href="https://PyDevices.github.io/micropython-lib/mip/PyDevices">MIP Index</a>
     </div>
-
   </section>
 
-  <main class="wrap">
+  <main class="wrap" style="padding-bottom: 60px;">
+    <!-- Architecture Specification Component -->
     <div class="section-head">
-      <h2>📚 Documentation</h2>
-      <span class="hint">Source under <code>docs/</code></span>
+      <h2>Architecture &amp; Core Subsystems</h2>
+      <span class="hint">The key pillars of the PyDevices hardware abstraction layer.</span>
     </div>
-    <ul class="doc-list">
-      <li>
-        <a href="audio.html">Portable audio</a>
-        <p>PCM <code>audio_out</code>/<code>audio_in</code>, host backends, and WAV file devices.</p>
-      </li>
-      <li>
-        <a href="install-workflows.html">Install workflows</a>
-        <p>Install and verify board configs and portable packages with MIP or pip.</p>
-      </li>
-      <li>
-        <a href="publishing.html">Publishing</a>
-        <p>TestPyPI/MIP naming, ownership, release tags, and the publication pipeline.</p>
-      </li>
-      <li>
-        <a href="pydevices-desktop.html">Desktop bundle</a>
-        <p>The universal desktop board config and its <code>pydevices-desktop</code> distribution.</p>
-      </li>
-      <li>
-        <a href="board-configs.html">Board configs</a>
-        <p>Pick and MIP-install a <code>board_config</code> for your hardware.</p>
-      </li>
-      <li>
-        <a href="board-peripherals.html">Board peripherals</a>
-        <p>Eager UI / lazy <code>PERIPHERALS</code> contract and touch duck-type.</p>
-      </li>
-      <li>
-        <a href="device-matrix.html">Device matrix</a>
-        <p>Campaign boards: fixture #, path, eager roles, lazy <code>PERIPHERALS</code>.</p>
-      </li>
-      <li>
-        <a href="display-drivers.html">Display drivers</a>
-        <p>Chip init helpers for BusDisplay.</p>
-      </li>
-      <li>
-        <a href="touch-drivers.html">Touch drivers</a>
-        <p>Touch controllers and install notes.</p>
-      </li>
-      <li>
-        <a href="display-interfaces.html">Display interfaces</a>
-        <p>SPI / I80 / RGB / DSI taxonomy and native modules.</p>
-      </li>
-      <li>
-        <a href="driver-inventory.html">Driver inventory</a>
-        <p>What’s under <code>drivers/</code>.</p>
-      </li>
-      <li>
-        <a href="board-inventory.html">Board inventory</a>
-        <p>Detect fixtures — chip, flash, runtime.</p>
-      </li>
-      <li>
-        <a href="firmware-fixtures.html">Firmware fixtures</a>
-        <p>Raw Detect campaign probe notes.</p>
-      </li>
-      <li>
-        <a href="display-boards.html">Display board bring-up</a>
-        <p>Panel / touch / soft-reset notes for campaign boards.</p>
-      </li>
-      <li>
-        <a href="wokwi.html">Wokwi</a>
-        <p>Simulator pin map and MIP install.</p>
-      </li>
-      <li>
-        <a href="tft-espi-parity.html">TFT_eSPI parity</a>
-        <p>How pydevices-examples / displayif map to TFT_eSPI buses.</p>
-      </li>
-    </ul>
+
+    <div class="spec-block">
+      <div class="spec-grid">
+        <div class="spec-item tier-1">
+          <h4><code>board_config.py</code> Contract</h4>
+          <p>Standardized MCU pinout definitions and bus initializations enabling user code to run unchanged on any target development board.</p>
+        </div>
+
+        <div class="spec-item tier-1">
+          <h4><code>displaydev</code> Abstraction</h4>
+          <p>Unified display driver interface supporting SPI, I80, RGB, and DSI panels with automatic frame-buffer blitting and rotation.</p>
+        </div>
+
+        <div class="spec-item tier-1">
+          <h4><code>audiodev</code> Subsystem</h4>
+          <p>Portable PCM audio output/input abstractions for microcontrollers (I2S, PWM DAC) and desktop host backends.</p>
+        </div>
+
+        <div class="spec-item tier-1">
+          <h4>Lazy <code>boarddev</code> Peripheral Management</h4>
+          <p>Hardware peripherals are initialized on-demand when accessed, saving RAM and power on constrained devices.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quickstart & Environment Setup Block -->
+    <div class="section-head" style="margin-top: 36px;">
+      <h2>Quickstart &amp; Preferred Search Paths</h2>
+      <span class="hint">MicroPython MIP and canonical environment variable settings.</span>
+    </div>
+
+    <div class="spec-block">
+      <pre><code># Install pydevices core package via MicroPython MIP:
+import mip
+mip.install("github:PyDevices/pydevices")
+
+# Preferred environment path settings (Linux / macOS):
+export MICROPYPATH=".:.frozen:lib:utils:~/.micropython/lib:/usr/lib/micropython"
+export PYTHONPATH=".:lib:utils"</code></pre>
+    </div>
+
+    <!-- Documentation & Driver Compatibility Matrix -->
+    <div class="section-head" style="margin-top: 36px;">
+      <h2>Supported Display &amp; Input Driver Matrix</h2>
+      <span class="hint">Hardware ICs supported out of the box by pydevices.</span>
+    </div>
+
+    <div class="spec-block" style="overflow-x: auto;">
+      <table class="matrix-table">
+        <thead>
+          <tr>
+            <th>Hardware Category</th>
+            <th>Supported IC Controller Chips</th>
+            <th>Target Interfaces</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>TFT / LCD Display Drivers</strong></td>
+            <td>ST7789, ST7735, ILI9341, ILI9488, GC9A01, SSD1306</td>
+            <td>SPI, I80 Parallel, RGB, DSI</td>
+          </tr>
+          <tr>
+            <td><strong>Touch Controllers</strong></td>
+            <td>FT6X36, CST816S, GT911, XPT2046</td>
+            <td>I2C, SPI</td>
+          </tr>
+          <tr>
+            <td><strong>Audio Codecs &amp; DACs</strong></td>
+            <td>I2S Audio, PWM DAC, WAV File Reader</td>
+            <td>I2S, PWM</td>
+          </tr>
+          <tr>
+            <td><strong>Timer &amp; Event Subsystems</strong></td>
+            <td><code>eventsys</code>, <code>multimer</code>, non-blocking software timers</td>
+            <td>Software Loop, IRQ</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </main>
+
   <div id="pydevices-site-footer"></div>
-  <script src="https://pydevices.github.io/assets/js/site-chrome.js"></script>
-  <script src="https://pydevices.github.io/assets/js/theme-toggle.js"></script>
+  <script src="./vendor/pydevices-chrome/site-chrome.js"></script>
+  <script src="./vendor/pydevices-chrome/theme-toggle.js"></script>
+  <script src="./vendor/pydevices-chrome/tree-nav.js"></script>
 </body>
 </html>
