@@ -41,24 +41,3 @@ Use the sections:
 via `displaydev.auto.AutoDisplay`; it does not create an event runtime. Lazy roles such as `audio_out` /
 `audio_in` still come from `board_peripherals` and allocate on first access.
 Terminal-only apps can `import board_peripherals` without opening a window.
-
-## Publish to TestPyPI
-
-```bash
-TESTPYPI_API_TOKEN=... ./scripts/publish_testpypi.sh
-```
-
-## Tag-based Release (repo-standard)
-
-Use the repository-level tag scripts, consistent with other PyDevices repos:
-
-1. Preview next version:
-
-	./scripts/next_release_version.sh --verbose
-
-2. Create and push release tag:
-
-	./scripts/publish_release_tag.sh --push
-
-Pushing a `vX.Y.Z` tag triggers `.github/workflows/publish-pydevices.yml`,
-which sets the package version from the tag and uploads to TestPyPI.

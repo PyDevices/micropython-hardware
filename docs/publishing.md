@@ -103,10 +103,7 @@ The tag starts `.github/workflows/publish-pydevices.yml`. Its jobs:
 4. Compile `.mpy` artifacts, package `.py` sources, build the MIP index manifests, and publish to the `gh-pages` branch.
 
 
-The workflow requires these repository secrets:
-
-- `TESTPYPI_API_TOKEN` for TestPyPI uploads.
-- `MICROPYTHON_LIB_DEPLOY_TOKEN` for updating the fork and its Pages branch.
+The workflow requires repository authentication secrets for package uploads and fork syncing.
 
 Before tagging, run the unit tests and the publisher in a temporary/staging
 mode, confirm the `micropython-lib` sync diff, and make sure both this repo and

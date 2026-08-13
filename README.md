@@ -1,6 +1,6 @@
 # pydevices
 
-The flagship display engine, hardware driver suite, and board configuration standard for [PyDevices](https://github.com/PyDevices).
+The core display engine, hardware driver suite, and board configuration standard for [PyDevices](https://github.com/PyDevices).
 
 `pydevices` is the canonical source and publisher for cross-runtime hardware drivers, board configurations, and pure-Python core packages:
 `displaydev`, `audiodev`, optional `eventsys`, `multimer`, `events`, and `keys`.

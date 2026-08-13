@@ -41,7 +41,7 @@ micropython.exe -m mip install --target lib --index https://PyDevices.github.io/
 ```
 
 #### Preferred Environment Variables
-For details on the preferred `PYTHONPATH` and `MICROPYPATH` environment variables and the rationale behind their layout, see [Preferred Path Configuration in the flagship pydevices README](../../README.md#preferred-path-configuration).
+For details on the preferred `PYTHONPATH` and `MICROPYPATH` environment variables and the rationale behind their layout, see [Preferred Path Configuration in the pydevices README](../../README.md#preferred-path-configuration).
 
 
 

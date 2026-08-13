@@ -1,6 +1,6 @@
 # Architecture
 
-`pydevices` is the flagship product layer, owning portable hardware interfaces, driver abstractions, board wiring contracts, and releases.
+`pydevices` is the core product layer, owning portable hardware interfaces, driver abstractions, board wiring contracts, and releases.
 
 Applications build directly on the **PyDevices Board Contract** and core packages (`displaydev`, `audiodev`, `eventsys`, `multimer`). Downstream showcases like `pydevices-examples` consume this layer as companion sample code.
 
@@ -8,7 +8,7 @@ Applications build directly on the **PyDevices Board Contract** and core package
 
 ```mermaid
 flowchart TB
-  subgraph product [pydevices Flagship Core]
+  subgraph product [pydevices Core Engine]
     BC[board_config.py - Eager UI Hardware]
     BP[board_peripherals.py / boarddev - Lazy Extras]
     DD[displaydev - Display Abstraction]
