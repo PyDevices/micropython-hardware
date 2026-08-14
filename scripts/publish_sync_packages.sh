@@ -107,15 +107,14 @@ requires() {
 }
 
 source_dir() {
-    case "$1" in
-        displaydev | audiodev | eventsys | multimer) echo "$SOURCE_REPO/lib/$1" ;;
-    esac
+    echo "$SOURCE_REPO/lib/$1"
 }
 
 readme_path() {
-    case "$1" in
-        displaydev | audiodev | eventsys | multimer) echo "$SOURCE_REPO/lib/$1/README.md" ;;
-    esac
+    local p="$SOURCE_REPO/lib/$1/README.md"
+    if [[ -f "$p" ]]; then
+        echo "$p"
+    fi
 }
 
 copy_tree() {
@@ -169,7 +168,17 @@ publish_package() {
     echo "Processing $package -> $(pypi_name "$package")"
     copy_tree "$source" "$package_dir/$package"
     write_manifest "$package" "$package_dir/manifest.py" package
-    cp "$readme" "$package_dir/README.md"
+    if [[ -n "$readme" && -f "$readme" ]]; then
+        cp "$readme" "$package_dir/README.md"
+    else
+        cat > "$package_dir/README.md" <<EOF
+# $package
+
+$(summary "$package").
+
+Canonical source: [pydevices/lib/$package](https://github.com/PyDevices/pydevices/tree/main/lib/$package).
+EOF
+    fi
 }
 
 publish_module() {
@@ -211,13 +220,31 @@ rm -rf "$DEST_DIR"
 rm -rf "$LEGACY_DEST_DIR"
 mkdir -p "$DEST_DIR"
 
-for package in displaydev audiodev eventsys multimer; do publish_package "$package"; done
-for package in events keys usdl2 uwin32; do publish_module "$package"; done
+PUBLISHED_PACKAGES=()
+
+# Dynamically discover all package directories in lib/
+for dir_path in "$SOURCE_REPO/lib"/*/; do
+    [[ -d "$dir_path" ]] || continue
+    pkg="$(basename "$dir_path")"
+    [[ "$pkg" != "__pycache__" && ! "$pkg" =~ ^\. ]] || continue
+    publish_package "$pkg"
+    PUBLISHED_PACKAGES+=("$pkg")
+done
+
+# Dynamically discover all single-file modules in lib/*.py
+for file_path in "$SOURCE_REPO/lib"/*.py; do
+    [[ -f "$file_path" ]] || continue
+    mod="$(basename "$file_path" .py)"
+    [[ "$mod" != "__init__" ]] || continue
+    publish_module "$mod"
+    PUBLISHED_PACKAGES+=("$mod")
+done
+
 publish_bundle
 
 # Build only after the complete collection exists, so require() can resolve
 # sibling PyDevices packages while generating each TestPyPI project.
-for package in displaydev audiodev eventsys multimer events keys usdl2 uwin32; do
+for package in "${PUBLISHED_PACKAGES[@]}"; do
     build_and_upload "$package" "$DEST_DIR/$package/manifest.py"
 done
 
