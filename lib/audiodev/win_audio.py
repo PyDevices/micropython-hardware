@@ -37,7 +37,12 @@ _CAPTURE_PROFILES = {
 
 
 def _sleep_ms(milliseconds):
-    time.sleep(milliseconds / 1000)
+    try:
+        from multimer import sleep_ms
+
+        sleep_ms(milliseconds)
+    except Exception:
+        time.sleep(milliseconds / 1000)
 
 
 async def _asleep_ms(milliseconds):
