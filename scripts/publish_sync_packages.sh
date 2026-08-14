@@ -46,11 +46,12 @@ done
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SOURCE_REPO="$(cd "$SCRIPT_DIR/.." && pwd)"
-DEST_REPO="${MICROPYTHON_LIB_DIR:-$SOURCE_REPO/../micropython-lib}"
+DEST_REPO="${MIP_DIR:-${MICROPYTHON_LIB_DIR:-$SOURCE_REPO/../mip}}"
 DEST_REPO="$(cd "$DEST_REPO" && pwd)"
 DEST_DIR="$DEST_REPO/micropython/pydevices"
 LEGACY_DEST_DIR="$DEST_REPO/micropython/pydisplay"
 PYPI_DIR="$SOURCE_REPO/wheels"
+export MIP_DIR="$DEST_REPO"
 export MICROPYTHON_LIB_DIR="$DEST_REPO"
 
 normalize_version() {

@@ -18,12 +18,12 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PYDEVICES_DIR="${PYDEVICES_DIR:-$ROOT}"
-LIB_DIR="${MICROPYTHON_LIB_DIR:?set MICROPYTHON_LIB_DIR}"
+LIB_DIR="${MIP_DIR:-${MICROPYTHON_LIB_DIR:-$PYDEVICES_DIR/../mip}}"
 MPY_DIR="${MICROPYTHON_DIR:-/tmp/micropython}"
 INDEX_OUT="${MIP_INDEX_OUTPUT:-/tmp/mip-index}"
 MIP_SUBDIR="${MIP_INDEX_SUBDIR:-PyDevices}"
 MPY_CROSS="$MPY_DIR/mpy-cross/build/mpy-cross"
-PAGES_PATH="${MIP_GHPAGES_WORKTREE:-/tmp/micropython-lib-gh-pages}"
+PAGES_PATH="${MIP_GHPAGES_WORKTREE:-/tmp/mip-gh-pages}"
 
 if [[ ! -x "$MPY_CROSS" ]]; then
     echo "Building mpy-cross in $MPY_DIR"
@@ -82,4 +82,4 @@ if [[ "$NEW_BRANCH" -eq 0 ]]; then
 fi
 git push origin gh-pages
 
-echo "Published https://pydevices.github.io/micropython-lib"
+echo "Published https://pydevices.github.io/mip"

@@ -166,9 +166,9 @@ jobs:
 
       - uses: actions/checkout@v4
         with:
-          repository: PyDevices/micropython-lib
+          repository: PyDevices/mip
           ref: PyDevices
-          path: micropython-lib
+          path: mip
           token: ${{ secrets.MICROPYTHON_LIB_DEPLOY_TOKEN }}
 
       - uses: actions/checkout@v4
@@ -184,16 +184,17 @@ jobs:
       - name: Install publish tooling
         run: python -m pip install --upgrade hatch twine
 
-      - name: Configure micropython-lib push
+      - name: Configure mip push
         run: |
-          git -C micropython-lib config user.name 'github-actions[bot]'
-          git -C micropython-lib config user.email 'github-actions[bot]@users.noreply.github.com'
-          git -C micropython-lib remote set-url origin \
-            "https://x-access-token:${{ secrets.MICROPYTHON_LIB_DEPLOY_TOKEN }}@github.com/PyDevices/micropython-lib.git"
+          git -C mip config user.name 'github-actions[bot]'
+          git -C mip config user.email 'github-actions[bot]@users.noreply.github.com'
+          git -C mip remote set-url origin \
+            "https://x-access-token:${{ secrets.MICROPYTHON_LIB_DEPLOY_TOKEN }}@github.com/PyDevices/mip.git"
 
       - name: Sync MIP sources and publish TestPyPI packages
         env:
-          MICROPYTHON_LIB_DIR: ${{ github.workspace }}/micropython-lib
+          MIP_DIR: ${{ github.workspace }}/mip
+          MICROPYTHON_LIB_DIR: ${{ github.workspace }}/mip
           MICROPYTHON_DIR: ${{ github.workspace }}/micropython
           PYDEVICES_VERSION: ${{ steps.version.outputs.version }}
           TESTPYPI_API_TOKEN: ${{ secrets.TESTPYPI_API_TOKEN }}
@@ -205,7 +206,8 @@ jobs:
 
       - name: Build and publish MIP index
         env:
-          MICROPYTHON_LIB_DIR: ${{ github.workspace }}/micropython-lib
+          MIP_DIR: ${{ github.workspace }}/mip
+          MICROPYTHON_LIB_DIR: ${{ github.workspace }}/mip
           MICROPYTHON_DIR: ${{ github.workspace }}/micropython
           MIP_INDEX_OUTPUT: /tmp/mip-index
         run: ./scripts/publish_mip_ghpages.sh
