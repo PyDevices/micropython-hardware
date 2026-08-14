@@ -56,11 +56,11 @@ To quickly set up a local desktop simulation and development workspace, download
 ```bash
 # On Linux / macOS
 mkdir -p ~/.micropython && cd ~/.micropython
-micropython -m mip install --target lib --index https://PyDevices.github.io/micropython-lib/mip/PyDevices github:PyDevices/pydevices/board_configs/desktop
+micropython -m mip install --target lib --index https://PyDevices.github.io/mip github:PyDevices/pydevices/board_configs/desktop
 
 # On Windows (cmd.exe)
 mkdir "%USERPROFILE%\.micropython" && cd "%USERPROFILE%\.micropython"
-micropython.exe -m mip install --target lib --index https://PyDevices.github.io/micropython-lib/mip/PyDevices github:PyDevices/pydevices/board_configs/desktop
+micropython.exe -m mip install --target lib --index https://PyDevices.github.io/mip github:PyDevices/pydevices/board_configs/desktop
 ```
 
 #### Preferred Path Configuration
@@ -95,11 +95,11 @@ pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/
 On MCU boards with network access, install the specific `board_config` directly to the device:
 ```python
 import mip
-mip.install("board_configs/esp32_s3_box", index="https://PyDevices.github.io/micropython-lib/mip/PyDevices")
+mip.install("board_configs/esp32_s3_box", index="https://PyDevices.github.io/mip")
 ```
 For connected boards without network access, run installation via `mpremote`:
 ```bash
-mpremote mip install --index https://PyDevices.github.io/micropython-lib/mip/PyDevices board_configs/esp32_s3_box
+mpremote mip install --index https://PyDevices.github.io/mip board_configs/esp32_s3_box
 ```
 See [docs/install-workflows.md](docs/install-workflows.md) for full workflows and verification.
 

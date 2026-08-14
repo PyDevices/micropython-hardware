@@ -11,7 +11,7 @@ automatically from the PyDevices MIP index.
 ```python
 import mip
 
-INDEX = "https://PyDevices.github.io/micropython-lib/mip/PyDevices"
+INDEX = "https://PyDevices.github.io/mip"
 mip.install(
     "github:PyDevices/pydevices/board_configs/busdisplay/i80/t-display-s3",
     index=INDEX,
@@ -20,7 +20,7 @@ mip.install(
 
 Notes:
 - This is the standard MCU flow.
-- The default index in `mip` is upstream `https://micropython.org/pi/v2`. By passing `index="https://PyDevices.github.io/micropython-lib/mip/PyDevices"`, `mip` resolves packages from the PyDevices custom package index (built from the `PyDevices/micropython-lib` fork).
+- The default index in `mip` is upstream `https://micropython.org/pi/v2`. By passing `index="https://PyDevices.github.io/mip"`, `mip` resolves packages from the PyDevices custom package index (built from the `PyDevices/micropython-lib` fork).
 - When `index=INDEX` is set, dependencies resolve automatically (for example `displaydev` → `events` + `keys`; `eventsys` → `events` + `keys` + `multimer`).
 - The PyDevices index hosts both precompiled `.mpy` bytecode and raw `.py` sources.
 
@@ -33,11 +33,11 @@ To set up a local desktop simulation workspace, create your preferred directory 
 ```bash
 # On Linux / macOS
 mkdir -p ~/.micropython && cd ~/.micropython
-micropython -m mip install --target lib --index https://PyDevices.github.io/micropython-lib/mip/PyDevices github:PyDevices/pydevices/board_configs/desktop
+micropython -m mip install --target lib --index https://PyDevices.github.io/mip github:PyDevices/pydevices/board_configs/desktop
 
 # On Windows (cmd.exe)
 mkdir "%USERPROFILE%\.micropython" && cd "%USERPROFILE%\.micropython"
-micropython.exe -m mip install --target lib --index https://PyDevices.github.io/micropython-lib/mip/PyDevices github:PyDevices/pydevices/board_configs/desktop
+micropython.exe -m mip install --target lib --index https://PyDevices.github.io/mip github:PyDevices/pydevices/board_configs/desktop
 ```
 
 #### Preferred Environment Variables
@@ -53,7 +53,7 @@ Shared with CircuitPython (source `.py`):
 
 ```bash
 micropython -m mip install --no-mpy --target lib \
-  --index https://PyDevices.github.io/micropython-lib/mip/PyDevices \
+  --index https://PyDevices.github.io/mip \
   github:PyDevices/pydevices/board_configs/desktop
 ```
 
@@ -62,7 +62,7 @@ REPL equivalent (shared / source install shown; drop `mpy=False` for precompiled
 ```python
 import mip
 
-INDEX = "https://PyDevices.github.io/micropython-lib/mip/PyDevices"
+INDEX = "https://PyDevices.github.io/mip"
 mip.install(
     "github:PyDevices/pydevices/board_configs/desktop",
     index=INDEX,
@@ -115,7 +115,7 @@ Run from your target working directory (for example `/tmp/my-cpy-run`):
 
 ```bash
 micropython -m mip install --no-mpy -t lib \
-  -i https://PyDevices.github.io/micropython-lib/mip/PyDevices \
+  -i https://PyDevices.github.io/mip \
   github:PyDevices/pydevices/board_configs/desktop
 ```
 

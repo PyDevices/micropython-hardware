@@ -63,7 +63,7 @@ mip.install pattern in [`wokwi/main.py`](https://github.com/PyDevices/pydevices-
 ```python
 import mip
 
-MICROPYTHON_LIB = "https://PyDevices.github.io/micropython-lib/mip/PyDevices"
+MICROPYTHON_LIB = "https://PyDevices.github.io/mip"
 PYDEVICES = "github:PyDevices/pydevices"
 PYDEVICES_EXAMPLES = "github:PyDevices/pydevices-examples"
 

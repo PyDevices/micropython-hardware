@@ -61,7 +61,7 @@ In the MicroPython ecosystem, `https://micropython.org/pi/v2` serves as the defa
 For PyDevices, the [`PyDevices/micropython-lib`](https://github.com/PyDevices/micropython-lib) fork acts as the dedicated distribution and aggregation hub. PyDevices packages are synchronized into this fork, where CI builds and hosts the custom PyDevices MIP package index at:
 
 ```text
-https://PyDevices.github.io/micropython-lib/mip/PyDevices
+https://PyDevices.github.io/mip
 ```
 
 This index hosts **both `.py` (source) and `.mpy` (precompiled bytecode)** artifacts:
@@ -75,7 +75,7 @@ import mip
 
 mip.install(
     "displaydev",
-    index="https://PyDevices.github.io/micropython-lib/mip/PyDevices",
+    index="https://PyDevices.github.io/mip",
 )
 ```
 

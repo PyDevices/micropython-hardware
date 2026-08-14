@@ -83,4 +83,4 @@ if [[ "$NEW_BRANCH" -eq 0 ]]; then
 fi
 git push origin gh-pages
 
-echo "Published https://PyDevices.github.io/micropython-lib/mip/$MIP_SUBDIR"
+echo "Published https://PyDevices.github.io/mip/$MIP_SUBDIR"
