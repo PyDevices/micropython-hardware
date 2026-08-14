@@ -64,10 +64,9 @@ else
     cd "$LIB_DIR"
 fi
 
-DEST_PATH="$PAGES_PATH/mip/$MIP_SUBDIR"
-rm -rf "$DEST_PATH"
-mkdir -p "$DEST_PATH"
-cp -r "$INDEX_OUT/." "$DEST_PATH/"
+# Clean up legacy mip/ directory if present, then copy index directly to root
+rm -rf "$PAGES_PATH/mip"
+cp -r "$INDEX_OUT/." "$PAGES_PATH/"
 
 cd "$PAGES_PATH"
 git add .
@@ -76,11 +75,11 @@ git diff --staged --quiet && {
     echo "No MIP index changes to publish"
     exit 0
 }
-git commit -m "pydevices: Update mip/$MIP_SUBDIR from pydevices ${SHA}."
+git commit -m "pydevices: Update MIP index from pydevices ${SHA}."
 
 if [[ "$NEW_BRANCH" -eq 0 ]]; then
     git pull --rebase origin gh-pages
 fi
 git push origin gh-pages
 
-echo "Published https://PyDevices.github.io/mip/$MIP_SUBDIR"
+echo "Published https://pydevices.github.io/micropython-lib"
