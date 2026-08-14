@@ -250,6 +250,18 @@ if _use_ffi:
             return len(obj)
         return _PTR_SIZE
 
+    _raw_RtlMoveMemory = kernel32.func("v", "RtlMoveMemory", "Ppi")
+
+    def memmove(dst, src, count):
+        if isinstance(dst, int):
+            dst_addr = dst
+        else:
+            dst_addr = uctypes.addressof(dst)
+        _raw_RtlMoveMemory(dst_addr, src, int(count))
+
+    def string_at(ptr, size):
+        return uctypes.bytes_at(ptr, int(size))
+
     def WNDPROC(fn):
         if callable(fn):
             return ffi.callback(_L, fn, "PI" + _W + _L)
@@ -1095,6 +1107,10 @@ else:
         proto = ctypes.WINFUNCTYPE(restype, c_void_p, *argtypes)
         fn = proto(_vtbl(punk)[index])
         return fn(punk, *args)
+
+    memmove = ctypes.memmove
+    string_at = ctypes.string_at
+
 
 
 # ---------------------------------------------------------------------------

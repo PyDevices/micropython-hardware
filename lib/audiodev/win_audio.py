@@ -13,7 +13,6 @@ except ImportError:  # pragma: no cover
     except ImportError:
         asyncio = None
 
-import ctypes
 import time
 
 from audiodev import AudioFormat, PCMInput, PCMOutput, check_latency
@@ -150,7 +149,7 @@ class WinPCMOutput(PCMOutput):
             return 0
         frames = min(frames, room)
         ptr = win.IAudioRenderClient_GetBuffer(self._render, frames)
-        ctypes.memmove(ptr, data[: frames * frame], frames * frame)
+        win.memmove(ptr, data[: frames * frame], frames * frame)
         win.IAudioRenderClient_ReleaseBuffer(self._render, frames)
         return frames * frame
 
@@ -285,7 +284,7 @@ class WinPCMInput(PCMInput):
             ptr, frames, _flags = win.IAudioCaptureClient_GetBuffer(self._capture)
             nbytes = frames * self.format.frame_size
             if ptr and nbytes:
-                self._pending.extend(ctypes.string_at(ptr, nbytes))
+                self._pending.extend(win.string_at(ptr, nbytes))
             win.IAudioCaptureClient_ReleaseBuffer(self._capture, frames)
 
     def _readinto(self, buf):
