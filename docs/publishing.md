@@ -58,7 +58,7 @@ and verification examples.
 
 In the MicroPython ecosystem, `https://micropython.org/pi/v2` serves as the default package index for `mip` (analogous to PyPI in CPython), fed by upstream `micropython/micropython-lib`.
 
-For PyDevices, the [`PyDevices/micropython-lib`](https://github.com/PyDevices/micropython-lib) fork acts as the dedicated distribution and aggregation hub. PyDevices packages are synchronized into this fork, where CI builds and hosts the custom PyDevices MIP package index at:
+For PyDevices, the [`PyDevices/mip`](https://github.com/PyDevices/mip) fork acts as the dedicated distribution and aggregation hub. PyDevices packages are synchronized into this fork, where CI builds and hosts the custom PyDevices MIP package index at:
 
 ```text
 https://PyDevices.github.io/mip
@@ -99,7 +99,7 @@ The tag starts `.github/workflows/publish-pydevices.yml`. Its jobs:
 1. Build and upload the six core TestPyPI distributions.
 2. Build and upload `pydevices` and `pydevices-desktop`.
 3. Sync canonical sources and manifests to
-   `PyDevices/micropython-lib` under `micropython/pydevices/`.
+   `PyDevices/mip` under `micropython/pydevices/`.
 4. Compile `.mpy` artifacts, package `.py` sources, build the MIP index manifests, and publish to the `gh-pages` branch.
 
 

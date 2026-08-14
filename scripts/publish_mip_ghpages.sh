@@ -2,7 +2,7 @@
 # Build mip/PyDevices from micropython-lib and push to gh-pages.
 #
 # Requires:
-#   MICROPYTHON_LIB_DIR   checkout of PyDevices/micropython-lib (PyDevices branch)
+#   MICROPYTHON_LIB_DIR   checkout of PyDevices/mip (PyDevices branch)
 #   PYDEVICES_DIR         pydevices root (default: parent of scripts/)
 #
 # Optional:

@@ -15,7 +15,7 @@ usage() {
     cat <<'EOF'
 Usage: ./scripts/publish_sync_packages.sh [OPTION]
 
-Sync canonical packages into a PyDevices/micropython-lib checkout, optionally
+Sync canonical packages into a PyDevices/mip checkout, optionally
 build/upload TestPyPI distributions, and optionally commit/push the PyDevices
 branch.
 

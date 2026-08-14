@@ -20,7 +20,7 @@ mip.install(
 
 Notes:
 - This is the standard MCU flow.
-- The default index in `mip` is upstream `https://micropython.org/pi/v2`. By passing `index="https://PyDevices.github.io/mip"`, `mip` resolves packages from the PyDevices custom package index (built from the `PyDevices/micropython-lib` fork).
+- The default index in `mip` is upstream `https://micropython.org/pi/v2`. By passing `index="https://PyDevices.github.io/mip"`, `mip` resolves packages from the PyDevices custom package index (built from the `PyDevices/mip` fork).
 - When `index=INDEX` is set, dependencies resolve automatically (for example `displaydev` → `events` + `keys`; `eventsys` → `events` + `keys` + `multimer`).
 - The PyDevices index hosts both precompiled `.mpy` bytecode and raw `.py` sources.
 
