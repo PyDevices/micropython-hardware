@@ -9,18 +9,24 @@ import _env  # noqa: E402, F401
 
 
 class Uwin32ImportTests(unittest.TestCase):
-    @unittest.skipIf(sys.platform == "win32", "uwin32 loads on Windows CPython")
+    @unittest.skipIf(sys.platform == "win32", "uwin32 loads on Windows")
     def test_import_fails_off_windows(self):
         with self.assertRaises(ImportError):
             import uwin32  # noqa: F401
 
-    @unittest.skipUnless(sys.platform == "win32", "uwin32 is Windows CPython only")
+    @unittest.skipUnless(sys.platform == "win32", "uwin32 is Windows only")
     def test_import_on_windows(self):
         import uwin32
 
         self.assertTrue(hasattr(uwin32, "CreateWindowExW"))
         self.assertTrue(hasattr(uwin32, "CreateWaitableTimerExW"))
         self.assertTrue(hasattr(uwin32, "IAudioClient_Initialize_shared_pcm"))
+        self.assertTrue(hasattr(uwin32, "RegisterClassExW"))
+        self.assertTrue(hasattr(uwin32, "StretchDIBits"))
+        self.assertTrue(hasattr(uwin32, "DefWindowProcW"))
+        self.assertTrue(hasattr(uwin32, "WNDCLASSEXW"))
+        self.assertTrue(hasattr(uwin32, "PAINTSTRUCT"))
+        self.assertTrue(hasattr(uwin32, "RECT"))
 
 
 if __name__ == "__main__":
