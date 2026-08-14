@@ -24,8 +24,8 @@ FILE_MAPPINGS = (
     ("board_configs/desktop/board_config.py", "src/board_config.py"),
     ("board_configs/desktop/board_peripherals.py", "src/board_peripherals.py"),
     ("drivers/boarddev.py", "src/boarddev.py"),
-    ("drivers/usdl2.py", "src/usdl2.py"),
-    ("drivers/uwin32.py", "src/uwin32.py"),
+    ("lib/usdl2.py", "src/usdl2.py"),
+    ("lib/uwin32.py", "src/uwin32.py"),
     ("utils/micropython.py", "src/micropython.py"),
 )
 

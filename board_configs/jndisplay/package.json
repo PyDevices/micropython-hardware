@@ -22,7 +22,7 @@
     ],
     [
       "usdl2.py",
-      "github:PyDevices/pydevices/drivers/usdl2.py"
+      "github:PyDevices/pydevices/lib/usdl2.py"
     ]
   ],
   "deps": [

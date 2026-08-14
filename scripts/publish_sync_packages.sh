@@ -93,6 +93,8 @@ summary() {
         events) echo "SDL2/PyGame-style event types and namedtuple event classes" ;;
         keys) echo "SDL-style key codes, modifier masks, and chord matching" ;;
         multimer) echo "Cross-platform machine.Timer-style and asyncio timers" ;;
+        usdl2) echo "SDL2 FFI bindings for MicroPython, CircuitPython, and desktop runtimes" ;;
+        uwin32) echo "Win32 FFI bindings and helpers for desktop runtimes" ;;
         *) echo "PyDevices $1" ;;
     esac
 }
@@ -210,12 +212,12 @@ rm -rf "$LEGACY_DEST_DIR"
 mkdir -p "$DEST_DIR"
 
 for package in displaydev audiodev eventsys multimer; do publish_package "$package"; done
-for package in events keys; do publish_module "$package"; done
+for package in events keys usdl2 uwin32; do publish_module "$package"; done
 publish_bundle
 
 # Build only after the complete collection exists, so require() can resolve
 # sibling PyDevices packages while generating each TestPyPI project.
-for package in displaydev audiodev eventsys multimer events keys; do
+for package in displaydev audiodev eventsys multimer events keys usdl2 uwin32; do
     build_and_upload "$package" "$DEST_DIR/$package/manifest.py"
 done
 
