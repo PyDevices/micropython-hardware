@@ -811,6 +811,8 @@ if _use_ffi:
             raise OSError("NULL COM pointer")
         vtbl = _ptr_read(punk)
         fn_addr = _ptr_read(vtbl + index * _PTR_SIZE)
+        if isinstance(argtypes_str, (tuple, list)):
+            argtypes_str = "".join(argtypes_str)
         fn = ffi.func(rettype_code, fn_addr, "P" + argtypes_str)
         return fn(punk, *args)
 
