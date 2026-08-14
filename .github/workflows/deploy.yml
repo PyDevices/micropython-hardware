@@ -5,10 +5,8 @@ on:
     branches:
       - main
     paths:
-      - 'web/**'
-      - 'docs/**'
-      - 'scripts/build_pages.sh'
-      - '.github/workflows/deploy-pages.yml'
+      - ".site/**"
+      - ".github/workflows/deploy.yml"
   workflow_dispatch:
 
 permissions:
@@ -20,11 +18,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install pandoc
-        run: sudo apt-get update && sudo apt-get install -y pandoc
-
       - name: Assemble GitHub Pages site
-        run: ./scripts/build_pages.sh
+        run: |
+          mkdir -p _site
+          cp -r .site/* _site/
+          touch _site/.nojekyll
 
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v4
