@@ -26,8 +26,8 @@ records `X.Y.Z` as its own version.
 `.github/workflows/publish-release-packages.yml` is the only package release
 coordinator. It calls versioned reusable workflows from `PyDevices/.github` at
 `publishing-v1`, builds and validates all distributions, uploads the complete
-set through TestPyPI Trusted Publishing, and sends one exact source ref/version
-request to the serialized `PyDevices/mip` publication queue.
+set to TestPyPI with the existing API token, and sends one exact source
+ref/version request to the serialized `PyDevices/mip` publication queue.
 
 Manual retries require the exact existing `vX.Y.Z` tag. They never rebuild from
 a moving branch.
@@ -53,8 +53,8 @@ with explicit `/lib/...` destinations. CI fails if any discovered `lib/` or
 
 ## Required service configuration
 
-- TestPyPI Trusted Publisher: repository `PyDevices/pydevices`, workflow
-  `publish-release-packages.yml`, environment `testpypi`.
+- Repository secret `TESTPYPI_API_TOKEN`, currently owned by `bdbarnett` while
+  the PyDevices TestPyPI organization request is pending.
 - Repository secret `MICROPYTHON_LIB_DEPLOY_TOKEN` with access to dispatch the
   central MIP queue.
 - Shared workflow ref `PyDevices/.github@publishing-v1`.
