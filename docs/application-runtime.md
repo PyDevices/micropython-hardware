@@ -19,30 +19,21 @@ application decides which coordinator, if any, to instantiate.
 
 Board configs do not import `eventsys` and do not export `runtime`.
 
-## Non-LVGL examples
+## Standard applications
 
-pydevices-examples's examples opt into the optional event traffic controller through the
-application helper:
+Applications opt into the optional event traffic controller by instantiating the coordinator directly:
 
 ```python
+import board_config
 from board_config import display_drv
-from app_runtime import runtime
+import eventsys
+
+runtime = eventsys.Runtime.from_board_config(board_config)
 
 runtime.run_forever()
 ```
 
-`app_runtime` calls `eventsys.Runtime.from_board_config(board_config)` and adds
-only gallery/example test behavior. Reusable `eventsys` remains independent of
-pydevices-examples.
-
-For your own app, instantiate the coordinator directly:
-
-```python
-import board_config
-import eventsys
-
-runtime = eventsys.Runtime.from_board_config(board_config)
-```
+Reusable `eventsys` remains independent of board hardware details.
 
 You may also provide overrides:
 

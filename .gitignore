@@ -9,9 +9,17 @@ dist/
 *.so
 *.pyd
 
+# Testing & Lint caches
+.pytest_cache/
+.ruff_cache/
+
 # Cursor IDE throwaways (do not ignore the whole .cursor/ tree)
 .cursor/debug*
 .cursor/plans/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
 
 # Repo-specific
 .DS_Store

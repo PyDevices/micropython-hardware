@@ -21,6 +21,24 @@ class TestQuitRequested(unittest.TestCase):
         runtime = Runtime()
         self.assertFalse(runtime.quit_requested)
 
+    def test_runtime_current_lifecycle(self):
+        import eventsys
+
+        # Teardown any prior instance to start clean
+        if Runtime.current() is not None:
+            Runtime.current()._perform_teardown()
+
+        self.assertIsNone(Runtime.current())
+        self.assertIsNone(eventsys.current_runtime())
+
+        rt = Runtime()
+        self.assertIs(Runtime.current(), rt)
+        self.assertIs(eventsys.current_runtime(), rt)
+
+        rt._perform_teardown()
+        self.assertIsNone(Runtime.current())
+        self.assertIsNone(eventsys.current_runtime())
+
 
 class TestRuntimeQuitLifecycle(unittest.TestCase):
     def test_before_quit_then_display_quit(self):

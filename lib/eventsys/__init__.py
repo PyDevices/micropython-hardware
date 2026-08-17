@@ -34,6 +34,9 @@ from ._keypad import KeypadDevice
 from ._runtime import DEFAULT_REFRESH_MS, Runtime
 from ._touch import TouchDevice
 
+# Convenience alias for active runtime discovery
+current_runtime = Runtime.current
+
 # Device type constants (also available as eventsys.types.*)
 HOST = types.HOST
 POINTER = types.POINTER
@@ -58,6 +61,7 @@ __all__ = [
     "TouchDevice",
     "VirtualDevices",
     "capabilities",
+    "current_runtime",
     "register_device",
     "types",
 ]

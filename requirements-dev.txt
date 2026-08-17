@@ -1,2 +1,6 @@
 # Required to unittest audiodev.pygame_audio
 pygame-ce
+
+# Jupyter CLI runner (bin/jupyter.py)
+jupyterlab>=4.0
+pillow

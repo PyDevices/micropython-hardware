@@ -160,6 +160,12 @@ class Runtime:
     """
 
     events = events
+    _current = None
+
+    @classmethod
+    def current(cls):
+        """Return the currently active Runtime instance, or None."""
+        return cls._current
 
     @classmethod
     def from_board_config(cls, board_config, **overrides):
@@ -249,6 +255,7 @@ class Runtime:
                 ``requires_async_timer`` (e.g. ``PSDisplay`` / ``JNDisplay``).
         """
         self.devices = []
+        Runtime._current = self
         self._event_callbacks = {}
         self._device_callbacks = {}
         if displays is None:
@@ -1137,6 +1144,8 @@ class Runtime:
             return
         self._teardown_done = True
         self._quit_requested = True
+        if getattr(Runtime, "_current", None) is self:
+            Runtime._current = None
         self._pending_teardown = False
         self._teardown_oneshot_armed = False
         if self._before_quit is not None:

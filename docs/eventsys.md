@@ -123,8 +123,11 @@ events (the auto-service still handles host QUIT when you call `poll` or run
 `run_forever`):
 
 ```python
+import board_config
 from board_config import display_drv
-from app_runtime import runtime
+import eventsys
+
+runtime = eventsys.Runtime.from_board_config(board_config)
 
 while not runtime.quit_requested:
     draw_frame()
@@ -153,6 +156,8 @@ eventsys.register_device("MYPAD", [events.KEYDOWN, events.KEYUP])
 ```
 
 Use `eventsys.capabilities()` to inspect the dialect and built-in device list.
+Query `eventsys.Runtime.current()` (or `eventsys.current_runtime()`) to discover
+the active runtime instance.
 
 ## FAQ
 
@@ -162,10 +167,9 @@ Use `eventsys.capabilities()` to inspect the dialect and built-in device list.
 
 **Joystick hats from analog sticks** — pass `emulate_digital=[(axis_x, axis_y), …]`.
 
-## pydevices-examples integration
+## Application runtime integration
 
-pydevices-examples's `app_runtime` explicitly constructs
-`eventsys.Runtime.from_board_config(board_config)` for non-LVGL examples.
+Applications construct `eventsys.Runtime.from_board_config(board_config)`.
 Board configs expose neutral hardware capabilities and never instantiate a
 runtime. Display-only apps may omit eventsys; LVGL uses `display_driver`.
 See [Runtime](application-runtime.md), [Architecture](architecture.md), and [Displays](displaydev.md).
