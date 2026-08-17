@@ -86,6 +86,18 @@ class TestJupyterCli(unittest.TestCase):
         self.assertIn("sys.argv = ['test.py', 'arg1', 'arg2']", joined_source)
         self.assertIn("print('hello')", joined_source)
 
+    def test_build_notebook_without_script_args(self):
+        nb = jupyter_cli.build_notebook_json(
+            title="Test Notebook",
+            code="print('hello')",
+            script_args=[],
+            script_name="test.py",
+        )
+        code_cell = nb["cells"][1]
+        joined_source = "".join(code_cell["source"])
+        self.assertNotIn("sys.argv", joined_source)
+        self.assertIn("print('hello')", joined_source)
+
     def test_generate_only_file_creation(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             out_file = pathlib.Path(tmpdir) / "output.ipynb"

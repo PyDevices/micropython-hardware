@@ -66,7 +66,7 @@ class TestStandalone(unittest.TestCase):
             env["PYTHONPATH"] = tmp
 
             proc = subprocess.run(
-                [sys.executable, "-c", _EVENTSYS_CHILD],
+                [sys.executable, "-S", "-c", _EVENTSYS_CHILD],
                 cwd=tmp,
                 env=env,
                 capture_output=True,

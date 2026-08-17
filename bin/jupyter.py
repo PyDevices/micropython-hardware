@@ -117,9 +117,9 @@ def build_notebook_json(
     """Generate a valid Jupyter Notebook format 4.5 dictionary."""
     code_lines: List[str] = []
 
-    # Inject sys.argv if script arguments were provided
-    if script_args or script_name:
-        argv_list = [script_name or "notebook.ipynb"] + (script_args or [])
+    # Inject sys.argv only if extra script arguments were provided
+    if script_args:
+        argv_list = [script_name or "notebook.ipynb"] + list(script_args)
         code_lines.append("import sys\n")
         code_lines.append(f"sys.argv = {argv_list!r}\n\n")
 

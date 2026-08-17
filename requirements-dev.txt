@@ -1,6 +1,8 @@
 # Required to unittest audiodev.pygame_audio
 pygame-ce
 
-# Jupyter CLI runner (bin/jupyter.py)
+# Jupyter CLI runner (bin/jupyter.py) & JNDisplay interactive widgets
 jupyterlab>=4.0
 pillow
+ipywidgets>=8.0
+ipyevents>=2.0
