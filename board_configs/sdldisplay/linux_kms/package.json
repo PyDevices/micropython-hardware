@@ -7,20 +7,8 @@
   ],
   "deps": [
     [
-      "displaydev",
+      "pydevices-desktop",
       "latest"
-    ],
-    [
-      "github:PyDevices/pydevices/packages/usdl2.json",
-      "main"
-    ],
-    [
-      "github:PyDevices/pydevices/packages/events.json",
-      "main"
-    ],
-    [
-      "github:PyDevices/pydevices/packages/keys.json",
-      "main"
     ]
   ],
   "version": "0.1",

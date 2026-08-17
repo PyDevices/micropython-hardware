@@ -1,9 +1,0 @@
-{
-  "urls": [
-    [
-      "canbus.py",
-      "github:PyDevices/pydevices/drivers/bus/canbus.py"
-    ]
-  ],
-  "version": "0.1"
-}

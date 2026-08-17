@@ -1,9 +1,0 @@
-{
-  "urls": [
-    [
-      "dotstar.py",
-      "github:PyDevices/pydevices/drivers/led/dotstar.py"
-    ]
-  ],
-  "version": "0.1"
-}

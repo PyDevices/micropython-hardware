@@ -1,0 +1,73 @@
+name: Publish release packages
+
+on:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+    inputs:
+      release-ref:
+        description: Exact vX.Y.Z tag to retry
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  prepare-release:
+    runs-on: ubuntu-latest
+    outputs:
+      release-ref: ${{ steps.release.outputs.release-ref }}
+      version: ${{ steps.release.outputs.version }}
+    steps:
+      - name: Resolve and validate the release tag
+        id: release
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name || inputs.release-ref }}
+        run: |
+          if [[ ! "$RELEASE_TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+            echo "Release ref must be an exact vX.Y.Z tag: $RELEASE_TAG" >&2
+            exit 1
+          fi
+          echo "release-ref=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+          echo "version=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+
+  build-all-testpypi-distributions:
+    needs: prepare-release
+    uses: PyDevices/.github/.github/workflows/reusable-build-pydevices-distributions.yml@publishing-v1
+    with:
+      release-ref: ${{ needs.prepare-release.outputs.release-ref }}
+      version: ${{ needs.prepare-release.outputs.version }}
+
+  publish-all-distributions-to-testpypi:
+    needs:
+      - prepare-release
+      - build-all-testpypi-distributions
+    runs-on: ubuntu-latest
+    environment: testpypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: testpypi-pydevices-${{ needs.prepare-release.outputs.version }}
+          path: dist
+
+      - name: Publish with TestPyPI Trusted Publishing
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          skip-existing: true
+
+  request-mip-publication:
+    needs:
+      - prepare-release
+      - build-all-testpypi-distributions
+    uses: PyDevices/.github/.github/workflows/reusable-request-mip-publication.yml@publishing-v1
+    with:
+      release-ref: ${{ needs.prepare-release.outputs.release-ref }}
+      version: ${{ needs.prepare-release.outputs.version }}
+      profile: pydevices
+    secrets:
+      mip-publication-token: ${{ secrets.MICROPYTHON_LIB_DEPLOY_TOKEN }}

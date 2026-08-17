@@ -3,7 +3,7 @@
 The core display engine, hardware driver suite, and board configuration standard for [PyDevices](https://github.com/PyDevices).
 
 `pydevices` is the canonical source and publisher for cross-runtime hardware drivers, board configurations, and pure-Python core packages:
-`displaydev`, `audiodev`, optional `eventsys`, `multimer`, `events`, and `keys`.
+`displaydev`, `audiodev`, `eventsys`, `multimer`, `events`, and `keys`.
 
 ---
 
@@ -33,8 +33,7 @@ Write your display and hardware logic once and run across 5 supported Python env
 | `drivers/` | Display, touch, bus, joystick, IO expander, input helpers |
 | `lib/displaydev/` | Display backends (`BusDisplay`, `SDLDisplay`, …); `auto.py` is convenience only |
 | `lib/` | `audiodev/`, `displaydev/`, `eventsys/`, `events.py`, `keys.py`, `multimer/` |
-| `utils/` | Portable helpers (`byteswap`, `mip`, `viper_tools`, `keypins`, `wifi`, `frame_recorder`, CPython `micropython` shim) |
-| `packages/` | Shared MIP manifests (`displaydev`, `utils`, `spibus`, `i80bus`, …) |
+| `utils/` | Desktop-bundled helpers (`mip`, `frame_recorder`, `micropython`, `usdl2`, `uwin32`) |
 | `tests/` | Stdlib unittest for `displaydev`, `multimer`, `events`, `keys`, `audiodev`, `boarddev`, `mip` |
 | `docs/` | Hardware & Board Contract documentation ([Pages](https://pydevices.github.io/pydevices/)) |
 
@@ -86,7 +85,7 @@ This path configuration mimics the default search path on both hosted Unix/Windo
 ### 2. CPython Desktop (pip)
 Install the CPython desktop simulation package and backend drivers:
 ```bash
-pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ pydevices[desktop]
+pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ pydevices-desktop
 ```
 
 ---
@@ -95,11 +94,14 @@ pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/
 On MCU boards with network access, install the specific `board_config` directly to the device:
 ```python
 import mip
-mip.install("board_configs/esp32_s3_box", index="https://PyDevices.github.io/mip")
+mip.install(
+    "github:PyDevices/pydevices/board_configs/busdisplay/i80/t-display-s3",
+    index="https://PyDevices.github.io/mip",
+)
 ```
 For connected boards without network access, run installation via `mpremote`:
 ```bash
-mpremote mip install --index https://PyDevices.github.io/mip board_configs/esp32_s3_box
+mpremote mip install --index https://PyDevices.github.io/mip github:PyDevices/pydevices/board_configs/busdisplay/i80/t-display-s3
 ```
 See [docs/install-workflows.md](docs/install-workflows.md) for full workflows and verification.
 
@@ -118,4 +120,3 @@ See [`tests/README.md`](tests/README.md).
 ## License
 
 MIT — see [LICENSE](LICENSE).
-

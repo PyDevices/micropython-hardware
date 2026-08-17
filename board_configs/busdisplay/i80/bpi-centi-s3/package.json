@@ -19,8 +19,8 @@
   ],
   "deps": [
     [
-      "github:PyDevices/pydevices/packages/i80bus.json",
-      "main"
+      "pydevices",
+      "latest"
     ]
   ],
   "version": "0.2",

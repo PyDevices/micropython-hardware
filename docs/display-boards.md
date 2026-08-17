@@ -165,7 +165,7 @@ variant (`C6_WIFI` in inventory fixture #1).
   native USB. Example unit serial `ECDA3B9956DC0000` (Windows `COM57` in one
   WSL session).
 - **Setup:** mip / `/setup` the `package.json` (notes: firmware-native
-  `i80bus` — do not mip-install `packages/i80bus.json`).
+  `i80bus` — do not install an optional Python bus fallback).
 - **Interesting:** Resistive touch is usable for `lv_test_timer` but remains
   flaky (missed taps) even with IRQ/Z press detect — expect firm presses.
   Thin noisy vertical lines after geometry tests were often **stale GRAM**

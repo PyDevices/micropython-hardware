@@ -23,8 +23,8 @@
   ],
   "deps": [
     [
-      "github:PyDevices/pydevices/packages/spibus.json",
-      "main"
+      "pydevices",
+      "latest"
     ]
   ],
   "version": "0.2"

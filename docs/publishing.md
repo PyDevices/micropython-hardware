@@ -1,122 +1,63 @@
-# Publishing
+# Publishing PyDevices
 
-`pydevices` is the canonical source and release owner for the
-portable PyDevices core. A single release tag publishes the core packages to
-TestPyPI, syncs their unprefixed MIP packages into the PyDevices
-`micropython-lib` fork, and rebuilds the PyDevices MIP index.
+One published GitHub Release named `vX.Y.Z` publishes every artifact generated
+from this repository with version `X.Y.Z`. `VERSION` must already contain that
+same version.
 
-`pydevices-examples` is the examples and integration showcase. It consumes these
-packages, but does not publish them.
+## Generated products
 
-## Package names
+Every non-debris top-level module or package under `lib/` is discovered as a
+leaf. Today those leaves are `audiodev`, `displaydev`, `events`, `eventsys`,
+`keys`, and `multimer`. Adding another component under `lib/` automatically
+adds its unprefixed MIP package and its `pydevices-<name>` TestPyPI
+distribution; there is no include list.
 
-TestPyPI distributions use the `pydevices-` namespace. Python imports and MIP
-package names stay short and unprefixed, matching normal MicroPython library
-conventions.
+The dependency-only `pydevices` meta-package installs every discovered leaf,
+including `eventsys`. The `pydevices-desktop` meta-package depends on
+`pydevices` and also installs the desktop board files plus every runtime module
+discovered under `utils/`. Utilities do not have separate distributions.
 
-| Canonical source | TestPyPI distribution | Python import / MIP name |
-|---|---|---|
-| `lib/displaydev/` | `pydevices-displaydev` | `displaydev` |
-| `lib/audiodev/` | `pydevices-audiodev` | `audiodev` |
-| `lib/eventsys/` | `pydevices-eventsys` | `eventsys` |
-| `lib/multimer/` | `pydevices-multimer` | `multimer` |
-| `lib/events.py` | `pydevices-events` | `events` |
-| `lib/keys.py` | `pydevices-keys` | `keys` |
-| `board_configs/desktop/` plus shared sources | `pydevices-desktop` | `board_config` and its dependencies |
-| `release/pydevices/` | `pydevices` | portable MIP bundle `pydevices` |
+All internal TestPyPI requirements use exact `==X.Y.Z` pins. MIP meta-package
+requirements intentionally resolve `latest`, while each generated manifest
+records `X.Y.Z` as its own version.
 
-`eventsys` is an optional application-level event traffic controller. Board
-configs do not construct it. Non-LVGL applications may instantiate it (or
-provide their own controller); the PyDevices LVGL display driver connects LVGL
-to `displaydev` and `multimer` directly.
+## Release pipeline
 
-Companion repositories follow the same naming rule:
+`.github/workflows/publish-release-packages.yml` is the only package release
+coordinator. It calls versioned reusable workflows from `PyDevices/.github` at
+`publishing-v1`, builds and validates all distributions, uploads the complete
+set through TestPyPI Trusted Publishing, and sends one exact source ref/version
+request to the serialized `PyDevices/mip` publication queue.
 
-| Source repository | TestPyPI distribution | Python import / MIP name |
-|---|---|---|
-| `palettes` | `pydevices-palettes` | `palettes` |
-| `pdwidgets` | `pydevices-pdwidgets` | `pdwidgets` |
-| `pygraphics` | `pydevices-pygraphics` | `pygraphics` |
-| `lvgl-python` | `pydevices-lvgl` | `lvgl` (pip only) |
+Manual retries require the exact existing `vX.Y.Z` tag. They never rebuild from
+a moving branch.
 
-## Install from TestPyPI
+## Board installers
 
-TestPyPI does not mirror dependencies from PyPI, so use both indexes:
+Board `package.json` files are not published in the MIP index. Install them
+directly from their raw GitHub directory. Hardware installers depend on
+`pydevices` at `latest` and carry their board-specific Python drivers in their
+own `urls`. Optional Python bus fallbacks are not pulled: firmware-provided
+`i80bus`, `i2cbus`, `spibus`, and similar native modules take precedence.
 
-```bash
-python -m pip install \
-  --index-url https://test.pypi.org/simple/ \
-  --extra-index-url https://pypi.org/simple \
-  'pydevices[desktop]'
-```
+The one desktop board installer depends on `pydevices-desktop` at `latest`.
+Run `python scripts/validate_board_mip_installers.py` to validate every board
+installer discovered under `board_configs/`.
 
-Install `pydevices-eventsys` only when the application wants that event
-controller. See [install-workflows.md](install-workflows.md) for board-config
-and verification examples.
+## PyScript filesystem
 
-## Install with MIP
+`pydevices-desktop.toml` is a generated, committed filesystem mapping that
+tracks `main`. It contains the complete Python payload of the desktop package
+with explicit `/lib/...` destinations. CI fails if any discovered `lib/` or
+`utils/` source, or one of the fixed desktop board files, is missing or stale.
 
-In the MicroPython ecosystem, `https://micropython.org/pi/v2` serves as the default package index for `mip` (analogous to PyPI in CPython), fed by upstream `micropython/micropython-lib`.
+## Required service configuration
 
-For PyDevices, the [`PyDevices/mip`](https://github.com/PyDevices/mip) fork acts as the dedicated distribution and aggregation hub. PyDevices packages are synchronized into this fork, where CI builds and hosts the custom PyDevices MIP package index at:
+- TestPyPI Trusted Publisher: repository `PyDevices/pydevices`, workflow
+  `publish-release-packages.yml`, environment `testpypi`.
+- Repository secret `MICROPYTHON_LIB_DEPLOY_TOKEN` with access to dispatch the
+  central MIP queue.
+- Shared workflow ref `PyDevices/.github@publishing-v1`.
 
-```text
-https://PyDevices.github.io/mip
-```
-
-This index hosts **both `.py` (source) and `.mpy` (precompiled bytecode)** artifacts:
-- **`.mpy` (precompiled)**: Delivered by default for MicroPython targets for faster import speeds and reduced RAM consumption on microcontrollers.
-- **`.py` (source)**: Available for development, inspection, or multi-runtime workflows when installing with `--no-mpy` / `mpy=False`.
-
-Example install pointing to the PyDevices index:
-
-```python
-import mip
-
-mip.install(
-    "displaydev",
-    index="https://PyDevices.github.io/mip",
-)
-```
-
-Board package manifests declare their own driver and library dependencies within the index. They intentionally do not declare `eventsys`; the application owns that choice and its lifecycle.
-
-## Release the core
-
-The next core release is normally created from a clean `main` checkout with:
-
-```bash
-./scripts/publish_release_tag.sh X.Y.Z --push
-```
-
-Omit `X.Y.Z` to use the next patch version reported by
-`scripts/next_release_version.sh`. The helper updates the package floors in the
-sibling `pydevices-examples/requirements.txt` when needed, commits that change, creates
-an annotated `vX.Y.Z` tag, and pushes it.
-
-The tag starts `.github/workflows/publish-pydevices.yml`. Its jobs:
-
-1. Build and upload the six core TestPyPI distributions.
-2. Build and upload `pydevices` and `pydevices-desktop`.
-3. Sync canonical sources and manifests to
-   `PyDevices/mip` under `micropython/pydevices/`.
-4. Compile `.mpy` artifacts, package `.py` sources, build the MIP index manifests, and publish to the `gh-pages` branch.
-
-
-The workflow requires repository authentication secrets for package uploads and fork syncing.
-
-Before tagging, run the unit tests and the publisher in a temporary/staging
-mode, confirm the `micropython-lib` sync diff, and make sure both this repo and
-the sibling `pydevices-examples` checkout are clean. Published versions cannot be
-replaced on TestPyPI; use a new version to correct a release.
-
-After publishing to TestPyPI, verify each portable distribution in a separate
-environment. Add `--desktop` to exercise the SDL and pygame host stacks:
-
-```bash
-./tools/test_testpypi_standalone.sh
-./tools/test_testpypi_standalone.sh --desktop
-```
-
-The companion repositories own their own tags and publishing workflows. Their
-`docs/publishing.md` files describe any additional native-wheel build matrix.
+Published TestPyPI files and MIP releases are immutable in practice; publish a
+new version to correct a release.

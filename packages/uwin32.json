@@ -1,9 +1,0 @@
-{
-  "urls": [
-    [
-      "uwin32.py",
-      "github:PyDevices/pydevices/lib/uwin32.py"
-    ]
-  ],
-  "version": "0.1"
-}

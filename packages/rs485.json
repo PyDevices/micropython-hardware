@@ -1,9 +1,0 @@
-{
-  "urls": [
-    [
-      "rs485.py",
-      "github:PyDevices/pydevices/drivers/bus/rs485.py"
-    ]
-  ],
-  "version": "0.1"
-}

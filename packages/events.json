@@ -1,9 +1,0 @@
-{
-  "urls": [
-    [
-      "events.py",
-      "github:PyDevices/pydevices/lib/events.py"
-    ]
-  ],
-  "version": "0.0"
-}

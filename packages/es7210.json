@@ -1,9 +1,0 @@
-{
-  "urls": [
-    [
-      "es7210.py",
-      "github:PyDevices/pydevices/drivers/codec/es7210.py"
-    ]
-  ],
-  "version": "0.1"
-}

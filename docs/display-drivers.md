@@ -24,7 +24,9 @@ Board config packages install the drivers they need. To install individually:
 mip.install("github:PyDevices/pydevices/drivers/display/st7789.py", target="./drivers/display")
 ```
 
-Precompiled drivers are also on the [PyDevices MIP index](install-workflows.md) (e.g. `mip.install("st7789", index=...)`).
+Board installers include the display driver they require directly from this
+repository. Individual Python drivers can also be installed from their raw
+GitHub file; they are not separate PyDevices MIP-index packages.
 
 ## CircuitPython
 

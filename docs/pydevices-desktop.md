@@ -10,15 +10,12 @@ Installed modules:
 - usdl2
 - uwin32 (Windows CPython)
 
-It depends on `pydevices-displaydev` and `pydevices-audiodev`. The optional
-`pydevices-eventsys` application traffic controller is installed separately by
-applications that want it; LVGL does not require it.
+It depends on the full `pydevices` meta-package, which includes `eventsys`.
 
 Source of truth:
-- Runtime modules are generated from canonical sources in this repo
-  (`board_configs/desktop/` and `drivers/`).
-- Use `scripts/sync_pydevices_desktop_sources.py` to stage package files for
-  build/publish and avoid drift between MIP and pip behavior.
+- Fixed runtime modules come from `board_configs/desktop/` and `drivers/`.
+- Every non-debris runtime module under `utils/` is discovered automatically.
+- `pydevices-desktop.toml` lists the same complete payload for PyScript.
 
 This package is intended to provide a single pip-installable desktop config
 bundle while core runtime libraries continue to come from PyDevices packages.

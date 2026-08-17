@@ -7,32 +7,12 @@
     [
       "board_peripherals.py",
       "github:PyDevices/pydevices/board_configs/psdisplay/board_peripherals.py"
-    ],
-    [
-      "boarddev.py",
-      "github:PyDevices/pydevices/drivers/boarddev.py"
-    ],
-    [
-      "audiodev/__init__.py",
-      "github:PyDevices/pydevices/lib/audiodev/__init__.py"
-    ],
-    [
-      "audiodev/web_audio.py",
-      "github:PyDevices/pydevices/lib/audiodev/web_audio.py"
     ]
   ],
   "deps": [
     [
-      "displaydev",
+      "pydevices-desktop",
       "latest"
-    ],
-    [
-      "github:PyDevices/pydevices/packages/events.json",
-      "main"
-    ],
-    [
-      "github:PyDevices/pydevices/packages/keys.json",
-      "main"
     ]
   ],
   "version": "0.1"

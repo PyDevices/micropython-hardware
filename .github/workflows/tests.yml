@@ -8,6 +8,8 @@ on:
       - 'lib/**'
       - 'utils/**'
       - 'drivers/**'
+      - 'board_configs/**/package.json'
+      - 'scripts/validate_board_mip_installers.py'
       - 'tests/**'
       - '.github/workflows/tests.yml'
   pull_request:
@@ -15,6 +17,8 @@ on:
       - 'lib/**'
       - 'utils/**'
       - 'drivers/**'
+      - 'board_configs/**/package.json'
+      - 'scripts/validate_board_mip_installers.py'
       - 'tests/**'
       - '.github/workflows/tests.yml'
   workflow_dispatch:
@@ -37,3 +41,6 @@ jobs:
           SDL_VIDEODRIVER: dummy
           SDL_AUDIODRIVER: dummy
         run: python -m unittest discover -s tests -v
+
+      - name: Validate direct-GitHub board installers
+        run: python scripts/validate_board_mip_installers.py

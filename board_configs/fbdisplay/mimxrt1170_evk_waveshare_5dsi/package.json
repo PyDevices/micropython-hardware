@@ -11,16 +11,8 @@
   ],
   "deps": [
     [
-      "displaydev",
+      "pydevices",
       "latest"
-    ],
-    [
-      "github:PyDevices/pydevices/packages/events.json",
-      "main"
-    ],
-    [
-      "github:PyDevices/pydevices/packages/keys.json",
-      "main"
     ]
   ],
   "version": "0.1"

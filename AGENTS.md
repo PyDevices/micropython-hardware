@@ -1,7 +1,7 @@
 # AGENTS.md — pydevices
 
 Canonical PyDevices product/source repository. Owns **board configs**,
-**hardware drivers**, portable libraries (`displaydev`, `audiodev`, optional
+**hardware drivers**, portable libraries (`displaydev`, `audiodev`,
 `eventsys`, `multimer`, `events`, `keys`), and pip/MIP publishing.
 Docs are markdown under `docs/`, published only via GitHub Pages
 ([pydevices.github.io/pydevices](https://pydevices.github.io/pydevices/))
@@ -13,9 +13,10 @@ Docs are markdown under `docs/`, published only via GitHub Pages
 - Add/edit MicroPython boards under `board_configs/` and CircuitPython under
   `board_configs/cp/` (same directory names as MicroPython; do not add an `mp/`
   mirror). Chip helpers under `drivers/` (see `drivers/README.md`).
-- Keep shared bus/touch/chip MIP manifests under `packages/` (`spibus.json`,
-  `sdcard.json`, …). MicroPython board dirs get a `package.json`; do **not**
-  add `package.json` under `board_configs/cp/`.
+- MicroPython board dirs get a direct-GitHub `package.json`; do **not** add one
+  under `board_configs/cp/`. Board installers depend on `pydevices` at
+  `latest`, include required board-specific Python drivers in `urls`, and do
+  not pull optional Python bus fallbacks.
 - Prefer vendored single-file drivers (micropython-lib / reputable GitHub) for
   shared chips. Use `machine.SDCard` for SDMMC/SDIO and `sdcard.py` for SPI CS
   paths.
@@ -37,13 +38,12 @@ Docs are markdown under `docs/`, published only via GitHub Pages
   (MicroPython boards only; all sources are product-owned).
   MIP names and Python imports remain unprefixed (`displaydev`, `audiodev`,
   `eventsys`, `events`, `keys`, `multimer`). TestPyPI distribution names are
-  always `pydevices-*`. `displaydev` → `events` + `keys`; optional `eventsys`
-  → `events` + `keys` + `multimer`. Board `package.json` never depends on
-  `eventsys`; the application installs it when selected. GitHub package
-  manifests live under `packages/`.
-  Portable `utils/` (`byteswap`, `mip`, `viper_tools`, `keypins`, `wifi`,
-  `frame_recorder`, CPython `micropython` shim) is installed via
-  `packages/utils.json`.
+  always `pydevices-*`. `displaydev` → `events` + `keys`; `eventsys` →
+  `events` + `keys` + `multimer`. Every non-debris top-level component in
+  `lib/` publishes automatically as a leaf; `pydevices` depends on all leaves.
+  Every runtime component in `utils/` is bundled automatically into
+  `pydevices-desktop` without becoming a separate package. The desktop package
+  depends on `pydevices`.
   `AutoDisplay` is `displaydev.auto` only — never re-exported from
   `displaydev/__init__.py`. Backends must not import `.auto`.
   Likewise, synchronous `Timer` providers are explicit `multimer` modules
