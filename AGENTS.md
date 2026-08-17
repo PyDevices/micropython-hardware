@@ -46,12 +46,19 @@ Docs are markdown under `docs/`, published only via GitHub Pages
   `packages/utils.json`.
   `AutoDisplay` is `displaydev.auto` only — never re-exported from
   `displaydev/__init__.py`. Backends must not import `.auto`.
+  Likewise, synchronous `Timer` providers are explicit `multimer` modules
+  (`multimer.machine`, `multimer.librt`, `multimer.win32`, `multimer.sdl2`,
+  `multimer.threading`, or `multimer.polling`). Automatic selection is
+  `multimer.auto` only and providers must not import it. The package root is
+  backend-neutral and owns shared clocks, scheduling, `AsyncTimer`, and the
+  lazy `asyncio` export.
 
 ## Do not
 
 - Put product libraries or their release pipeline back in the examples repo.
 - Instantiate `eventsys.Runtime` (or any traffic controller) in a board config.
 - Import `displaydev.auto` from `displaydev/__init__.py` or any backend.
+- Import `multimer.auto` from `multimer/__init__.py` or any provider.
 - Commit large generated assets unrelated to boards/drivers.
 - Rename the GitHub repo casually — MIP URLs and docs pin this name.
 - Add `board_peripherals.py` under `board_configs/cp/`.

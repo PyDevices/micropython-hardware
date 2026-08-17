@@ -46,7 +46,7 @@ Pair eventsys with [multimer](multimer.md) on asyncio-native hosts:
 
 ```python
 import eventsys
-import multimer
+from multimer import asyncio
 
 runtime = eventsys.Runtime()
 
@@ -54,7 +54,7 @@ async def main():
     while True:
         for event in runtime.poll():
             handle(event)
-        await multimer.sleep_ms(0)
+        await asyncio.sleep(0)
 
 runtime.run_async(main)  # Jupyter / PyScript; or asyncio.run(main()) on desktop
 ```

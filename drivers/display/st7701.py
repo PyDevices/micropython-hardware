@@ -6,7 +6,11 @@ see https://github.com/Xinyuan-LilyGO/lilygo-micropython/tree/master/target/esp3
 try:
     from time import sleep_ms
 except ImportError:
-    from multimer import sleep_ms
+    from time import sleep
+
+    def sleep_ms(milliseconds):
+        sleep(milliseconds / 1000)
+
 
 from displaydev.busdisplay import BusDisplay
 

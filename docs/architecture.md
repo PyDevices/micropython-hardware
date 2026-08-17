@@ -57,7 +57,7 @@ flowchart TB
 | `displaydev` | Cross-platform display interfaces (`BusDisplay`, `FBDisplay`, `SDLDisplay`, `PyScriptDisplay`). |
 | `audiodev` | Cross-platform audio output/input interfaces (`I2SAudio`, `SDLAudio`). |
 | `events` / `keys` | Neutral event definitions, key codes, modifier keys, and touch gestures. |
-| `multimer` | Cross-platform timing primitives (`Timer`, `AsyncTimer`, ticks, sleep). |
+| `multimer` | Cross-platform timing primitives (explicit `Timer` providers, optional `auto`, `AsyncTimer`, and ticks). |
 | `eventsys` | Optional event traffic controller and input queue for applications using native PyDevices dispatch. |
 | `display_driver` | LVGL coordinator bridging LVGL widgets to `displaydev` and `multimer`. |
 
@@ -83,4 +83,3 @@ display_drv.show()
 - [Display Drivers](displaydev.md) — display interfaces and backends
 - [multimer](multimer.md) — portable timers and async support
 - [Companion Demos](https://pydevices.github.io/pydevices-examples/) — sample applications
-

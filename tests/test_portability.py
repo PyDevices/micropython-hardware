@@ -35,7 +35,7 @@ PORTABLE = (
     "lib/audiodev/sdl2_audio.py",
     "lib/audiodev/i2s_audio.py",
     "lib/audiodev/emulated_audio.py",
-    "drivers/usdl2.py",
+    "lib/usdl2.py",
     "board_configs/desktop/board_config.py",
     "board_configs/desktop/board_peripherals.py",
 )
