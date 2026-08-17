@@ -2,27 +2,31 @@
 #
 # SPDX-License-Identifier: MIT
 
+import os
+import runpy
 import sys
 import threading
 import time
 import unittest
 
 import _env  # noqa: F401
-
 import multimer
 from multimer import (
     AsyncTimer,
-    Timer,
     monotonic,
-    sleep_ms,
     ticks_add,
     ticks_diff,
     ticks_less,
     ticks_ms,
 )
+from multimer import auto as timer
+
+Timer = timer.Timer
+sleep_ms = timer.sleep_ms
 
 _TICKS_PERIOD = 1 << 29
 _TICKS_MAX = _TICKS_PERIOD - 1
+_TICKS_HALFPERIOD = _TICKS_PERIOD // 2
 
 _PUBLIC_TIMER_MEMBERS = {"init", "deinit", "ONE_SHOT", "PERIODIC"}
 
@@ -48,67 +52,120 @@ class TestApiSurface(unittest.TestCase):
         self.assertEqual(
             set(multimer.__all__),
             {
-                "Timer",
                 "AsyncTimer",
-                "backend_name",
-                "backends",
-                "backends_available",
                 "loop_running",
                 "monotonic",
                 "run_deadline_hook",
                 "schedule",
                 "set_deadline_hook",
-                "use_backend",
-                "uses_signals",
-                "sleep_ms",
                 "ticks_ms",
                 "ticks_add",
                 "ticks_diff",
                 "ticks_less",
                 "asyncio",
-                "install_asyncio_compat",
             },
         )
 
 
-class TestBackendSelection(unittest.TestCase):
-    """``backend_name`` / ``use_backend`` — the supported way to pick a backend."""
+class TestProviderSelection(unittest.TestCase):
+    def test_root_has_no_timer_or_backend_side_effects(self):
+        import subprocess
 
-    def setUp(self):
-        self._original = multimer.backend_name()
-
-    def tearDown(self):
-        multimer.use_backend(self._original)
-
-    def test_backend_name_is_a_known_backend(self):
-        self.assertIn(multimer.backend_name(), multimer.backends())
-
-    def test_backends_includes_win32(self):
-        self.assertIn("win32", multimer.backends())
-
-    def test_backends_order_matches_auto_then_async(self):
-        self.assertEqual(
-            multimer.backends(),
-            ("machine", "librt", "win32", "sdl2", "threading", "polling", "async"),
+        code = (
+            "import sys; sys.path.insert(0, 'lib'); import multimer; "
+            "assert not any(hasattr(multimer, n) for n in ("
+            "'Timer','sleep_ms','backends','available_backends',"
+            "'backends_available','use_backend')); "
+            "assert not any(n in sys.modules for n in ("
+            "'multimer.auto','multimer.machine','multimer.librt','multimer.win32',"
+            "'multimer.sdl2','multimer.threading','multimer.polling'))"
         )
+        subprocess.run([sys.executable, "-c", code], check=True)
+
+    def test_explicit_provider_contract(self):
+        from multimer import polling
+
+        self.assertEqual(
+            set(polling.__all__),
+            {"Timer", "is_async", "name", "pump", "sleep_ms", "uses_interrupts"},
+        )
+        self.assertEqual(polling.name, "polling")
+        self.assertFalse(polling.uses_interrupts)
+        self.assertFalse(polling.is_async)
+        self.assertEqual(polling.Timer.__module__, "multimer.polling")
+
+    def test_environment_forces_auto_provider_at_import(self):
+        import subprocess
+
+        code = (
+            "import sys; sys.path.insert(0, 'lib'); "
+            "from multimer import auto as timer; "
+            "assert timer.name == 'polling'; "
+            "assert timer.Timer.__module__ == 'multimer.polling'"
+        )
+        env = os.environ.copy()
+        env["MULTIMER_BACKEND"] = "polling"
+        subprocess.run([sys.executable, "-c", code], check=True, env=env)
+
+    def test_environment_can_force_async_auto_provider(self):
+        import subprocess
+
+        code = (
+            "import sys; sys.path.insert(0, 'lib'); "
+            "from multimer import AsyncTimer; from multimer import auto as timer; "
+            "assert timer.name == 'async'; assert timer.Timer is AsyncTimer; "
+            "assert timer.is_async and not timer.uses_interrupts"
+        )
+        env = os.environ.copy()
+        env["MULTIMER_BACKEND"] = "async"
+        subprocess.run([sys.executable, "-c", code], check=True, env=env)
+
+    def test_invalid_environment_backend_fails_without_fallback(self):
+        import subprocess
+
+        code = (
+            "import sys; sys.path.insert(0, 'lib'); "
+            "from multimer import auto"
+        )
+        env = os.environ.copy()
+        env["MULTIMER_BACKEND"] = "no_such_backend"
+        result = subprocess.run(
+            [sys.executable, "-c", code],
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("unknown multimer backend", result.stderr)
+
+    def test_auto_matches_provider_contract(self):
+        self.assertEqual(
+            set(timer.__all__),
+            {"Timer", "is_async", "name", "pump", "sleep_ms", "uses_interrupts"},
+        )
+        self.assertIsInstance(timer.name, str)
+        self.assertIsInstance(timer.uses_interrupts, bool)
+        self.assertIsInstance(timer.is_async, bool)
 
     def test_auto_backends_skips_win32_off_windows(self):
         from unittest import mock
 
-        from multimer import _select
+        from multimer import auto
 
-        with mock.patch.object(_select.sys, "platform", "linux"):
-            self.assertNotIn("win32", _select._auto_backends())
+        with mock.patch.object(auto.sys, "platform", "linux"):
+            self.assertNotIn("win32", auto._auto_backends())
 
     @unittest.skipUnless(sys.platform == "win32", "win32 timer backend")
     def test_win32_backend_arms(self):
+        from multimer import win32
+
         hits = []
-        multimer.use_backend("win32")
-        self.assertTrue(multimer.uses_signals())
-        t = Timer(-1)
+        self.assertTrue(win32.uses_interrupts)
+        t = win32.Timer(-1)
         t.init(period=40, callback=lambda _t: hits.append(1))
         try:
-            sleep_ms(120)
+            win32.sleep_ms(120)
         finally:
             t.deinit()
         self.assertGreaterEqual(len(hits), 1)
@@ -116,74 +173,53 @@ class TestBackendSelection(unittest.TestCase):
     def test_auto_backends_skips_sdl2_when_pygame_present(self):
         from unittest import mock
 
-        from multimer import _select
+        from multimer import auto
 
         self.assertEqual(sys.implementation.name, "cpython")
-        with mock.patch.object(_select, "_pygame_available", return_value=True):
-            self.assertNotIn("sdl2", _select._auto_backends())
-        # Explicit override list still includes sdl2.
-        self.assertIn("sdl2", multimer.backends())
+        with mock.patch.object(auto, "_pygame_available", return_value=True):
+            self.assertNotIn("sdl2", auto._auto_backends())
         # With pygame available, auto-selection must not land on sdl2.
-        with mock.patch.object(_select, "_pygame_available", return_value=True):
+        with mock.patch.object(auto, "_pygame_available", return_value=True):
             # Re-evaluate active backend through the same auto filter used at import.
-            auto = _select._auto_backends()
-        self.assertNotIn("sdl2", auto)
+            candidates = auto._auto_backends()
+        self.assertNotIn("sdl2", candidates)
 
     def test_auto_backends_allows_sdl2_on_cpython_without_pygame(self):
         from unittest import mock
 
-        from multimer import _select
+        from multimer import auto
 
         with mock.patch.object(
-            _select, "_pygame_available", return_value=False
-        ), mock.patch.object(_select.sys, "platform", "linux"):
-            self.assertIn("sdl2", _select._auto_backends())
+            auto, "_pygame_available", return_value=False
+        ), mock.patch.object(auto.sys, "platform", "linux"):
+            self.assertIn("sdl2", auto._auto_backends())
 
     def test_auto_backends_skips_sdl2_on_android(self):
         from unittest import mock
 
-        from multimer import _select
+        from multimer import auto
 
         with mock.patch.object(
-            _select, "_pygame_available", return_value=False
-        ), mock.patch.object(_select.sys, "platform", "android"):
-            self.assertNotIn("sdl2", _select._auto_backends())
-
-    def test_backends_available_is_subset(self):
-        available = multimer.backends_available()
-        self.assertTrue(available)
-        self.assertTrue(set(available).issubset(set(multimer.backends())))
-        self.assertIn(multimer.backend_name(), available)
-
-    def test_backends_available_does_not_change_active(self):
-        before = multimer.backend_name()
-        multimer.backends_available()
-        self.assertEqual(multimer.backend_name(), before)
-
-    def test_use_backend_rebinds_timer_and_sleep(self):
-        multimer.use_backend("polling")
-        self.assertEqual(multimer.backend_name(), "polling")
-        self.assertEqual(multimer.Timer.__module__, "multimer._backends.polling")
-        # ``from multimer import Timer`` must see the same class as multimer.Timer.
-        from multimer import _timer
-
-        self.assertIs(_timer.Timer, multimer.Timer)
-        self.assertFalse(multimer.uses_signals())
-
-    def test_use_backend_returns_active_name(self):
-        self.assertEqual(multimer.use_backend("polling"), "polling")
+            auto, "_pygame_available", return_value=False
+        ), mock.patch.object(auto.sys, "platform", "android"):
+            self.assertNotIn("sdl2", auto._auto_backends())
 
     def test_async_backend_selects_awaitable_sleep(self):
-        multimer.use_backend("async")
-        self.assertIs(multimer.Timer, AsyncTimer)
-        # ``sleep_ms`` must be awaitable here, not a blocking sleep.
-        coro = multimer.sleep_ms(0)
+        from multimer import auto
+
+        provider = auto._load_backend("async")
+        self.assertIs(provider.Timer, AsyncTimer)
+        self.assertTrue(provider.is_async)
+        self.assertFalse(provider.uses_interrupts)
+        coro = provider.sleep_ms(0)
         self.addCleanup(coro.close)
         self.assertTrue(hasattr(coro, "send"))
 
     def test_unknown_backend_raises_value_error(self):
+        from multimer import auto
+
         with self.assertRaises(ValueError):
-            multimer.use_backend("no_such_backend")
+            auto._load_backend("no_such_backend")
 
     def test_unavailable_backend_raises_import_error(self):
         # ``machine.Timer`` is absent on CPython desktop; the selection must not
@@ -195,25 +231,37 @@ class TestBackendSelection(unittest.TestCase):
         else:
             self.skipTest("machine.Timer is available on this host")
         with self.assertRaises(ImportError):
-            multimer.use_backend("machine")
-
-    def test_restores_previous_backend(self):
-        before = multimer.backend_name()
-        multimer.use_backend("polling")
-        multimer.use_backend(before)
-        self.assertEqual(multimer.backend_name(), before)
+            from multimer import machine  # noqa: F401
 
     def test_context_manager_deinits(self):
         hits = []
-        with Timer(-1) as t:
+        from multimer import polling
+
+        with polling.Timer(-1) as t:
             t.init(period=20, callback=lambda _t: hits.append(1))
             for _ in range(8):
-                sleep_ms(10)
+                polling.sleep_ms(10)
         self.assertGreaterEqual(len(hits), 1)
         # After exit the timer must be disarmed.
         n = len(hits)
-        sleep_ms(50)
+        polling.sleep_ms(50)
         self.assertEqual(len(hits), n)
+
+    def test_provider_constructor_matches_machine_timer_initialization(self):
+        from multimer import polling
+
+        hits = []
+        timer = polling.Timer(
+            -1,
+            mode=polling.Timer.ONE_SHOT,
+            period=10,
+            callback=lambda _timer: hits.append(1),
+        )
+        try:
+            polling.sleep_ms(30)
+        finally:
+            timer.deinit()
+        self.assertEqual(hits, [1])
 
 
 class TestTicks(unittest.TestCase):
@@ -231,6 +279,32 @@ class TestTicks(unittest.TestCase):
 
     def test_ticks_add_wrap(self):
         self.assertEqual(ticks_add(_TICKS_MAX, 1), 0)
+
+    def test_ticks_add_rejects_ambiguous_intervals(self):
+        with self.assertRaises(OverflowError):
+            ticks_add(0, _TICKS_HALFPERIOD)
+        with self.assertRaises(OverflowError):
+            ticks_add(0, -_TICKS_HALFPERIOD)
+
+    def test_host_native_tick_period_is_normalized(self):
+        from unittest import mock
+
+        native_add = mock.Mock(return_value=_TICKS_PERIOD)
+        native_diff = mock.Mock(return_value=1)
+        with mock.patch.object(
+            time, "ticks_ms", return_value=_TICKS_PERIOD + 7, create=True
+        ), mock.patch.object(
+            time, "ticks_add", native_add, create=True
+        ), mock.patch.object(
+            time, "ticks_diff", native_diff, create=True
+        ):
+            portable = runpy.run_path(os.path.join(_env.MULTIMER_DIR, "_ticks.py"))
+
+        self.assertEqual(portable["ticks_ms"](), 7)
+        self.assertEqual(portable["ticks_add"](_TICKS_MAX, 1), 0)
+        self.assertEqual(portable["ticks_diff"](0, _TICKS_MAX), 1)
+        native_add.assert_not_called()
+        native_diff.assert_not_called()
 
     def test_ticks_diff_wrap(self):
         later = ticks_add(_TICKS_MAX, 10)
@@ -294,30 +368,24 @@ class TestTimerSemantics(unittest.TestCase):
 
     def test_soft_coalesce_under_threading(self):
         """``hard=False`` must go through ``_deliver`` (coalesce), not raw invoke."""
-        original = multimer.backend_name()
         try:
-            try:
-                multimer.use_backend("threading")
-            except ImportError:
-                self.skipTest("threading backend unavailable")
-            hits = []
+            from multimer import threading as thread_timer
+        except ImportError:
+            self.skipTest("threading backend unavailable")
+        hits = []
 
-            def cb(_t):
-                hits.append(1)
-                multimer.sleep_ms(40)
+        def cb(_t):
+            hits.append(1)
+            thread_timer.sleep_ms(40)
 
-            t = multimer.Timer(-1)
-            t.init(period=10, callback=cb, hard=False)
-            # Use ``multimer.sleep_ms`` (rebound by use_backend), not the
-            # module-level import captured under the previous backend.
-            for _ in range(20):
-                multimer.sleep_ms(10)
-            t.deinit()
-            # Without coalesce a 10 ms period over ~200 ms would enqueue many more.
-            self.assertGreaterEqual(len(hits), 1)
-            self.assertLessEqual(len(hits), 8)
-        finally:
-            multimer.use_backend(original)
+        t = thread_timer.Timer(-1)
+        t.init(period=10, callback=cb, hard=False)
+        for _ in range(20):
+            thread_timer.sleep_ms(10)
+        t.deinit()
+        # Without coalesce a 10 ms period over ~200 ms would enqueue many more.
+        self.assertGreaterEqual(len(hits), 1)
+        self.assertLessEqual(len(hits), 8)
 
 
 class TestAsyncTimer(unittest.TestCase):
@@ -399,133 +467,6 @@ class TestLoopRunning(unittest.TestCase):
             self.assertFalse(_asyncio_loader.loop_running())
         finally:
             _asyncio_loader._asyncio_mod = saved
-
-
-class TestAsyncioCompat(unittest.TestCase):
-    def test_backend_contract_is_unchanged(self):
-        from multimer import asyncio, asyncio_compat
-
-        self.assertIs(asyncio_compat.backend(), asyncio)
-
-    def test_run_delegates_without_running_loop(self):
-        from multimer import asyncio_compat
-
-        async def main():
-            return 42
-
-        self.assertEqual(asyncio_compat.run(main()), 42)
-
-    def test_run_schedules_inside_running_loop(self):
-        from multimer import asyncio, asyncio_compat
-
-        async def child():
-            await asyncio.sleep(0)
-            return 42
-
-        async def main():
-            loop = asyncio.get_running_loop()
-            task = asyncio_compat.run(child())
-            self.assertIs(asyncio_compat.new_event_loop(), loop)
-            self.assertEqual(await task, 42)
-
-        asyncio.run(main())
-
-    def test_zero_delay_sleeps_yield_to_browser_host(self):
-        from multimer import asyncio, asyncio_compat
-
-        calls = []
-
-        class Backend:
-            @staticmethod
-            async def sleep(delay):
-                calls.append(("sleep", delay))
-
-            @staticmethod
-            async def sleep_ms(delay):
-                calls.append(("sleep_ms", delay))
-
-        old_backend = asyncio_compat._backend
-
-        async def main():
-            asyncio_compat._backend = Backend()
-            try:
-                await asyncio_compat.sleep(0)
-                await asyncio_compat.sleep_ms(0)
-                await asyncio_compat.sleep(2)
-                await asyncio_compat.sleep_ms(3)
-            finally:
-                asyncio_compat._backend = old_backend
-
-        asyncio.run(main())
-        self.assertEqual(
-            calls,
-            [("sleep", 0.001), ("sleep_ms", 1), ("sleep", 2), ("sleep_ms", 3)],
-        )
-
-    def test_installer_replaces_module_names_only(self):
-        from multimer import asyncio
-
-        old_asyncio = sys.modules.get("asyncio")
-        old_uasyncio = sys.modules.get("uasyncio")
-        try:
-            facade = multimer.install_asyncio_compat()
-            self.assertIs(sys.modules["asyncio"], facade)
-            self.assertIs(sys.modules["uasyncio"], facade)
-            self.assertIs(multimer.asyncio, asyncio)
-            self.assertIs(multimer.install_asyncio_compat(), facade)
-        finally:
-            if old_asyncio is None:
-                sys.modules.pop("asyncio", None)
-            else:
-                sys.modules["asyncio"] = old_asyncio
-            if old_uasyncio is None:
-                sys.modules.pop("uasyncio", None)
-            else:
-                sys.modules["uasyncio"] = old_uasyncio
-
-    def test_installer_survives_uasyncio_name_shim(self):
-        """MicroPython ``uasyncio`` forwards into ``sys.modules['asyncio']``.
-
-        If the loader cached that shim and the facade then replaced ``asyncio``,
-        ``loop_running`` / ``getattr(current_task)`` used to recurse forever.
-        """
-        import types
-
-        from multimer import _asyncio_loader, asyncio_compat
-
-        real = sys.modules["asyncio"]
-        old_cached = _asyncio_loader._asyncio_mod
-        old_backend = asyncio_compat._backend
-        old_uasyncio = sys.modules.get("uasyncio")
-
-        shim = types.ModuleType("uasyncio")
-
-        def _shim_getattr(name):
-            return getattr(sys.modules["asyncio"], name)
-
-        shim.__getattr__ = _shim_getattr  # type: ignore[attr-defined]
-        shim.create_task = real.create_task  # load_asyncio probe
-
-        try:
-            sys.modules["uasyncio"] = shim
-            _asyncio_loader._asyncio_mod = shim
-            asyncio_compat._backend = shim
-
-            facade = multimer.install_asyncio_compat()
-            self.assertIs(sys.modules["asyncio"], facade)
-            self.assertIs(asyncio_compat._backend, real)
-            self.assertIs(_asyncio_loader._asyncio_mod, real)
-            # Must not recurse through shim → facade → shim.
-            self.assertTrue(callable(getattr(sys.modules["uasyncio"], "current_task", None)))
-            self.assertFalse(multimer.loop_running())
-        finally:
-            _asyncio_loader._asyncio_mod = old_cached
-            asyncio_compat._backend = old_backend
-            sys.modules["asyncio"] = real
-            if old_uasyncio is None:
-                sys.modules.pop("uasyncio", None)
-            else:
-                sys.modules["uasyncio"] = old_uasyncio
 
 
 class TestSchedule(unittest.TestCase):

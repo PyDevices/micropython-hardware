@@ -110,5 +110,13 @@ mode, confirm the `micropython-lib` sync diff, and make sure both this repo and
 the sibling `pydevices-examples` checkout are clean. Published versions cannot be
 replaced on TestPyPI; use a new version to correct a release.
 
+After publishing to TestPyPI, verify each portable distribution in a separate
+environment. Add `--desktop` to exercise the SDL and pygame host stacks:
+
+```bash
+./tools/test_testpypi_standalone.sh
+./tools/test_testpypi_standalone.sh --desktop
+```
+
 The companion repositories own their own tags and publishing workflows. Their
 `docs/publishing.md` files describe any additional native-wheel build matrix.

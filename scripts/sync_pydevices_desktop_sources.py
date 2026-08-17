@@ -5,8 +5,8 @@ The canonical implementation lives in:
 - board_configs/desktop/board_config.py
 - board_configs/desktop/board_peripherals.py
 - drivers/boarddev.py
-- drivers/usdl2.py
-- drivers/uwin32.py
+- lib/usdl2.py
+- lib/uwin32.py
 - utils/micropython.py
 
 This script writes a throwaway staging tree so the pip package and MIP package

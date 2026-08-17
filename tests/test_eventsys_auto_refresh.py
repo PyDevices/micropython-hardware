@@ -7,9 +7,8 @@ import time
 import unittest
 
 import _env  # noqa: F401
-
 from eventsys import Runtime
-from multimer import sleep_ms
+from multimer import auto as timer
 
 
 class _FakeDisplay:
@@ -33,7 +32,7 @@ def _wait(predicate, timeout_s=1.0):
     while time.monotonic() < deadline:
         if predicate():
             return True
-        sleep_ms(5)
+        timer.sleep_ms(5)
     return predicate()
 
 
@@ -81,12 +80,10 @@ class TestRuntimeOwnedRefresh(unittest.TestCase):
         self.assertIsInstance(runtime._timer, AsyncTimer)
 
     def test_sync_refresh_deferred_when_backend_needs_drain(self):
-        import multimer._select as sel
-
         display = _FakeDisplay()
         runtime = Runtime(displays=[display], timer_async=False)
         self.addCleanup(runtime.stop_timer)
-        if not sel._drain:
+        if not timer._defer_sync_arm:
             self.skipTest("no drain backend on this platform")
         self.assertIsNone(runtime._timer)
         self.assertIsNotNone(runtime._pending_sync_refresh)
@@ -99,7 +96,7 @@ class TestRuntimeOwnedRefresh(unittest.TestCase):
         self.assertTrue(_wait(lambda: len(hits) > 0))
         sub.deinit()
         count = len(hits)
-        sleep_ms(80)
+        timer.sleep_ms(80)
         self.assertEqual(len(hits), count)
 
     def test_stop_timer_clears_everything(self):

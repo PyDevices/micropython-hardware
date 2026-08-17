@@ -165,7 +165,7 @@ Draw through `display_drv` only; `_pixel_framebuf` is an internal wiring detail.
 
 ## Default config
 
-[`board_configs/desktop/`](../board_configs/desktop/) — universal non-MCU
+[`board_configs/desktop/`](https://github.com/PyDevices/pydevices/tree/main/board_configs/desktop) — universal non-MCU
 `board_config` for desktop, PyScript, and Jupyter. Host display selection is
 `displaydev.auto.AutoDisplay` (PS / JN / Win→PG→SDL on Windows); the config
 exports hardware only:

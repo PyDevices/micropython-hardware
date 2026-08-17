@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
-# Assemble GitHub Pages site from web/ + docs/*.md (pandoc → HTML).
+# Assemble GitHub Pages site from .site/ + docs/*.md (pandoc → HTML).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SITE="${ROOT}/_site"
 DOCS="${ROOT}/docs"
-WEB="${ROOT}/web"
-TEMPLATE="${ROOT}/web/_pandoc.html"
+BASE_SITE="${ROOT}/.site"
+TEMPLATE="${BASE_SITE}/_pandoc.html"
 
 rm -rf "$SITE"
 mkdir -p "$SITE"
-cp -r "$WEB"/* "$SITE"/
+cp -r "$BASE_SITE"/* "$SITE"/
 rm -f "$SITE/_pandoc.html"
 touch "$SITE/.nojekyll"
 
