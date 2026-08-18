@@ -60,7 +60,7 @@ runtime = eventsys.Runtime(
 CPython). Explicit boards import a backend directly. Install a board package
 for MCU pins, or
 use the desktop bundle from pydevices
-([install workflows](https://pydevices.github.io/pydevices/install-workflows.html)).
+([install workflows](https://github.com/PyDevices/pydevices/blob/main/docs/install-workflows.md)).
 
 ## What you get
 

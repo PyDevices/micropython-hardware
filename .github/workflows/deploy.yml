@@ -8,8 +8,6 @@ on:
       - ".site/**"
       - "bin/micropython.mjs"
       - "bin/micropython.wasm"
-      - "docs/**"
-      - "scripts/build_pages.sh"
       - ".github/workflows/deploy.yml"
   workflow_dispatch:
 
@@ -22,11 +20,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install pandoc
-        run: sudo apt-get update && sudo apt-get install -y pandoc
-
       - name: Assemble GitHub Pages site
-        run: ./scripts/build_pages.sh
+        run: |
+          mkdir -p _site/bin
+          cp -r .site/* _site/
+          cp bin/micropython.mjs bin/micropython.wasm _site/bin/
+          touch _site/.nojekyll
 
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v4

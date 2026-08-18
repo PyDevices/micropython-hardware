@@ -4,7 +4,7 @@ Canonical PyDevices product/source repository. Owns **board configs**,
 **hardware drivers**, portable libraries (`displaydev`, `audiodev`,
 `eventsys`, `multimer`, `events`, `keys`), and pip/MIP publishing.
 Docs are markdown under `docs/`, published only via GitHub Pages
-([pydevices.github.io/pydevices](https://pydevices.github.io/pydevices/))
+([docs/](docs/README.md); the Pages site is the landing page only)
 — not Read the Docs. Build locally with `./scripts/build_pages.sh` (needs
 `pandoc`).
 

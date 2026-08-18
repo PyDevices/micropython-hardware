@@ -35,12 +35,14 @@ Write your display and hardware logic once and run across 5 supported Python env
 | `lib/` | `audiodev/`, `displaydev/`, `eventsys/`, `events.py`, `keys.py`, `multimer/` |
 | `utils/` | Desktop-bundled helpers (`mip`, `frame_recorder`, `micropython`, `usdl2`, `uwin32`) |
 | `tests/` | Stdlib unittest for `displaydev`, `multimer`, `events`, `keys`, `audiodev`, `boarddev`, `mip` |
-| `docs/` | Hardware & Board Contract documentation ([Pages](https://pydevices.github.io/pydevices/)) |
+| `docs/` | Hardware and Board Contract documentation ([index](docs/README.md)) |
 
 ## Documentation
 
-Full specification, driver matrix, and board contract details are available on GitHub Pages:
-[pydevices.github.io/pydevices](https://pydevices.github.io/pydevices/)
+The full specification, driver matrix, and board contract details are markdown
+in [`docs/`](docs/README.md), read on github.com.
+[pydevices.github.io/pydevices](https://pydevices.github.io/pydevices/) is the
+landing page.
 
 - [Board Contract Specification](docs/board-peripherals.md)
 - [Board Configuration Inventory](docs/board-inventory.md)

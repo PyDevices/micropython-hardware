@@ -9,7 +9,7 @@ Paths are under
 `board_configs/fbdisplay/<name>/` unless a `busdisplay/…` path is given.
 Device roles (eager / lazy):
 [`device-matrix.md`](device-matrix.md)
-([Pages](https://pydevices.github.io/pydevices/)).
+
 Native drivers live in pydevices **displayif** (`displayif.DotClockFramebuffer`
 or `mipidsi`). Soft-reset / scanout lessons:
 [displayif `docs/soft-reset-and-bring-up.md`](https://github.com/PyDevices/displayif/blob/main/docs/soft-reset-and-bring-up.md).

@@ -168,7 +168,7 @@ On `QUIT`, eventsys runs its optional `before_quit` hook, releases the display,
 and stops its timer. `runtime.quit_requested` remains true after the first quit.
 
 See [Events](eventsys.md), [Architecture](architecture.md), and
-[Board configs](https://pydevices.github.io/pydevices/board-configs.html).
+[Board configs](board-configs.md).
 
 ## Background work on MicroPython (`_thread`)
 

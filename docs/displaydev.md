@@ -18,7 +18,7 @@ See [Architecture](architecture.md) for how drivers connect to `board_config.py`
 | Jupyter notebook | `JNDisplay` | `board_configs/jndisplay/` |
 | PyScript browser | `PSDisplay` | `board_configs/psdisplay/` |
 
-Install the matching [board config](https://pydevices.github.io/pydevices/board-configs.html) — it constructs the driver for you.
+Install the matching [board config](board-configs.md) — it constructs the driver for you.
 
 ## Display classes
 
@@ -33,7 +33,7 @@ For microcontrollers on **MicroPython and CircuitPython**.
 
 SDL2 desktop backend (CPython, MicroPython Unix, CircuitPython Unix). Uses an SDL texture as GRAM. It is the default on MicroPython Unix and available on CPython via `board_configs/sdldisplay/`.
 
-SDL2 bindings for **`SDLDisplay`**: `import usdl2` from [`pydevices-desktop`](https://pydevices.github.io/pydevices/pydevices-desktop.html) (TestPyPI) or the MIP desktop board package in [pydevices](https://github.com/PyDevices/pydevices) (`utils/usdl2.py`). A native `usdl2` module is used when already present in the firmware or environment. See [pydevices-desktop](pydevices-desktop.md).
+SDL2 bindings for **`SDLDisplay`**: `import usdl2` from [`pydevices-desktop`](pydevices-desktop.md) (TestPyPI) or the MIP desktop board package in [pydevices](https://github.com/PyDevices/pydevices) (`utils/usdl2.py`). A native `usdl2` module is used when already present in the firmware or environment. See [pydevices-desktop](pydevices-desktop.md).
 
 ### WinDisplay
 
@@ -192,7 +192,7 @@ Known issues: Unix SDL rotation clears the screen; scrolling while rotated has e
 - [Display backend internals](displaydev-internals.md) — GRAM/present model, 565 API, color conversion per backend
 - [Events](eventsys.md)
 - [Drawing and fonts](https://github.com/PyDevices/pygraphics/blob/main/docs/graphics-guide.md)
-- [Display drivers (chips)](https://pydevices.github.io/pydevices/display-drivers.html)
+- [Display drivers (chips)](display-drivers.md)
 
 ## API reference
 

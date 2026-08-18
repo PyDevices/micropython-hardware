@@ -114,7 +114,7 @@ LVGL owns its own coordinator.
 
 ## Links
 
-- [Documentation — multimer](https://pydevices.github.io/pydevices/multimer.html)
+- [Documentation — multimer](https://github.com/PyDevices/pydevices/blob/main/docs/multimer.md)
 - [Source](https://github.com/PyDevices/pydevices/tree/main/lib/multimer)
 - [Issues](https://github.com/PyDevices/pydevices/issues)
 - Related: `pydevices-eventsys`
