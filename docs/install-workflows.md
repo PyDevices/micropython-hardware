@@ -3,6 +3,31 @@
 This guide covers PyDevices products. For general `mip`, `micropython -m mip`,
 and `mpremote mip` usage, see the [PyDevices MIP index](https://github.com/PyDevices/mip).
 
+## System prerequisites (desktop)
+
+The desktop backends need SDL2 from the system package manager before the Python
+packages are installed:
+
+```bash
+sudo apt update && sudo apt install libsdl2-dev python3-venv   # Debian / Ubuntu / WSL
+```
+
+Fedora uses `SDL2-devel`; macOS uses Homebrew's `sdl2`. On Windows, install
+Python from python.org — `pygame-ce` (`PGDisplay`) is generally the easiest
+window backend there, and WSL supports the Linux workflow unchanged.
+
+Headless CI should set `SDL_VIDEODRIVER=dummy` and `SDL_AUDIODRIVER=dummy`. For
+Linux without X11 or Wayland, install the `board_configs/sdldisplay/linux_kms`
+board config, which sets `SDL_VIDEODRIVER=kmsdrm` before SDL initializes; the
+host needs an SDL build with KMSDRM support, access to `/dev/dri`, and no
+competing DRM master.
+
+| Target | Selection | Use case |
+|---|---|---|
+| Normal desktop | X11 / Wayland default | Desktop session |
+| KMS | `SDL_VIDEODRIVER=kmsdrm` | Direct scanout with no window manager |
+| Headless CI | `SDL_VIDEODRIVER=dummy` | Automated tests |
+
 ## Desktop with pip
 
 One command installs the complete desktop runtime: all portable PyDevices

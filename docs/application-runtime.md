@@ -169,3 +169,15 @@ and stops its timer. `runtime.quit_requested` remains true after the first quit.
 
 See [Events](eventsys.md), [Architecture](architecture.md), and
 [Board configs](https://pydevices.github.io/pydevices/board-configs.html).
+
+## Background work on MicroPython (`_thread`)
+
+On ESP32, MicroPython worker threads (`_thread` / `mp_thread`) get a very small
+stack. Do **not** run network I/O, discovery, or other deep call stacks on a new
+thread spawned from a soft timer or an input callback — that overflows the stack
+(`Stack protection fault` in task `mp_thread`).
+
+Queue the work and run it on the main tick instead: `eventsys.Runtime.on_tick`,
+an LVGL `lv.timer`, or a soft [`multimer.auto.Timer`](multimer.md) pump. Keep UI
+mutations on that same main path. Desktop CPython can still use threads freely —
+this constraint is specific to MCU MicroPython.

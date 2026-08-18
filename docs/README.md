@@ -1,31 +1,50 @@
-# Documentation
+# pydevices documentation
 
-Published on GitHub Pages (not Read the Docs):
-https://pydevices.github.io/pydevices/
+## Start here
 
-| Doc | HTML |
-|-----|------|
-| [architecture.md](architecture.md) | [architecture.html](https://pydevices.github.io/pydevices/architecture.html) |
-| [application-runtime.md](application-runtime.md) | [application-runtime.html](https://pydevices.github.io/pydevices/application-runtime.html) |
-| [audio.md](audio.md) | [audio.html](https://pydevices.github.io/pydevices/audio.html) |
-| [board-configs.md](board-configs.md) | [board-configs.html](https://pydevices.github.io/pydevices/board-configs.html) |
-| [board-peripherals.md](board-peripherals.md) | [board-peripherals.html](https://pydevices.github.io/pydevices/board-peripherals.html) |
-| [device-matrix.md](device-matrix.md) | [device-matrix.html](https://pydevices.github.io/pydevices/device-matrix.html) |
-| [display-drivers.md](display-drivers.md) | [display-drivers.html](https://pydevices.github.io/pydevices/display-drivers.html) |
-| [displaydev.md](displaydev.md) | [displaydev.html](https://pydevices.github.io/pydevices/displaydev.html) |
-| [displaydev-internals.md](displaydev-internals.md) | [displaydev-internals.html](https://pydevices.github.io/pydevices/displaydev-internals.html) |
-| [eventsys.md](eventsys.md) | [eventsys.html](https://pydevices.github.io/pydevices/eventsys.html) |
-| [multimer.md](multimer.md) | [multimer.html](https://pydevices.github.io/pydevices/multimer.html) |
-| [multimer-internals.md](multimer-internals.md) | [multimer-internals.html](https://pydevices.github.io/pydevices/multimer-internals.html) |
-| [touch-drivers.md](touch-drivers.md) | [touch-drivers.html](https://pydevices.github.io/pydevices/touch-drivers.html) |
+- [architecture.md](architecture.md) — how the core pieces fit together
+- [install-workflows.md](install-workflows.md) — pip, MIP, `mpremote`, and desktop prerequisites
+- [board-configs.md](board-configs.md) — the board config catalog and what each one selects
+- [troubleshooting.md](troubleshooting.md) — import, install, and display problems
 
-| [display-interfaces.md](display-interfaces.md) | [display-interfaces.html](https://pydevices.github.io/pydevices/display-interfaces.html) |
-| [install-workflows.md](install-workflows.md) | [install-workflows.html](https://pydevices.github.io/pydevices/install-workflows.html) |
-| [publishing.md](publishing.md) | [publishing.html](https://pydevices.github.io/pydevices/publishing.html) |
-| [driver-inventory.md](driver-inventory.md) | [driver-inventory.html](https://pydevices.github.io/pydevices/driver-inventory.html) |
-| [board-inventory.md](board-inventory.md) | [board-inventory.html](https://pydevices.github.io/pydevices/board-inventory.html) |
-| [pydevices-desktop.md](pydevices-desktop.md) | [pydevices-desktop.html](https://pydevices.github.io/pydevices/pydevices-desktop.html) |
-| [display-boards.md](display-boards.md) | [display-boards.html](https://pydevices.github.io/pydevices/display-boards.html) |
-| [wokwi.md](wokwi.md) | [wokwi.html](https://pydevices.github.io/pydevices/wokwi.html) |
-| [tft-espi-parity.md](tft-espi-parity.md) | [tft-espi-parity.html](https://pydevices.github.io/pydevices/tft-espi-parity.html) |
-Companion application examples and gallery showcases are hosted in [pydevices-examples](https://github.com/PyDevices/pydevices-examples).
+## The board contract
+
+- [board-peripherals.md](board-peripherals.md) — eager UI hardware vs lazy extras
+- [display-boards.md](display-boards.md) — per-board panel, touch, and interface notes
+- [device-matrix.md](device-matrix.md) — product board → `board_config` → peripheral roles
+
+## Core packages
+
+- [displaydev.md](displaydev.md) — display backends and how they expose input
+- [eventsys.md](eventsys.md) — the optional event dispatcher
+- [multimer.md](multimer.md) — portable timers
+- [audio.md](audio.md) — `audiodev` interfaces
+- [application-runtime.md](application-runtime.md) — the application loop
+
+## Drivers
+
+- [display-drivers.md](display-drivers.md)
+- [touch-drivers.md](touch-drivers.md)
+- [display-interfaces.md](display-interfaces.md)
+
+## Platforms
+
+- [pydevices-desktop.md](pydevices-desktop.md) — the desktop bundle
+- [android.md](android.md) — the APK, `bin/android.py`, orientation, timers, audio
+- [jupyter.md](jupyter.md) — `JNDisplay`, `bin/jupyter.py`, the async execution model
+- [wokwi.md](wokwi.md) — simulator notes
+
+## Internals
+
+- [displaydev-internals.md](displaydev-internals.md)
+- [multimer-internals.md](multimer-internals.md)
+
+## Maintainers
+
+- [publishing.md](publishing.md) — releases and package publication
+- [driver-inventory.md](driver-inventory.md)
+- [board-inventory.md](board-inventory.md)
+- [tft-espi-parity.md](tft-espi-parity.md)
+
+Companion application examples and gallery showcases live in
+[pydevices-examples](https://github.com/PyDevices/pydevices-examples).
