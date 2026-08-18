@@ -6,6 +6,8 @@ on:
       - main
     paths:
       - ".site/**"
+      - "bin/micropython.mjs"
+      - "bin/micropython.wasm"
       - "docs/**"
       - "scripts/build_pages.sh"
       - ".github/workflows/deploy.yml"

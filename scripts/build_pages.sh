@@ -14,6 +14,10 @@ cp -r "$BASE_SITE"/* "$SITE"/
 rm -f "$SITE/_pandoc.html"
 touch "$SITE/.nojekyll"
 
+# Publish the matching MicroPython WebAssembly runtime pair for browser clients.
+mkdir -p "$SITE/bin"
+cp "$ROOT/bin/micropython.mjs" "$ROOT/bin/micropython.wasm" "$SITE/bin/"
+
 if ! command -v pandoc >/dev/null 2>&1; then
   echo "pandoc is required to build Pages HTML" >&2
   exit 1
