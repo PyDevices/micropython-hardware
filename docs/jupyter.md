@@ -31,9 +31,10 @@ demo:
 jupyter.py calculator
 ```
 
-Generated notebooks are written to `run-{demo}.ipynb`. Open the URL printed in
-the terminal, select the **`.venv`** kernel (**Kernel → Change Kernel**), then run
-cells top to bottom.
+The generated notebook is written to the current directory, named
+`{script-stem}.ipynb` for a file path or `run-{slug}.ipynb` for `-m <module>`.
+Open the URL printed in the terminal, select the **`.venv`** kernel
+(**Kernel → Change Kernel**), then run cells top to bottom.
 
 ## Input
 
