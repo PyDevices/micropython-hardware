@@ -27,13 +27,13 @@ Install the matching [board config](https://pydevices.github.io/pydevices/board-
 For microcontrollers on **MicroPython and CircuitPython**.
 
 - MicroPython: uses `spibus` / `i80bus` or community C bus drivers ([lvgl_micropython](https://github.com/kdschlosser/lvgl_micropython)).
-- CircuitPython: uses Adafruit FourWire / ParallelBus — see [CircuitPython guide](https://pydisplay.readthedocs.io/en/latest/platforms/circuitpython/).
+- CircuitPython: uses Adafruit FourWire / ParallelBus — see [board configs](board-configs.md).
 
 ### SDLDisplay
 
 SDL2 desktop backend (CPython, MicroPython Unix, CircuitPython Unix). Uses an SDL texture as GRAM. It is the default on MicroPython Unix and available on CPython via `board_configs/sdldisplay/`.
 
-SDL2 bindings for **`SDLDisplay`**: `import usdl2` from [`pydevices-desktop`](https://pydevices.github.io/pydevices/pydevices-desktop.html) (TestPyPI) or the MIP desktop board package in [pydevices](https://github.com/PyDevices/pydevices) (`utils/usdl2.py`). A native `usdl2` module is used when already present in the firmware or environment. See [MicroPython — Desktop SDL](https://pydisplay.readthedocs.io/en/latest/platforms/micropython/#desktop-sdl-usdl2).
+SDL2 bindings for **`SDLDisplay`**: `import usdl2` from [`pydevices-desktop`](https://pydevices.github.io/pydevices/pydevices-desktop.html) (TestPyPI) or the MIP desktop board package in [pydevices](https://github.com/PyDevices/pydevices) (`utils/usdl2.py`). A native `usdl2` module is used when already present in the firmware or environment. See [pydevices-desktop](pydevices-desktop.md).
 
 ### WinDisplay
 
@@ -55,7 +55,7 @@ Jupyter Notebook output via an interactive `ipywidgets` image. Input (mouse, whe
 
 ### PSDisplay
 
-PyScript browser canvas. Input (pointer/touch/pen, wheel, keyboard, gamepad) is captured by `PSDevices` and delivered as events. Config: `board_configs/psdisplay/`. See [PyScript](https://pydisplay.readthedocs.io/en/latest/guides/pyscript/).
+PyScript browser canvas. Input (pointer/touch/pen, wheel, keyboard, gamepad) is captured by `PSDevices` and delivered as events. Config: `board_configs/psdisplay/`. See [PSDisplay](#psdisplay).
 
 
 Display backends expose input without choosing an application coordinator.
@@ -164,7 +164,7 @@ Anything you can draw on implements the framebuf API:
 - The display itself
 - `framebuf` bytearrays
 - `pygraphics.BMP565` bitmap files
-- `displaybuf.DisplayBuffer` (see [utils](https://pydisplay.readthedocs.io/en/latest/utils/))
+- `displaybuf.DisplayBuffer` (see [pydevices-examples utils](https://github.com/PyDevices/pydevices-examples/blob/main/lib/utils/README.md))
 
 ## Timing
 
@@ -177,7 +177,7 @@ pydevices-examples does not include a task scheduler. Options:
 
 Many drivers expose **ILI9341-style** vertical scroll: a top fixed band (TFA), a scrollable middle (VSA), and a bottom fixed band (BFA). You define regions with `set_vscroll(tfa, bfa)` or `vscrdef`, then move content with the `vscroll` property (wrapper around `vscsad`).
 
-The [**pydevices_demo**](https://pydisplay.readthedocs.io/en/latest/examples/pydevices-demo/) guide explains this model with diagrams, covers drawing at `vscroll = 0` during redraw, and shows auto-scroll with `multimer`.
+The [**pydevices_demo**](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/pydevices_demo.py) example demonstrates this model, covers drawing at `vscroll = 0` during redraw, and shows auto-scroll with `multimer`.
 
 Related examples: [`scroll_touch_test.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/scroll_touch_test.py) (touch Up/Down), [`eventsys_encoder_test.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/eventsys_encoder_test.py) (encoder).
 
@@ -191,7 +191,7 @@ Known issues: Unix SDL rotation clears the screen; scrolling while rotated has e
 
 - [Display backend internals](displaydev-internals.md) — GRAM/present model, 565 API, color conversion per backend
 - [Events](eventsys.md)
-- [Drawing and fonts](https://pydisplay.readthedocs.io/en/latest/concepts/drawing-and-fonts/)
+- [Drawing and fonts](https://github.com/PyDevices/pygraphics/blob/main/docs/graphics-guide.md)
 - [Display drivers (chips)](https://pydevices.github.io/pydevices/display-drivers.html)
 
 ## API reference

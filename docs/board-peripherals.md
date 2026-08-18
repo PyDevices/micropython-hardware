@@ -124,7 +124,7 @@ the neutral callable used by an application coordinator.
    `board_config`. Keep only sequence-preserving maps (e.g. diagonal rescale).
 4. Wire with `touch_read=touch.read_points` (or a sequence-preserving wrapper).
 
-See [Runtime — touch read contract](https://pydisplay.readthedocs.io/en/latest/concepts/runtime/#touch-read-contract)
+See [Runtime — touch read contract](application-runtime.md#touch-read-contract)
 and [Touch drivers](touch-drivers.md).
 
 ## App usage
@@ -169,5 +169,5 @@ See also [device-matrix.md](device-matrix.md) and the other notes in this `docs/
 ## See also
 
 - [Board configs](board-configs.md) — how to pick and install a config
-- [Runtime](https://pydisplay.readthedocs.io/en/latest/concepts/runtime/) — `display_drv` / `runtime` / touch read
-- [Architecture](https://pydisplay.readthedocs.io/en/latest/concepts/architecture/) — how pieces fit together
+- [Runtime](application-runtime.md) — `display_drv` / `runtime` / touch read
+- [Architecture](architecture.md) — how pieces fit together

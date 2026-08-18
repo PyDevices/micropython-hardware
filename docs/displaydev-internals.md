@@ -83,7 +83,7 @@ Five simulators — **SDLDisplay**, **PGDisplay**, **WinDisplay**, **PSDisplay**
 
 Scroll emulation **requires** this split: you cannot draw directly on the window
 and still implement `vscroll` / `set_vscroll` correctly. See
-[pydevices_demo](https://pydisplay.readthedocs.io/en/latest/examples/pydevices-demo/) for the redraw-at-`vscroll=0`
+[pydevices_demo](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/pydevices_demo.py) for the redraw-at-`vscroll=0`
 rule.
 
 **PixelDisplay** is different: there is no ILI9341 scroll model. Drawing updates
@@ -244,7 +244,7 @@ Internal buffer format may remain 565 (SDL), RGB (JN), RGBA (PS), or RGB888
 ## Related reading
 
 - [Displays](displaydev.md) — pick a driver, input, scroll overview
-- [pydevices_demo](https://pydisplay.readthedocs.io/en/latest/examples/pydevices-demo/) — scroll bands and redraw rules
+- [`pydevices_demo.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/pydevices_demo.py) — scroll bands and redraw rules
 - [Architecture](architecture.md) — how `board_config` wires drivers
 - [Display interfaces](https://pydevices.github.io/pydevices/display-interfaces.html) — hardware taxonomy
 - `tests/test_color.py` — `color_rgb` / `color565` contract tests

@@ -17,7 +17,7 @@ pip install \
   pydevices-eventsys
 ```
 
-Why both indexes: [two-index pip install](https://pydisplay.readthedocs.io/en/latest/publishing-micropython-lib/#two-index-pip-install-required).
+Why both indexes: [two-index pip install](https://github.com/PyDevices/pydevices/blob/main/docs/publishing.md).
 
 Pulls in `pydevices-multimer` for shared timers used by `Runtime`, plus `pydevices-events` and `pydevices-keys`. Python imports remain `multimer`, `events`, and `keys`.
 
@@ -62,8 +62,8 @@ runtime.run_forever()
 
 ## Links
 
-- [Documentation — eventsys](https://pydisplay.readthedocs.io/en/latest/concepts/events/)
-- [Documentation — Runtime](https://pydisplay.readthedocs.io/en/latest/concepts/runtime/)
+- [Documentation — eventsys](https://github.com/PyDevices/pydevices/blob/main/docs/eventsys.md)
+- [Documentation — Runtime](https://github.com/PyDevices/pydevices/blob/main/docs/application-runtime.md)
 - [Source](https://github.com/PyDevices/pydevices)
 - [Issues](https://github.com/PyDevices/pydevices/issues)
 - Related TestPyPI distributions: `pydevices-events`, `pydevices-keys`, `pydevices-multimer`, `pydevices-displaydev`

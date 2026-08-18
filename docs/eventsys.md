@@ -178,7 +178,7 @@ See [Runtime](application-runtime.md), [Architecture](architecture.md), and [Dis
 
 - [multimer](multimer.md) — timers and async main loops
 - [Displays](displaydev.md) — how backends feed the runtime
-- [App starter](https://pydisplay.readthedocs.io/en/latest/examples/app-starter/)
+- [Example applications](https://github.com/PyDevices/pydevices-examples/tree/main/lib/examples)
 
 ## API reference
 

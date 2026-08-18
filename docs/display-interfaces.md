@@ -39,7 +39,7 @@ touch_read = touch.read_points
 touch_rotation_table = (...)  # when default mapping is wrong
 ```
 
-See [Runtime — touch read contract](https://pydisplay.readthedocs.io/en/latest/concepts/runtime/#touch-read-contract) and
+See [Runtime — touch read contract](application-runtime.md#touch-read-contract) and
 [Board peripherals](board-peripherals.md).
 
 ## Vendoring drivers

@@ -17,7 +17,7 @@ pip install \
   pydevices-displaydev
 ```
 
-Why both indexes: [two-index pip install](https://pydisplay.readthedocs.io/en/latest/publishing-micropython-lib/#two-index-pip-install-required).
+Why both indexes: [two-index pip install](https://github.com/PyDevices/pydevices/blob/main/docs/publishing.md).
 
 For desktop SDL, also install [`pydevices-desktop`](https://test.pypi.org/project/pydevices-desktop/) with the same two-index pattern (bundles `usdl2` and the desktop `board_config`). For PyGame, install `pygame-ce` from PyPI (`import pygame`).
 
@@ -74,7 +74,7 @@ separately when the application chooses that traffic controller.
 
 ## Links
 
-- [Documentation — Displays](https://pydisplay.readthedocs.io/en/latest/concepts/displays/)
+- [Documentation — Displays](https://github.com/PyDevices/pydevices/blob/main/docs/displaydev.md)
 - [Source](https://github.com/PyDevices/pydevices/tree/main/lib/displaydev)
 - [Issues](https://github.com/PyDevices/pydevices/issues)
 - Related: `pydevices-events`, `pydevices-keys`, `pydevices-eventsys`,
