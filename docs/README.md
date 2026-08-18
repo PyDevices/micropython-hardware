@@ -3,6 +3,7 @@
 ## Start here
 
 - [architecture.md](architecture.md) — how the core pieces fit together
+- [ecosystem.md](ecosystem.md) — the other repositories and what each one owns
 - [install-workflows.md](install-workflows.md) — pip, MIP, `mpremote`, and desktop prerequisites
 - [board-configs.md](board-configs.md) — the board config catalog and what each one selects
 - [troubleshooting.md](troubleshooting.md) — import, install, and display problems
