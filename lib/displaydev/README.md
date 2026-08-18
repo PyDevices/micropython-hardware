@@ -17,7 +17,8 @@ pip install \
   pydevices-displaydev
 ```
 
-Why both indexes: [two-index pip install](https://github.com/PyDevices/pydevices/blob/main/docs/publishing.md).
+Why both indexes: PyDevices wheels are on TestPyPI while some of their
+dependencies are on PyPI only — [details](https://github.com/PyDevices/pydevices/blob/main/docs/troubleshooting.md#pip-cannot-resolve-a-pydevices-distribution).
 
 For desktop SDL, also install [`pydevices-desktop`](https://test.pypi.org/project/pydevices-desktop/) with the same two-index pattern (bundles `usdl2` and the desktop `board_config`). For PyGame, install `pygame-ce` from PyPI (`import pygame`).
 

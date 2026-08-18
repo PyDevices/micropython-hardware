@@ -1,4 +1,13 @@
-# Publishing PyDevices
+# Publishing pydevices
+
+**The release procedure itself is org-wide and lives in one place:
+[.github/docs/publishing-automation.md](https://github.com/PyDevices/.github/blob/main/docs/publishing-automation.md).** It covers the standard
+steps, the shared reusable workflows, the required secrets, monitoring the MIP
+queue, retrying an interrupted publication, and correcting a bad release — for
+every publishing repository, not just this one.
+
+This page covers only what is specific to `pydevices`: what a release of this
+repository actually produces.
 
 One published GitHub Release named `vX.Y.Z` publishes every artifact generated
 from this repository with version `X.Y.Z`. `VERSION` must already contain that
@@ -21,17 +30,6 @@ All internal TestPyPI requirements use exact `==X.Y.Z` pins. MIP meta-package
 requirements intentionally resolve `latest`, while each generated manifest
 records `X.Y.Z` as its own version.
 
-## Release pipeline
-
-`.github/workflows/publish-release-packages.yml` is the only package release
-coordinator. It calls versioned reusable workflows from `PyDevices/.github` at
-`publishing-v1`, builds and validates all distributions, uploads the complete
-set to TestPyPI with the existing API token, and sends one exact source
-ref/version request to the serialized `PyDevices/mip` publication queue.
-
-Manual retries require the exact existing `vX.Y.Z` tag. They never rebuild from
-a moving branch.
-
 ## Board installers
 
 Board `package.json` files are not published in the MIP index. Install them
@@ -51,13 +49,12 @@ tracks `main`. It contains the complete Python payload of the desktop package
 with explicit `/lib/...` destinations. CI fails if any discovered `lib/` or
 `utils/` source, or one of the fixed desktop board files, is missing or stale.
 
-## Required service configuration
+## Before you release
 
-- Repository secret `TESTPYPI_API_TOKEN`, currently owned by `bdbarnett` while
-  the PyDevices TestPyPI organization request is pending.
-- Repository secret `MICROPYTHON_LIB_DEPLOY_TOKEN` with access to dispatch the
-  central MIP queue.
-- Shared workflow ref `PyDevices/.github@publishing-v1`.
+Confirm the generated package set is what you expect — adding or removing a
+publishable entry under `lib/` or `utils/` changes the next release
+automatically — then follow the standard procedure in the
+[org-wide runbook](https://github.com/PyDevices/.github/blob/main/docs/publishing-automation.md).
 
 Published TestPyPI files and MIP releases are immutable in practice; publish a
 new version to correct a release.
