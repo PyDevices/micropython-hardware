@@ -45,68 +45,31 @@ in [`docs/`](docs/README.md), read on github.com.
 landing page.
 
 - [Board Contract Specification](docs/board-peripherals.md)
-- [Board Configuration Inventory](docs/board-inventory.md)
-- [Hardware Driver Inventory](docs/driver-inventory.md)
+- [Device Matrix](docs/device-matrix.md) — product board → `board_config` → peripheral roles
+- [Display Boards](docs/display-boards.md) — panel, touch, and bring-up notes per board
 - [Cross-Platform Architecture](docs/architecture.md)
 
 ## Installation
 
-### 1. Desktop / Simulation Quickstart (MicroPython)
-To quickly set up a local desktop simulation and development workspace, download `micropython` or `micropython.exe` to your machine and run the following three commands to generate a ready-to-use workspace:
-
 ```bash
-# On Linux / macOS
-mkdir -p ~/.micropython && cd ~/.micropython
-micropython -m mip install --target lib --index https://PyDevices.github.io/mip github:PyDevices/pydevices/board_configs/desktop
-
-# On Windows (cmd.exe)
-mkdir "%USERPROFILE%\.micropython" && cd "%USERPROFILE%\.micropython"
-micropython.exe -m mip install --target lib --index https://PyDevices.github.io/mip github:PyDevices/pydevices/board_configs/desktop
+# CPython desktop — the complete desktop runtime in one command
+pip install -i https://test.pypi.org/simple/ \
+  --extra-index-url https://pypi.org/simple/ pydevices-desktop
 ```
 
-#### Preferred Path Configuration
-When running your application or script, set the following environment variables:
-
-```bash
-# On Linux / macOS (bash)
-export MICROPYPATH=".:.frozen:lib:utils:~/.micropython/lib:/usr/lib/micropython"
-export PYTHONPATH=".:lib:utils"
-
-# On Windows (cmd.exe)
-set MICROPYPATH=.;.frozen;lib;utils;%USERPROFILE%\.micropython\lib
-set PYTHONPATH=.;lib;utils
-```
-
-##### Why this setup?
-This path configuration mimics the default search path on both hosted Unix/Windows runtimes and hardware MCUs (where `.frozen`, the user home `.micropython/lib`, and the system `/usr/lib/micropython` library are searched by default), but explicitly appends the local directories `.` (current folder), `lib` (local workspace), and `utils` (shared dev tools) to the path. This ensures that custom packages, simulator components, and examples are immediately runnable from any directory without path conflicts.
-
-
-
----
-
-### 2. CPython Desktop (pip)
-Install the CPython desktop simulation package and backend drivers:
-```bash
-pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ pydevices-desktop
-```
-
----
-
-### 3. Microcontroller Boards (MIP)
-On MCU boards with network access, install the specific `board_config` directly to the device:
 ```python
+# A MicroPython board — install its board_config directly
 import mip
 mip.install(
     "github:PyDevices/pydevices/board_configs/busdisplay/i80/t-display-s3",
     index="https://PyDevices.github.io/mip",
 )
 ```
-For connected boards without network access, run installation via `mpremote`:
-```bash
-mpremote mip install --index https://PyDevices.github.io/mip github:PyDevices/pydevices/board_configs/busdisplay/i80/t-display-s3
-```
-See [docs/install-workflows.md](docs/install-workflows.md) for full workflows and verification.
 
+**[docs/install-workflows.md](docs/install-workflows.md)** has the rest: SDL2
+system prerequisites, the MicroPython desktop workspace and its `MICROPYPATH` /
+`PYTHONPATH` setup, `mpremote` for boards without network access, Linux KMS,
+headless CI, and verification steps for each channel.
 
 ## Companion Showcases & Demos
 

@@ -26,7 +26,6 @@
 
 - [display-drivers.md](display-drivers.md)
 - [touch-drivers.md](touch-drivers.md)
-- [display-interfaces.md](display-interfaces.md)
 
 ## Platforms
 
@@ -43,9 +42,6 @@
 ## Maintainers
 
 - [publishing.md](publishing.md) — releases and package publication
-- [driver-inventory.md](driver-inventory.md)
-- [board-inventory.md](board-inventory.md)
-- [tft-espi-parity.md](tft-espi-parity.md)
 
 Companion application examples and gallery showcases live in
 [pydevices-examples](https://github.com/PyDevices/pydevices-examples).

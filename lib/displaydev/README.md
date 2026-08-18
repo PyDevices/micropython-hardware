@@ -41,26 +41,16 @@ display_drv.fill_rect(10, 10, 40, 40, 0xF800)
 display_drv.show()
 ```
 
-Optional host auto-selection lives in `displaydev.auto` (never imported from the package root):
+Optional host auto-selection lives in `displaydev.auto` (never imported from the
+package root); `AutoDisplay` picks `PSDisplay` on PyScript, `JNDisplay` on
+Jupyter, and `WinDisplay`→`PGDisplay`→`SDLDisplay` on desktop. Explicit boards
+import a backend directly.
 
-```python
-from displaydev.auto import AutoDisplay
-import eventsys
+Install a board package for MCU pins, or the desktop bundle from pydevices —
+see [install workflows](https://github.com/PyDevices/pydevices/blob/main/docs/install-workflows.md).
 
-display_drv = AutoDisplay(width=320, height=480, scale=2.0)
-runtime = eventsys.Runtime(
-    displays=[display_drv],
-    host_read=display_drv.get_events,
-    timer_async=display_drv.requires_async_timer,
-)
-```
-
-`AutoDisplay` picks `PSDisplay` (PyScript), `JNDisplay` (Jupyter), or
-`WinDisplay`→`PGDisplay`→`SDLDisplay` (desktop; Win32 first on Windows
-CPython). Explicit boards import a backend directly. Install a board package
-for MCU pins, or
-use the desktop bundle from pydevices
-([install workflows](https://github.com/PyDevices/pydevices/blob/main/docs/install-workflows.md)).
+**Backends, the input contract, rotation, scrolling, and the internals are in
+[docs/displaydev.md](https://github.com/PyDevices/pydevices/blob/main/docs/displaydev.md).**
 
 ## What you get
 

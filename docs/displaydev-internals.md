@@ -7,7 +7,7 @@ chose its implementation pattern.
 
 For a shorter “which driver do I pick?” guide, see [Displays](displaydev.md). For
 chip wiring and board configs, see [Board configs](board-configs.md)
-and [Display interfaces](display-interfaces.md).
+and [display-drivers.md](display-drivers.md).
 
 ## The DisplayDriver API contract
 
@@ -246,5 +246,4 @@ Internal buffer format may remain 565 (SDL), RGB (JN), RGBA (PS), or RGB888
 - [Displays](displaydev.md) — pick a driver, input, scroll overview
 - [`pydevices_demo.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/pydevices_demo.py) — scroll bands and redraw rules
 - [Architecture](architecture.md) — how `board_config` wires drivers
-- [Display interfaces](display-interfaces.md) — hardware taxonomy
 - `tests/test_color.py` — `color_rgb` / `color565` contract tests

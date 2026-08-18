@@ -60,7 +60,7 @@ Adafruit touch libraries vendored under `drivers/touch/circuitpython/`:
 | `adafruit_stmpe610.py` | STMPE610 (PiTFT) |
 | `adafruit_touchscreen.py` | 4-wire analog resistive |
 
-See [driver inventory](driver-inventory.md) for the full list.
+The authoritative list is the source tree itself: [`drivers/touch/`](../drivers/touch/).
 
 ## Calibration (STMPE610 / PiTFT)
 

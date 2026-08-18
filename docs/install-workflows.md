@@ -83,8 +83,27 @@ firmware is expected to provide the hardware interface.
 
 ## Desktop with MicroPython MIP
 
-The desktop raw-GitHub installer is retained and depends on the indexed
-`pydevices-desktop` package:
+Download `micropython` (or `micropython.exe`), then create a ready-to-use
+workspace in the default user library location:
+
+```bash
+# Linux / macOS
+mkdir -p ~/.micropython && cd ~/.micropython
+micropython -m mip install --target lib \
+  --index https://PyDevices.github.io/mip \
+  github:PyDevices/pydevices/board_configs/desktop
+```
+
+```bat
+REM Windows (cmd.exe)
+mkdir "%USERPROFILE%\.micropython" && cd "%USERPROFILE%\.micropython"
+micropython.exe -m mip install --target lib ^
+  --index https://PyDevices.github.io/mip ^
+  github:PyDevices/pydevices/board_configs/desktop
+```
+
+The desktop raw-GitHub installer depends on the indexed `pydevices-desktop`
+package. Installing into an arbitrary directory instead works the same way:
 
 ```bash
 micropython -m mip install \
@@ -115,5 +134,15 @@ export MICROPYPATH=".:.frozen:lib:utils:~/.micropython/lib:/usr/lib/micropython"
 export PYTHONPATH=".:lib:utils"
 ```
 
-This is why installing the CPython `micropython.py` compatibility module is
-harmless on MicroPython: `.frozen` resolves first in the preferred path.
+```bat
+REM Windows (cmd.exe)
+set MICROPYPATH=.;.frozen;lib;utils;%USERPROFILE%\.micropython\lib
+set PYTHONPATH=.;lib;utils
+```
+
+This mirrors the default search order on hosted runtimes and on hardware MCUs —
+where `.frozen`, the user's `~/.micropython/lib`, and the system
+`/usr/lib/micropython` are searched by default — while appending `.`, `lib/`,
+and `utils/` so a workspace runs from any directory. It is also why installing
+the CPython `micropython.py` compatibility module is harmless on MicroPython:
+`.frozen` resolves first.

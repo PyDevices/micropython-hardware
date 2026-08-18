@@ -46,12 +46,11 @@ while True:
             break
 ```
 
-Subscribe instead of polling:
+Or subscribe instead of polling — `runtime.on(events.KEYDOWN, handler)` then
+`runtime.run_forever()`.
 
-```python
-runtime.on(events.KEYDOWN, lambda e: print(e))
-runtime.run_forever()
-```
+**Devices, mappers, the async model, and `from_board_config` wiring are in
+[docs/eventsys.md](https://github.com/PyDevices/pydevices/blob/main/docs/eventsys.md).**
 
 ## What you get
 

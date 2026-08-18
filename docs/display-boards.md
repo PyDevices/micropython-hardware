@@ -1,8 +1,11 @@
-# PyDevices display boards (bring-up notes)
+# Display boards — bring-up notes
 
-Bring-up notes for **PyDevices `board_config`s** — panel resolution, touch,
-interface module, and quirks — for boards exercised in the July 2026 DotClock /
-`mipidsi` / busdisplay (`spibus` / `i80bus`) + LVGL (`lv_test_timer`) campaign.
+Panel resolution, touch controller, interface module, and per-board quirks for
+the commercially available boards with a PyDevices `board_config`. If you have
+one of these boards, this is what you need to know to bring the display up.
+
+Coverage spans the RGB DotClock, MIPI DSI (`mipidsi`), and busdisplay
+(`spibus` / `i80bus`) paths, each verified against LVGL with `lv_test_timer`.
 
 Paths are under
 [`pydevices`](https://github.com/PyDevices/pydevices)
@@ -16,24 +19,24 @@ or `mipidsi`). Soft-reset / scanout lessons:
 
 Typical MicroPython flash for the ESP32-S3 RGB boards below:
 `ESP32_GENERIC_S3` + **`SPIRAM_OCT`** (8 MB octal PSRAM). P4 uses its own board
-variant (`C6_WIFI` in inventory fixture #1).
+variant (`C6_WIFI`).
 
 ---
 
 ## Summary table
 
-| Product / nickname | `board_config` dir | Resolution | Panel / bus | Touch | Expander / IO | Inventory # |
-|--------------------|--------------------|------------|-------------|-------|---------------|-------------|
-| Waveshare ESP32-P4-WIFI6-Touch-LCD-4B | `esp32-p4-wifi6-touch-lcd-4b` | 720×720 | ST7703 **MIPI DSI** (`mipidsi`) | GT911 | — | #1 |
-| Adafruit Qualia S3 + TL040HDS20 | `qualia_tl040hds20` (+ CP under `cp/fbdisplay/qualia_tl040hds20`) | 720×720 | RGB-666→565 **DotClock** | FT6x36 @ `0x48` | PCA9554 @ `0x3f` | #8 |
-| Waveshare ESP32-S3-Touch-LCD-4.3 | `esp32-s3-touch-lcd-4_3` | 800×480 | ST7262 RGB **DotClock** | GT911 @ `0x5D` | CH422G | *(not yet a Detect fixture)* |
-| LILYGO T-RGB 2.1″ round | `t-rgb_480` | 480×480 | ST7701 RGB **DotClock** | CST820 (`cst8xx`) | XL9535 | *(not yet a Detect fixture)* |
-| Waveshare ESP32-S3-Touch-LCD-7 (sku 27078) | `esp32-s3-touch-lcd-7` | 800×480 | ST7262 RGB **DotClock** | GT911 @ `0x5D` | CH422G | *(not yet a Detect fixture)* |
-| LILYGO T-Embed | `busdisplay/spi/t-embed` | 170×320 | ST7789 **SPI** (`spibus`) | — (rotary) | GPIO46 power | *(not yet a Detect fixture)* |
-| LILYGO T-HMI | `busdisplay/i80/t-hmi` | 240×320 | ST7789 **I80** (`i80bus`) | XPT2046 SPI | GPIO14/10 power | *(not yet a Detect fixture)* |
-| Waveshare RP2040-Touch-LCD-1.28 | `busdisplay/spi/rp2040-touch-lcd-1.28` (+ CP under `cp/busdisplay/spi/rp2040-touch-lcd-1.28`) | 240×240 round | GC9A01A **SPI** (`spibus` / FourWire) | CST816 (`cst8xx` / `cst816`) | — | *(not yet a Detect fixture)* |
-| Adafruit Metro M7 + 2.8″ TFT Touch Shield (1947) | `busdisplay/spi/metro_m7_tft_touch_shield_1947` | 240×320 | ILI9341 **SPI** (`spibus` SoftSPI or SPI0) | FT6206 @ `0x38` | Onboard AirLift (NINA) | *(not yet a Detect fixture)* |
-| ST NUCLEO-H743ZI2 + Adafruit 2.8″ TFT Touch Shield (1947) | `busdisplay/spi/nucleo_h743zi2_tft_touch_shield_1947` | 240×320 | ILI9341 **SPI** (`spibus` SPI1 / SoftSPI) | FT6206 @ `0x38` | — | [#25](board-inventory.md) |
+| Product / nickname | `board_config` dir | Resolution | Panel / bus | Touch | Expander / IO |
+|---|---|---|---|---|---|
+| Waveshare ESP32-P4-WIFI6-Touch-LCD-4B | `esp32-p4-wifi6-touch-lcd-4b` | 720×720 | ST7703 **MIPI DSI** (`mipidsi`) | GT911 | — |
+| Adafruit Qualia S3 + TL040HDS20 | `qualia_tl040hds20` (+ CP under `cp/fbdisplay/qualia_tl040hds20`) | 720×720 | RGB-666→565 **DotClock** | FT6x36 @ `0x48` | PCA9554 @ `0x3f` |
+| Waveshare ESP32-S3-Touch-LCD-4.3 | `esp32-s3-touch-lcd-4_3` | 800×480 | ST7262 RGB **DotClock** | GT911 @ `0x5D` | CH422G |
+| LILYGO T-RGB 2.1″ round | `t-rgb_480` | 480×480 | ST7701 RGB **DotClock** | CST820 (`cst8xx`) | XL9535 |
+| Waveshare ESP32-S3-Touch-LCD-7 (sku 27078) | `esp32-s3-touch-lcd-7` | 800×480 | ST7262 RGB **DotClock** | GT911 @ `0x5D` | CH422G |
+| LILYGO T-Embed | `busdisplay/spi/t-embed` | 170×320 | ST7789 **SPI** (`spibus`) | — (rotary) | GPIO46 power |
+| LILYGO T-HMI | `busdisplay/i80/t-hmi` | 240×320 | ST7789 **I80** (`i80bus`) | XPT2046 SPI | GPIO14/10 power |
+| Waveshare RP2040-Touch-LCD-1.28 | `busdisplay/spi/rp2040-touch-lcd-1.28` (+ CP under `cp/busdisplay/spi/rp2040-touch-lcd-1.28`) | 240×240 round | GC9A01A **SPI** (`spibus` / FourWire) | CST816 (`cst8xx` / `cst816`) | — |
+| Adafruit Metro M7 + 2.8″ TFT Touch Shield (1947) | `busdisplay/spi/metro_m7_tft_touch_shield_1947` | 240×320 | ILI9341 **SPI** (`spibus` SoftSPI or SPI0) | FT6206 @ `0x38` | Onboard AirLift (NINA) |
+| ST NUCLEO-H743ZI2 + Adafruit 2.8″ TFT Touch Shield (1947) | `busdisplay/spi/nucleo_h743zi2_tft_touch_shield_1947` | 240×320 | ILI9341 **SPI** (`spibus` SPI1 / SoftSPI) | FT6206 @ `0x38` | — |
 
 ---
 
@@ -49,7 +52,7 @@ variant (`C6_WIFI` in inventory fixture #1).
 - **Touch:** GT911, 5 points
 - **SoC / flash notes:** ESP32-P4, 32 MB flash, large SPIRAM heap; external C6
   Wi-Fi (see inventory #1)
-- **Role in campaign:** Soft-reset / timer lifecycle reference for displayif
+- **Role:** Soft-reset / timer lifecycle reference for displayif
 
 ### Adafruit Qualia S3 RGB666 + TL040HDS20
 
@@ -279,7 +282,7 @@ variant (`C6_WIFI` in inventory fixture #1).
   + multimer + `display_driver` (~370 KiB free while running).
 - **Firmware:** custom `NUCLEO_H743ZI2` with **displayif** (stm32 port: spibus
   + notimpl stubs), **graphics**, **lvgl** (`lvgl-micropython`). Flash via
-  ST-Link MSD (`NOD_H743ZI2` / `firmware.bin`). Inventory fixture **#25**.
+  ST-Link MSD (`NOD_H743ZI2` / `firmware.bin`).
 - **Demos verified:** RGB stripes; `simon.py` (graphics + eventsys); headless
   `lvgl-bindings/tools/test_lvgl_smoke.py`; `lvgl_test.py` (tap-count button on real
   panel via `display_driver`). **`main.py`** boots `lvgl_test.py`.
@@ -304,9 +307,4 @@ already sets `refresh_cb=display_drv.show`.
 
 ---
 
-*Seeded 2026-07-20 from the PyDevices + displayif bring-up chat; T-Embed /
-T-HMI busdisplay notes expanded 2026-07-21; Waveshare RP2040-Touch-LCD-1.28
-added 2026-07-21; Adafruit Metro M7 + TFT Touch Shield 1947 added 2026-07-21;
-ST NUCLEO-H743ZI2 + TFT Touch Shield 1947 added 2026-07-21.
-Add a row when a new display board is verified; note inventory fixture numbers
-when Detect has captured the silicon.*
+Add a row when a new display board is verified against LVGL.
