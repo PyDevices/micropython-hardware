@@ -76,6 +76,20 @@ display_drv.fill_rect(0, 0, 100, 50, 0xF800)
 display_drv.show()
 ```
 
+## Choosing a GUI layer
+
+PyDevices supports several graphical approaches; pick by how much you need and
+what you can compile:
+
+| Approach | Use it for | Package |
+|---|---|---|
+| **Raw graphics / canvas** | Direct pixel, line, and shape drawing | [`displaydev`](displaydev.md) with [`pygraphics`](https://github.com/PyDevices/pygraphics) |
+| **Pure-Python GUI** | Portable buttons, lists, themes, and screen management with nothing to compile | [`pdwidgets`](https://github.com/PyDevices/pdwidgets) |
+| **C-native GUI** | Complex vector widgets and a C-accelerated animation engine | [`lvgl`](https://github.com/PyDevices/lvgl-bindings) — see [using LVGL with PyDevices](https://github.com/PyDevices/lvgl-bindings/blob/main/docs/using-lvgl-with-pydevices.md) |
+
+All three sit on the same board contract, so the choice does not change how your
+hardware is configured.
+
 ## Where to go next
 
 - [Board Contract Specification](board-peripherals.md) — eager vs lazy board hardware
