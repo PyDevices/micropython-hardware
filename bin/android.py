@@ -541,11 +541,25 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--apk-path", help="path to custom APK file to install")
     parser.add_argument("-y", "--yes", action="store_true", help="automatic yes to prompts (for CI/automation)")
     parser.add_argument("--port", type=int, default=STDIO_PORT_DEFAULT, help=f"stdio sidecar port (default: {STDIO_PORT_DEFAULT})")
+    parser.add_argument("--kit", action="store_true", help="run the entry in example_test_kit mode (run_argv=kit; stages quit_inject.py)")
 
     # Positional script and its arguments
     parser.add_argument("script", nargs="?", help="Python script file to execute")
     parser.add_argument("script_args", nargs=argparse.REMAINDER, help="arguments passed to the script")
     return parser
+
+
+def _find_quit_inject() -> Optional[pathlib.Path]:
+    """Locate pydevices-examples/tools/quit_inject.py in a sibling checkout."""
+    env = os.environ.get("PYDEVICES_EXAMPLES_ROOT")
+    roots = [pathlib.Path(env)] if env else []
+    here = pathlib.Path(__file__).resolve()
+    roots.append(here.parent.parent.parent / "pydevices-examples")
+    for root in roots:
+        candidate = root / "tools" / "quit_inject.py"
+        if candidate.is_file():
+            return candidate
+    return None
 
 
 def main(argv: Optional[List[str]] = None) -> int:
@@ -643,8 +657,20 @@ def main(argv: Optional[List[str]] = None) -> int:
                 if asset.is_file():
                     adb.stage_file(package_id, str(asset), f"run/assets/{asset.name}")
 
+        # example_test_kit mode: the entry reads run_argv == "kit" and switches to
+        # a timed, self-quitting run. lv_test_timer's kit path imports quit_inject,
+        # so stage it beside the entry from a sibling pydevices-examples checkout.
+        if args.kit:
+            adb.write_app_file(package_id, "run_argv", "kit")
+            quit_inject = _find_quit_inject()
+            if quit_inject is not None:
+                adb.stage_file(package_id, str(quit_inject), "run/quit_inject.py")
+                print(f"android.py: staged quit_inject.py for kit mode", file=sys.stderr)
+            else:
+                print("android.py: warning: kit mode but tools/quit_inject.py not found", file=sys.stderr)
+
         # Write run_argv if script arguments were provided
-        if args.script_args:
+        elif args.script_args:
             argv_str = " ".join([script_path.name] + args.script_args)
             adb.write_app_file(package_id, "run_argv", argv_str)
         else:
