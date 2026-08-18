@@ -45,6 +45,15 @@ android.py examples/paint.py
 android.py --clear
 ```
 
+It can also fetch and install the Runner APK itself, so users never have to build
+one:
+
+```bash
+android.py --install-apk     # download the latest release APK and adb install it
+android.py --update-apk      # replace an installed Runner with the latest
+android.py --apk-path ./my.apk --install-apk
+```
+
 When stdin is a TTY, `android.py` **stays attached** after launch and wires the
 terminal to the app's `stdin` / `stdout` / `stderr` (prints, tracebacks, and
 `input()`). Use `--no-attach` for fire-and-forget runs in CI.
@@ -66,8 +75,7 @@ attach REPL. `android.py` stages a script as `main.py` (`import <stem>`) plus
 
 Each launch hot-syncs `boot.py`, `stdio_sidecar.py`, and `mp_*.py` from a sibling
 `pydevices-android-template` checkout when one is present, and drops stale
-bytecode that would otherwise shadow the update. Optional flags: `--kit`,
-`--deps`, `--modules`, `--manifests`. Changing the boot-entrypoint Java patch
+bytecode that would otherwise shadow the update. Changing the boot-entrypoint Java patch
 requires an APK rebuild — hot-sync alone cannot retarget an older package that
 still launches `main.py` first.
 
