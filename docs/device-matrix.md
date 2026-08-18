@@ -9,7 +9,6 @@ Related inventories (keep concerns separate):
 | Doc | Role |
 |-----|------|
 | [board-inventory.md](board-inventory.md) | Physical Detect fixtures (#) — chip, flash, runtime |
-| [firmware-fixtures.md](firmware-fixtures.md) | Detect probe notes / esptool details |
 | [display-boards.md](display-boards.md) | Display bring-up quirks (panel, touch, soft-reset) |
 | **This file** | Fixture # ↔ product ↔ `board_config` ↔ eager / lazy roles |
 

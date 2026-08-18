@@ -24,7 +24,6 @@ https://pydevices.github.io/pydevices/
 | [publishing.md](publishing.md) | [publishing.html](https://pydevices.github.io/pydevices/publishing.html) |
 | [driver-inventory.md](driver-inventory.md) | [driver-inventory.html](https://pydevices.github.io/pydevices/driver-inventory.html) |
 | [board-inventory.md](board-inventory.md) | [board-inventory.html](https://pydevices.github.io/pydevices/board-inventory.html) |
-| [firmware-fixtures.md](firmware-fixtures.md) | [firmware-fixtures.html](https://pydevices.github.io/pydevices/firmware-fixtures.html) |
 | [pydevices-desktop.md](pydevices-desktop.md) | [pydevices-desktop.html](https://pydevices.github.io/pydevices/pydevices-desktop.html) |
 | [display-boards.md](display-boards.md) | [display-boards.html](https://pydevices.github.io/pydevices/display-boards.html) |
 | [wokwi.md](wokwi.md) | [wokwi.html](https://pydevices.github.io/pydevices/wokwi.html) |

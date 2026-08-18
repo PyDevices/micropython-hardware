@@ -2,12 +2,6 @@
 
 Status of display and touch drivers vendored into PyDevices from Adafruit and community bundles.
 
-Regenerate display drivers:
-
-```bash
-python3 scripts/vendor_circuitpython_drivers.py --all
-```
-
 ## SPI / I80 TFT (BusDisplay)
 
 | File | Source | Status |

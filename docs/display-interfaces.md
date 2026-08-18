@@ -44,11 +44,7 @@ See [Runtime — touch read contract](https://pydisplay.readthedocs.io/en/latest
 
 ## Vendoring drivers
 
-Use `scripts/vendor_circuitpython_drivers.py` to refresh Adafruit displayio drivers from GitHub.
-
-```bash
-python3 scripts/vendor_circuitpython_drivers.py --all
-```
+Adafruit displayio drivers are vendored by hand from the upstream bundles.
 
 ## pydevices priority
 
