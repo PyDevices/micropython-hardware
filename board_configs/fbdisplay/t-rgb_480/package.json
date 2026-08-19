@@ -9,10 +9,6 @@
       "github:PyDevices/pydevices/board_configs/fbdisplay/t-rgb_480/board_peripherals.py"
     ],
     [
-      "boarddev.py",
-      "github:PyDevices/pydevices/drivers/boarddev.py"
-    ],
-    [
       "st7701.py",
       "github:PyDevices/pydevices/drivers/display/st7701.py"
     ],

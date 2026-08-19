@@ -7,10 +7,6 @@
     [
       "board_peripherals.py",
       "github:PyDevices/pydevices/board_configs/busdisplay/i80/teensy41_flexio_ili9341/board_peripherals.py"
-    ],
-    [
-      "boarddev.py",
-      "github:PyDevices/pydevices/drivers/boarddev.py"
     ]
   ],
   "deps": [

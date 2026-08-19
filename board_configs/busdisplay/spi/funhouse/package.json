@@ -9,10 +9,6 @@
       "github:PyDevices/pydevices/board_configs/busdisplay/spi/funhouse/board_peripherals.py"
     ],
     [
-      "boarddev.py",
-      "github:PyDevices/pydevices/drivers/boarddev.py"
-    ],
-    [
       "st7789.py",
       "github:PyDevices/pydevices/drivers/display/st7789.py"
     ],
@@ -35,14 +31,6 @@
     [
       "bmp280.py",
       "github:PyDevices/pydevices/drivers/env/bmp280.py"
-    ],
-    [
-      "audiodev/__init__.py",
-      "github:PyDevices/pydevices/lib/audiodev/__init__.py"
-    ],
-    [
-      "audiodev/pwm_tone.py",
-      "github:PyDevices/pydevices/lib/audiodev/pwm_tone.py"
     ]
   ],
   "deps": [

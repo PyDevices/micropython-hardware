@@ -9,10 +9,6 @@
       "github:PyDevices/pydevices/board_configs/busdisplay/spi/rp2040-touch-lcd-1.28/board_peripherals.py"
     ],
     [
-      "boarddev.py",
-      "github:PyDevices/pydevices/drivers/boarddev.py"
-    ],
-    [
       "gc9a01.py",
       "github:PyDevices/pydevices/drivers/display/gc9a01.py"
     ],

@@ -21,24 +21,12 @@
       "github:PyDevices/pydevices/board_configs/fbdisplay/m5stack_tab5_ili9881c/board_peripherals.py"
     ],
     [
-      "boarddev.py",
-      "github:PyDevices/pydevices/drivers/boarddev.py"
-    ],
-    [
       "es7210.py",
       "github:PyDevices/pydevices/drivers/codec/es7210.py"
     ],
     [
       "es8388.py",
       "github:PyDevices/pydevices/drivers/codec/es8388.py"
-    ],
-    [
-      "audiodev/__init__.py",
-      "github:PyDevices/pydevices/lib/audiodev/__init__.py"
-    ],
-    [
-      "audiodev/i2s_audio.py",
-      "github:PyDevices/pydevices/lib/audiodev/i2s_audio.py"
     ]
   ],
   "deps": [

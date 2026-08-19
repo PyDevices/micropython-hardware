@@ -7,14 +7,12 @@ on:
       - "lib/**"
       - "utils/**"
       - "board_configs/desktop/**"
-      - "drivers/boarddev.py"
       - "pydevices-desktop.toml"
   pull_request:
     paths:
       - "lib/**"
       - "utils/**"
       - "board_configs/desktop/**"
-      - "drivers/boarddev.py"
       - "pydevices-desktop.toml"
   workflow_dispatch:
 
@@ -29,4 +27,3 @@ jobs:
       file-mappings: |
         board_configs/desktop/board_config.py=/lib/board_config.py
         board_configs/desktop/board_peripherals.py=/lib/board_peripherals.py
-        drivers/boarddev.py=/lib/boarddev.py

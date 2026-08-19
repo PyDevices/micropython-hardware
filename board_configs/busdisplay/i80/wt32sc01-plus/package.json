@@ -17,10 +17,6 @@
       "github:PyDevices/pydevices/board_configs/busdisplay/i80/wt32sc01-plus/board_peripherals.py"
     ],
     [
-      "boarddev.py",
-      "github:PyDevices/pydevices/drivers/boarddev.py"
-    ],
-    [
       "sdcard.py",
       "github:PyDevices/pydevices/drivers/storage/sdcard.py"
     ]

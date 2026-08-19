@@ -9,10 +9,6 @@
       "github:PyDevices/pydevices/board_configs/fbdisplay/esp32-s3-touch-lcd-7/board_peripherals.py"
     ],
     [
-      "boarddev.py",
-      "github:PyDevices/pydevices/drivers/boarddev.py"
-    ],
-    [
       "ch422g.py",
       "github:PyDevices/pydevices/drivers/io_expander/ch422g.py"
     ],

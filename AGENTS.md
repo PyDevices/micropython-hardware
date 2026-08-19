@@ -33,9 +33,11 @@ Docs are markdown under `docs/`, published only via GitHub Pages
   peripherals stay on CP `board` / libraries.
 - Run `SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy python -m unittest discover -s tests` after changing `displaydev`, `multimer`, `events`, `keys`, `audiodev`, `boarddev`, or `utils/`. See `tests/README.md`.
 - Keep MIP `package.json` URLs on
-  `github:PyDevices/pydevices/...` for files in this repo,
-  including `boarddev.py`, which is localized under `drivers/boarddev.py`
-  (MicroPython boards only; all sources are product-owned).
+  `github:PyDevices/pydevices/...` for files in this repo
+  (MicroPython boards only; all sources are product-owned). Do **not** add a
+  URL for anything under `lib/`: a board config that declares
+  `"deps": [["pydevices", "latest"]]` already installs all of it, and a second
+  fetch pinned to `main` only creates a way for the two to disagree.
   MIP names and Python imports remain unprefixed (`displaydev`, `audiodev`,
   `appdev`, `events`, `keys`, `multimer`). TestPyPI distribution names are
   always `pydevices-*`. `displaydev` → `events` + `keys`; `appdev` →

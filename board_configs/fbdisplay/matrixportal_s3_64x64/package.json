@@ -9,10 +9,6 @@
       "github:PyDevices/pydevices/board_configs/fbdisplay/matrixportal_s3_64x64/board_peripherals.py"
     ],
     [
-      "boarddev.py",
-      "github:PyDevices/pydevices/drivers/boarddev.py"
-    ],
-    [
       "lis3dh.py",
       "github:PyDevices/pydevices/drivers/imu/lis3dh.py"
     ]

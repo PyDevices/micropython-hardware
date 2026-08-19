@@ -17,10 +17,6 @@
       "github:PyDevices/pydevices/board_configs/busdisplay/spi/m5stack-cores3/board_peripherals.py"
     ],
     [
-      "boarddev.py",
-      "github:PyDevices/pydevices/drivers/boarddev.py"
-    ],
-    [
       "es7210.py",
       "github:PyDevices/pydevices/drivers/codec/es7210.py"
     ],
@@ -31,14 +27,6 @@
     [
       "bmi270.py",
       "github:PyDevices/pydevices/drivers/imu/bmi270.py"
-    ],
-    [
-      "audiodev/__init__.py",
-      "github:PyDevices/pydevices/lib/audiodev/__init__.py"
-    ],
-    [
-      "audiodev/i2s_audio.py",
-      "github:PyDevices/pydevices/lib/audiodev/i2s_audio.py"
     ]
   ],
   "deps": [

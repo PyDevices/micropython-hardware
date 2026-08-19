@@ -7,10 +7,6 @@
     [
       "board_peripherals.py",
       "github:PyDevices/pydevices/board_configs/fbdisplay/olimex_rp2350pc_640x480/board_peripherals.py"
-    ],
-    [
-      "boarddev.py",
-      "github:PyDevices/pydevices/drivers/boarddev.py"
     ]
   ],
   "deps": [

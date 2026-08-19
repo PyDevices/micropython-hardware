@@ -15,10 +15,6 @@
     [
       "board_peripherals.py",
       "github:PyDevices/pydevices/board_configs/busdisplay/spi/esp32_wrover_e_st7789_joystick/board_peripherals.py"
-    ],
-    [
-      "boarddev.py",
-      "github:PyDevices/pydevices/drivers/boarddev.py"
     ]
   ],
   "deps": [

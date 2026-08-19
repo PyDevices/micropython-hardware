@@ -13,10 +13,6 @@
       "github:PyDevices/pydevices/board_configs/busdisplay/spi/t-dongle-s3/board_peripherals.py"
     ],
     [
-      "boarddev.py",
-      "github:PyDevices/pydevices/drivers/boarddev.py"
-    ],
-    [
       "dotstar.py",
       "github:PyDevices/pydevices/drivers/led/dotstar.py"
     ]

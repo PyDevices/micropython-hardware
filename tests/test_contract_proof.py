@@ -13,8 +13,8 @@ import sys
 import unittest
 
 HW = Path(__file__).resolve().parents[1]
-# boarddev.py is localized under drivers/ as a product-owned helper.
-LIB = HW / "drivers"
+# boarddev.py lives in lib/ and ships as part of the pydevices meta package.
+LIB = HW / "lib"
 
 # Graduated campaign boards: name -> path under pydevices/board_configs/
 EXPECTED = {
@@ -156,10 +156,8 @@ class TestGraduatedBoardLayout(unittest.TestCase):
                 urls = {u[0] for u in meta["urls"]}
                 self.assertIn("board_config.py", urls)
                 self.assertIn("board_peripherals.py", urls)
-                self.assertIn("boarddev.py", urls)
                 joined = " ".join(u[1] for u in meta["urls"])
                 self.assertIn("pydevices/", joined)
-                self.assertIn("pydevices/drivers/boarddev.py", joined)
 
 
 @unittest.skipUnless(HW.is_dir(), "sibling pydevices clone required")

@@ -9,10 +9,6 @@
       "github:PyDevices/pydevices/board_configs/fbdisplay/sparkfun_iot_redboard_rp2350_hstx_640x480/board_peripherals.py"
     ],
     [
-      "boarddev.py",
-      "github:PyDevices/pydevices/drivers/boarddev.py"
-    ],
-    [
       "sdcard.py",
       "github:PyDevices/pydevices/drivers/storage/sdcard.py"
     ]

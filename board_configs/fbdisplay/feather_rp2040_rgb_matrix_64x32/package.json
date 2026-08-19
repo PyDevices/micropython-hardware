@@ -7,10 +7,6 @@
     [
       "board_peripherals.py",
       "github:PyDevices/pydevices/board_configs/fbdisplay/feather_rp2040_rgb_matrix_64x32/board_peripherals.py"
-    ],
-    [
-      "boarddev.py",
-      "github:PyDevices/pydevices/drivers/boarddev.py"
     ]
   ],
   "deps": [

@@ -79,8 +79,9 @@ from board_peripherals import PERIPHERALS, load_peripherals
 load_peripherals(globals())
 ```
 
-Shared boilerplate is [`boarddev`](https://github.com/PyDevices/pydevices/blob/main/drivers/boarddev.py) under `drivers/`
-(name signals *devices*, not `board_config`). Typical
+Shared boilerplate is [`boarddev`](https://github.com/PyDevices/pydevices/blob/main/lib/boarddev.py),
+a `lib/` module shipped by the `pydevices` meta package (the name signals
+*devices*, not `board_config`). Typical
 `board_peripherals.load_peripherals` is a thin wrapper around `boarddev.bind_lazy`.
 A board may replace `load_peripherals` and skip `boarddev` entirely.
 

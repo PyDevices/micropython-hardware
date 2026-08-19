@@ -9,10 +9,6 @@
       "github:PyDevices/pydevices/board_configs/fbdisplay/qualia_tl040hds20/board_peripherals.py"
     ],
     [
-      "boarddev.py",
-      "github:PyDevices/pydevices/drivers/boarddev.py"
-    ],
-    [
       "ft6x36.py",
       "github:PyDevices/pydevices/drivers/touch/ft6x36.py"
     ],

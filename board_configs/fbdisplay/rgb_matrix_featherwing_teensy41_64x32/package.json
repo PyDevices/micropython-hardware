@@ -7,10 +7,6 @@
     [
       "board_peripherals.py",
       "github:PyDevices/pydevices/board_configs/fbdisplay/rgb_matrix_featherwing_teensy41_64x32/board_peripherals.py"
-    ],
-    [
-      "boarddev.py",
-      "github:PyDevices/pydevices/drivers/boarddev.py"
     ]
   ],
   "deps": [

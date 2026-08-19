@@ -13,10 +13,6 @@
       "github:PyDevices/pydevices/board_configs/busdisplay/i80/t-display-s3/board_peripherals.py"
     ],
     [
-      "boarddev.py",
-      "github:PyDevices/pydevices/drivers/boarddev.py"
-    ],
-    [
       "battery_adc.py",
       "github:PyDevices/pydevices/drivers/power/battery_adc.py"
     ]

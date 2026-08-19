@@ -9,10 +9,6 @@
       "github:PyDevices/pydevices/board_configs/busdisplay/spi/nucleo_h743zi2_tft_touch_shield_1947/board_peripherals.py"
     ],
     [
-      "boarddev.py",
-      "github:PyDevices/pydevices/drivers/boarddev.py"
-    ],
-    [
       "ili9341.py",
       "github:PyDevices/pydevices/drivers/display/ili9341.py"
     ],

@@ -9,10 +9,6 @@
       "github:PyDevices/pydevices/board_configs/busdisplay/spi/pyportal/board_peripherals.py"
     ],
     [
-      "boarddev.py",
-      "github:PyDevices/pydevices/drivers/boarddev.py"
-    ],
-    [
       "ili9341.py",
       "github:PyDevices/pydevices/drivers/display/ili9341.py"
     ],
@@ -23,14 +19,6 @@
     [
       "sdcard.py",
       "github:PyDevices/pydevices/drivers/storage/sdcard.py"
-    ],
-    [
-      "audiodev/__init__.py",
-      "github:PyDevices/pydevices/lib/audiodev/__init__.py"
-    ],
-    [
-      "audiodev/pwm_tone.py",
-      "github:PyDevices/pydevices/lib/audiodev/pwm_tone.py"
     ]
   ],
   "deps": [
