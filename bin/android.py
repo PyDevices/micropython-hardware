@@ -542,6 +542,9 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("-y", "--yes", action="store_true", help="automatic yes to prompts (for CI/automation)")
     parser.add_argument("--port", type=int, default=STDIO_PORT_DEFAULT, help=f"stdio sidecar port (default: {STDIO_PORT_DEFAULT})")
     parser.add_argument("--kit", action="store_true", help="run the entry in example_test_kit mode (run_argv=kit; stages quit_inject.py)")
+    parser.add_argument("--modules", help="comma-separated pydevices-examples lib/examples modules to stage beside the entry")
+    parser.add_argument("--manifests", help="comma-separated pydevices-examples packages/*.json manifests to stage")
+    parser.add_argument("--deps", help="comma-separated dependency names (informational; the APK bakes the core stack)")
 
     # Positional script and its arguments
     parser.add_argument("script", nargs="?", help="Python script file to execute")
@@ -549,17 +552,64 @@ def build_arg_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _find_quit_inject() -> Optional[pathlib.Path]:
-    """Locate pydevices-examples/tools/quit_inject.py in a sibling checkout."""
+def _examples_roots() -> List[pathlib.Path]:
+    """Candidate pydevices-examples checkouts, most explicit first."""
     env = os.environ.get("PYDEVICES_EXAMPLES_ROOT")
     roots = [pathlib.Path(env)] if env else []
     here = pathlib.Path(__file__).resolve()
     roots.append(here.parent.parent.parent / "pydevices-examples")
-    for root in roots:
-        candidate = root / "tools" / "quit_inject.py"
+    return roots
+
+
+def _find_in_examples(*parts: str) -> Optional[pathlib.Path]:
+    """First existing pydevices-examples file at the given relative path."""
+    for root in _examples_roots():
+        candidate = root.joinpath(*parts)
         if candidate.is_file():
             return candidate
     return None
+
+
+def _find_quit_inject() -> Optional[pathlib.Path]:
+    """Locate pydevices-examples/tools/quit_inject.py in a sibling checkout."""
+    return _find_in_examples("tools", "quit_inject.py")
+
+
+def _csv(value: Optional[str]) -> List[str]:
+    """Split a comma-separated flag value, ignoring blanks and whitespace."""
+    if not value:
+        return []
+    return [item.strip() for item in value.split(",") if item.strip()]
+
+
+def _stage_companions(adb, package_id: str, args) -> None:
+    """Stage the extra example modules and MIP manifests named on the CLI.
+
+    Mirrors --modules / --manifests / --deps from the older android.sh, with the
+    example path corrected: sources moved from src/examples/ to lib/examples/.
+    """
+    for name in _csv(getattr(args, "modules", None)):
+        found = _find_in_examples("lib", "examples", name + ".py")
+        if found is not None:
+            adb.stage_file(package_id, str(found), "run/{}.py".format(name))
+            print("android.py: staged module {}".format(name), file=sys.stderr)
+        else:
+            print("android.py: warning: module not found: {}".format(name), file=sys.stderr)
+
+    for name in _csv(getattr(args, "manifests", None)):
+        found = _find_in_examples("packages", name + ".json")
+        if found is not None:
+            adb.stage_file(package_id, str(found), "run/{}.json".format(name))
+            print("android.py: staged manifest {}".format(name), file=sys.stderr)
+        else:
+            print("android.py: warning: manifest not found: {}".format(name), file=sys.stderr)
+
+    for name in _csv(getattr(args, "deps", None)):
+        # Documentation only: the core stack is baked into the Runner APK.
+        print(
+            "android.py: note: --deps {} (the APK should already provide it)".format(name),
+            file=sys.stderr,
+        )
 
 
 def main(argv: Optional[List[str]] = None) -> int:
@@ -656,6 +706,8 @@ def main(argv: Optional[List[str]] = None) -> int:
             for asset in assets_dir.iterdir():
                 if asset.is_file():
                     adb.stage_file(package_id, str(asset), f"run/assets/{asset.name}")
+
+        _stage_companions(adb, package_id, args)
 
         # example_test_kit mode: the entry reads run_argv == "kit" and switches to
         # a timed, self-quitting run. lv_test_timer's kit path imports quit_inject,
