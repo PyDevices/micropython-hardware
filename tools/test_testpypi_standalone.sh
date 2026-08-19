@@ -8,7 +8,7 @@
 #   ./tools/test_testpypi_standalone.sh
 #   ./tools/test_testpypi_standalone.sh --desktop   # also SDL + pygame stacks
 #
-# See https://pydevices.github.io/pydevices/publishing.html
+# See docs/publishing.md
 
 set -euo pipefail
 
