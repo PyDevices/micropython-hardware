@@ -2,6 +2,9 @@
 # Sources intentionally track the main branch for the PyScript gallery.
 
 [files]
+"https://raw.githubusercontent.com/PyDevices/pydevices/main/lib/appdev/__init__.py" = "/lib/appdev/__init__.py"
+"https://raw.githubusercontent.com/PyDevices/pydevices/main/lib/appdev/app.py" = "/lib/appdev/app.py"
+"https://raw.githubusercontent.com/PyDevices/pydevices/main/lib/appdev/devices.py" = "/lib/appdev/devices.py"
 "https://raw.githubusercontent.com/PyDevices/pydevices/main/lib/audiodev/__init__.py" = "/lib/audiodev/__init__.py"
 "https://raw.githubusercontent.com/PyDevices/pydevices/main/lib/audiodev/android_audio.py" = "/lib/audiodev/android_audio.py"
 "https://raw.githubusercontent.com/PyDevices/pydevices/main/lib/audiodev/auto.py" = "/lib/audiodev/auto.py"
@@ -28,9 +31,6 @@
 "https://raw.githubusercontent.com/PyDevices/pydevices/main/lib/displaydev/sdldisplay.py" = "/lib/displaydev/sdldisplay.py"
 "https://raw.githubusercontent.com/PyDevices/pydevices/main/lib/displaydev/windisplay.py" = "/lib/displaydev/windisplay.py"
 "https://raw.githubusercontent.com/PyDevices/pydevices/main/lib/events.py" = "/lib/events.py"
-"https://raw.githubusercontent.com/PyDevices/pydevices/main/lib/appdev/__init__.py" = "/lib/appdev/__init__.py"
-"https://raw.githubusercontent.com/PyDevices/pydevices/main/lib/appdev/app.py" = "/lib/appdev/app.py"
-"https://raw.githubusercontent.com/PyDevices/pydevices/main/lib/appdev/devices.py" = "/lib/appdev/devices.py"
 "https://raw.githubusercontent.com/PyDevices/pydevices/main/utils/frame_recorder.py" = "/lib/frame_recorder.py"
 "https://raw.githubusercontent.com/PyDevices/pydevices/main/lib/keys.py" = "/lib/keys.py"
 "https://raw.githubusercontent.com/PyDevices/pydevices/main/utils/micropython.py" = "/lib/micropython.py"
