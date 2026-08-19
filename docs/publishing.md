@@ -16,13 +16,13 @@ same version.
 ## Generated products
 
 Every non-debris top-level module or package under `lib/` is discovered as a
-leaf. Today those leaves are `audiodev`, `displaydev`, `events`, `eventsys`,
+leaf. Today those leaves are `audiodev`, `displaydev`, `events`, `appdev`,
 `keys`, and `multimer`. Adding another component under `lib/` automatically
 adds its unprefixed MIP package and its `pydevices-<name>` TestPyPI
 distribution; there is no include list.
 
 The dependency-only `pydevices` meta-package installs every discovered leaf,
-including `eventsys`. The `pydevices-desktop` meta-package depends on
+including `appdev`. The `pydevices-desktop` meta-package depends on
 `pydevices` and also installs the desktop board files plus every runtime module
 discovered under `utils/`. Utilities do not have separate distributions.
 

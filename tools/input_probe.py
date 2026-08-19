@@ -8,7 +8,7 @@ the same ``events.Key`` contract every displaydev backend must emit.
 
 1. **displaydev** (``sdldisplay`` / ``pgdisplay`` / ``psdisplay`` / ``jndisplay``)
    — native → ``events.Key`` conversion (repeat, scancode, mod, name).
-2. **eventsys** (``HostEventsDevice``, ``KeypadDevice``, ``VirtualDevices``)
+2. **appdev** (``HostEventsDevice``, ``KeypadDevice``, ``VirtualDevices``)
    — quit chords, hardware keypad, FIFO fan-out to virtual keypad.
 Applications consume these layers via ``runtime.poll()`` and
 ``runtime.on(KEYDOWN, …)``.
@@ -34,9 +34,9 @@ Quit: platform quit chord (usually Ctrl+Q).
 
 Ordered by layer. Each item is a targeted change with acceptance criteria.
 
-### A. eventsys — ``KeypadDevice`` name must not use ``chr(key)`` (multi-backend / HW)
+### A. appdev — ``KeypadDevice`` name must not use ``chr(key)`` (multi-backend / HW)
 
-- **Where:** ``eventsys/_keypad.py`` ``_poll``.
+- **Where:** ``appdev/_keypad.py`` ``_poll``.
 - **Bug:** ``chr(keys.K_UP)`` etc. raises ``ValueError`` (SDL scancode-masked
   codes). FunHouse ``board_config`` feeds ``keys.K_UP`` / ``K_DOWN``.
 - **Fix:** Set ``name`` via ``keys.keyname(key)`` (or ``""`` / hex fallback),
@@ -62,9 +62,9 @@ Ordered by layer. Each item is a targeted change with acceptance criteria.
   (manual hold in interactive mode + ``downs[key]`` counter).
 - **Do not** coalesce only in LVGL — non-LVGL apps share this path.
 
-### C. eventsys — keypad virtual-device FIFO backpressure (LVGL path, multi-display)
+### C. appdev — keypad virtual-device FIFO backpressure (LVGL path, multi-display)
 
-- **Where:** ``eventsys/_host.py`` ``VirtualDevice.add_event`` (keypad fifo).
+- **Where:** ``appdev/_host.py`` ``VirtualDevice.add_event`` (keypad fifo).
 - **Bug:** Only ``MOUSEMOTION`` coalesces; key fifo is uncapped; LVGL drains
   ~1 event per indev period. SDL repeat (B) + slow UI → lagged "playback".
 - **Fix:** Coalesce consecutive identical ``KEYDOWN`` events and preserve an
@@ -72,9 +72,9 @@ Ordered by layer. Each item is a targeted change with acceptance criteria.
 - **Accept:** Hold Backspace 3s then type — no multi-second backlog of
   deletes; fifo length stays bounded under load (probe ``fifo_depth``).
 
-### D. eventsys — browser ``mod_mask`` left-only (browser backends)
+### D. appdev — browser ``mod_mask`` left-only (browser backends)
 
-- **Where:** ``eventsys/keys.py`` ``mod_mask``.
+- **Where:** ``appdev/keys.py`` ``mod_mask``.
 - **Bug:** Ambient ``event.mod`` never sets ``KMOD_R*`` even when right
   modifier keys are held (key events themselves can be ``K_RSHIFT``).
 - **Fix:** Either document "always use ``chord_matches`` / ``KMOD_SHIFT``
@@ -118,9 +118,9 @@ for _p in (_src, _tools):
 import events  # noqa: E402
 import keys  # noqa: E402
 from displaydev._domkeys import enrich_mod, key_to_keycode, mod_mask  # noqa: E402
-from eventsys import types  # noqa: E402
-from eventsys._host import VirtualDevices  # noqa: E402
-from eventsys._keypad import KeypadDevice  # noqa: E402
+from appdev import types  # noqa: E402
+from appdev._host import VirtualDevices  # noqa: E402
+from appdev._keypad import KeypadDevice  # noqa: E402
 
 
 # ---------------------------------------------------------------------------
@@ -317,8 +317,8 @@ Historical fixes implemented (acceptance criteria)
 
 Ordered by layer. Each item is a targeted change with acceptance criteria.
 
-A. eventsys — KeypadDevice name must not use chr(key) (multi-backend / HW)
-   Where: eventsys/_keypad.py _poll
+A. appdev — KeypadDevice name must not use chr(key) (multi-backend / HW)
+   Where: appdev/_keypad.py _poll
    Fix: keys.keyname(key) or "" / hex fallback — never chr(key) for arbitrary ints
    Accept: KeypadDevice(read=lambda: {keys.K_UP}).poll() returns KEYDOWN
 
@@ -328,13 +328,13 @@ B. displaydev — unify key-repeat policy (SDL/pygame vs browser)
         and stop silently dropping only on browser
    Accept: hold a key 2s → same KEYDOWN count on SDL and PyScript under chosen contract
 
-C. eventsys — keypad virtual-device FIFO backpressure
-   Where: eventsys/_host.py VirtualDevice.add_event (keypad fifo)
+C. appdev — keypad virtual-device FIFO backpressure
+   Where: appdev/_host.py VirtualDevice.add_event (keypad fifo)
    Fix: coalesce same-key KEYDOWN and preserve release edges across key rollover
    Accept: hold Backspace then type — no multi-second backlog; fifo stays bounded
 
-D. eventsys — browser mod_mask left-only
-   Where: eventsys/keys.py mod_mask
+D. appdev — browser mod_mask left-only
+   Where: appdev/keys.py mod_mask
    Fix: document group-mask API, or track pressed modifiers into event.mod
    Accept: event.mod & KMOD_SHIFT true for both Shift keys on all backends
 
@@ -354,7 +354,7 @@ def print_fixes():
 # ---------------------------------------------------------------------------
 def run_interactive():
     import board_config
-    from eventsys import Runtime
+    from appdev import Runtime
 
     runtime = Runtime.from_board_config(board_config)
 
@@ -387,7 +387,7 @@ def run_interactive():
     def _tick(_=None):
         # Report virtual-keypad FIFO depth when a host has virtual peers.
         try:
-            from eventsys._host import _vd_peers
+            from appdev._host import _vd_peers
 
             for host in runtime.devices:
                 if getattr(host, "type", None) != types.HOST:

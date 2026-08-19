@@ -58,7 +58,7 @@ timers, `pump()` / `sleep_ms()`, hard versus soft delivery, and the
 - [Documentation — multimer](https://github.com/PyDevices/pydevices/blob/main/docs/multimer.md)
 - [Source](https://github.com/PyDevices/pydevices/tree/main/lib/multimer)
 - [Issues](https://github.com/PyDevices/pydevices/issues)
-- Related: `pydevices-eventsys`
+- Related: `pydevices-appdev`
 
 ## License
 

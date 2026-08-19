@@ -13,7 +13,7 @@ Target wiring (see [Board peripherals — touch duck-type](board-peripherals.md#
 - `touch_read = touch.read_points` (neutral application-facing adapter)
 - optional `touch_rotation_table` — maps display rotation to touch orientation
 
-Apps pass these exports to their chosen coordinator. `eventsys.Runtime` exposes
+Apps pass these exports to their chosen coordinator. `appdev.App` exposes
 `runtime.touch_dev`; LVGL creates its own pointer adapter.
 Do not collapse multi-touch to `points[0]` in the board file — return the full
 `read_points()` sequence (or a sequence-preserving map).

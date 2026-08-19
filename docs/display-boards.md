@@ -208,7 +208,7 @@ variant (`C6_WIFI`).
   sck/mosi/miso on **rp2** (`extra keyword arguments given`); pin kwargs are
   ESP-only. Same guard in Python `drivers/bus/spibus.py`.
 - **Demos:** LVGL/`lv_test_timer` is too RAM-heavy on this board. Prefer
-  `src/examples/simon.py` (MP graphics + eventsys) or
+  `src/examples/simon.py` (MP graphics + appdev) or
   `src/examples/circuitpython/simon_waveshare_rp2040_touch_lcd_1_28.py`
   (standalone CP). Soft-reset / USB attach after heavy SPI init can wedge
   CDC — prefer cold boot / power cycle for recovery; keep `boot.py`
@@ -235,7 +235,7 @@ variant (`C6_WIFI`).
   Named pins (`"D9"`) work; numeric GPIO ids often fail on mimxrt.
 - **Touch:** FT6206 @ `0x38` on `I2C(0)`; `touch_rotation_table = (6, 3, 0, 5)`.
   no event traffic controller is created by the board config; OCRAM heap is
-  ~**64 KiB**, so eventsys / LVGL / full `.py` stacks do not fit.
+  ~**64 KiB**, so appdev / LVGL / full `.py` stacks do not fit.
 - **AirLift (onboard NINA):** MicroPython `network.WLAN` = `nina` over
   **SPI(0)** @ 8 MHz (`ESP_CS` / `ESP_BUSY` / `ESP_RESET` / `ESP_GPIO0`).
   Join + DNS work; **TCP sockets failed** with `fd=-1` / `OSError: 0` on
@@ -257,7 +257,7 @@ variant (`C6_WIFI`).
   paint works but is very slow. Prefer MP + native SoftSPI for PyDevices;
   CP is fine for AirLift networking.
 - **Demos:** stripes / `ili9341` over SoftSPI; Simon needs a slim path (no
-  eventsys). LVGL unlikely without frozen/slim runtime.
+  appdev). LVGL unlikely without frozen/slim runtime.
 - **Setup:** mip / `/setup` `metro_m7_tft_touch_shield_1947` after WiFi is up
   (or `mpftp put` over serial if NINA sockets are still broken).
 
@@ -278,17 +278,17 @@ variant (`C6_WIFI`).
   not SPI SCK.
 - **Pins:** CS=`D10` (PD14), DC=`D9` (PD15); hold SD `D4` high when unused.
 - **Touch:** FT6206 @ `0x38` on `I2C(1)` (D14/D15); `touch_rotation_table =
-  (6, 3, 0, 5)`. Heap ~**450 KiB** free at idle; Simon / LVGL fit with eventsys
+  (6, 3, 0, 5)`. Heap ~**450 KiB** free at idle; Simon / LVGL fit with appdev
   + multimer + `display_driver` (~370 KiB free while running).
 - **Firmware:** custom `NUCLEO_H743ZI2` with **displayif** (stm32 port: spibus
   + notimpl stubs), **graphics**, **lvgl** (`lvgl-micropython`). Flash via
   ST-Link MSD (`NOD_H743ZI2` / `firmware.bin`).
-- **Demos verified:** RGB stripes; `simon.py` (graphics + eventsys); headless
+- **Demos verified:** RGB stripes; `simon.py` (graphics + appdev); headless
   `lvgl-bindings/tools/test_lvgl_smoke.py`; `lvgl_test.py` (tap-count button on real
   panel via `display_driver`). **`main.py`** boots `lvgl_test.py`.
 - **Setup:** `mpftp put` board_config + `displaydev/{__init__,busdisplay}.py` +
-  `eventsys` + `multimer` + `display_driver.py` + `ili9341`/`ft6x36` + examples
-  (no WiFi on this fixture). Package deps: eventsys + multimer.
+  `appdev` + `multimer` + `display_driver.py` + `ili9341`/`ft6x36` + examples
+  (no WiFi on this fixture). Package deps: appdev + multimer.
 
 ---
 

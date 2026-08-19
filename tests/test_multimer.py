@@ -434,7 +434,7 @@ class TestLoopRunning(unittest.TestCase):
         """``get_event_loop`` returns a loop even when none runs, so it must not be used.
 
         A backend offering only ``get_event_loop`` has to report "no loop" rather
-        than trusting it — the case that made eventsys defer async timers forever
+        than trusting it — the case that made appdev defer async timers forever
         on MicroPython.
         """
         from multimer import _asyncio_loader

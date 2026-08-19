@@ -25,7 +25,7 @@ def scripted(*values):
 
 
 class FakeDisplay:
-    """Minimal display driver stand-in used by ``eventsys`` device tests."""
+    """Minimal display driver stand-in used by ``appdev`` device tests."""
 
     def __init__(self, width=320, height=240, rotation=0):
         self.width = width

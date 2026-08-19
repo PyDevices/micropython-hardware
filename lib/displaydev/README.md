@@ -60,15 +60,15 @@ see [install workflows](https://github.com/PyDevices/pydevices/blob/main/docs/in
 - `displaydev.auto.AutoDisplay` / `host_kind` for desktop-like host selection (board_config remains the app import surface)
 
 Host backends use `pydevices-events` and `pydevices-keys` for event records and
-key codes (`import events` / `import keys`). Install `pydevices-eventsys`
-separately when the application chooses that traffic controller.
+key codes (`import events` / `import keys`). Install `pydevices-appdev`
+separately when the application chooses that coordinator.
 
 ## Links
 
 - [Documentation — Displays](https://github.com/PyDevices/pydevices/blob/main/docs/displaydev.md)
 - [Source](https://github.com/PyDevices/pydevices/tree/main/lib/displaydev)
 - [Issues](https://github.com/PyDevices/pydevices/issues)
-- Related: `pydevices-events`, `pydevices-keys`, `pydevices-eventsys`,
+- Related: `pydevices-events`, `pydevices-keys`, `pydevices-appdev`,
   `pydevices-multimer`, `pydevices-pygraphics`, `pydevices-desktop`
 
 ## License

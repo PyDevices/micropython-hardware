@@ -10,7 +10,7 @@ Installed modules:
 - usdl2
 - uwin32 (Windows CPython)
 
-It depends on the full `pydevices` meta-package, which includes `eventsys`.
+It depends on the full `pydevices` meta-package, which includes `appdev`.
 
 Source of truth:
 - Fixed runtime modules come from `board_configs/desktop/` and `drivers/`.

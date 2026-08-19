@@ -103,14 +103,14 @@ class DesktopBoardConfigHeadlessSmoke(unittest.TestCase):
         self.assertIn(name, ("PGDisplay", "SDLDisplay", "PSDisplay", "JNDisplay"))
         self.assertEqual(board_config.host_read, board_config.display_drv.get_events)
 
-    def test_application_can_opt_into_eventsys(self):
+    def test_application_can_opt_into_appdev(self):
         import board_config
-        import eventsys
+        import appdev
 
-        runtime = eventsys.Runtime.from_board_config(board_config, refresh_period=0)
-        self.addCleanup(runtime.stop_timer)
-        self.assertIs(runtime.primary, board_config.display_drv)
-        self.assertEqual(runtime.host_dev._read, board_config.display_drv.get_events)
+        app = appdev.App(board_config, refresh_period=0)
+        self.addCleanup(app.stop_timer)
+        self.assertIs(app.primary, board_config.display_drv)
+        self.assertEqual(app.host_dev._read, board_config.display_drv.get_events)
 
 
 if __name__ == "__main__":

@@ -41,14 +41,14 @@ Run CircuitPython from that same working directory so it imports from `./lib`.
 
 ```python
 import board_config
-import eventsys
+import appdev
 
 display_drv = board_config.display_drv
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
 ```
 
 `display_drv` is constructed at import time (same shape as MCU board configs).
-Applications instantiate an event runtime only when they need one. Lazy audio
+Applications instantiate an application coordinator only when they need one. Lazy audio
 roles still come from `board_peripherals`.
 
 This bundle installs:
@@ -60,8 +60,8 @@ This bundle installs:
 - `uwin32.py` (Windows CPython)
 - plus `displaydev`, `events`, `keys`, `multimer`, and `utils` (`byteswap`, `mip`, …) from the PyDevices MIP index / this repo's GitHub packages
 
-Install the optional MIP package `eventsys` for non-LVGL applications that use
-the example traffic controller above.
+Install the optional MIP package `appdev` for non-LVGL applications that use
+the example application coordinator above.
 
 Display host selection is `displaydev.auto.AutoDisplay` (convenience; boards may import a backend directly):
 - PyScript: `PSDisplay`

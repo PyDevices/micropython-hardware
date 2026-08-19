@@ -5,7 +5,7 @@ through the **`JNDisplay`** backend. `displaydev.auto.AutoDisplay` detects the
 notebook (`get_ipython()`) and selects it with `timer_async=True`.
 
 Board config: `board_configs/jndisplay/board_config.py`. It exports the Jupyter
-display and host reader; `eventsys.Runtime.from_board_config(board_config)`
+display and host reader; `appdev.App(board_config)`
 registers the corresponding host device.
 
 ## Setup

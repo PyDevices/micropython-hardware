@@ -2,7 +2,7 @@
 
 Canonical PyDevices product/source repository. Owns **board configs**,
 **hardware drivers**, portable libraries (`displaydev`, `audiodev`,
-`eventsys`, `multimer`, `events`, `keys`), and pip/MIP publishing.
+`appdev`, `multimer`, `events`, `keys`), and pip/MIP publishing.
 Docs are markdown under `docs/`, published only via GitHub Pages
 ([docs/](docs/README.md); the Pages site is the landing page only)
 — not Read the Docs. Build locally with `./scripts/build_pages.sh` (needs
@@ -29,7 +29,7 @@ Docs are markdown under `docs/`, published only via GitHub Pages
   CircuitPython already has the native `board` module for pins/buses. CP
   `board_config.py` provides `display_drv`, eager input hardware, and neutral
   read aliases (`touch_read`, `keypad_read`, `encoder_read`, and so on). Board
-  configs never instantiate `eventsys` or an application runtime. Non-UI
+  configs never instantiate `appdev` or an application runtime. Non-UI
   peripherals stay on CP `board` / libraries.
 - Run `SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy python -m unittest discover -s tests` after changing `displaydev`, `multimer`, `events`, `keys`, `audiodev`, `boarddev`, or `utils/`. See `tests/README.md`.
 - Keep MIP `package.json` URLs on
@@ -37,8 +37,8 @@ Docs are markdown under `docs/`, published only via GitHub Pages
   including `boarddev.py`, which is localized under `drivers/boarddev.py`
   (MicroPython boards only; all sources are product-owned).
   MIP names and Python imports remain unprefixed (`displaydev`, `audiodev`,
-  `eventsys`, `events`, `keys`, `multimer`). TestPyPI distribution names are
-  always `pydevices-*`. `displaydev` → `events` + `keys`; `eventsys` →
+  `appdev`, `events`, `keys`, `multimer`). TestPyPI distribution names are
+  always `pydevices-*`. `displaydev` → `events` + `keys`; `appdev` →
   `events` + `keys` + `multimer`. Every non-debris top-level component in
   `lib/` publishes automatically as a leaf; `pydevices` depends on all leaves.
   Every runtime component in `utils/` is bundled automatically into
@@ -56,7 +56,7 @@ Docs are markdown under `docs/`, published only via GitHub Pages
 ## Do not
 
 - Put product libraries or their release pipeline back in the examples repo.
-- Instantiate `eventsys.Runtime` (or any traffic controller) in a board config.
+- Instantiate `appdev.App` (or any traffic controller) in a board config.
 - Import `displaydev.auto` from `displaydev/__init__.py` or any backend.
 - Import `multimer.auto` from `multimer/__init__.py` or any provider.
 - Commit large generated assets unrelated to boards/drivers.

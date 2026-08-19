@@ -32,6 +32,6 @@ PATH_ENTRIES = [
 
 DISPLAYDEV_DIR = str(ROOT / "lib" / "displaydev")
 MULTIMER_DIR = str(ROOT / "lib" / "multimer")
-EVENTSYS_DIR = str(ROOT / "lib" / "eventsys")
+APPDEV_DIR = str(ROOT / "lib" / "appdev")
 EVENTS_PY = str(ROOT / "lib" / "events.py")
 KEYS_PY = str(ROOT / "lib" / "keys.py")

@@ -24,7 +24,7 @@ Activity surface after GL buffers exist and yields a black screen after splash).
 
 Display wiring uses the MCU-shaped `board_config` from `pydevices-desktop`
 (`AutoDisplay` plus neutral input readers). LVGL owns its runtime in
-`display_driver`; non-LVGL apps may instantiate optional `eventsys`. Set
+`display_driver`; non-LVGL apps may instantiate optional `appdev`. Set
 `PYDEVICES_WIDTH` / `PYDEVICES_HEIGHT` / `PYDEVICES_SCALE` for your panel size.
 
 Two APKs are in play:
@@ -159,7 +159,7 @@ the template repo) and a landscape framebuffer for 10-foot UI.
 `PYDEVICES_WIDTH=1280`, `PYDEVICES_HEIGHT=720`), or set those env vars yourself.
 Phone defaults stay portrait 720×1280.
 
-**Remote → eventsys** (SDL's Android keyboard map; no extra remap needed):
+**Remote → appdev** (SDL's Android keyboard map; no extra remap needed):
 
 | TV remote | `keys` |
 |---|---|

@@ -18,8 +18,8 @@ import unittest
 
 import _env
 
-_MULTIMER_SIBLINGS = ("displaydev", "eventsys", "pygraphics", "palettes", "audiodev")
-_DISPLAYDEV_SIBLINGS = ("eventsys", "pygraphics", "multimer", "palettes", "audiodev")
+_MULTIMER_SIBLINGS = ("displaydev", "appdev", "pygraphics", "palettes", "audiodev")
+_DISPLAYDEV_SIBLINGS = ("appdev", "pygraphics", "multimer", "palettes", "audiodev")
 
 _MULTIMER_CHILD = textwrap.dedent(
     """
@@ -106,7 +106,7 @@ _DISPLAYDEV_CHILD = textwrap.dedent(
     d.deinit()
 
     assert "multimer" not in sys.modules, "displaydev imported multimer unexpectedly"
-    assert "eventsys" not in sys.modules, "displaydev imported eventsys"
+    assert "appdev" not in sys.modules, "displaydev imported appdev"
     assert events.QUIT == 0x100
     assert keys.K_q
     assert key_to_keycode("BrowserBack", 0) == keys.K_AC_BACK

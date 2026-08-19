@@ -1,4 +1,4 @@
-from eventsys import JoystickDriver
+from appdev import JoystickDriver
 
 
 def _pin_level(pin):

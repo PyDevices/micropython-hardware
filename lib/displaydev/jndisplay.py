@@ -69,7 +69,7 @@ def _buttons_tuple(buttons):
 
 class JNDevices:
     """
-    Unified input for Jupyter Notebook, registered as an eventsys QUEUE device.
+    Unified input for Jupyter Notebook, registered as an appdev HOST device.
 
     Creates the interactive ``ipywidgets`` Image that mirrors the display buffer
     and watches it (via ``ipyevents``) for all available input, turning it into
@@ -84,7 +84,7 @@ class JNDevices:
 
     Quit chord handling is configured on :class:`JNDisplay` via ``quit_chord``
     (default ``(keys.K_AC_BACK, 0)``).
-    :class:`~eventsys.HostEventsDevice` applies the chord when constructed with
+    :class:`~appdev.HostEvents` applies the chord when constructed with
     ``display=``.
 
     This class also owns the display widget: ``JNDisplay`` pushes frames to it
@@ -159,7 +159,7 @@ class JNDevices:
 
     def read(self):
         """
-        Returns queued input events for an eventsys QUEUE device.
+        Returns queued input events for an appdev device.
 
         Returns:
             list or None: The events received since the last call, or None.
@@ -318,7 +318,7 @@ class JNDisplay(DisplayDriver):
         color_depth (int): Bits per pixel (16).
         touch_scale (float): Pointer scale for ``QueueDevice`` (always ``1.0``).
         quit_chord: Keyboard chord for quit (default browser Back); ``None`` disables.
-        needs_refresh (bool): True — ``eventsys.Runtime`` drives periodic ``show()``.
+        needs_refresh (bool): True — ``appdev.App`` drives periodic ``show()``.
     """
 
     needs_refresh = True

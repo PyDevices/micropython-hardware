@@ -1,4 +1,4 @@
-"""GPIO button helper for eventsys KEYPAD on CircuitPython and MicroPython."""
+"""GPIO button helper for appdev KEYPAD on CircuitPython and MicroPython."""
 
 import keys
 

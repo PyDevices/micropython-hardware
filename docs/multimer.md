@@ -261,7 +261,7 @@ loops invoke `run_deadline_hook()` directly.
 
 ## PyDevices integration
 
-`eventsys.Runtime` and LVGL's `display_driver` explicitly opt into
+`appdev.App` and LVGL's `display_driver` explicitly opt into
 `multimer.auto`. They keep their sync timer, provider sleep, pump, and interrupt
 capability together. Async mode uses `AsyncTimer` and `multimer.asyncio`.
 

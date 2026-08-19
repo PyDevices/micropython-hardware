@@ -17,7 +17,7 @@ application decides which coordinator, if any, to instantiate.
 | `joystick_driver` / `emulate` | optional | Joystick input and optional emulation mapping |
 | `timer_async` | optional | Host preference for async timing |
 
-Board configs do not import `eventsys` and do not export `runtime`.
+Board configs do not import `appdev` and do not export `runtime`.
 
 ## Standard applications
 
@@ -26,19 +26,19 @@ Applications opt into the optional event traffic controller by instantiating the
 ```python
 import board_config
 from board_config import display_drv
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+runtime = appdev.App(board_config)
 
 runtime.run_forever()
 ```
 
-Reusable `eventsys` remains independent of board hardware details.
+Reusable `appdev` remains independent of board hardware details.
 
 You may also provide overrides:
 
 ```python
-runtime = eventsys.Runtime.from_board_config(
+runtime = appdev.App.from_board_config(
     board_config,
     refresh_period=16,
     timer_async=True,
@@ -54,12 +54,12 @@ from display_driver import runtime
 ```
 
 That implementation bridges LVGL to `displaydev` and `multimer`, owns LVGL
-tick/task handling and input-device adapters, and does not import `eventsys`.
+tick/task handling and input-device adapters, and does not import `appdev`.
 
 ## Direct constructor
 
 ```python
-eventsys.Runtime(
+appdev.App(
     display=None,
     host_read=None,
     touch_read=None,
@@ -115,7 +115,7 @@ while not runtime.quit_requested:
 ```
 
 Hosted displays that set `needs_refresh` are presented by the coordinator.
-Display-only MCU applications can omit `eventsys` entirely and call
+Display-only MCU applications can omit `appdev` entirely and call
 `display_drv.show()` according to their own policy.
 
 
@@ -152,22 +152,22 @@ returning a sequence, even for one contact.
 
 ## Refresh ownership
 
-A GUI layer that presents frames itself can pause eventsys-driven refresh:
+A GUI layer that presents frames itself can pause appdev-driven refresh:
 
 ```python
 with runtime.display_refresh_paused():
     run_game()
 ```
 
-LVGL does not use this eventsys mechanism: its own coordinator owns presentation
+LVGL does not use this appdev mechanism: its own coordinator owns presentation
 from the outset.
 
 ## Quit lifecycle
 
-On `QUIT`, eventsys runs its optional `before_quit` hook, releases the display,
+On `QUIT`, appdev runs its optional `before_quit` hook, releases the display,
 and stops its timer. `runtime.quit_requested` remains true after the first quit.
 
-See [Events](eventsys.md), [Architecture](architecture.md), and
+See [Events](appdev.md), [Architecture](architecture.md), and
 [Board configs](board-configs.md).
 
 ## Background work on MicroPython (`_thread`)
@@ -177,7 +177,7 @@ stack. Do **not** run network I/O, discovery, or other deep call stacks on a new
 thread spawned from a soft timer or an input callback — that overflows the stack
 (`Stack protection fault` in task `mp_thread`).
 
-Queue the work and run it on the main tick instead: `eventsys.Runtime.on_tick`,
+Queue the work and run it on the main tick instead: `appdev.App.on_tick`,
 an LVGL `lv.timer`, or a soft [`multimer.auto.Timer`](multimer.md) pump. Keep UI
 mutations on that same main path. Desktop CPython can still use threads freely —
 this constraint is specific to MCU MicroPython.

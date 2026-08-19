@@ -59,8 +59,8 @@ PyScript browser canvas. Input (pointer/touch/pen, wheel, keyboard, gamepad) is 
 
 
 Display backends expose input without choosing an application coordinator.
-Applications using the optional [`eventsys`](eventsys.md) runtime can drain the
-backend's [`events`](eventsys.md) records through a **`HostEventsDevice`**. The
+Applications using the optional [`appdev`](appdev.md) runtime can drain the
+backend's [`events`](appdev.md) records through a **`HostEventsDevice`**. The
 input source depends on what each platform exposes:
 
 | Backends | Input source | Wired via |
@@ -68,11 +68,11 @@ input source depends on what each platform exposes:
 | `SDLDisplay`, `PGDisplay`, `WinDisplay` | System-wide OS queue drain (module `get_events`, also on `display_drv.get_events`) | `Runtime(..., host_read=display_drv.get_events)` |
 | `JNDisplay`, `PSDisplay` | Per-surface `PSDevices` / `JNDevices`, exposed as `display_drv.get_events` | `Runtime(..., host_read=display_drv.get_events)` |
 
-With eventsys, handlers see the same `events` objects, so application code does
+With appdev, handlers see the same `events` objects, so application code does
 not need to know which backend is active. LVGL instead connects these neutral
 backend capabilities through its own `display_driver` coordinator. Desktop board configs also use
 `timer_async=env_bool("PYDEVICES_TIMER_ASYNC", display_drv.requires_async_timer)`
-(`requires_async_timer` is `True` only on PS/JN). `eventsys.Runtime` raises if
+(`requires_async_timer` is `True` only on PS/JN). `appdev.App` raises if
 `timer_async=False` while any attached display has `requires_async_timer`.
 
 ### Desktop (SDL2, PyGame)
@@ -82,10 +82,10 @@ converts each event to an `events` object:
 
 ```python
 from displaydev.sdldisplay import SDLDisplay
-import eventsys
+import appdev
 
 display_drv = SDLDisplay(...)
-runtime = eventsys.Runtime(
+runtime = appdev.App(
     displays=[display_drv],
     host_read=display_drv.get_events,
 )
@@ -116,10 +116,10 @@ display owns that drain as `get_events`:
 
 ```python
 from displaydev.psdisplay import PSDisplay
-import eventsys
+import appdev
 
 display_drv = PSDisplay("display_canvas", width, height)
-runtime = eventsys.Runtime(
+runtime = appdev.App(
     displays=[display_drv],
     host_read=display_drv.get_events,
     timer_async=display_drv.requires_async_timer,
@@ -179,7 +179,7 @@ Many drivers expose **ILI9341-style** vertical scroll: a top fixed band (TFA), a
 
 The [**pydevices_demo**](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/pydevices_demo.py) example demonstrates this model, covers drawing at `vscroll = 0` during redraw, and shows auto-scroll with `multimer`.
 
-Related examples: [`scroll_touch_test.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/scroll_touch_test.py) (touch Up/Down), [`eventsys_encoder_test.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/eventsys_encoder_test.py) (encoder).
+Related examples: [`scroll_touch_test.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/scroll_touch_test.py) (touch Up/Down), [`appdev_encoder_test.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/appdev_encoder_test.py) (encoder).
 
 ## Rotation
 
@@ -190,7 +190,7 @@ Known issues: Unix SDL rotation clears the screen; scrolling while rotated has e
 ## Next
 
 - [Display backend internals](displaydev-internals.md) — GRAM/present model, 565 API, color conversion per backend
-- [Events](eventsys.md)
+- [Events](appdev.md)
 - [Drawing and fonts](https://github.com/PyDevices/pygraphics/blob/main/docs/graphics-guide.md)
 - [Display drivers (chips)](display-drivers.md)
 

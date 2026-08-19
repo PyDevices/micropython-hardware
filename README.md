@@ -3,7 +3,7 @@
 The core display engine, hardware driver suite, and board configuration standard for [PyDevices](https://github.com/PyDevices).
 
 `pydevices` is the canonical source and publisher for cross-runtime hardware drivers, board configurations, and pure-Python core packages:
-`displaydev`, `audiodev`, `eventsys`, `multimer`, `events`, and `keys`.
+`displaydev`, `audiodev`, `appdev`, `multimer`, `events`, and `keys`.
 
 ---
 
@@ -32,7 +32,7 @@ Write your display and hardware logic once and run across 5 supported Python env
 | `board_configs/` | MicroPython boards (top level); CircuitPython under `board_configs/cp/` |
 | `drivers/` | Display, touch, bus, joystick, IO expander, input helpers |
 | `lib/displaydev/` | Display backends (`BusDisplay`, `SDLDisplay`, …); `auto.py` is convenience only |
-| `lib/` | `audiodev/`, `displaydev/`, `eventsys/`, `events.py`, `keys.py`, `multimer/` |
+| `lib/` | `audiodev/`, `displaydev/`, `appdev/`, `events.py`, `keys.py`, `multimer/` |
 | `utils/` | Desktop-bundled helpers (`mip`, `frame_recorder`, `micropython`, `usdl2`, `uwin32`) |
 | `tests/` | Stdlib unittest for `displaydev`, `multimer`, `events`, `keys`, `audiodev`, `boarddev`, `mip` |
 | `docs/` | Hardware and Board Contract documentation ([index](docs/README.md)) |

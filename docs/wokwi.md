@@ -68,7 +68,7 @@ PYDEVICES = "github:PyDevices/pydevices"
 PYDEVICES_EXAMPLES = "github:PyDevices/pydevices-examples"
 
 # Board package pulls ili9341/ft6x36/spibus from this repo and displaydev from
-# the MIP index (displaydev → events + keys). Install optional eventsys in the
+# the MIP index (displaydev → events + keys). Install optional appdev in the
 # application when the example uses that traffic controller.
 mip.install(
     PYDEVICES + "/board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3/",

@@ -2,7 +2,7 @@
 
 `pydevices` is the core product layer, owning portable hardware interfaces, driver abstractions, board wiring contracts, and releases.
 
-Applications build directly on the **PyDevices Board Contract** and core packages (`displaydev`, `audiodev`, `eventsys`, `multimer`). Downstream showcases like `pydevices-examples` consume this layer as companion sample code.
+Applications build directly on the **PyDevices Board Contract** and core packages (`displaydev`, `audiodev`, `appdev`, `multimer`). Downstream showcases like `pydevices-examples` consume this layer as companion sample code.
 
 ## Component diagram
 
@@ -15,12 +15,12 @@ flowchart TB
     AD[audiodev - Audio Abstraction]
     EV[events and keys]
     MT[multimer - Portable Timers]
-    ES[eventsys - Optional Event Dispatcher]
+    ES[appdev - Optional Event Dispatcher]
     DR[Hardware & Bus Drivers]
   end
   subgraph app [Application / GUI Layer]
     APP[Custom Application / User GUI]
-    AR[eventsys.Runtime / App Loop]
+    AR[appdev.App / App Loop]
     LR[display_driver - LVGL Coordinator]
   end
   subgraph showcase [Companion Showcase]
@@ -58,7 +58,7 @@ flowchart TB
 | `audiodev` | Cross-platform audio output/input interfaces (`I2SAudio`, `SDLAudio`). |
 | `events` / `keys` | Neutral event definitions, key codes, modifier keys, and touch gestures. |
 | `multimer` | Cross-platform timing primitives (explicit `Timer` providers, optional `auto`, `AsyncTimer`, and ticks). |
-| `eventsys` | Optional event traffic controller and input queue for applications using native PyDevices dispatch. |
+| `appdev` | Optional event traffic controller and input queue for applications using native PyDevices dispatch. |
 | `display_driver` | LVGL coordinator bridging LVGL widgets to `displaydev` and `multimer`. |
 
 ## Standard Application Boot Sequence

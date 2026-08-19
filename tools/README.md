@@ -5,7 +5,7 @@ PyDevices core.
 
 | Script | Purpose |
 |---|---|
-| [`input_probe.py`](input_probe.py) | Core displaydev/eventsys keyboard and keypad diagnostics |
+| [`input_probe.py`](input_probe.py) | Core displaydev/appdev keyboard and keypad diagnostics |
 | [`test_timers.py`](test_timers.py) | Public multimer timer probe for any supported interpreter |
 | [`test_testpypi_standalone.sh`](test_testpypi_standalone.sh) | Isolated TestPyPI import checks for core distributions; `--desktop` adds host backends |
 

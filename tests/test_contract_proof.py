@@ -133,7 +133,8 @@ class TestGraduatedBoardLayout(unittest.TestCase):
 
                 self.assertIn("display_drv", names)
                 self.assertNotIn("runtime", names)
-                self.assertNotIn("eventsys", bc.read_text())
+                self.assertNotIn("app", names)
+                self.assertNotIn("appdev", bc.read_text())
                 self.assertTrue(_has_call(bc_tree, "load_peripherals"))
                 if expect.get("eager_touch"):
                     self.assertIn("touch", names)

@@ -176,13 +176,13 @@ host_read = display_drv.get_events
 timer_async = env_bool("PYDEVICES_TIMER_ASYNC", display_drv.requires_async_timer)
 ```
 
-An application opting into `eventsys` then creates its own traffic controller:
+An application opting into `appdev` then creates its own traffic controller:
 
 ```python
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+runtime = appdev.App(board_config)
 ```
 
 LVGL instead creates an independent coordinator in `display_driver`.
@@ -192,7 +192,7 @@ LVGL instead creates an independent coordinator in `display_driver`.
 | PyScript / Jupyter | `True` | `True` (default; **`PYDEVICES_TIMER_ASYNC=0` → Runtime raises**) |
 | PG/SDL desktop | `False` | `False` unless **`PYDEVICES_TIMER_ASYNC`** is set |
 
-`eventsys.Runtime` rejects `timer_async=False` when any attached display has
+`appdev.App` rejects `timer_async=False` when any attached display has
 `requires_async_timer` (PS/JN), so a forced sync override fails at construction
 instead of hanging.
 

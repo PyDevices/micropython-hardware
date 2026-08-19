@@ -117,7 +117,7 @@ the neutral callable used by an application coordinator.
    `(x, y[, id[, …]])`. Never a bare `(x, y)` from this method (ambiguous with
    a single 2-tuple point). Single-touch chips return `()` or a one-element
    sequence.
-2. **Adapters:** `eventsys.TouchDevice` rotates all points, emits primary-finger
+2. **Adapters:** `appdev.TouchDevice` rotates all points, emits primary-finger
    `MOUSE*`, exposes `touch_dev.points`. LVGL `display_driver` feeds gesture
    recognizers when those APIs exist. Non-LVGL apps keep using primary `MOUSE*`.
 3. **Board wrappers:** do not collapse multi-touch to `points[0]` in
@@ -132,9 +132,9 @@ and [Touch drivers](touch-drivers.md).
 ```python
 import board_config as board
 from board_config import display_drv
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board)
+runtime = appdev.App(board)
 
 display_drv.fill(0)
 

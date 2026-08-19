@@ -94,11 +94,11 @@ test_package pydevices-displaydev "import displaydev; print('displaydev', displa
 
 test_package pydevices-audiodev "import audiodev; print('audiodev', audiodev.AudioFormat.__name__)"
 
-test_package pydevices-eventsys "
-import eventsys
-r = eventsys.Runtime()
+test_package pydevices-appdev "
+import appdev
+r = appdev.App()
 r.start_timer()
-print('eventsys', type(r).__name__)
+print('appdev', type(r).__name__)
 r.stop_timer()
 "
 
