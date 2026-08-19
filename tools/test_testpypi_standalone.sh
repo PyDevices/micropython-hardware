@@ -84,18 +84,18 @@ test_package() {
     echo
 }
 
-test_package pydevices-events "import events; print('events', events.KEYDOWN)"
-
-test_package pydevices-keys "import keys; print('keys', keys.keyname(keys.K_UP))"
-
-test_package pydevices-multimer "from multimer import auto as timer; print('multimer', timer.Timer)"
-
-test_package pydevices-displaydev "import displaydev; print('displaydev', displaydev.DisplayDriver.__name__)"
-
-test_package pydevices-audiodev "import audiodev; print('audiodev', audiodev.AudioFormat.__name__)"
-
-test_package pydevices-appdev "
-import appdev
+# One distribution now carries the whole core lib/ tree, so this is a single
+# install exercising every module it should have delivered -- rather than six
+# installs of distributions that no longer exist separately.
+test_package pydevices "
+import events, keys, displaydev, audiodev, appdev, boarddev
+from multimer import auto as timer
+print('events', events.KEYDOWN)
+print('keys', keys.keyname(keys.K_UP))
+print('multimer', timer.Timer)
+print('displaydev', displaydev.DisplayDriver.__name__)
+print('audiodev', audiodev.AudioFormat.__name__)
+print('boarddev', boarddev.bind_lazy.__name__)
 r = appdev.App()
 r.start_timer()
 print('appdev', type(r).__name__)
@@ -115,7 +115,7 @@ if hasattr(display_drv, 'quit'):
     display_drv.quit()
 "
 
-    BASE_VENV="${BASE_VENV}-pg" test_package pydevices-displaydev "
+    BASE_VENV="${BASE_VENV}-pg" test_package pydevices "
 from displaydev.pgdisplay import PGDisplay
 print('pgdisplay', PGDisplay.__name__)
 " pygame-ce
