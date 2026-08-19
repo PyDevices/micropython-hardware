@@ -49,7 +49,7 @@ PACKAGE_ID_DEFAULT = "org.pydevices.runner"
 PACKAGE_ID_LEGACY = "org.pydevices.launcher"
 ACTIVITY_DEFAULT = "org.kivy.android.PythonActivity"
 STDIO_PORT_DEFAULT = 18765
-RUNNER_REPO = "PyDevices/pydevices-android-runner"
+RUNNER_REPO = "PyDevices/android-runner"
 DEFAULT_APK_CACHE_DIR = pathlib.Path.home() / ".pydevices" / "apk"
 DEFAULT_APK_FILENAME = "pydevices-runner-debug.apk"
 

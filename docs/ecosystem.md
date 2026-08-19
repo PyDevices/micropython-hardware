@@ -42,8 +42,8 @@ Single-source LVGL C header binding generator and native runtime modules.
 
 Deploy PyDevices apps directly to desktop browsers or mobile APKs.
 
-- [`pydevices-pyscript-template`](https://github.com/PyDevices/pydevices-pyscript-template) — Progressive Web App starter template repository for deploying offline-capable client-side PyDevices applications on GitHub Pages.
-- [`pydevices-android-template`](https://github.com/PyDevices/pydevices-android-template) — Pre-configured python-for-android build recipes and Buildozer project template for packaging PyDevices applications into native Android APKs.
+- [`pyscript-template`](https://github.com/PyDevices/pyscript-template) — Progressive Web App starter template repository for deploying offline-capable client-side PyDevices applications on GitHub Pages.
+- [`android-template`](https://github.com/PyDevices/android-template) — Pre-configured python-for-android build recipes and Buildozer project template for packaging PyDevices applications into native Android APKs.
 
 ### Tier 5: Developer Tools & Infrastructure
 
@@ -56,6 +56,6 @@ MIP package indexing, multi-usermod builds, and serial/FTP IDE extensions.
 **Deliberately absent from this map:**
 
 - **.github (dotgithub)** — No landing page by design. It holds org-wide data, scripts, and community health files, and is documented as markdown only.
-- **pydevices-android-runner** — Exists solely to enable pydevices/bin/android.py. The APK is documented in pydevices; the runner publishes no site.
+- **android-runner** — Exists solely to enable pydevices/bin/android.py. The APK is documented in pydevices; the runner publishes no site.
 
 <!-- PYDEVICES-ECOSYSTEM: END -->

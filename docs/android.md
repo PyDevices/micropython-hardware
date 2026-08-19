@@ -7,10 +7,10 @@ the platform.
 
 **Building the APK is not documented here.** The template app, build scripts, and
 p4a recipes live in
-[pydevices-android-template](https://github.com/PyDevices/pydevices-android-template).
+[android-template](https://github.com/PyDevices/android-template).
 
 For an installable *browser* app on Android (Chrome home screen, no APK), see the
-[PyDevices PyScript template](https://github.com/PyDevices/pydevices-pyscript-template) —
+[PyDevices PyScript template](https://github.com/PyDevices/pyscript-template) —
 that path uses PyScript / `PSDisplay`, not this stack.
 
 ## Runtime shape
@@ -74,7 +74,7 @@ attach REPL. `android.py` stages a script as `main.py` (`import <stem>`) plus
 `run/<stem>.py`.
 
 Each launch hot-syncs `boot.py`, `stdio_sidecar.py`, and `mp_*.py` from a sibling
-`pydevices-android-template` checkout when one is present, and drops stale
+`android-template` checkout when one is present, and drops stale
 bytecode that would otherwise shadow the update. Changing the boot-entrypoint Java patch
 requires an APK rebuild — hot-sync alone cannot retarget an older package that
 still launches `main.py` first.
