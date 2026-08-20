@@ -215,7 +215,14 @@ def _http_get(url):
         except ValueError:
             # CircuitPython unix: MicroPython-built .mpy of urequests/requests.
             continue
-        resp = mod.get(url)
+        try:
+            resp = mod.get(url)
+        except ImportError:
+            # Imports fine but cannot run: CircuitPython ships urequests while
+            # providing no socket module, so .get() raises "no module named
+            # 'socket'". That means this transport is unusable, not that the
+            # request failed -- keep looking (the curl branch below handles it).
+            continue
         try:
             if hasattr(resp, "content"):
                 data = resp.content
