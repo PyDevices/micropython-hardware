@@ -29,11 +29,24 @@ API (compatible subset of on-device mip)::
 the index ``py`` channel or ``urls`` entries, not device ``.mpy`` bytecode).
 """
 
+# NOTE: this future import cannot be wrapped in try/except — CPython requires
+# future statements to be the first statement in the file. It is also what makes
+# this module fail on MicroPython, with the unhelpful message
+# "ImportError: no module named '__future__'". If you see that, `import mip`
+# picked up this file instead of MicroPython's frozen `mip`, which means
+# `.frozen` lost its place ahead of `lib` on sys.path (see utils/path.py in
+# pydevices-examples). ``ps_loader._import_firmware_mip`` catches that case and
+# re-raises it with the real explanation.
 from __future__ import annotations
 
 import json
 import os
 import sys
+
+#: Marks this as the portable implementation rather than firmware ``mip``.
+#: Importers that specifically need firmware ``mip`` (MicroPython WASM has no
+#: HTTP transport for this one) check it to detect sys.path shadowing.
+PORTABLE = True
 
 _PACKAGE_INDEX = "https://micropython.org/pi/v2"
 
