@@ -107,7 +107,15 @@ def _select_backend():
     for backend_name in tried:
         try:
             return _load_backend(backend_name)
-        except ImportError:
+        except (ImportError, AttributeError):
+            # A provider whose native type is missing is unavailable, whatever
+            # the host raises reaching for it. ``from machine import Timer``
+            # raises ImportError on a real module, but AttributeError when
+            # ``machine`` has been replaced in sys.modules by a shim -- which
+            # is exactly what happens on unix MicroPython, whose native
+            # ``machine`` has no Pin and rejects setattr, so callers install a
+            # forwarding proxy. Catching only ImportError let that proxy abort
+            # the whole search instead of falling through to librt.
             pass
     raise ImportError(
         f"multimer.auto: no timer backend available (tried {', '.join(tried)})"
