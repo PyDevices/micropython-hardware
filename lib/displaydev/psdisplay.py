@@ -189,12 +189,11 @@ class PSDevices:
         if self._is_touch(e):
             # Multipoint path for LVGL gestures (VirtualDevices tracks fingers).
             self._queue.append(events.Finger(events.FINGERDOWN, pos, self._finger_id(e), None))
-            return
         self._queue.append(
             events.Button(
                 events.MOUSEBUTTONDOWN,
                 pos,
-                e.button + 1,  # DOM 0/1/2 -> SDL 1/2/3
+                getattr(e, "button", 0) + 1,  # DOM 0/1/2 -> SDL 1/2/3
                 False,
                 None,
             )
@@ -204,12 +203,11 @@ class PSDevices:
         pos = self._pointer_pos(e)
         if self._is_touch(e):
             self._queue.append(events.Finger(events.FINGERUP, pos, self._finger_id(e), None))
-            return
         self._queue.append(
             events.Button(
                 events.MOUSEBUTTONUP,
                 pos,
-                e.button + 1,
+                getattr(e, "button", 0) + 1,
                 False,
                 None,
             )
