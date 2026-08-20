@@ -23,5 +23,5 @@ circuitpython tools/test_timers.py
 ./tools/test_testpypi_standalone.sh --desktop
 ```
 
-The cross-runtime timer runner and LVGL-specific input diagnostics remain in
+The cross-interpreter timer runner and LVGL-specific input diagnostics remain in
 the sibling `pydevices-examples` integration repository.

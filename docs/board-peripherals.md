@@ -125,7 +125,7 @@ the neutral callable used by an application coordinator.
    `board_config`. Keep only sequence-preserving maps (e.g. diagonal rescale).
 4. Wire with `touch_read=touch.read_points` (or a sequence-preserving wrapper).
 
-See [Runtime — touch read contract](application-runtime.md#touch-read-contract)
+See [App and board config — touch read contract](app-and-board-config.md#touch-read-contract)
 and [Touch drivers](touch-drivers.md).
 
 ## App usage
@@ -135,13 +135,13 @@ import board_config as board
 from board_config import display_drv
 import appdev
 
-runtime = appdev.App(board)
+app = appdev.App(board)
 
 display_drv.fill(0)
 
-# Eager UI — discover/use through runtime
-if runtime is not None and runtime.touch_dev is not None:
-    runtime.touch_dev.subscribe(...)
+# Eager UI — discover/use through the app
+if app is not None and app.touch_dev is not None:
+    app.touch_dev.subscribe(...)
 
 # Lazy extras — PERIPHERALS only (do not hasattr these)
 if "sdcard" in board.PERIPHERALS:
@@ -170,5 +170,5 @@ See also [device-matrix.md](device-matrix.md) and the other notes in this `docs/
 ## See also
 
 - [Board configs](board-configs.md) — how to pick and install a config
-- [Runtime](application-runtime.md) — `display_drv` / `runtime` / touch read
+- [App and board config](app-and-board-config.md) — `display_drv` / `app` / touch read
 - [Architecture](architecture.md) — how pieces fit together

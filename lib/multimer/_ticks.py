@@ -182,7 +182,7 @@ def set_deadline_hook(hook):
     Example (harness)::
 
         def on_deadline():
-            runtime.request_quit()
+            app.request_quit()
             return True
 
         multimer.set_deadline_hook(on_deadline)

@@ -19,7 +19,7 @@ Standard hardware driver engine and companion reference code.
 
 - [`pydevices`](https://github.com/PyDevices/pydevices) — Unified pure-Python hardware abstraction layer and core device contract for MicroPython, CircuitPython, CPython, Pyodide WASM, and Android.
 - [`displayif`](https://github.com/PyDevices/displayif) — High-performance C hardware bus engines (SPI, I2C, Intel 8080, RGB/DPI, MIPI DSI) and native usermod display drivers for MicroPython and CircuitPython.
-- [`pydevices-examples`](https://github.com/PyDevices/pydevices-examples) — Comprehensive example code, interactive PyScript browser demos, board configurations, and multi-runtime showcase benchmarks.
+- [`pydevices-examples`](https://github.com/PyDevices/pydevices-examples) — Comprehensive example code, interactive PyScript browser demos, board configurations, and multi-interpreter showcase benchmarks.
 
 ### Tier 2: Python Framebuffers & GUI Toolkits
 
@@ -31,7 +31,7 @@ Zero external native dependencies — runs on any Python 3 host.
 
 ### Tier 3: LVGL Native Extensions & Binding Generator
 
-Single-source LVGL C header binding generator and native runtime modules.
+Single-source LVGL C header binding generator and native interpreter modules.
 
 - [`lvgl-bindings`](https://github.com/PyDevices/lvgl-bindings) — Automated binding generator parsing LVGL C headers into native CPython extensions, MicroPython usermods, and CircuitPython modules.
 - [`lvgl-micropython`](https://github.com/PyDevices/lvgl-micropython) — Native MicroPython C module integrating LVGL v9 graphics engine with displayif bus drivers across ESP32, RP2040, and i.MX RT targets.

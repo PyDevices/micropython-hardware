@@ -257,7 +257,7 @@ variant (`C6_WIFI`).
   paint works but is very slow. Prefer MP + native SoftSPI for PyDevices;
   CP is fine for AirLift networking.
 - **Demos:** stripes / `ili9341` over SoftSPI; Simon needs a slim path (no
-  appdev). LVGL unlikely without frozen/slim runtime.
+  appdev). LVGL unlikely without frozen/slim app.
 - **Setup:** mip / `/setup` `metro_m7_tft_touch_shield_1947` after WiFi is up
   (or `mpftp put` over serial if NINA sockets are still broken).
 

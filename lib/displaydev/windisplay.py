@@ -91,9 +91,9 @@ def _display_for_hwnd(hwnd):
 def _handle_close(display):
     if display is None or display is _displays[0] or len(_displays) <= 1:
         return events.Quit(events.QUIT)
-    runtime = getattr(display, "runtime", None)
-    if runtime is not None and callable(getattr(runtime, "remove_display", None)):
-        runtime.remove_display(display)
+    app = getattr(display, "app", None)
+    if app is not None and callable(getattr(app, "remove_display", None)):
+        app.remove_display(display)
     else:
         try:
             display.quit()
@@ -268,7 +268,7 @@ class WinDisplay(DisplayDriver):
         self._requires_byteswap = False
         self._hwnd = None
         self._window_id = None
-        self.runtime = None
+        self.app = None
         self._render_dirty = False
         self._last_mouse = (0, 0)
         self._bytes_per_pixel = 2
@@ -462,7 +462,7 @@ class WinDisplay(DisplayDriver):
         self._hwnd = None
         wid = self._window_id
         self._window_id = None
-        self.runtime = None
+        self.app = None
         if wid:
             _hwnd_map.pop(wid, None)
         try:

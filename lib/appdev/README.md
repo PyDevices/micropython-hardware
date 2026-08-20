@@ -96,7 +96,7 @@ Stops the underlying shared timer and cancels all periodic `every()` subscriptio
 ### 3. Execution & Run Loop
 
 #### `app.run(tick_ms=10)`
-The single universal entry point at the bottom of application scripts. It transparently handles all runtime environments:
+The single universal entry point at the bottom of application scripts. It transparently handles all interpreter environments:
 * **Async host with active loop** (PyScript / WASM / Jupyter Notebook): Arms the deferred async timer and refresh, then returns immediately so the browser/notebook loop drives the app.
 * **Async host without active loop** (Desktop async): Executes `asyncio.run()` until quit.
 * **Sync host in interactive REPL** (MicroPython / CPython `-i` with interrupt timers): Returns immediately, keeping the interactive REPL live and responsive while timers run in the background.
@@ -117,10 +117,10 @@ Optional callable (e.g. `lv.deinit`) executed during teardown before displays ar
 ### 4. Display Coordination & GUI Framework Interfacing
 
 #### `app.pause_refresh()`
-Pauses runtime-driven `display.show()` calls. Used by GUI frameworks (such as `pdwidgets` or `LVGL`) that present frames manually. Returns a claim object with `.release()`.
+Pauses app-driven `display.show()` calls. Used by GUI frameworks (such as `pdwidgets` or `LVGL`) that present frames manually. Returns a claim object with `.release()`.
 
 #### `app.resume_refresh()`
-Resumes runtime-driven `display.show()` presentation.
+Resumes app-driven `display.show()` presentation.
 
 #### `app.refresh_paused()`
 Context manager that pauses auto-refresh within a code block:

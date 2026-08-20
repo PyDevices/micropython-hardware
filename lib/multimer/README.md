@@ -51,7 +51,7 @@ Explicit providers are `machine`, `librt`, `win32`, `sdl2`, `threading`, and
 `polling`; each exposes the same surface. Importing `multimer` itself probes
 nothing and gives you `AsyncTimer`, the `ticks_*` helpers, and `schedule`.
 
-**Everything else — the provider-selection order, the runtime matrix, async
+**Everything else — the provider-selection order, the interpreter matrix, async
 timers, `pump()` / `sleep_ms()`, hard versus soft delivery, and the
 `MULTIMER_BACKEND` override — is in
 [docs/multimer.md](https://github.com/PyDevices/pydevices/blob/main/docs/multimer.md).**

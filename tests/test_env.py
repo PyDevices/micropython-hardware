@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""Tests for cross-runtime ``displaydev`` env helpers."""
+"""Tests for cross-interpreter ``displaydev`` env helpers."""
 
 import os
 import unittest

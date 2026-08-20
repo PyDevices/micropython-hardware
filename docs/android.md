@@ -13,7 +13,7 @@ For an installable *browser* app on Android (Chrome home screen, no APK), see th
 [PyDevices PyScript template](https://github.com/PyDevices/pyscript-template) —
 that path uses PyScript / `PSDisplay`, not this stack.
 
-## Runtime shape
+## App shape
 
 There is no MicroPython port for Android. Native `libSDL2.so` comes from p4a's
 `sdl2` recipe; `import usdl2` is the pure-Python ctypes binding shipped in
@@ -23,7 +23,7 @@ There is no MicroPython port for Android. Native `libSDL2.so` comes from p4a's
 Activity surface after GL buffers exist and yields a black screen after splash).
 
 Display wiring uses the MCU-shaped `board_config` from `pydevices-desktop`
-(`AutoDisplay` plus neutral input readers). LVGL owns its runtime in
+(`AutoDisplay` plus neutral input readers). LVGL owns its app in
 `display_driver`; non-LVGL apps may instantiate optional `appdev`. Set
 `PYDEVICES_WIDTH` / `PYDEVICES_HEIGHT` / `PYDEVICES_SCALE` for your panel size.
 
@@ -83,7 +83,7 @@ still launches `main.py` first.
 
 | Situation | What you see |
 |---|---|
-| Script running (oneshot or `run_forever` loop) | Stdio only — prints and `input()` in this terminal; **no** `>>>` yet |
+| Script running (oneshot or `run` loop) | Stdio only — prints and `input()` in this terminal; **no** `>>>` yet |
 | Oneshot falls off the bottom | Banner + `>>>` automatically |
 | Looping entry + **Ctrl+C** | `KeyboardInterrupt`, then banner + `>>>` |
 | Bare `android.py -i` | Clean `>>>` (`main.py` removed for this session) |
@@ -91,7 +91,7 @@ still launches `main.py` first.
 With `multimer` **threading** (`timer_async=False`, Android's usual path) there is
 no MicroPython soft-IRQ into the REPL mid-loop — matching `micropython.exe -i` on
 Windows desktop. MicroPython's signals / `machine.Timer` path can return from
-`run_forever` immediately so `>>>` coexists with ticks; Android does not fake that.
+`run` immediately so `>>>` coexists with ticks; Android does not fake that.
 
 TTY editing aims for MicroPython REPL parity:
 

@@ -2,7 +2,7 @@
 
 The core display engine, hardware driver suite, and board configuration standard for [PyDevices](https://github.com/PyDevices).
 
-`pydevices` is the canonical source and publisher for cross-runtime hardware drivers, board configurations, and pure-Python core packages:
+`pydevices` is the canonical source and publisher for cross-interpreter hardware drivers, board configurations, and pure-Python core packages:
 `displaydev`, `audiodev`, `appdev`, `multimer`, `events`, and `keys`.
 
 ---
@@ -15,7 +15,7 @@ PyDevices hardware drivers and board configurations adhere to a standardized con
 - **Lazy Extra Peripherals (`board_peripherals.py` / `boarddev`)**: Defers initialization of secondary hardware (sensors, external flash, power monitoring) until explicitly requested by the application via `boarddev`.
 - **Decoupled Application Lifecycle**: Board configuration exports neutral capability interfaces; event coordination and application flow remain strictly owned by the application.
 
-### Cross-Runtime Compatibility
+### Cross-Interpreter Compatibility
 Write your display and hardware logic once and run across 5 supported Python environments:
 1. **MicroPython** — Microcontroller firmware with MIP package support.
 2. **CircuitPython** — Microcontroller firmware with stock driver compatibility.
@@ -52,7 +52,7 @@ landing page.
 ## Installation
 
 ```bash
-# CPython desktop — the complete desktop runtime in one command
+# CPython desktop — the complete desktop stack in one command
 pip install -i https://test.pypi.org/simple/ \
   --extra-index-url https://pypi.org/simple/ pydevices-desktop
 ```

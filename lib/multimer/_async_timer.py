@@ -31,7 +31,7 @@ def _may_arm_async_timer():
 class AsyncTimer(_TimerCore):
     """``asyncio``-backed timer with the same API as ``machine.Timer`` / :class:`Timer`.
 
-    Use when ``runtime.timer_async`` is True (PyScript, Jupyter, desktop async).
+    Use when ``app.timer_async`` is True (PyScript, Jupyter, desktop async).
     :meth:`init` requires a running event loop — prefer constructing at import
     time and calling :meth:`init` (or passing kwargs) only after the loop starts,
     or let ``appdev.App`` defer arming via ``arm_async_refresh``.

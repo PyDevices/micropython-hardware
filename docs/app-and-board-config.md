@@ -1,4 +1,4 @@
-# Runtime and board config
+# App and board config
 
 Every application needs a `board_config.py` on `sys.path` that describes its
 hardware or host. The board config exports hardware capabilities; the
@@ -17,7 +17,7 @@ application decides which coordinator, if any, to instantiate.
 | `joystick_driver` / `emulate` | optional | Joystick input and optional emulation mapping |
 | `timer_async` | optional | Host preference for async timing |
 
-Board configs do not import `appdev` and do not export `runtime`.
+Board configs do not import `appdev` and do not export `app`.
 
 ## Standard applications
 
@@ -28,9 +28,9 @@ import board_config
 from board_config import display_drv
 import appdev
 
-runtime = appdev.App(board_config)
+app = appdev.App(board_config)
 
-runtime.run_forever()
+app.run()
 ```
 
 Reusable `appdev` remains independent of board hardware details.
@@ -38,7 +38,7 @@ Reusable `appdev` remains independent of board hardware details.
 You may also provide overrides:
 
 ```python
-runtime = appdev.App.from_board_config(
+app = appdev.App(
     board_config,
     refresh_period=16,
     timer_async=True,
@@ -50,7 +50,7 @@ runtime = appdev.App.from_board_config(
 LVGL supplies its own coordinator:
 
 ```python
-from display_driver import runtime
+from display_driver import app
 ```
 
 That implementation bridges LVGL to `displaydev` and `multimer`, owns LVGL
@@ -69,16 +69,16 @@ appdev.App(
 )
 ```
 
-Bare `Runtime()` is valid for custom wiring. Additional devices can be attached
+Bare `appdev.App()` is valid for custom wiring. Additional devices can be attached
 after construction:
 
 ```python
-runtime.add_keypad(read=buttons.read)
-runtime.add_joystick(joystick_driver=drv)
-runtime.add_encoder(read=pos_read, button_read=btn_read, button=2)
+app.add_keypad(read=buttons.read)
+app.add_joystick(joystick_driver=drv)
+app.add_encoder(read=pos_read, button_read=btn_read, button=2)
 ```
 
-## App loop & `run_forever()`
+## App loop & `run()`
 
 The supplied coordinator can manage the application loop:
 
@@ -86,30 +86,30 @@ The supplied coordinator can manage the application loop:
 def on_click(event):
     ...
 
-runtime.on(runtime.events.MOUSEBUTTONDOWN, on_click)
-runtime.run_forever()
+app.on(app.events.MOUSEBUTTONDOWN, on_click)
+app.run()
 ```
 
-### How `runtime.run_forever()` Behaves
+### How `app.run()` Behaves
 
-`runtime.run_forever()` automatically adapts its behavior based on the runtime environment and timer model:
+`app.run()` automatically adapts its behavior based on the interpreter environment and timer model:
 
 1. **Interactive REPL (`python -i`, `micropython -i`, MCU prompt)**:
-   - When running with hardware interrupts or signal-based timers (`machine.Timer`, Linux `librt`, Windows `uwin32`), `run_forever()` **immediately returns**.
+   - When running with hardware interrupts or signal-based timers (`machine.Timer`, Linux `librt`, Windows `uwin32`), `run()` **immediately returns**.
    - The interactive prompt (`>>>`) stays open for live debugging and introspection while the UI continues running and responding to inputs in the background.
 
 2. **Standalone Desktop CLI (`python app.py`)**:
-   - In non-interactive desktop scripts, `run_forever()` **sleeps in a keep-alive loop** until a quit event occurs.
+   - In non-interactive desktop scripts, `run()` **sleeps in a keep-alive loop** until a quit event occurs.
    - This prevents the desktop OS process from exiting immediately after drawing the initial window.
 
 3. **Async / Cooperative / Pumped Modes (`asyncio`, CircuitPython, Browser)**:
-   - `run_forever()` runs the event loop continuously to pump timer ticks and process queued events.
+   - `run()` runs the event loop continuously to pump timer ticks and process queued events.
 
 Or an application can explicitly poll:
 
 ```python
-while not runtime.quit_requested:
-    for event in runtime.poll():
+while not app.quit_requested:
+    for event in app.poll():
         handle(event)
     draw_frame()
 ```
@@ -136,9 +136,9 @@ coordinator consumes `board_config.timer_async`; test harnesses can use their
 ## Touch read contract
 
 `touch_read` is called once per poll. It returns either a falsy value for no
-contacts or a sequence of `(x, y[, id[, …]])` contacts. The runtime maps the
+contacts or a sequence of `(x, y[, id[, …]])` contacts. The app maps the
 primary contact to mouse-style events and exposes all rotated contacts as
-`runtime.touch_dev.points`.
+`app.touch_dev.points`.
 
 | Return value | Meaning |
 |---|---|
@@ -155,7 +155,7 @@ returning a sequence, even for one contact.
 A GUI layer that presents frames itself can pause appdev-driven refresh:
 
 ```python
-with runtime.display_refresh_paused():
+with app.display_refresh_paused():
     run_game()
 ```
 
@@ -165,7 +165,7 @@ from the outset.
 ## Quit lifecycle
 
 On `QUIT`, appdev runs its optional `before_quit` hook, releases the display,
-and stops its timer. `runtime.quit_requested` remains true after the first quit.
+and stops its timer. `app.quit_requested` remains true after the first quit.
 
 See [Events](appdev.md), [Architecture](architecture.md), and
 [Board configs](board-configs.md).

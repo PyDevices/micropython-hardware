@@ -78,7 +78,7 @@ async def _async_sleep_ms(ms):
     run_deadline_hook()
 
 
-def _async_only_runtime():
+def _async_only_interpreter():
     """True on hosts whose application lifecycle is owned by an async loop."""
     if sys.platform in ("emscripten", "webassembly"):
         return True

@@ -179,7 +179,7 @@ def probe_board_config():
     import board_config
 
     check("board_config built a display", hasattr(board_config, "display_drv"))
-    check("board_config leaves runtime policy to the app", not hasattr(board_config, "runtime"))
+    check("board_config leaves app creation to the application", not hasattr(board_config, "app"))
     check("board_config bound the audio roles", "audio_out" in board_config.PERIPHERALS)
 
 

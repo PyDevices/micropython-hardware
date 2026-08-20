@@ -14,7 +14,7 @@ Explicit provider imports never fall back.
 
 import sys
 
-from . import AsyncTimer, _async_only_runtime, _async_sleep_ms, _provider_pump
+from . import AsyncTimer, _async_only_interpreter, _async_sleep_ms, _provider_pump
 
 _AUTO_BACKENDS = ("machine", "librt", "win32", "sdl2", "threading", "polling")
 _BACKENDS = _AUTO_BACKENDS + ("async",)
@@ -100,7 +100,7 @@ def _select_backend():
     forced = _forced_backend()
     if forced is not None:
         return _load_backend(forced)
-    if _async_only_runtime():
+    if _async_only_interpreter():
         return _AsyncProvider
 
     tried = _auto_backends()

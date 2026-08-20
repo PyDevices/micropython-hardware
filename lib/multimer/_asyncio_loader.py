@@ -49,7 +49,7 @@ def loop_running():
     """True when a coroutine of a running event loop is currently executing.
 
     ``current_task()`` is the only probe that answers this correctly on every
-    supported runtime, so prefer it whenever the implementation has it:
+    supported interpreter, so prefer it whenever the implementation has it:
 
     * uasyncio (MicroPython) has no ``get_running_loop`` at all, so testing for
       that name reports "no loop" even from inside a task;

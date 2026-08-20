@@ -30,7 +30,7 @@ competing DRM master.
 
 ## Desktop with pip
 
-One command installs the complete desktop runtime: all portable PyDevices
+One command installs the complete desktop stack: all portable PyDevices
 components, the desktop board configuration, and the bundled utility modules.
 
 ```bash
@@ -53,7 +53,7 @@ python -m pip install \
 python -c "import board_config, micropython, mip; print(board_config.__file__)"
 ```
 
-Install only the portable runtime when no desktop board is wanted:
+Install only the portable libraries when no desktop board is wanted:
 
 ```bash
 python -m pip install \
@@ -126,7 +126,7 @@ mpremote mip install \
   github:PyDevices/pydevices/board_configs/busdisplay/i80/t-display-s3
 ```
 
-The recommended hosted-runtime search paths keep frozen firmware modules ahead
+The recommended hosted-interpreter search paths keep frozen firmware modules ahead
 of workspace fallbacks:
 
 ```bash
@@ -140,7 +140,7 @@ set MICROPYPATH=.;.frozen;lib;utils;%USERPROFILE%\.micropython\lib
 set PYTHONPATH=.;lib;utils
 ```
 
-This mirrors the default search order on hosted runtimes and on hardware MCUs —
+This mirrors the default search order on hosted interpreters and on hardware MCUs —
 where `.frozen`, the user's `~/.micropython/lib`, and the system
 `/usr/lib/micropython` are searched by default — while appending `.`, `lib/`,
 and `utils/` so a workspace runs from any directory. It is also why installing

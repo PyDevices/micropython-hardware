@@ -621,7 +621,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         print("\nMicroPython compatibility notes:")
         print("  -c <cmd> | -m <mod> | <filename> are mutually exclusive.")
         print("  -O and -X options are accepted for CLI parity.")
-        print("  Ctrl-C sends SIGINT (\\x03) to on-device runtime.")
+        print("  Ctrl-C sends SIGINT (\\x03) to on-device interpreter.")
         print("  Ctrl-\\ detaches the host terminal without killing the on-device app.")
         return 0
 

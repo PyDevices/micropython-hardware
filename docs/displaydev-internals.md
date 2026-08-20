@@ -30,10 +30,10 @@ below. Application code, `pygraphics`, and examples assume they exist — not on
 | `fill_rect(x, y, w, h, color)` | Fill a rectangle with a 565 color |
 | `pixel(x, y, color)` | Set one pixel (often implemented via a 1×1 `blit_rect`) |
 | `show()` | Present the logical framebuffer (immediate on MCU buses; batched on SDL/pygame until `show()` on desktop) |
-| `quit(code=0, force=False)` | Release native resources; `Runtime` calls this on app quit |
+| `quit(code=0, force=False)` | Release native resources; `appdev.App` calls this on app quit |
 
 Optional but common: `deinit()` (called from `quit()`), scroll helpers (`vscroll`,
-`set_vscroll`), `blit_transparent`, and `needs_refresh` for runtime-driven
+`set_vscroll`), `blit_transparent`, and `needs_refresh` for app-driven
 presentation on hosted backends.
 
 **BusDisplay**, **FBDisplay**, and most TFT paths are **565 end-to-end** — the
@@ -127,9 +127,9 @@ coordinates — see [Displays — Browser / notebook](displaydev.md#browser--not
 | **JNDisplay** | 1:1 (`touch_scale = 1.0`) |
 | **PixelDisplay** | N/A (tiny physical grid) |
 
-## Why each backend exists (runtime)
+## Why each backend exists (interpreter)
 
-| Backend | Typical runtime | Why it exists |
+| Backend | Typical interpreter | Why it exists |
 |---------|-----------------|---------------|
 | **SDLDisplay** | CPython, MicroPython Unix, CircuitPython Unix | Native SDL2 / `usdl2`; default on MP Unix |
 | **WinDisplay** | Windows CPython | Native HWND via `uwin32`; preferred by `AutoDisplay` on `win32` |

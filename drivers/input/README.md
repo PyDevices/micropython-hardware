@@ -16,8 +16,8 @@ buttons = GPIOButtons({
     "b": (board.BUTTON_B, keys.K_b),
 })
 
-runtime = appdev.App(display=display_drv)
-runtime.add_keypad(read=buttons.read)
+app = appdev.App(display=display_drv)
+app.add_keypad(read=buttons.read)
 ```
 
 Used by MagTag, PyBadge, and similar boards with front-panel buttons.

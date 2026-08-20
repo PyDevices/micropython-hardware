@@ -179,9 +179,9 @@ from multimer import auto as timer
 print(timer.name)
 ```
 
-## Runtime matrix
+## Interpreter matrix
 
-| Runtime / host | Typical auto provider | `uses_interrupts` | Application requirement |
+| Interpreter / host | Typical auto provider | `uses_interrupts` | Application requirement |
 |---|---|---:|---|
 | MicroPython MCU | `machine` | `True` | callbacks run from hardware timer delivery |
 | CPython Linux | `librt` | `True` | no callback pump required |
@@ -256,7 +256,7 @@ finally:
     multimer.set_deadline_hook(None)
 ```
 
-Provider `sleep_ms` invokes the hook before and after sleeping. Runtime poll
+Provider `sleep_ms` invokes the hook before and after sleeping. App poll
 loops invoke `run_deadline_hook()` directly.
 
 ## PyDevices integration
@@ -265,12 +265,12 @@ loops invoke `run_deadline_hook()` directly.
 `multimer.auto`. They keep their sync timer, provider sleep, pump, and interrupt
 capability together. Async mode uses `AsyncTimer` and `multimer.asyncio`.
 
-Applications using those coordinators normally call `runtime.poll()`,
-`runtime.run_forever()`, or `runtime.run_async()` rather than allocating a
+Applications using those coordinators normally call `app.poll()`,
+`app.run()`, or `app.run_async()` rather than allocating a
 second refresh timer.
 
 ## Next
 
 - [Timer backend internals](multimer-internals.md)
-- [Application runtime](application-runtime.md)
+- [App and board config](app-and-board-config.md)
 - [Displays](displaydev.md)

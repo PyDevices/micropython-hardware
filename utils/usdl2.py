@@ -664,7 +664,7 @@ _FFI_FUNCS = (
     ("SDL_UnlockAudioDevice", "v", "I"),
     # No real SDL_AddTimer/SDL_RemoveTimer binding here -- see the "Timer API"
     # section: SDL's timer thread is never registered with the MicroPython
-    # runtime (mp_thread_init()), and calling back into the interpreter from
+    # interpreter (mp_thread_init()), and calling back into it from
     # it segfaults unconditionally (verified experimentally), so MicroPython
     # timers are cooperative/software instead of real SDL ones.
 )
@@ -944,7 +944,7 @@ def SDL_TimerCallback(callback):
 
 
 if _use_ffi:
-    # Real SDL timers fire on an SDL-owned pthread that MicroPython's runtime
+    # Real SDL timers fire on an SDL-owned pthread that MicroPython's interpreter
     # never registered (mp_thread_init() was never called for it); invoking
     # any Python callback from that thread segfaults unconditionally --
     # verified experimentally, even a trivial ffi.callback(..., lock=True)

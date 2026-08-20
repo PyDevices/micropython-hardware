@@ -23,7 +23,7 @@ distribution; there is no include list.
 
 The dependency-only `pydevices` meta-package installs every discovered leaf,
 including `appdev`. The `pydevices-desktop` meta-package depends on
-`pydevices` and also installs the desktop board files plus every runtime module
+`pydevices` and also installs the desktop board files plus every library module
 discovered under `utils/`. Utilities do not have separate distributions.
 
 All internal TestPyPI requirements use exact `==X.Y.Z` pins. MIP meta-package

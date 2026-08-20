@@ -1,6 +1,6 @@
 # Desktop utility modules
 
-Every non-debris runtime module placed directly under this directory is
+Every non-debris library module placed directly under this directory is
 automatically included in both the pip and MIP `pydevices-desktop` packages and
 in `pydevices-desktop.toml`. Utilities do not publish as separate packages.
 

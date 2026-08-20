@@ -1,10 +1,10 @@
 # appdev
 
 Cross-platform input events with PyGame/SDL2-style types. `appdev` is the
-poller and device mux (`Runtime`, `HostEventsDevice`, …). Event type constants
+poller and device mux (`App`, `HostEventsDevice`, …). Event type constants
 and namedtuples live in `events`; SDL key codes live in `keys`.
 
-For board wiring and application-owned coordinator setup, see **[Runtime](application-runtime.md)**.
+For board wiring and application-owned coordinator setup, see **[App and board config](app-and-board-config.md)**.
 
 ## Quick start — poll loop
 
@@ -12,12 +12,12 @@ For board wiring and application-owned coordinator setup, see **[Runtime](applic
 import events
 import appdev
 
-runtime = appdev.App()
+app = appdev.App()
 keypad = appdev.KeypadDevice(read=lambda: pressed_keys)  # set of key codes
-runtime.register(keypad)
+app.register(keypad)
 
 while True:
-    for event in runtime.poll():  # always a list — safe to iterate
+    for event in app.poll():  # always a list — safe to iterate
         if event.type == events.KEYDOWN:
             print("down", event.key)
         elif event.type == events.QUIT:
@@ -30,14 +30,13 @@ while True:
 import events
 import appdev
 
-runtime = appdev.App()
+app = appdev.App()
 
 def on_key(event):
     print(event)
 
-runtime.on(events.KEYDOWN, on_key)
-runtime.on([events.KEYDOWN, events.KEYUP], on_key)
-runtime.on_device(appdev.KEYPAD, on_key)
+app.on(events.KEYDOWN, on_key)
+app.on([events.KEYDOWN, events.KEYUP], on_key)
 ```
 
 ## Quick start — async
@@ -48,22 +47,22 @@ Pair appdev with [multimer](multimer.md) on asyncio-native hosts:
 import appdev
 from multimer import asyncio
 
-runtime = appdev.App()
+app = appdev.App()
 
 async def main():
     while True:
-        for event in runtime.poll():
+        for event in app.poll():
             handle(event)
         await asyncio.sleep(0)
 
-runtime.run_async(main)  # Jupyter / PyScript; or asyncio.run(main()) on desktop
+app.run_async(main)  # Jupyter / PyScript; or asyncio.run(main()) on desktop
 ```
 
-Or subscribe and let the runtime auto-service drive the app:
+Or subscribe and let the auto-service drive the app:
 
 ```python
-runtime.on(runtime.events.MOUSEBUTTONDOWN, handle)
-runtime.run_forever()
+app.on(app.events.MOUSEBUTTONDOWN, handle)
+app.run()
 ```
 
 ## Poll vs subscribe
@@ -71,10 +70,10 @@ runtime.run_forever()
 | Pattern | When to use |
 |---------|-------------|
 | **Poll** | Main loop owns flow; inspect every event each frame. |
-| **`runtime.on()`** | React to specific event types without a big `if` chain. |
-| **`runtime.on_device()`** | Handle all events from touch, keypad, joystick, etc. |
+| **`app.on()`** | React to specific event types without a big `if` chain. |
+| **`app.on([...])`** | Handle a whole family of events — all joystick or keypad types — in one callback. |
 
-`runtime.poll()` **always** returns a list (possibly empty). It never returns `None`.
+`app.poll()` **always** returns a list (possibly empty). It never returns `None`.
 
 ## Built-in devices
 
@@ -86,13 +85,14 @@ runtime.run_forever()
 | `EncoderDevice` | `read()` returns scroll delta / button state. |
 | `JoystickDevice` | `joystick_driver` with PyGame-style `get_axis`, `get_button`, `get_hat`, … |
 
-Register devices with `runtime.register(dev)` or the constructor helpers
-(`Runtime(..., touch_read=...)`, `runtime.add_keypad(read=...)`, etc.).
+Register devices with `app.register(dev)` or the constructor helpers
+(`appdev.App(..., touch_read=...)`, `app.add_keypad(read=...)`, etc.).
 
 ### Joystick
 
 ```python
 import appdev
+import events
 
 class MyDriver(appdev.JoystickDriver):
     def get_instance_id(self):
@@ -103,47 +103,55 @@ joy = appdev.JoystickDevice(
     joystick_driver=MyDriver(),
     emulate_digital=[(0, 1)],  # optional: analog axes → hat motion
 )
-runtime.register(joy)
-runtime.on_device(appdev.JOYSTICK, lambda e: print(e))
+app.register(joy)
+app.on(
+    [
+        events.JOYAXISMOTION,
+        events.JOYHATMOTION,
+        events.JOYBUTTONDOWN,
+        events.JOYBUTTONUP,
+    ],
+    lambda e: print(e),
+)
 ```
 
 ## Quit handling
 
-When constructed with `display=`, the runtime handles quit implicitly: on
+When constructed with `display=`, the app handles quit implicitly: on
 `events.QUIT` it runs `before_quit` (if set), then `display.quit()`, then
-stops the shared timer. Set `runtime.before_quit` for application-specific
+stops the shared timer. Set `app.before_quit` for application-specific
 teardown before the display is released. LVGL uses its own coordinator.
 
 ```python
-runtime.before_quit = _lvgl_shutdown
+app.before_quit = _lvgl_shutdown
 ```
 
-Use **`runtime.quit_requested`** in output-only loops that do not dispatch
+Use **`app.quit_requested`** in output-only loops that do not dispatch
 events (the auto-service still handles host QUIT when you call `poll` or run
-`run_forever`):
+`run`):
 
 ```python
 import board_config
 from board_config import display_drv
 import appdev
 
-runtime = appdev.App(board_config)
+app = appdev.App(board_config)
 
-while not runtime.quit_requested:
+while not app.quit_requested:
     draw_frame()
-    # Prefer runtime.run_forever() for interactive apps; poll only when you
+    # Prefer app.run() for interactive apps; poll only when you
     # own a custom frame loop and need to drain events yourself.
 ```
 
 Canonical interactive apps subscribe callbacks and stay alive with:
 
 ```python
-runtime.on(runtime.events.MOUSEBUTTONDOWN, handle)
-runtime.run_forever()
+app.on(app.events.MOUSEBUTTONDOWN, handle)
+app.run()
 ```
 
 `display_drv.quit()` only releases resources (REPL-safe); your loop must still
-exit when `runtime.quit_requested` becomes true or you handle `events.QUIT`.
+exit when `app.quit_requested` becomes true or you handle `events.QUIT`.
 
 ## Custom events and devices
 
@@ -156,28 +164,28 @@ appdev.register_device("MYPAD", [events.KEYDOWN, events.KEYUP])
 ```
 
 Use `appdev.capabilities()` to inspect the dialect and built-in device list.
-Query `appdev.App.current()` (or `appdev.current_runtime()`) to discover
-the active runtime instance.
+Query `appdev.App.current()` to discover
+the active app instance.
 
 ## FAQ
 
-**No events arrive** — call `runtime.poll()` frequently in your main loop.
+**No events arrive** — call `app.poll()` frequently in your main loop.
 
 **Touch coordinates wrong** — set `TouchDevice.rotation_table` for your panel rotation.
 
 **Joystick hats from analog sticks** — pass `emulate_digital=[(axis_x, axis_y), …]`.
 
-## Application runtime integration
+## Application integration
 
 Applications construct `appdev.App(board_config)`.
-Board configs expose neutral hardware capabilities and never instantiate a
-runtime. Display-only apps may omit appdev; LVGL uses `display_driver`.
-See [Runtime](application-runtime.md), [Architecture](architecture.md), and [Displays](displaydev.md).
+Board configs expose neutral hardware capabilities and never instantiate
+an app. Display-only apps may omit appdev; LVGL uses `display_driver`.
+See [App and board config](app-and-board-config.md), [Architecture](architecture.md), and [Displays](displaydev.md).
 
 ## Next
 
 - [multimer](multimer.md) — timers and async main loops
-- [Displays](displaydev.md) — how backends feed the runtime
+- [Displays](displaydev.md) — how backends feed the app
 - [Example applications](https://github.com/PyDevices/pydevices-examples/tree/main/lib/examples)
 
 ## API reference

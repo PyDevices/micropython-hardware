@@ -9,10 +9,10 @@ For panel, touch controller, and bring-up quirks on these boards, see
 
 Paths below are relative to `board_configs/` and are **MicroPython** trees (the
 ones with `board_peripherals`). CircuitPython twins under `cp/` are eager-UI
-only (`display_drv` / `runtime` / `touch` / `keypad` / `encoder` / `joystick`) —
+only (`display_drv` / `app` / `touch` / `keypad` / `encoder` / `joystick`) —
 they have no lazy `PERIPHERALS`; use native `board` for the rest.
 
-`display_drv` / `runtime` / `display_bus` are always part of the board surface
+`display_drv` / `app` / `display_bus` are always part of the board surface
 when present, and are omitted from the Eager column for brevity.
 
 ---

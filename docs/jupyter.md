@@ -57,8 +57,8 @@ The kernel already runs an `asyncio` loop, so a blocking poll loop would starve 
 and never receive widget events. The Jupyter board config therefore exports
 `timer_async=True` and the application coordinator consumes that preference.
 
-Keep an app alive with **`runtime.run_forever()`** — subscribe callbacks, then run.
-For a custom async `main()`, use **`runtime.run_async(main)`**, not
+Keep an app alive with **`app.run()`** — subscribe callbacks, then run.
+For a custom async `main()`, use **`app.run_async(main)`**, not
 `asyncio.run(main())`: in a notebook the latter raises
 `RuntimeError: asyncio.run() cannot be called from a running event loop`. On
 Jupyter, `run_async` schedules `main` as a background task and returns
@@ -67,7 +67,7 @@ with no loop running yet it blocks via `asyncio.run`.
 
 Custom wait-for-touch loops should import `asyncio` from `multimer` and
 `await asyncio.sleep(0)` each iteration so the kernel can dispatch widget events
-between polls. See [Runtime](application-runtime.md) and [multimer](multimer.md).
+between polls. See [App and board config](app-and-board-config.md) and [multimer](multimer.md).
 
 ## Stopping a running example
 

@@ -17,10 +17,10 @@
 ## Core packages
 
 - [displaydev.md](displaydev.md) — display backends and how they expose input
-- [appdev.md](appdev.md) — the event poller and device mux (`Runtime`, `App`)
+- [appdev.md](appdev.md) — the event poller and device mux (`App`)
 - [multimer.md](multimer.md) — portable timers
 - [audio.md](audio.md) — `audiodev` interfaces
-- [application-runtime.md](application-runtime.md) — the application loop
+- [app-and-board-config.md](app-and-board-config.md) — the application loop
 
 ## Drivers
 

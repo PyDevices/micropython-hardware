@@ -13,12 +13,12 @@ Installed modules:
 It depends on the full `pydevices` meta-package, which includes `appdev`.
 
 Source of truth:
-- Fixed runtime modules come from `board_configs/desktop/` and `drivers/`.
-- Every non-debris runtime module under `utils/` is discovered automatically.
+- Fixed library modules come from `board_configs/desktop/` and `drivers/`.
+- Every non-debris library module under `utils/` is discovered automatically.
 - `pydevices-desktop.toml` lists the same complete payload for PyScript.
 
 This package is intended to provide a single pip-installable desktop config
-bundle while core runtime libraries continue to come from PyDevices packages.
+bundle while core PyDevices libraries continue to come from PyDevices packages.
 
 `board_config.py` ownership for packaged desktop installs lives here
 (`pydevices-desktop`), analogous to the MIP desktop bundle in
@@ -35,6 +35,6 @@ Use the sections:
 - "Verify without .venv (python.exe / pip.exe)"
 
 `board_config` constructs `display_drv` and exports neutral host/input callables
-via `displaydev.auto.AutoDisplay`; it does not create an event runtime. Lazy roles such as `audio_out` /
+via `displaydev.auto.AutoDisplay`; it does not create an event app. Lazy roles such as `audio_out` /
 `audio_in` still come from `board_peripherals` and allocate on first access.
 Terminal-only apps can `import board_peripherals` without opening a window.

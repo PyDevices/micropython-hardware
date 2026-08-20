@@ -7,5 +7,5 @@
     ]
   ],
   "version": "0.0",
-  "notes": "Universal non-MCU board package with split board_config + board_peripherals for desktop, Jupyter, and PyScript runtimes."
+  "notes": "Universal non-MCU board package with split board_config + board_peripherals for desktop, Jupyter, and PyScript interpreters."
 }

@@ -551,7 +551,7 @@ class DisplayDriver:
 
     needs_refresh = False
     # True on async-native hosts (PSDisplay / JNDisplay); desktop PG/SDL keep False.
-    # Board configs decide Runtime.timer_async via env_bool(..., display.requires_async_timer).
+    # Board configs decide appdev.App.timer_async via env_bool(..., display.requires_async_timer).
     requires_async_timer = False
     share_framebuffer = False
     # HostEventsDevice reads this ``(key, mod)`` tuple; None disables keyboard quit.
@@ -1007,7 +1007,7 @@ class DisplayDriver:
 
         The broker owns the shared refresh timer, so there is no display-owned
         timer to stop here; ``board_config`` stops the timer on quit via
-        ``runtime.stop_timer``.
+        ``app.stop_timer``.
         """
         if getattr(self, "_deinitialized", False):
             return

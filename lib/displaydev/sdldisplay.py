@@ -174,7 +174,7 @@ def _handle_window_event(e):
     display = _display_for_window_id(wid)
     if display is None or display is _displays[0] or len(_displays) <= 1:
         return events.Quit(events.QUIT)
-    app = getattr(display, "app", None) or getattr(display, "runtime", None)
+    app = getattr(display, "app", None)
     if app is not None and callable(getattr(app, "remove_display", None)):
         app.remove_display(display)
     else:
@@ -513,7 +513,7 @@ class SDLDisplay(DisplayDriver):
             raise RuntimeError(f"{usdl2.SDL_GetError()}")
         get_id = getattr(usdl2, "SDL_GetWindowID", None)
         self._window_id = int(get_id(self._window)) if get_id is not None else None
-        self.runtime = None
+        self.app = None
         self._lock_window_size()
         self._renderer = usdl2.SDL_CreateRenderer(self._window, -1, render_flags)
         if not self._renderer and (render_flags & usdl2.SDL_RENDERER_ACCELERATED):
@@ -883,7 +883,7 @@ class SDLDisplay(DisplayDriver):
             usdl2.SDL_DestroyWindow(self._window)
             self._window = None
         self._window_id = None
-        self.runtime = None
+        self.app = None
         # Keep SDL (and the primary window) alive while other displays remain —
         # same policy as PGDisplay._deinit.
         if _displays:

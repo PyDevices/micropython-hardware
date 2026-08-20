@@ -2,7 +2,7 @@
 
 Playback pushes PCM with ``SDL_QueueAudio`` and never installs an audio
 callback: SDL's audio thread is not registered with the Python/MicroPython
-runtime, so calling back into the interpreter from it is unsafe (it segfaults
+interpreter, so calling back into it from it is unsafe (it segfaults
 under MicroPython and fights the GIL under CPython/LVGL).
 
 Four behaviors keep queued playback smooth, all established by measurement on
@@ -48,7 +48,7 @@ change before making it.
 
 This module also runs on MicroPython (unix and ``micropython.exe``) and
 CircuitPython, so it avoids CPython-only APIs -- notably it consumes buffers with
-``buf[:n] = b""`` rather than ``del buf[:n]``, which those runtimes reject at
+``buf[:n] = b""`` rather than ``del buf[:n]``, which those interpreters reject at
 runtime, not at import. See "Portability" in ``README.md``; verify changes by
 running ``examples/audio_out_test.py`` under all three interpreters.
 """

@@ -183,7 +183,6 @@ class App:
         for drv in self._displays:
             try:
                 drv.app = self
-                drv.runtime = self  # Duck-type compat for existing display drivers
             except Exception:
                 pass
 
@@ -287,7 +286,6 @@ class App:
         self._displays.append(drv)
         try:
             drv.app = self
-            drv.runtime = self
         except Exception:
             pass
         if first:

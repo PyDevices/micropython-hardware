@@ -29,7 +29,7 @@ Docs are markdown under `docs/`, published only via GitHub Pages
   CircuitPython already has the native `board` module for pins/buses. CP
   `board_config.py` provides `display_drv`, eager input hardware, and neutral
   read aliases (`touch_read`, `keypad_read`, `encoder_read`, and so on). Board
-  configs never instantiate `appdev` or an application runtime. Non-UI
+  configs never instantiate `appdev` or an `appdev.App`. Non-UI
   peripherals stay on CP `board` / libraries.
 - Run `SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy python -m unittest discover -s tests` after changing `displaydev`, `multimer`, `events`, `keys`, `audiodev`, `boarddev`, or `utils/`. See `tests/README.md`.
 - Keep MIP `package.json` URLs on
@@ -43,7 +43,7 @@ Docs are markdown under `docs/`, published only via GitHub Pages
   always `pydevices-*`. `displaydev` → `events` + `keys`; `appdev` →
   `events` + `keys` + `multimer`. Every non-debris top-level component in
   `lib/` publishes automatically as a leaf; `pydevices` depends on all leaves.
-  Every runtime component in `utils/` is bundled automatically into
+  Every library component in `utils/` is bundled automatically into
   `pydevices-desktop` without becoming a separate package. The desktop package
   depends on `pydevices`.
   `AutoDisplay` is `displaydev.auto` only — never re-exported from

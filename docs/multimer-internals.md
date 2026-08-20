@@ -1,6 +1,6 @@
 # Timer backend internals & platform capabilities
 
-This document explains the internal architecture of `multimer`: how timer providers are selected, the underlying C-binding and threading capabilities of each Python runtime, and how PyDevices bridges hardware interrupts, OS signals, and SDL2 event pumps.
+This document explains the internal architecture of `multimer`: how timer providers are selected, the underlying C-binding and threading capabilities of each Python interpreter, and how PyDevices bridges hardware interrupts, OS signals, and SDL2 event pumps.
 
 Importing `multimer` itself never selects a synchronous timer provider. An
 application imports a provider explicitly, such as
@@ -8,15 +8,15 @@ application imports a provider explicitly, such as
 `from multimer import auto as timer`. The final column below describes what
 `multimer.auto` normally selects; it is not a package-root default.
 
-For the general user guide and quickstart, see [multimer](multimer.md). For display driver integration, see [Display backend internals](displaydev-internals.md) and [Runtime](application-runtime.md).
+For the general user guide and quickstart, see [multimer](multimer.md). For display driver integration, see [Display backend internals](displaydev-internals.md) and [App and board config](app-and-board-config.md).
 
 ---
 
 ## Platform capabilities matrix
 
-The table below details the underlying system capabilities available to `multimer` across all supported runtimes:
+The table below details the underlying system capabilities available to `multimer` across all supported interpreters:
 
-| Runtime / Executable | Target Platform | FFI / C-Bindings | Threading Support | SDL2 Provider | Signal / Interrupt Timers | Normal `multimer.auto` Provider |
+| Interpreter / Executable | Target Platform | FFI / C-Bindings | Threading Support | SDL2 Provider | Signal / Interrupt Timers | Normal `multimer.auto` Provider |
 |---|---|---|---|---|---|---|
 | **CPython** (`python`) | Linux Desktop | `ctypes` | Full `threading` + `_thread` | `usdl2.py` (via `ctypes`) or `pygame` | POSIX real-time signals (`librt`) | `librt` (`uses_interrupts=True`) |
 | **MicroPython** (`micropython`) | Linux Unix port | `ffi` + `uctypes` | Built-in `_thread` | `usdl2.py` (via `ffi`) | POSIX real-time signals (`librt`) | `librt` (`uses_interrupts=True`) |
@@ -36,13 +36,13 @@ The table below details the underlying system capabilities available to `multime
 Hosted desktop and simulation targets often use SDL2 for window management, frame presentation, and input polling. PyDevices provides two distinct mechanisms to connect to SDL2 depending on the host's FFI capabilities:
 
 ### 1. Pure-Python FFI Bridge (`usdl2.py`)
-When running on **CPython** (Linux/Windows) or **MicroPython Unix** (Linux), the runtime has access to dynamic foreign function interfaces (`ctypes` or `ffi`):
-* `usdl2.py` dynamically loads the system `libSDL2.so` or `SDL2.dll` at runtime.
+When running on **CPython** (Linux/Windows) or **MicroPython Unix** (Linux), the interpreter has access to dynamic foreign function interfaces (`ctypes` or `ffi`):
+* `usdl2.py` dynamically loads the system `libSDL2.so` or `SDL2.dll` at app.
 * No C compilation or custom binary build is needed.
 * Timer ticks and window pump hooks can be called directly from Python code.
 
 ### 2. Compiled User C Module (`displayif` / `cmods`)
-When running on runtimes **without FFI** (such as CircuitPython, or a custom
+When running on interpreters **without FFI** (such as CircuitPython, or a custom
 MicroPython build that omits `ffi`):
 * Python cannot load DLLs or shared libraries dynamically.
 * The [cmods](https://github.com/PyDevices/cmods) workspace compiles `displayif` directly into the interpreter binary as a native C module (`usdl2`).

@@ -59,14 +59,14 @@ PyScript browser canvas. Input (pointer/touch/pen, wheel, keyboard, gamepad) is 
 
 
 Display backends expose input without choosing an application coordinator.
-Applications using the optional [`appdev`](appdev.md) runtime can drain the
+Applications using the optional [`appdev`](appdev.md) app can drain the
 backend's [`events`](appdev.md) records through a **`HostEventsDevice`**. The
 input source depends on what each platform exposes:
 
 | Backends | Input source | Wired via |
 |----------|--------------|-----------|
-| `SDLDisplay`, `PGDisplay`, `WinDisplay` | System-wide OS queue drain (module `get_events`, also on `display_drv.get_events`) | `Runtime(..., host_read=display_drv.get_events)` |
-| `JNDisplay`, `PSDisplay` | Per-surface `PSDevices` / `JNDevices`, exposed as `display_drv.get_events` | `Runtime(..., host_read=display_drv.get_events)` |
+| `SDLDisplay`, `PGDisplay`, `WinDisplay` | System-wide OS queue drain (module `get_events`, also on `display_drv.get_events`) | `appdev.App(..., host_read=display_drv.get_events)` |
+| `JNDisplay`, `PSDisplay` | Per-surface `PSDevices` / `JNDevices`, exposed as `display_drv.get_events` | `appdev.App(..., host_read=display_drv.get_events)` |
 
 With appdev, handlers see the same `events` objects, so application code does
 not need to know which backend is active. LVGL instead connects these neutral
@@ -85,7 +85,7 @@ from displaydev.sdldisplay import SDLDisplay
 import appdev
 
 display_drv = SDLDisplay(...)
-runtime = appdev.App(
+app = appdev.App(
     displays=[display_drv],
     host_read=display_drv.get_events,
 )
@@ -119,7 +119,7 @@ from displaydev.psdisplay import PSDisplay
 import appdev
 
 display_drv = PSDisplay("display_canvas", width, height)
-runtime = appdev.App(
+app = appdev.App(
     displays=[display_drv],
     host_read=display_drv.get_events,
     timer_async=display_drv.requires_async_timer,

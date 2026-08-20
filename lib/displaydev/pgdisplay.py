@@ -83,9 +83,9 @@ def _handle_window_close(window):
     display = _display_for_window(window)
     if display is None or display is _pg_displays[0] or len(_pg_displays) <= 1:
         return events.Quit(events.QUIT)
-    runtime = getattr(display, "runtime", None)
-    if runtime is not None and callable(getattr(runtime, "remove_display", None)):
-        runtime.remove_display(display)
+    app = getattr(display, "app", None)
+    if app is not None and callable(getattr(app, "remove_display", None)):
+        app.remove_display(display)
     else:
         try:
             display.quit()
@@ -262,7 +262,7 @@ class PGDisplay(DisplayDriver):
         self._pg_window = None
         self._window_id = None
         self._window = None  # Window.get_surface() display surface
-        self.runtime = None
+        self.app = None
         self._render_dirty = False
         self._show_pending = False
         self._requires_byteswap = False
@@ -585,7 +585,7 @@ class PGDisplay(DisplayDriver):
         self._pg_window = None
         self._window = None
         self._window_id = None
-        self.runtime = None
+        self.app = None
         if window is not None:
             try:
                 window.destroy()

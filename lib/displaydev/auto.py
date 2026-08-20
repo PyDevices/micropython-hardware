@@ -5,12 +5,12 @@
 """Optional host backend selection. Backends never import this module.
 
 Selects ``PSDisplay`` / ``JNDisplay`` / ``WinDisplay``→``PGDisplay``→
-``SDLDisplay`` (or Android ``AndroidSDLDisplay``) from the runtime host so
+``SDLDisplay`` (or Android ``AndroidSDLDisplay``) from the host so
 board configs stay MCU-shaped wiring only. Explicit boards import a backend
 directly; this factory is convenience only.
 
 Returns the display driver directly. Desktop drivers expose ``get_events`` for
-``Runtime(host_read=...)`` and ``requires_async_timer`` for the timer default.
+``appdev.App(host_read=...)`` and ``requires_async_timer`` for the timer default.
 """
 
 import sys

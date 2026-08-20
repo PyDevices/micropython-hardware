@@ -182,14 +182,14 @@ An application opting into `appdev` then creates its own traffic controller:
 import board_config
 import appdev
 
-runtime = appdev.App(board_config)
+app = appdev.App(board_config)
 ```
 
 LVGL instead creates an independent coordinator in `display_driver`.
 
 | Branch | `display_drv.requires_async_timer` | `timer_async` export |
 |--------|-----------------------------------|-------------------------------|
-| PyScript / Jupyter | `True` | `True` (default; **`PYDEVICES_TIMER_ASYNC=0` → Runtime raises**) |
+| PyScript / Jupyter | `True` | `True` (default; **`PYDEVICES_TIMER_ASYNC=0` → appdev.App raises**) |
 | PG/SDL desktop | `False` | `False` unless **`PYDEVICES_TIMER_ASYNC`** is set |
 
 `appdev.App` rejects `timer_async=False` when any attached display has
@@ -211,7 +211,7 @@ PYDEVICES_TIMER_ASYNC=1 python my_example.py
 ```
 
 Per-board configs under `board_configs/` may export `timer_async`; they never
-construct a runtime.
+construct a app.
 
 ## Custom config
 

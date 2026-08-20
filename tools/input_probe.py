@@ -10,8 +10,8 @@ the same ``events.Key`` contract every displaydev backend must emit.
    — native → ``events.Key`` conversion (repeat, scancode, mod, name).
 2. **appdev** (``HostEventsDevice``, ``KeypadDevice``, ``VirtualDevices``)
    — quit chords, hardware keypad, FIFO fan-out to virtual keypad.
-Applications consume these layers via ``runtime.poll()`` and
-``runtime.on(KEYDOWN, …)``.
+Applications consume these layers via ``app.poll()`` and
+``app.on(KEYDOWN, …)``.
 
 ## Usage (from the ``pydevices`` repo root)
 
@@ -354,9 +354,9 @@ def print_fixes():
 # ---------------------------------------------------------------------------
 def run_interactive():
     import board_config
-    from appdev import Runtime
+    from appdev import App
 
-    runtime = Runtime.from_board_config(board_config)
+    app = App(board_config)
 
     downs = {}
     pressed = set()
@@ -389,7 +389,7 @@ def run_interactive():
         try:
             from appdev._host import _vd_peers
 
-            for host in runtime.devices:
+            for host in app.devices:
                 if getattr(host, "type", None) != types.HOST:
                     continue
                 peers = _vd_peers.get(id(host)) or []
@@ -409,9 +409,9 @@ def run_interactive():
     print("held keys / down counts update live.\n")
 
     for et in (events.KEYDOWN, events.KEYUP):
-        runtime.on(et, _on_key)
-    runtime.on_tick(_tick, period=200, async_=False)
-    runtime.run_forever()
+        app.on(et, _on_key)
+    app.on_tick(_tick, period=200, async_=False)
+    app.run()
 
 
 def main(argv=None):

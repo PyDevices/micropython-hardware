@@ -69,7 +69,7 @@ class Timer(_TimerCore):
             return 0
         # usdl2's SDL trampoline already ``mp_sched_schedule``s onto the VM
         # thread before invoking this callback. Do not schedule again — with
-        # ``hard=False`` (Runtime) that was a third hop and overflowed
+        # ``hard=False`` (appdev.App) that was a third hop and overflowed
         # ``MICROPY_SCHEDULER_DEPTH`` on micropython.exe.
         self._pending = False
         self._deliver()

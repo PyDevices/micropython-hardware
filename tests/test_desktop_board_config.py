@@ -68,7 +68,7 @@ class DesktopBoardConfigContractTests(unittest.TestCase):
         self.assertIs(board_config.display_drv, display)
         self.assertIs(board_config.host_read, display.get_events)
         self.assertFalse(board_config.timer_async)
-        self.assertFalse(hasattr(board_config, "runtime"))
+        self.assertFalse(hasattr(board_config, "app"))
         self.assertEqual(board_config.PERIPHERALS, frozenset({"audio_out", "audio_in"}))
         import board_peripherals
 
@@ -92,7 +92,7 @@ class DesktopBoardConfigHeadlessSmoke(unittest.TestCase):
         import board_config
 
         self.assertTrue(hasattr(board_config, "display_drv"))
-        self.assertFalse(hasattr(board_config, "runtime"))
+        self.assertFalse(hasattr(board_config, "app"))
         self.assertIn("audio_out", board_config.PERIPHERALS)
         self.assertIn("audio_in", board_config.PERIPHERALS)
         self.assertTrue(hasattr(board_config.display_drv, "width"))

@@ -344,7 +344,7 @@ class PSDisplay(DisplayDriver):
         self.touch_scale = 1.0
 
         super().__init__(quiet=quiet)
-        # Per-canvas input; drain is the Runtime host_read callable.
+        # Per-canvas input; drain is the appdev.App host_read callable.
         self._ps_devices = PSDevices(id, self)
         self.get_events = self._ps_devices.read
 

@@ -132,7 +132,6 @@ class TestGraduatedBoardLayout(unittest.TestCase):
                 names = _assigned_names(bc_tree)
 
                 self.assertIn("display_drv", names)
-                self.assertNotIn("runtime", names)
                 self.assertNotIn("app", names)
                 self.assertNotIn("appdev", bc.read_text())
                 self.assertTrue(_has_call(bc_tree, "load_peripherals"))
@@ -189,7 +188,7 @@ class TestGraduatedBindLazy(unittest.TestCase):
                     ns.pop(role, None)
                     try:
                         obj = ns["__getattr__"](role)
-                    # Host structural smoke may not provide a board's runtime buses.
+                    # Host structural smoke may not provide a board's hardware buses.
                     except (NotImplementedError, ImportError, OSError, AttributeError):
                         continue
                     else:

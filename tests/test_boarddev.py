@@ -44,10 +44,10 @@ class TestBindLazy(unittest.TestCase):
             ns["__getattr__"]("wlan")
 
     def test_dir_lists_lazy_roles(self):
-        ns = {"runtime": None}
+        ns = {"app": None}
         boarddev.bind_lazy(ns, self._make_devices_mod(sdcard=lambda: 1, wlan=lambda: 2))
         names = ns["__dir__"]()
-        self.assertIn("runtime", names)
+        self.assertIn("app", names)
         self.assertIn("sdcard", names)
         self.assertIn("wlan", names)
 
