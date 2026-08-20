@@ -70,14 +70,11 @@ __all__ = [
     "color565",
     "color565_swapped",
     "color_rgb",
-    "desktop_work_area",
     "env_bool",
     "env_float",
     "env_get",
     "env_int",
     "env_set",
-    "fit_scale_to_desktop",
-    "notify_board_config_scale_override",
 ]
 
 _DEFAULT_AUTO_REFRESH_PERIOD = 33
@@ -182,121 +179,6 @@ def _env_raw(name):
         return getenv(name)
     except Exception:
         return None
-
-
-def desktop_work_area(display_index=0):
-    """Return ``(x, y, w, h)`` of the usable work area, or zeros if unknown.
-
-    Prefers the OS work area (taskbar / dock excluded). Used by desktop drivers
-    that do not have a native usable-bounds API (e.g. PyGame).
-    """
-    display_index = int(display_index)
-    if sys.platform == "win32":
-        try:
-            import uwin32
-
-            area = uwin32.SystemParametersInfoW_GETWORKAREA()
-            if area[2] > 0 and area[3] > 0:
-                return area
-        except Exception:
-            pass
-        try:
-            import ctypes
-            from ctypes import wintypes
-
-            class _RECT(ctypes.Structure):
-                _fields_ = [
-                    ("left", wintypes.LONG),
-                    ("top", wintypes.LONG),
-                    ("right", wintypes.LONG),
-                    ("bottom", wintypes.LONG),
-                ]
-
-            rect = _RECT()
-            # SPI_GETWORKAREA
-            if ctypes.windll.user32.SystemParametersInfoW(0x0030, 0, ctypes.byref(rect), 0):
-                w = int(rect.right - rect.left)
-                h = int(rect.bottom - rect.top)
-                if w > 0 and h > 0:
-                    return int(rect.left), int(rect.top), w, h
-        except Exception:
-            pass
-
-    # SDL2 usable bounds when libSDL2 is loadable (CPython desktop).
-    try:
-        import ctypes
-
-        sdl = None
-        for name in ("SDL2", "SDL2-2.0", "libSDL2-2.0.so.0", "libSDL2.so"):
-            try:
-                sdl = ctypes.CDLL(name)
-                break
-            except OSError:
-                continue
-        if sdl is not None and hasattr(sdl, "SDL_GetDisplayUsableBounds"):
-
-            class _SDL_Rect(ctypes.Structure):
-                _fields_ = [
-                    ("x", ctypes.c_int),
-                    ("y", ctypes.c_int),
-                    ("w", ctypes.c_int),
-                    ("h", ctypes.c_int),
-                ]
-
-            rect = _SDL_Rect()
-            fn = sdl.SDL_GetDisplayUsableBounds
-            fn.argtypes = [ctypes.c_int, ctypes.POINTER(_SDL_Rect)]
-            fn.restype = ctypes.c_int
-            if fn(display_index, ctypes.byref(rect)) == 0 and rect.w > 0 and rect.h > 0:
-                return int(rect.x), int(rect.y), int(rect.w), int(rect.h)
-    except Exception:
-        pass
-    return 0, 0, 0, 0
-
-
-def fit_scale_to_desktop(
-    width,
-    height,
-    scale,
-    desktop_w,
-    desktop_h,
-    *,
-    margin=_DESKTOP_SCALE_MARGIN,
-    chrome_w=0,
-    chrome_h=0,
-):
-    """Return the largest scale <= *scale* so the window fits on the desktop.
-
-    *desktop_w* / *desktop_h* should be the usable work area when available
-    (taskbar / dock excluded). *margin* is padding inside that area; *chrome_w*
-    / *chrome_h* reserve OS window frame outside the client (title bar, borders).
-    """
-    if scale <= 0 or desktop_w <= 0 or desktop_h <= 0:
-        return 1.0 if scale <= 0 else scale
-    max_w = desktop_w - margin - chrome_w
-    max_h = desktop_h - margin - chrome_h
-    if max_w <= 0 or max_h <= 0:
-        return scale
-    fit = min(max_w / width, max_h / height)
-    if fit < scale:
-        return fit
-    return scale
-
-
-def notify_board_config_scale_override(driver_name, requested, fitted, *, quiet=False):
-    """Tell the user when a desktop driver reduces board_config scale to fit the screen.
-
-    Args:
-        driver_name: Display class name for the log line (e.g. ``"SDLDisplay"``).
-        requested: Scale requested by board_config / constructor.
-        fitted: Scale after :func:`fit_scale_to_desktop`.
-        quiet: When True, skip printing.
-    """
-    if quiet or fitted == requested:
-        return
-    print(
-        f"{driver_name}: overriding board_config scale {requested} -> {fitted:.2f} to fit desktop"
-    )
 
 
 def capabilities():

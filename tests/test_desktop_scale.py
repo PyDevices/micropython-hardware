@@ -7,12 +7,8 @@ import unittest
 
 import _env  # noqa: F401
 
-from displaydev import (
-    _DESKTOP_SCALE_MARGIN,
-    _DESKTOP_WINDOW_CHROME_H,
-    desktop_work_area,
-    fit_scale_to_desktop,
-)
+from displaydev import _DESKTOP_SCALE_MARGIN, _DESKTOP_WINDOW_CHROME_H
+from displaydev._desktop import desktop_work_area, fit_scale_to_desktop
 
 
 class TestFitScaleToDesktop(unittest.TestCase):

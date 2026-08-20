@@ -8,15 +8,8 @@ displaydev.pgdisplay
 
 import pygame as pg
 
-from displaydev import (
-    _DESKTOP_WINDOW_CHROME_H,
-    _DESKTOP_WINDOW_CHROME_W,
-    DisplayDriver,
-    color_rgb,
-    desktop_work_area,
-    fit_scale_to_desktop,
-    notify_board_config_scale_override,
-)
+from displaydev import _DESKTOP_WINDOW_CHROME_H, color_rgb
+from displaydev._desktop import DesktopDisplay, FrameRecorderMixin, desktop_work_area
 import events
 import keys
 
@@ -212,7 +205,7 @@ def _init_joysticks() -> None:
         pass
 
 
-class PGDisplay(DisplayDriver):
+class PGDisplay(FrameRecorderMixin, DesktopDisplay):
     """Emulate an LCD window with pygame-ce (``pygame.Window``).
 
     Requires pygame-ce with public ``Window.get_surface`` / ``Window.flip``
@@ -290,20 +283,8 @@ class PGDisplay(DisplayDriver):
             except Exception:
                 desktop_w, desktop_h = 0, 0
         self._work_area = (ux, uy, desktop_w, desktop_h)
-        requested_scale = self._scale
-        fitted = fit_scale_to_desktop(
-            self.width,
-            self.height,
-            requested_scale,
-            desktop_w,
-            desktop_h,
-            chrome_w=_DESKTOP_WINDOW_CHROME_W,
-            chrome_h=_DESKTOP_WINDOW_CHROME_H,
-        )
-        notify_board_config_scale_override("PGDisplay", requested_scale, fitted, quiet=quiet)
-        if fitted != requested_scale:
-            self._scale = fitted
-            self.touch_scale = fitted
+        self._scale = self._fit_scale(desktop_w, desktop_h, quiet)
+        self.touch_scale = self._scale
         _init_joysticks()
 
         self._buffer = pg.Surface(size=(self._width, self._height), depth=self.color_depth)
@@ -364,10 +345,8 @@ class PGDisplay(DisplayDriver):
         self._lock_window_size()
         self._place_window(win_w, win_h)
 
-        super().vscrdef(
-            0, self.height, 0
-        )  # Set the vertical scroll definition without calling show
-        self.vscsad(False)  # Scroll offset; set to False to disable scrolling
+        # Full-height scroll region, no repaint during init.
+        self._reset_vscroll()
 
     def blit_rect(self, buffer: memoryview, x: int, y: int, w: int, h: int):
         """
@@ -407,33 +386,6 @@ class PGDisplay(DisplayDriver):
 
     ############### API Method Overrides ################
 
-    def vscrdef(self, tfa: int, vsa: int, bfa: int) -> None:
-        """
-        Set the vertical scroll definition.
-
-        Args:
-            tfa (int): The top fixed area.
-            vsa (int): The vertical scroll area.
-            bfa (int): The bottom fixed area.
-        """
-        super().vscrdef(tfa, vsa, bfa)
-        self._render_dirty = True
-
-    def vscsad(self, vssa=None) -> int:
-        """
-        Set the vertical scroll start address.
-
-        Args:
-            vssa (Optional[int], optional): The vertical scroll start address. Defaults to None.
-
-        Returns:
-            int: The vertical scroll start address.
-        """
-        if vssa is not None:
-            super().vscsad(vssa)
-            self._render_dirty = True
-        return self._vssa
-
     def _rotation_helper(self, value):
         """
         Helper function for the rotation setter.
@@ -468,34 +420,6 @@ class PGDisplay(DisplayDriver):
         if hasattr(pg.image, "tobytes"):
             return pg.image.tobytes(self._window, "RGB")
         return pg.image.tostring(self._window, "RGB")
-
-    @property
-    def frame_recording(self) -> bool:
-        """True while an ffmpeg frame recorder is attached."""
-        return self._frame_recorder is not None
-
-    def open_frame_recorder(self, path, *, fps=12, width=None, height=None):
-        """Attach an ffmpeg-backed recorder that receives one RGB24 frame per ``show()``."""
-        from frame_recorder import FFmpegFrameRecorder
-
-        self.close_frame_recorder()
-        w = int(self.width * self._scale) if width is None else width
-        h = int(self.height * self._scale) if height is None else height
-        self._frame_recorder = FFmpegFrameRecorder(path, w, h, fps)
-        return self._frame_recorder
-
-    def close_frame_recorder(self):
-        """Finalize and detach any active frame recorder."""
-        recorder = self._frame_recorder
-        self._frame_recorder = None
-        if recorder is not None:
-            return recorder.close()
-        return 0
-
-    def _record_frame(self, rgb_bytes) -> None:
-        recorder = self._frame_recorder
-        if recorder is not None:
-            recorder.write(rgb_bytes)
 
     def render(self, renderRect=None) -> None:
         """
@@ -569,10 +493,6 @@ class PGDisplay(DisplayDriver):
         except Exception:
             pass
         raise SystemExit(code)
-
-    def force_quit(self, code: int = 0) -> None:
-        """Release pygame resources then hard-exit the process."""
-        self.quit(code, force=True)
 
     def _deinit(self) -> None:
         """Release this window; quit pygame only when no PGDisplay remains."""

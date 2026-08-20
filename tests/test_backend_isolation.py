@@ -22,6 +22,7 @@ class TestBackendIsolation(unittest.TestCase):
             "displaydev.psdisplay",
             "displaydev.jndisplay",
             "displaydev.sdldisplay",
+            "displaydev._desktop",
         ):
             if name not in before:
                 self.assertNotIn(name, sys.modules, f"busdisplay imported {name}")

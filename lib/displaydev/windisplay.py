@@ -6,20 +6,10 @@
 displaydev.windisplay — Win32 HWND display driver (CPython on Windows).
 """
 
-import struct
-import sys
-
 import uwin32 as win
 
-from displaydev import (
-    _DESKTOP_WINDOW_CHROME_H,
-    _DESKTOP_WINDOW_CHROME_W,
-    DisplayDriver,
-    color_rgb,
-    desktop_work_area,
-    fit_scale_to_desktop,
-    notify_board_config_scale_override,
-)
+from displaydev import _DESKTOP_WINDOW_CHROME_H
+from displaydev._desktop import DesktopDisplay, desktop_work_area
 import events
 import keys
 
@@ -32,60 +22,70 @@ _pending = []
 _wndproc_ref = None
 _class_registered = False
 
+# Built once, not per message.
+_BUTTON_DOWN = {win.WM_LBUTTONDOWN: 1, win.WM_MBUTTONDOWN: 2, win.WM_RBUTTONDOWN: 3}
+_BUTTON_UP = {win.WM_LBUTTONUP: 1, win.WM_MBUTTONUP: 2, win.WM_RBUTTONUP: 3}
+_KEY_MSGS = (win.WM_KEYDOWN, win.WM_KEYUP, win.WM_SYSKEYDOWN, win.WM_SYSKEYUP)
+_KEY_DOWN_MSGS = (win.WM_KEYDOWN, win.WM_SYSKEYDOWN)
+
 
 def _color565_bytes(c):
     c = int(c) & 0xFFFF
     return bytes((c & 0xFF, c >> 8))
 
 
-def _rgb565_to_bgra_row(src, dst, width):
-    for x in range(width):
-        lo = src[x * 2]
-        hi = src[x * 2 + 1]
-        r = hi & 0xF8 | (hi >> 5) & 0x07
-        g = (hi << 5) & 0xE0 | (lo >> 3) & 0x1F
-        b = (lo << 3) & 0xF8 | (lo >> 2) & 0x07
-        o = x * 4
-        dst[o] = b
-        dst[o + 1] = g
-        dst[o + 2] = r
-        dst[o + 3] = 255
+def _rotate_rgb565(src, dst, width, height, angle):
+    """Rotate *src* into *dst* by *angle* degrees clockwise.
 
-
-def _rotate_rgb565(buf, width, height, angle):
-    """Return (new_buf, new_w, new_h) after rotating *angle* degrees clockwise."""
+    Both buffers are ``width * height * 2`` bytes of RGB565; *dst* is written
+    with the rotated image, whose dimensions are swapped for 90 / 270. Writing
+    into a caller-owned *dst* keeps rotation from allocating a framebuffer.
+    """
     angle %= 360
     if angle == 0:
-        return buf, width, height
-    src = memoryview(buf)
+        dst[:] = src
+        return
     if angle == 180:
-        out = bytearray(len(buf))
-        n = width * height
-        for i in range(n):
-            j = n - 1 - i
-            out[j * 2 : j * 2 + 2] = src[i * 2 : i * 2 + 2]
-        return out, width, height
-    out_w, out_h = height, width
-    out = bytearray(out_w * out_h * 2)
+        # Walk src forward and dst backward one row at a time, reversing
+        # pixels within the row -- no per-pixel index arithmetic on both sides.
+        pitch = width * 2
+        for y in range(height):
+            row = bytes(src[y * pitch : (y + 1) * pitch])
+            out = bytearray(pitch)
+            for x in range(width):
+                s = x * 2
+                d = pitch - 2 - s
+                out[d] = row[s]
+                out[d + 1] = row[s + 1]
+            d0 = (height - 1 - y) * pitch
+            dst[d0 : d0 + pitch] = out
+        return
+    out_w = height
+    out_pitch = out_w * 2
     if angle == 90:
+        # (x, y) -> (height - 1 - y, x): one source row becomes one dest column.
         for y in range(height):
+            s_base = y * width * 2
+            d_base = (height - 1 - y) * 2
             for x in range(width):
-                nx, ny = height - 1 - y, x
-                di = (ny * out_w + nx) * 2
-                si = (y * width + x) * 2
-                out[di : di + 2] = src[si : si + 2]
+                s = s_base + x * 2
+                d = x * out_pitch + d_base
+                dst[d] = src[s]
+                dst[d + 1] = src[s + 1]
     else:  # 270
+        # (x, y) -> (y, width - 1 - x)
         for y in range(height):
+            s_base = y * width * 2
+            d_base = y * 2
             for x in range(width):
-                nx, ny = y, width - 1 - x
-                di = (ny * out_w + nx) * 2
-                si = (y * width + x) * 2
-                out[di : di + 2] = src[si : si + 2]
-    return out, out_w, out_h
+                s = s_base + x * 2
+                d = (width - 1 - x) * out_pitch + d_base
+                dst[d] = src[s]
+                dst[d + 1] = src[s + 1]
 
 
-def _display_for_hwnd(hwnd):
-    return _hwnd_map.get(win.hwnd_int(hwnd))
+def _display_for_hwnd(wid):
+    return _hwnd_map.get(wid)
 
 
 def _handle_close(display):
@@ -124,13 +124,26 @@ def _queue(evt):
 
 
 def _wndproc(hwnd, msg, wparam, lparam):
-    display = _display_for_hwnd(hwnd)
     wid = win.hwnd_int(hwnd)
+    display = _hwnd_map.get(wid)
+    # Ordered by frequency: motion and paint dominate the message stream.
+    if msg == win.WM_MOUSEMOVE:
+        x, y = win.GET_X_LPARAM(lparam), win.GET_Y_LPARAM(lparam)
+        x, y = _map_coords(display, x, y)
+        rel = (0, 0)
+        if display is not None:
+            px, py = display._last_mouse
+            rel = (x - px, y - py)
+            display._last_mouse = (x, y)
+        _queue(events.Motion(events.MOUSEMOTION, (x, y), rel, _mouse_buttons(wparam), False, wid))
+        return 0
     if msg == win.WM_PAINT:
         hdc, ps = win.BeginPaint(hwnd)
         try:
             if display is not None:
-                display._present(hdc)
+                # The window was uncovered or resized -- the dirty band says
+                # nothing about what the compositor lost, so repaint it all.
+                display._present(hdc, full=True)
         finally:
             win.EndPaint(hwnd, ps)
         return 0
@@ -139,49 +152,35 @@ def _wndproc(hwnd, msg, wparam, lparam):
         return 0
     if msg == win.WM_DESTROY:
         return 0
-    if msg == win.WM_MOUSEMOVE:
-        x, y = win.GET_X_LPARAM(lparam), win.GET_Y_LPARAM(lparam)
-        x, y = _map_coords(display, x, y)
-        rel = (0, 0)
-        if display is not None:
-            px, py = getattr(display, "_last_mouse", (x, y))
-            rel = (x - px, y - py)
-            display._last_mouse = (x, y)
-        _queue(events.Motion(events.MOUSEMOTION, (x, y), rel, _mouse_buttons(wparam), False, wid))
-        return 0
-    if msg in (win.WM_LBUTTONDOWN, win.WM_MBUTTONDOWN, win.WM_RBUTTONDOWN):
-        button = {win.WM_LBUTTONDOWN: 1, win.WM_MBUTTONDOWN: 2, win.WM_RBUTTONDOWN: 3}[msg]
+    button = _BUTTON_DOWN.get(msg)
+    if button is not None:
         x, y = win.GET_X_LPARAM(lparam), win.GET_Y_LPARAM(lparam)
         x, y = _map_coords(display, x, y)
         _queue(events.Button(events.MOUSEBUTTONDOWN, (x, y), button, False, wid))
         return 0
-    if msg in (win.WM_LBUTTONUP, win.WM_MBUTTONUP, win.WM_RBUTTONUP):
-        button = {win.WM_LBUTTONUP: 1, win.WM_MBUTTONUP: 2, win.WM_RBUTTONUP: 3}[msg]
+    button = _BUTTON_UP.get(msg)
+    if button is not None:
         x, y = win.GET_X_LPARAM(lparam), win.GET_Y_LPARAM(lparam)
         x, y = _map_coords(display, x, y)
         _queue(events.Button(events.MOUSEBUTTONUP, (x, y), button, False, wid))
         return 0
     if msg in (win.WM_MOUSEWHEEL, win.WM_MOUSEHWHEEL):
         delta = win.GET_WHEEL_DELTA_WPARAM(wparam) / float(win.WHEEL_DELTA)
-        sx = win.GET_X_LPARAM(lparam)
-        sy = win.GET_Y_LPARAM(lparam)
-        if display is not None and display._hwnd:
-            sx, sy = win.ScreenToClient(display._hwnd, sx, sy)
         if msg == win.WM_MOUSEWHEEL:
             _queue(events.Wheel(events.MOUSEWHEEL, False, 0, delta, 0.0, delta, False, wid))
         else:
             _queue(events.Wheel(events.MOUSEWHEEL, False, delta, 0, delta, 0.0, False, wid))
         return 0
-    if msg in (win.WM_KEYDOWN, win.WM_KEYUP, win.WM_SYSKEYDOWN, win.WM_SYSKEYUP):
-        repeat = bool(lparam & 0x40000000) and msg in (win.WM_KEYDOWN, win.WM_SYSKEYDOWN)
-        if repeat:
+    if msg in _KEY_MSGS:
+        down = msg in _KEY_DOWN_MSGS
+        if down and lparam & 0x40000000:  # auto-repeat
             return 0
         vk = int(wparam) & 0xFF
         key = win.virtual_key_to_sdl(vk)
         name = keys.keyname(key)
         if name == "Unknown":
             name = win.GetKeyNameTextW(lparam) or str(vk)
-        et = events.KEYDOWN if msg in (win.WM_KEYDOWN, win.WM_SYSKEYDOWN) else events.KEYUP
+        et = events.KEYDOWN if down else events.KEYUP
         _queue(events.Key(et, name, key, win.modifier_mask(), vk, wid))
         return 0
     return win.DefWindowProcW(hwnd, msg, wparam, lparam)
@@ -205,6 +204,10 @@ def _ensure_class():
 
 
 def _pump():
+    # A fresh MSG per poll, deliberately: MicroPython's ffi passes a
+    # newly-allocated buffer roughly 40x faster than a long-lived one
+    # (~0.3us vs ~12.5us here), so caching one to save the allocation costs
+    # far more time than it saves memory.
     while True:
         msg = win.PeekMessageW()
         if msg is None:
@@ -232,16 +235,32 @@ def get_events():
     return out
 
 
-class WinDisplay(DisplayDriver):
+class WinDisplay(DesktopDisplay):
     """Emulate an LCD window with a Win32 HWND (via ``uwin32``).
 
-    Logical framebuffer is RGB565. ``show()`` converts scroll bands to BGRA
-    and ``StretchDIBits`` into the client area.
+    The RGB565 framebuffer is handed to GDI as-is, through a 16-bit
+    ``BI_BITFIELDS`` DIB, so presenting costs no conversion pass and no copy.
+    ``show()`` blits only the rows that changed since the last present.
     """
 
     needs_refresh = True
     requires_async_timer = False
     quit_chord = (keys.K_q, keys.KMOD_CTRL)
+
+    # Defaults at class level so teardown works on a half-built instance:
+    # __init__ validates its arguments before binding anything, and the
+    # finalizer still runs on the object that raised.
+    app = None
+    _hwnd = None
+    _window_id = None
+    _buffer = None
+    _buffer_ptr = 0
+    _bits = None
+    _bmi = None
+    _bmi_header = None
+    _bmi_dims = None
+    _scroll_scratch = None
+    _scroll_bits = 0
 
     def __init__(
         self,
@@ -258,6 +277,11 @@ class WinDisplay(DisplayDriver):
     ):
         if color_depth != 16:
             raise ValueError("WinDisplay only supports color_depth=16")
+        if width % 2 or height % 2:
+            # DIB scanlines are DWORD-aligned; RGB565 rows only land on a
+            # 4-byte boundary when the width is even. Rotation swaps the two,
+            # so both have to qualify.
+            raise ValueError("WinDisplay requires even width and height")
         self._width = width
         self._height = height
         self._rotation = rotation
@@ -272,27 +296,26 @@ class WinDisplay(DisplayDriver):
         self._render_dirty = False
         self._last_mouse = (0, 0)
         self._bytes_per_pixel = 2
-        self._buffer = bytearray(self._width * self._height * 2)
-        self._visible = bytearray(self._width * self._height * 2)
-        self._bgra = bytearray(self._width * self._height * 4)
+        self._buffer_ptr = 0
+        self._buffer = self._alloc_framebuffer(width * height * 2)
+        self._bits = None
         self._bmi = None
+        self._bmi_header = None
+        self._bmi_dims = None
+        # Rows pending present, as a half-open [y0, y1) band.
+        self._dirty_y0 = 0
+        self._dirty_y1 = height
         win.CoInitializeEx()
         ux, uy, desktop_w, desktop_h = desktop_work_area()
         self._work_area = (ux, uy, desktop_w, desktop_h)
-        requested_scale = self._scale
-        fitted = fit_scale_to_desktop(
-            self.width,
-            self.height,
-            requested_scale,
-            desktop_w,
-            desktop_h,
-            chrome_w=_DESKTOP_WINDOW_CHROME_W,
-            chrome_h=_DESKTOP_WINDOW_CHROME_H,
-        )
-        notify_board_config_scale_override("WinDisplay", requested_scale, fitted, quiet=quiet)
-        if fitted != requested_scale:
-            self._scale = fitted
-            self.touch_scale = fitted
+        self._scale = self._fit_scale(desktop_w, desktop_h, quiet)
+        self.touch_scale = self._scale
+        # Present only the changed rows when every band edge lands on a whole
+        # device row. GDI resamples each band against its own rectangle, so at
+        # a fractional scale a banded repaint disagrees with a full one by a
+        # row here and there and leaves seams; there we repaint the frame.
+        # Skipping an unchanged frame entirely still applies at any scale.
+        self._can_band = self._scale >= 1 and self._scale == int(self._scale)
         self._place_x = x
         self._place_y = y
         super().__init__(quiet=quiet)
@@ -300,6 +323,55 @@ class WinDisplay(DisplayDriver):
         self.get_events = get_events
         if self not in _displays:
             _displays.append(self)
+
+    # ------------------------------------------------------------------
+    # Framebuffer memory
+    # ------------------------------------------------------------------
+
+    def _alloc_framebuffer(self, nbytes):
+        """Framebuffer storage, kept off the GC heap when Win32 allows it.
+
+        ``VirtualAlloc`` hands back zero-filled pages at a stable address, so
+        the buffer behaves like a ``bytearray`` while staying invisible to the
+        collector -- worth ~150 KB of heap at 320x240. Falls back to a plain
+        ``bytearray`` if the allocation is refused.
+        """
+        try:
+            ptr = win.VirtualAlloc(nbytes)
+        except Exception:
+            ptr = 0
+        if ptr:
+            self._buffer_ptr = ptr
+            return win.buffer_at(ptr, nbytes)
+        self._buffer_ptr = 0
+        return bytearray(nbytes)
+
+    def _free_framebuffer(self):
+        """Drop every view of the framebuffer, then release it."""
+        self._bits = None
+        self._buffer = None
+        self._scroll_scratch = None
+        self._scroll_bits = 0
+        ptr = self._buffer_ptr
+        self._buffer_ptr = 0
+        if ptr:
+            try:
+                win.VirtualFree(ptr)
+            except Exception:
+                pass
+
+    def _ensure_bmi(self):
+        """(Re)build the DIB header and the zero-copy bits view after a resize."""
+        dims = (self.width, self.height)
+        if self._bmi_dims == dims and self._bits is not None:
+            return
+        self._bmi = win.bmi_rgb565(dims[0], dims[1])
+        # Held directly: re-reading .bmiHeader per present builds a new
+        # accessor object every time, on both backends.
+        self._bmi_header = self._bmi.bmiHeader
+        # Base address of the framebuffer; bands add a scanline offset to it.
+        self._bits = win.dib_bits(self._buffer)
+        self._bmi_dims = dims
 
     def init(self):
         _ensure_class()
@@ -335,122 +407,235 @@ class WinDisplay(DisplayDriver):
             win.ShowWindow(self._hwnd)
         else:
             win.SetWindowPos(self._hwnd, x, y, outer_w, outer_h)
-        self._bmi = win.bmi_bgra(self.width, self.height)
         nbytes = self.width * self.height * 2
-        if len(self._buffer) != nbytes:
-            self._buffer = bytearray(nbytes)
-            self._visible = bytearray(nbytes)
-            self._bgra = bytearray(self.width * self.height * 4)
+        if self._buffer is None or len(self._buffer) != nbytes:
+            self._free_framebuffer()
+            self._buffer = self._alloc_framebuffer(nbytes)
+            self._bmi_dims = None
+        self._ensure_bmi()
+        self._mark_dirty(0, self.height)
         super().vscrdef(0, self.height, 0)
         self.vscsad(False)
+
+    # ------------------------------------------------------------------
+    # Drawing
+    # ------------------------------------------------------------------
+
+    def _scroll_changed(self):
+        """A scroll definition or offset change remaps every row, so the whole
+        frame is pending -- the base class only flips ``_render_dirty``, which
+        would leave a stale band behind when scrolling is switched off."""
+        self._mark_dirty(0, self.height)
+
+    def _mark_dirty(self, y0, y1):
+        """Widen the pending present band to cover rows [y0, y1)."""
+        if self._render_dirty:
+            if y0 < self._dirty_y0:
+                self._dirty_y0 = y0
+            if y1 > self._dirty_y1:
+                self._dirty_y1 = y1
+        else:
+            self._dirty_y0 = y0
+            self._dirty_y1 = y1
+            self._render_dirty = True
 
     def blit_rect(self, buffer, x, y, w, h):
         pitch = w * 2
         need = pitch * h
-        buflen = len(buffer)
-        if buflen < need:
+        if len(buffer) < need:
             raise ValueError("Buffer size does not match dimensions")
-        src = memoryview(buffer)[:need]
-        dst = memoryview(self._buffer)
-        dst_pitch = self.width * 2
-        for row in range(h):
-            s = row * pitch
-            d = ((y + row) * dst_pitch) + (x * 2)
-            dst[d : d + pitch] = src[s : s + pitch]
-        self._render_dirty = True
+        dst = self._buffer
+        if w == self.width and x == 0:
+            # Full-width blit: source rows are already contiguous in both
+            # buffers, so the whole rectangle moves in one slice assignment.
+            # Slice through a memoryview -- slicing the buffer itself would
+            # copy the entire source before the assignment even starts.
+            if len(buffer) != need:
+                buffer = memoryview(buffer)[:need]
+            d = y * pitch
+            dst[d : d + need] = buffer
+        else:
+            src = memoryview(buffer)
+            dst_pitch = self.width * 2
+            d = (y * dst_pitch) + (x * 2)
+            s = 0
+            for _row in range(h):
+                dst[d : d + pitch] = src[s : s + pitch]
+                s += pitch
+                d += dst_pitch
+        self._mark_dirty(y, y + h)
         return (x, y, w, h)
 
     def fill_rect(self, x, y, w, h, c):
-        pix = _color565_bytes(c)
-        dst = memoryview(self._buffer)
+        row = _color565_bytes(c) * w
+        dst = self._buffer
         pitch = self.width * 2
-        row = pix * w
-        for yy in range(y, y + h):
-            d = yy * pitch + x * 2
-            dst[d : d + w * 2] = row
-        self._render_dirty = True
+        span = w * 2
+        d = y * pitch + x * 2
+        for _yy in range(h):
+            dst[d : d + span] = row
+            d += pitch
+        self._mark_dirty(y, y + h)
         return (x, y, w, h)
 
     def pixel(self, x, y, c):
-        return self.blit_rect(bytearray(_color565_bytes(c)), x, y, 1, 1)
-
-    def vscrdef(self, tfa, vsa, bfa):
-        super().vscrdef(tfa, vsa, bfa)
-        self._render_dirty = True
-
-    def vscsad(self, vssa=None):
-        if vssa is not None:
-            super().vscsad(vssa)
-            self._render_dirty = True
-        return self._vssa
+        c = int(c) & 0xFFFF
+        d = (y * self.width + x) * 2
+        self._buffer[d] = c & 0xFF
+        self._buffer[d + 1] = c >> 8
+        self._mark_dirty(y, y + 1)
+        return (x, y, 1, 1)
 
     def _rotation_helper(self, value):
         angle = (value % 360) - (self._rotation % 360)
-        if angle == 0:
+        if angle % 360 == 0:
             return
-        self._buffer, _new_w, _new_h = _rotate_rgb565(
-            self._buffer, self.width, self.height, angle % 360
-        )
+        # Rotate through a scratch buffer and copy back, so the framebuffer
+        # keeps its address: no reallocation, and the off-heap block and its
+        # GDI view both stay valid. The scratch is transient.
+        scratch = bytearray(len(self._buffer))
+        _rotate_rgb565(self._buffer, scratch, self.width, self.height, angle % 360)
+        self._buffer[:] = scratch
+        # width / height swap for 90 / 270 once the caller commits the new
+        # rotation, so the DIB header has to be rebuilt on the next present.
+        self._bmi_dims = None
         self._render_dirty = True
+        self._dirty_y0 = 0
+        self._dirty_y1 = self._height if (value // 90) & 1 else self._width
 
-    def _compose_visible(self):
-        w = self.width
-        h = self.height
-        pitch = w * 2
-        src = memoryview(self._buffer)
-        dst = memoryview(self._visible)
+    # ------------------------------------------------------------------
+    # Presentation
+    # ------------------------------------------------------------------
+
+    def _scroll_bands(self):
+        """Source-to-dest row bands for the current scroll offset.
+
+        Returns a list of ``(src_y0, src_y1, dest_y0)``, or None when the
+        display is not scrolled and the framebuffer maps straight through.
+        """
         y_start = self.vscsad()
         if not y_start:
-            dst[:] = src
-            return
-        rows = []
-        rows.extend(range(self._tfa))
-        rows.extend(range(y_start, self._tfa + self._vsa))
-        rows.extend(range(self._tfa, y_start))
-        rows.extend(range(self._tfa + self._vsa, h))
-        for i, src_y in enumerate(rows):
-            dst[i * pitch : (i + 1) * pitch] = src[src_y * pitch : (src_y + 1) * pitch]
-
-    def _fill_bgra(self):
-        w = self.width
+            return None
+        tfa = self._tfa
+        vsa = self._vsa
         h = self.height
-        src = memoryview(self._visible)
-        dst = memoryview(self._bgra)
-        for y in range(h):
-            _rgb565_to_bgra_row(
-                src[y * w * 2 : (y + 1) * w * 2], dst[y * w * 4 : (y + 1) * w * 4], w
-            )
+        bands = []
+        if tfa > 0:
+            bands.append((0, tfa, 0))
+        top_h = tfa + vsa - y_start
+        bands.append((y_start, tfa + vsa, tfa))
+        if top_h < vsa:
+            bands.append((tfa, y_start, tfa + top_h))
+        if tfa + vsa < h:
+            bands.append((tfa + vsa, h, tfa + vsa))
+        return bands
+
+    def _blit_band(self, hdc, src_y0, src_y1, dest_y0, bits=None):
+        """Present source rows [src_y0, src_y1) at *dest_y0* in window space.
+
+        The band is selected by offsetting the cached bits address to its first
+        scanline, which is plain integer arithmetic -- so the header and the
+        address are both reused untouched and a present allocates nothing.
+
+        Not by GDI's own source origin: that measures from the *bottom* of the
+        image even for a top-down DIB, and then special-cases zero to mean the
+        first scanline in memory, which silently mis-renders any band ending at
+        the last row.
+
+        The header is retargeted at the band's height because GDI bounds the
+        source by ``biHeight`` when it has to stretch; leaving it at the full
+        frame reads past the band.
+        """
+        rows = src_y1 - src_y0
+        if rows <= 0:
+            return
+        if bits is None:
+            bits = self._bits
+        scale = self._scale
+        width = self.width
+        header = self._bmi_header
+        header.biHeight = -rows
+        header.biSizeImage = width * rows * 2
+        if scale == 1.0:
+            dest_w, dest_h, dest_y = width, rows, dest_y0
+        else:
+            dest_y = int(dest_y0 * scale)
+            dest_h = int((dest_y0 + rows) * scale) - dest_y
+            dest_w = int(width * scale)
+        win.StretchDIBits(
+            hdc,
+            dest_w,
+            dest_h,
+            width,
+            rows,
+            bits + src_y0 * width * 2,
+            self._bmi,
+            dest_y=dest_y,
+        )
+
+    def _compose_scrolled(self, bands):
+        """Assemble the scrolled frame in scratch; return its bits address.
+
+        Scrolling has to be drawn as several bands, so at a fractional scale it
+        cannot be presented directly without the per-band resampling seams --
+        the bands are copied together first and blitted as one image instead.
+        The scratch is allocated on first use, so a display only pays for it if
+        it actually scrolls at a fractional scale.
+        """
+        buf = self._scroll_scratch
+        if buf is None or len(buf) != len(self._buffer):
+            buf = bytearray(len(self._buffer))
+            self._scroll_scratch = buf
+            self._scroll_bits = win.dib_bits(buf)
+        pitch = self.width * 2
+        src = memoryview(self._buffer)
+        for src_y0, src_y1, dest_y0 in bands:
+            n = (src_y1 - src_y0) * pitch
+            d = dest_y0 * pitch
+            s = src_y0 * pitch
+            buf[d : d + n] = src[s : s + n]
+        return self._scroll_bits
 
     def render(self, renderRect=None):
-        if self._hwnd is None:
-            return
-        self._compose_visible()
-        self._fill_bgra()
-        self._render_dirty = False
+        """Present pending draws. Kept for API symmetry with the other backends."""
+        self._present()
 
-    def _present(self, hdc=None):
-        if self._hwnd is None or self._bmi is None:
+    def _present(self, hdc=None, full=False):
+        if self._hwnd is None or self._buffer is None:
             return
-        if self._render_dirty:
-            self.render()
+        if not full and not self._render_dirty:
+            return
+        self._ensure_bmi()
         own = hdc is None
         if own:
             hdc = win.GetDC(self._hwnd)
+            if not hdc:
+                return
         try:
-            dest_w = int(self.width * self._scale)
-            dest_h = int(self.height * self._scale)
-            win.StretchDIBits(
-                hdc,
-                dest_w,
-                dest_h,
-                self.width,
-                self.height,
-                bytes(self._bgra),
-                self._bmi,
-            )
+            bands = self._scroll_bands()
+            if bands is not None:
+                # A scroll offset remaps every row; the dirty band says nothing
+                # useful about where those rows land, so present all of them.
+                if self._can_band:
+                    for src_y0, src_y1, dest_y0 in bands:
+                        self._blit_band(hdc, src_y0, src_y1, dest_y0)
+                else:
+                    bits = self._compose_scrolled(bands)
+                    self._blit_band(hdc, 0, self.height, 0, bits)
+            elif full or not self._can_band:
+                self._blit_band(hdc, 0, self.height, 0)
+            else:
+                y0 = self._dirty_y0
+                y1 = self._dirty_y1
+                if y0 < 0:
+                    y0 = 0
+                if y1 > self.height:
+                    y1 = self.height
+                self._blit_band(hdc, y0, y1, y0)
         finally:
-            if own and hdc:
+            if own:
                 win.ReleaseDC(self._hwnd, hdc)
+        self._render_dirty = False
 
     def show(self, _timer=None):
         if self._hwnd is None:
@@ -474,6 +659,7 @@ class WinDisplay(DisplayDriver):
                 win.DestroyWindow(hwnd)
             except Exception:
                 pass
-        self._buffer = None
-        self._visible = None
-        self._bgra = None
+        self._bmi = None
+        self._bmi_header = None
+        self._bmi_dims = None
+        self._free_framebuffer()

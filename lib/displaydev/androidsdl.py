@@ -36,18 +36,6 @@ def _logical_size(width, height, rotation):
     return int(width), int(height)
 
 
-def _fit_scale_android(width, height, scale, desktop_w, desktop_h, chrome_w=0, chrome_h=0):
-    """Do not let board_config scale drive CreateWindow on Android.
-
-    A portrait ``720x1280`` at ``scale=2`` becomes ``1440x2560``. After a WIDE
-    Activity lock, SDL still letterboxes into that stale tall size and content
-    clips to the top-left. Window size follows the Activity SurfaceView; logical
-    panel size is applied with ``RenderSetLogicalSize``.
-    """
-    del width, height, scale, desktop_w, desktop_h, chrome_w, chrome_h
-    return 1.0
-
-
 def _set_orientation_hint(landscape):
     """Restrict SDL Android orientations to the locked aspect."""
     set_hint = getattr(usdl2, "SDL_SetHint", None)
@@ -208,32 +196,37 @@ class AndroidSDLDisplay(SDLDisplay):
         # Lock before CreateWindow so the first SurfaceView matches aspect.
         _set_activity_orientation(landscape)
 
-        import displaydev.sdldisplay as _sdlmod
-
-        prev_fit = _sdlmod.fit_scale_to_desktop
-        _sdlmod.fit_scale_to_desktop = _fit_scale_android
-        try:
-            # scale=1: CreateWindow uses logical panel size, not desktop scale.
-            super().__init__(
-                width=width,
-                height=height,
-                rotation=rotation,
-                color_depth=color_depth,
-                title=title,
-                scale=1.0,
-                window_flags=window_flags,
-                render_flags=render_flags,
-                x=x,
-                y=y,
-                quiet=quiet,
-            )
-        finally:
-            _sdlmod.fit_scale_to_desktop = prev_fit
+        # scale=1: CreateWindow uses logical panel size, not desktop scale.
+        # _fit_scale below keeps it there.
+        super().__init__(
+            width=width,
+            height=height,
+            rotation=rotation,
+            color_depth=color_depth,
+            title=title,
+            scale=1.0,
+            window_flags=window_flags,
+            render_flags=render_flags,
+            x=x,
+            y=y,
+            quiet=quiet,
+        )
 
         # Requested scale kept for API/recorder; Android window sizing ignores it.
         self._scale = 1.0 if scale <= 0 else float(scale)
         self._orient_settle_until = 0.0
         self._await_drawable(landscape)
+
+    def _fit_scale(self, desktop_w, desktop_h, quiet):
+        """Do not let board_config scale drive CreateWindow on Android.
+
+        A portrait ``720x1280`` at ``scale=2`` becomes ``1440x2560``. After a WIDE
+        Activity lock, SDL still letterboxes into that stale tall size and content
+        clips to the top-left. Window size follows the Activity SurfaceView; logical
+        panel size is applied with ``RenderSetLogicalSize``.
+        """
+        del desktop_w, desktop_h, quiet
+        return 1.0
 
     def _await_drawable(self, landscape=None):
         """Pump until the SurfaceView/SDL drawable matches the locked aspect."""

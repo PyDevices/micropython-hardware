@@ -9,7 +9,7 @@ from unittest import mock
 
 import _env  # noqa: F401
 
-from displaydev import capabilities
+from displaydev import DisplayDriver, capabilities
 
 
 def _has(module: str) -> bool:
@@ -33,8 +33,10 @@ class TestJNDisplayScroll(unittest.TestCase):
         d._jn_devices = None
         d._deinitialized = False
         d._quiet = True
-        super(JNDisplay, d).vscrdef(2, h - 4, 2)
-        d.vscsad(False)
+        # Set the bands without repainting: go straight to DisplayDriver so
+        # JNDisplay._scroll_changed does not fire against a half-built display.
+        d._vssa = False
+        DisplayDriver.vscrdef(d, 2, h - 4, 2)
         return d
 
     def test_capabilities_scroll_emulation(self):

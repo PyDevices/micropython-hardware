@@ -7,9 +7,13 @@ displaydev.psdisplay
 """
 
 from js import console, document
-from pyscript.ffi import create_proxy
+try:
+    from pyscript.ffi import create_proxy
+except ImportError:
+    from pyodide.ffi import create_proxy
 
-from displaydev import DisplayDriver, color_rgb
+from displaydev import color_rgb
+from displaydev._desktop import DesktopDisplay
 from displaydev._domkeys import (
     dom_key_scrolls_page,
     enrich_mod,
@@ -313,7 +317,7 @@ class PSDevices:
             self._gp_buttons[gid] = cur_btns
 
 
-class PSDisplay(DisplayDriver):
+class PSDisplay(DesktopDisplay):
     """Emulate a display on a PyScript HTML canvas.
 
     Args:
@@ -375,8 +379,7 @@ class PSDisplay(DisplayDriver):
         self.touch_scale = sx
         # Match PGDisplay / SDLDisplay / JNDisplay: default full-height scroll region
         # so vscsad() works before an explicit set_vscroll/vscrdef.
-        super().vscrdef(0, self.height, 0)
-        self._vssa = False
+        self._reset_vscroll()
 
     def fill_rect(self, x, y, w, h, c):
         """
@@ -451,17 +454,9 @@ class PSDisplay(DisplayDriver):
 
     ############### Scrolling (ILI9341-style, like SDLDisplay / PGDisplay) ################
 
-    def vscrdef(self, tfa: int, vsa: int, bfa: int) -> None:
-        """Set vertical scroll bands and re-render the canvas."""
-        super().vscrdef(tfa, vsa, bfa)
+    def _scroll_changed(self) -> None:
+        """Repaint immediately; this backend has no deferred-render tick."""
         self.render()
-
-    def vscsad(self, vssa=None) -> int:
-        """Get or set the vertical scroll start address and re-render when set."""
-        if vssa is not None:
-            super().vscsad(vssa)
-            self.render()
-        return self._vssa
 
     def render(self, render_rect=None) -> None:
         """Copy the offscreen buffer to the visible canvas, applying vertical scroll."""

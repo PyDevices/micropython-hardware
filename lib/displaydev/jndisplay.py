@@ -11,7 +11,8 @@ from io import BytesIO
 from IPython.display import display, update_display
 from PIL import Image, ImageDraw
 
-from displaydev import DisplayDriver, color_rgb
+from displaydev import color_rgb
+from displaydev._desktop import DesktopDisplay
 from displaydev._domkeys import enrich_mod, key_to_keycode, mod_mask
 import events
 import keys
@@ -302,7 +303,7 @@ class JNDevices:
         self._queue.append(events.Key(type, keys.keyname(keycode), keycode, mod, 0, None))
 
 
-class JNDisplay(DisplayDriver):
+class JNDisplay(DesktopDisplay):
     """Emulate a display in a Jupyter Notebook output cell.
 
     Supports ILI9341-style vertical scroll emulation (same band compositing as
@@ -373,8 +374,7 @@ class JNDisplay(DisplayDriver):
             self._jn_devices._last_png = b""
             self._jn_devices.update_buffer(self.render())
         else:
-            super().vscrdef(0, self.height, 0)
-            self.vscsad(False)
+            self._reset_vscroll()
             self._visible = None
 
     def fill_rect(self, x, y, w, h, c):
@@ -469,17 +469,9 @@ class JNDisplay(DisplayDriver):
 
     ############### Scrolling (ILI9341-style, like PG/PS/SDL) ################
 
-    def vscrdef(self, tfa: int, vsa: int, bfa: int) -> None:
-        """Set vertical scroll bands and recompose the visible frame."""
-        super().vscrdef(tfa, vsa, bfa)
+    def _scroll_changed(self) -> None:
+        """Repaint immediately; this backend has no deferred-render tick."""
         self.render()
-
-    def vscsad(self, vssa=None) -> int:
-        """Get or set the vertical scroll start address and recompose when set."""
-        if vssa is not None:
-            super().vscsad(vssa)
-            self.render()
-        return self._vssa
 
     def render(self, render_rect=None):
         """Composite offscreen buffer to visible frame, applying vertical scroll."""

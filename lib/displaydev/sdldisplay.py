@@ -11,14 +11,8 @@ import sys
 
 import usdl2
 
-from displaydev import (
-    _DESKTOP_WINDOW_CHROME_H,
-    _DESKTOP_WINDOW_CHROME_W,
-    DisplayDriver,
-    color_rgb,
-    fit_scale_to_desktop,
-    notify_board_config_scale_override,
-)
+from displaydev import _DESKTOP_WINDOW_CHROME_H, color_rgb
+from displaydev._desktop import DesktopDisplay, FrameRecorderMixin
 import events
 import keys
 
@@ -375,12 +369,6 @@ def _desktop_usable(display_index=0):
     return 0, 0, 0, 0
 
 
-def _desktop_size(display_index=0):
-    """Return ``(width, height)`` of the usable desktop area, or ``(0, 0)``."""
-    _x, _y, w, h = _desktop_usable(display_index)
-    return w, h
-
-
 def _window_position(win_w, win_h, x, y, usable=None):
     """Center a window in the usable work area when *x*/*y* request centering."""
     centered = x == usdl2.SDL_WINDOWPOS_CENTERED and y == usdl2.SDL_WINDOWPOS_CENTERED
@@ -414,7 +402,7 @@ def _hard_process_exit(code: int = 0) -> None:
     raise SystemExit(code)
 
 
-class SDLDisplay(DisplayDriver):
+class SDLDisplay(FrameRecorderMixin, DesktopDisplay):
     """Emulate an LCD window with SDL2 (via ``usdl2``).
 
     Provides scrolling and rotation similar to a panel driver. The SDL texture
@@ -482,21 +470,9 @@ class SDLDisplay(DisplayDriver):
 
         _save_tty()
         _sdl_init_display()
-        requested_scale = self._scale
         usable = _desktop_usable()
         _ux, _uy, desktop_w, desktop_h = usable
-        fitted = fit_scale_to_desktop(
-            self.width,
-            self.height,
-            requested_scale,
-            desktop_w,
-            desktop_h,
-            chrome_w=_DESKTOP_WINDOW_CHROME_W,
-            chrome_h=_DESKTOP_WINDOW_CHROME_H,
-        )
-        notify_board_config_scale_override("SDLDisplay", requested_scale, fitted, quiet=quiet)
-        if fitted != requested_scale:
-            self._scale = fitted
+        self._scale = self._fit_scale(desktop_w, desktop_h, quiet)
         _init_joysticks()
         win_w = int(self.width * self._scale)
         win_h = int(self.height * self._scale)
@@ -572,10 +548,8 @@ class SDLDisplay(DisplayDriver):
         self._lock_window_size()
         retcheck(usdl2.SDL_RenderSetLogicalSize(self._renderer, self.width, self.height))
 
-        super().vscrdef(
-            0, self.height, 0
-        )  # Set the vertical scroll definition without calling .render()
-        self.vscsad(False)  # Scroll offset; set to False to disable scrolling
+        # Full-height scroll region, no repaint during init.
+        self._reset_vscroll()
 
     def blit_rect(self, buffer: memoryview, x: int, y: int, w: int, h: int):
         """
@@ -639,33 +613,6 @@ class SDLDisplay(DisplayDriver):
 
     ############### API Method Overrides ################
 
-    def vscrdef(self, tfa: int, vsa: int, bfa: int) -> None:
-        """
-        Set the vertical scroll definition.
-
-        Args:
-            tfa (int): The top fixed area.
-            vsa (int): The vertical scroll area.
-            bfa (int): The bottom fixed area.
-        """
-        super().vscrdef(tfa, vsa, bfa)
-        self._render_dirty = True
-
-    def vscsad(self, vssa=None) -> int:
-        """
-        Set or get the vertical scroll start address.
-
-        Args:
-            vssa (int): The vertical scroll start address. Defaults to None.
-
-        Returns:
-            int: The vertical scroll start address.
-        """
-        if vssa is not None:
-            super().vscsad(vssa)
-            self._render_dirty = True
-        return self._vssa
-
     def _rotation_helper(self, value):
         """
         Creates a new texture to use as the buffer and copies the old one,
@@ -717,29 +664,6 @@ class SDLDisplay(DisplayDriver):
         if getattr(self, "_deinitialized", False):
             return False
         return self._renderer is not None and self._window is not None
-
-    @property
-    def frame_recording(self) -> bool:
-        """True while an ffmpeg frame recorder is attached."""
-        return self._frame_recorder is not None
-
-    def open_frame_recorder(self, path, *, fps=12, width=None, height=None):
-        """Attach an ffmpeg recorder that receives RGB24 frames from ``show()``."""
-        from frame_recorder import FFmpegFrameRecorder
-
-        self.close_frame_recorder()
-        w = int(self.width * self._scale) if width is None else width
-        h = int(self.height * self._scale) if height is None else height
-        self._frame_recorder = FFmpegFrameRecorder(path, w, h, fps)
-        return self._frame_recorder
-
-    def close_frame_recorder(self):
-        """Finalize and detach the active frame recorder."""
-        recorder = self._frame_recorder
-        self._frame_recorder = None
-        if recorder is not None:
-            return recorder.close()
-        return 0
 
     def _read_texture_rgb(self):
         """Read the logical display texture as packed RGB24."""

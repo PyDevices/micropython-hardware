@@ -114,9 +114,19 @@ VK_RWIN = 0x5C
 VK_F1 = 0x70
 
 BI_RGB = 0
+BI_BITFIELDS = 3
 DIB_RGB_COLORS = 0
 SRCCOPY = 0x00CC0020
 SPI_GETWORKAREA = 0x0030
+CLR_INVALID = 0xFFFFFFFF
+
+# RGB565 channel masks for a BI_BITFIELDS DIB (little-endian WORD per pixel).
+RGB565_MASKS = (0xF800, 0x07E0, 0x001F)
+
+MEM_COMMIT = 0x00001000
+MEM_RESERVE = 0x00002000
+MEM_RELEASE = 0x00008000
+PAGE_READWRITE = 0x04
 
 INFINITE = 0xFFFFFFFF
 CREATE_WAITABLE_TIMER_HIGH_RESOLUTION = 0x00000002
@@ -203,10 +213,13 @@ if _use_ffi:
     _raw_GetWindowLongPtrW = user32.func(_L, "GetWindowLongPtrW", "Pi")
     _raw_SetWindowLongPtrW = user32.func(_L, "SetWindowLongPtrW", "Pi" + _L)
 
+    _raw_GetPixel = gdi32.func("I", "GetPixel", "Pii")
     _raw_StretchDIBits = gdi32.func("i", "StretchDIBits", "PiiiiiiiiPpiI")
     _raw_SetDIBitsToDevice = gdi32.func("i", "SetDIBitsToDevice", "PiiIIiiiiPpi")
 
     _raw_GetModuleHandleW = kernel32.func("P", "GetModuleHandleW", "P")
+    _raw_VirtualAlloc = kernel32.func("P", "VirtualAlloc", "P" + _W + "II")
+    _raw_VirtualFree = kernel32.func("i", "VirtualFree", "P" + _W + "I")
     _raw_GetLastError = kernel32.func("I", "GetLastError", "")
     _raw_CloseHandle = kernel32.func("i", "CloseHandle", "P")
     _raw_SleepEx = kernel32.func("I", "SleepEx", "Ii")
@@ -1028,6 +1041,8 @@ else:
     user32.SetWindowLongPtrW.argtypes = [HWND, INT, ctypes.c_ssize_t]
     user32.SetWindowLongPtrW.restype = ctypes.c_ssize_t
 
+    gdi32.GetPixel.argtypes = [HDC, INT, INT]
+    gdi32.GetPixel.restype = DWORD
     gdi32.StretchDIBits.argtypes = [
         HDC,
         INT,
@@ -1062,6 +1077,10 @@ else:
 
     kernel32.GetModuleHandleW.argtypes = [LPCWSTR]
     kernel32.GetModuleHandleW.restype = HINSTANCE
+    kernel32.VirtualAlloc.argtypes = [LPVOID, ctypes.c_size_t, DWORD, DWORD]
+    kernel32.VirtualAlloc.restype = LPVOID
+    kernel32.VirtualFree.argtypes = [LPVOID, ctypes.c_size_t, DWORD]
+    kernel32.VirtualFree.restype = BOOL
     kernel32.GetLastError.argtypes = []
     kernel32.GetLastError.restype = DWORD
     kernel32.CloseHandle.argtypes = [HANDLE]
@@ -1459,14 +1478,112 @@ def bmi_bgra(width, height):
     return info
 
 
-def StretchDIBits(hdc, dest_w, dest_h, src_w, src_h, bits, bmi):
+def bmi_rgb565(width, height):
+    """16-bit top-down BI_BITFIELDS BITMAPINFO for little-endian RGB565 pixels.
+
+    Lets GDI read an RGB565 framebuffer directly, with no conversion pass.
+    DIB scanlines are DWORD-aligned, so *width* must be even (``width * 2``
+    bytes per row must be a multiple of 4).
+    """
+    width = int(width)
+    height = int(height)
+    if width % 2:
+        raise ValueError("bmi_rgb565 requires an even width for DWORD-aligned scanlines")
+    info = BITMAPINFO()
+    info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER)
+    info.bmiHeader.biWidth = width
+    info.bmiHeader.biHeight = -height
+    info.bmiHeader.biPlanes = 1
+    info.bmiHeader.biBitCount = 16
+    info.bmiHeader.biCompression = BI_BITFIELDS
+    info.bmiHeader.biSizeImage = width * height * 2
+    if _use_ffi:
+        struct.pack_into("<III", info._buf, BITMAPINFOHEADER._SIZE, *RGB565_MASKS)
+    else:
+        info.bmiColors[0], info.bmiColors[1], info.bmiColors[2] = RGB565_MASKS
+    return info
+
+
+def dib_bits(buf):
+    """Address of *buf*, to hand GDI as its ``bits`` argument.
+
+    ctypes will not pass a ``bytearray`` as ``LPCVOID``, and copying it with
+    ``bytes()`` costs a full framebuffer per present. Both backends accept a
+    plain integer address instead, so nothing is copied. Callers can add a byte
+    offset to point at any scanline without allocating.
+
+    *buf* must outlive every use of the returned address, and must not be
+    resized: take it once, after the buffer is in its final home.
+    """
+    if _use_ffi:
+        return uctypes.addressof(buf)
+    return ctypes.addressof(ctypes.c_char.from_buffer(buf))
+
+
+def VirtualAlloc(size, protect=PAGE_READWRITE):
+    """Reserve and commit *size* bytes outside the interpreter heap.
+
+    Returns the base address, or 0 on failure. Keeps large, long-lived buffers
+    (framebuffers) off the GC heap. Pair every success with :func:`VirtualFree`.
+    """
+    size = int(size)
+    if size <= 0:
+        return 0
+    flags = MEM_COMMIT | MEM_RESERVE
+    if _use_ffi:
+        return int(_raw_VirtualAlloc(0, size, flags, int(protect)) or 0)
+    return int(kernel32.VirtualAlloc(None, size, flags, int(protect)) or 0)
+
+
+def VirtualFree(ptr):
+    """Release a :func:`VirtualAlloc` block. Drop every view of it first."""
+    if not ptr:
+        return False
+    if _use_ffi:
+        return bool(_raw_VirtualFree(int(ptr), 0, MEM_RELEASE))
+    return bool(kernel32.VirtualFree(int(ptr), 0, MEM_RELEASE))
+
+
+def buffer_at(ptr, size):
+    """Writable, sliceable view of *size* bytes at address *ptr*.
+
+    The view aliases the memory; it does not own it. Valid only while the
+    underlying allocation lives.
+    """
+    size = int(size)
+    if _use_ffi:
+        return uctypes.bytearray_at(int(ptr), size)
+    # cast("B") normalizes the ctypes-reported format ("<B"), which memoryview
+    # otherwise refuses to slice-assign -- exactly what framebuffer writes need.
+    return memoryview((ctypes.c_ubyte * size).from_address(int(ptr))).cast("B")
+
+
+def GetPixel(hdc, x, y):
+    """Return the ``0x00BBGGRR`` color at (*x*, *y*), or ``CLR_INVALID``.
+
+    Slow per-call -- for readback and verification, not for rendering.
+    """
+    if _use_ffi:
+        return int(_raw_GetPixel(hdc, int(x), int(y))) & 0xFFFFFFFF
+    return int(gdi32.GetPixel(hdc, int(x), int(y))) & 0xFFFFFFFF
+
+
+def StretchDIBits(hdc, dest_w, dest_h, src_w, src_h, bits, bmi, *, dest_x=0, dest_y=0):
+    """Blit *bits* to *hdc*, stretching src_w x src_h into dest_w x dest_h.
+
+    The destination origin defaults to ``0, 0`` so full-frame callers stay
+    unchanged; pass it to present a band without touching the rest of the
+    window. To read from part-way down the source, offset the *bits* address --
+    GDI's own source origin measures from the bottom of the image even for a
+    top-down DIB, and behaves differently again at zero.
+    """
     if _use_ffi:
         bmi_buf = bmi._buf if hasattr(bmi, "_buf") else bmi
         return int(
             _raw_StretchDIBits(
                 hdc,
-                0,
-                0,
+                int(dest_x),
+                int(dest_y),
                 int(dest_w),
                 int(dest_h),
                 0,
@@ -1482,8 +1599,8 @@ def StretchDIBits(hdc, dest_w, dest_h, src_w, src_h, bits, bmi):
     return int(
         gdi32.StretchDIBits(
             hdc,
-            0,
-            0,
+            int(dest_x),
+            int(dest_y),
             int(dest_w),
             int(dest_h),
             0,
