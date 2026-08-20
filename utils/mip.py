@@ -29,24 +29,33 @@ API (compatible subset of on-device mip)::
 the index ``py`` channel or ``urls`` entries, not device ``.mpy`` bytecode).
 """
 
-# NOTE: this future import cannot be wrapped in try/except — CPython requires
-# future statements to be the first statement in the file. It is also what makes
-# this module fail on MicroPython, with the unhelpful message
-# "ImportError: no module named '__future__'". If you see that, `import mip`
-# picked up this file instead of MicroPython's frozen `mip`, which means
-# `.frozen` lost its place ahead of `lib` on sys.path (see utils/path.py in
-# pydevices-examples). ``ps_loader._import_firmware_mip`` catches that case and
-# re-raises it with the real explanation.
-from __future__ import annotations
-
 import json
 import os
 import sys
 
 #: Marks this as the portable implementation rather than firmware ``mip``.
-#: Importers that specifically need firmware ``mip`` (MicroPython WASM has no
-#: HTTP transport for this one) check it to detect sys.path shadowing.
+#: Importers that specifically need firmware ``mip`` check it to detect
+#: search-path shadowing.
 PORTABLE = True
+
+# MicroPython ships ``mip`` in firmware, so arriving here on MicroPython means
+# ``import mip`` resolved to this file instead: the search path put this file's
+# directory ahead of ``.frozen``. Say so now rather than failing later at the
+# first request (there is no MicroPython transport below) or, as this file used
+# to, on a CPython-only ``from __future__ import annotations`` whose
+# "no module named '__future__'" said nothing about the real problem.
+#
+# Deliberately not a ``from __future__`` import: CPython requires future
+# statements to be the first statement in the file, so one cannot be wrapped in
+# try/except, and it would fail on MicroPython before this check could run.
+if getattr(sys.implementation, "name", "") == "micropython":
+    raise ImportError(
+        "portable mip.py was imported on MicroPython, which ships `mip` in "
+        "firmware and should never reach this file. `.frozen` must come before "
+        "{!r} on sys.path -- the documented MICROPYPATH order is "
+        ".:.frozen:lib:utils:~/.micropython/lib:/usr/lib/micropython. "
+        "sys.path={!r}".format(globals().get("__file__", "utils/mip.py"), sys.path)
+    )
 
 _PACKAGE_INDEX = "https://micropython.org/pi/v2"
 
