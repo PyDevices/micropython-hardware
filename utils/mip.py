@@ -27,6 +27,14 @@ API (compatible subset of on-device mip)::
 
 ``mpy`` defaults to **False** on CPython, CircuitPython, and Pyodide (they use
 the index ``py`` channel or ``urls`` entries, not device ``.mpy`` bytecode).
+
+``install`` **does not raise when a package cannot be installed** -- it prints
+``Package not found: <url>`` followed by ``Package may be partially installed``
+and returns ``None``, exactly as MicroPython's on-device ``mip`` does. This is
+deliberate parity, not an oversight: callers that need to know whether an
+install succeeded must check for the files afterwards rather than relying on an
+exception. Errors that are *not* a failed package -- notably having no usable
+HTTP client at all -- still raise.
 """
 
 import json
@@ -248,7 +256,9 @@ def _http_get(url):
     if hasattr(os, "system"):
         tmp = "/tmp/mip_http_" + str(int.from_bytes(os.urandom(4), "big")) + ".bin"
         # Quote URL for the shell; paths are ASCII package URLs from mip.
-        cmd = 'curl -fsSL "' + url + '" -o "' + tmp + '"'
+        # -S omitted on purpose: mip probes URLs that are expected to 404, and
+        # frozen mip stays quiet there. The caller prints "Package not found".
+        cmd = 'curl -fsL "' + url + '" -o "' + tmp + '"'
         try:
             rc = os.system(cmd)
             if rc == 0:
