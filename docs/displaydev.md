@@ -177,9 +177,9 @@ pydevices-examples does not include a task scheduler. Options:
 
 Many drivers expose **ILI9341-style** vertical scroll: a top fixed band (TFA), a scrollable middle (VSA), and a bottom fixed band (BFA). You define regions with `set_vscroll(tfa, bfa)` or `vscrdef`, then move content with the `vscroll` property (wrapper around `vscsad`).
 
-The [**pydevices_demo**](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/pydevices_demo.py) example demonstrates this model, covers drawing at `vscroll = 0` during redraw, and shows auto-scroll with `multimer`.
+The [**pydevices_demo**](https://pydevices.github.io/pydevices-examples/pyscript/pyodide.html?modules=pydevices_demo&deps=pydevices-pygraphics) example demonstrates this model, covers drawing at `vscroll = 0` during redraw, and shows auto-scroll with `multimer`.
 
-Related examples: [`scroll_touch_test.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/scroll_touch_test.py) (touch Up/Down), [`appdev_encoder_test.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/appdev_encoder_test.py) (encoder).
+Related examples: [`scroll_touch_test.py`](https://pydevices.github.io/pydevices-examples/pyscript/pyodide.html?modules=scroll_touch_test&deps=pydevices-palettes,pydevices-pygraphics) (touch Up/Down), [`appdev_encoder_test.py`](https://pydevices.github.io/pydevices-examples/pyscript/pyodide.html?modules=appdev_encoder_test) (encoder).
 
 ## Rotation
 
