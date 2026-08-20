@@ -145,6 +145,16 @@ class App:
         self._quit_requested = False
         self._exit_code = None
         self._timer = None
+
+        # Stop timers on any previous App instance to avoid duplicate event dispatch on re-runs
+        prev_app = getattr(App, "_current_app", None)
+        if prev_app is not None and prev_app is not self:
+            try:
+                prev_app.stop_timer()
+            except Exception:
+                pass
+        App._current_app = self
+
         self._pending_timer_async = False
         self._refresh_subscription = None
         self._refresh_paused = False

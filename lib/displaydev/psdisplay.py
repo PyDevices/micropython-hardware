@@ -81,6 +81,16 @@ class PSDevices:
     def __init__(self, id, display=None):
         self.canvas = document.getElementById(id)
         self._display = display
+
+        # Clean up any existing PSDevices listeners attached to this canvas
+        old_devices = getattr(self.canvas, "_ps_devices", None)
+        if old_devices is not None and hasattr(old_devices, "deinit"):
+            try:
+                old_devices.deinit()
+            except Exception:
+                pass
+        self.canvas._ps_devices = self
+
         try:
             self.canvas.tabIndex = 0  # make the element focusable for key events
             self.canvas.style.touchAction = "none"  # don't scroll/zoom on touch
@@ -108,6 +118,20 @@ class PSDevices:
         for name, proxy in self._proxies.items():
             self.canvas.addEventListener(name, proxy)
         self._focus_canvas()
+
+    def deinit(self):
+        """Detach DOM event listeners and destroy Pyodide proxies."""
+        if hasattr(self, "_proxies") and self._proxies:
+            for name, proxy in self._proxies.items():
+                try:
+                    self.canvas.removeEventListener(name, proxy)
+                    if hasattr(proxy, "destroy"):
+                        proxy.destroy()
+                except Exception:
+                    pass
+            self._proxies.clear()
+        if hasattr(self, "_queue"):
+            self._queue.clear()
 
     def _focus_canvas(self):
         """Move keyboard focus to the canvas so keys reach the game, not the page."""
