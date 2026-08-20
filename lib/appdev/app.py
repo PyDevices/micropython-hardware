@@ -177,6 +177,8 @@ class App:
             self._displays = list(displays)
         elif board_config is not None and getattr(board_config, "display_drv", None) is not None:
             self._displays = [board_config.display_drv]
+        elif board_config is not None and hasattr(board_config, "width") and hasattr(board_config, "height"):
+            self._displays = [board_config]
         else:
             self._displays = []
 
@@ -200,7 +202,10 @@ class App:
         primary = self.primary
 
         effective_host_read = (
-            host_read if host_read is not None else getattr(board_config, "host_read", None)
+            host_read
+            if host_read is not None
+            else getattr(board_config, "host_read", None)
+            or getattr(board_config, "get_events", None)
         )
         if effective_host_read is not None:
             self.host_dev = HostEvents(host_read=effective_host_read, display=primary)
@@ -588,7 +593,7 @@ class App:
         self._service_subscription = self.every(SERVICE_TICK_MS, self._service_tick)
 
     def _service_tick(self, timer_obj):
-        if self._quit_requested or self._app_drives_poll or self._refresh_claim is not None:
+        if self._quit_requested or self._app_drives_poll:
             return
         self._in_service_poll = True
         try:
