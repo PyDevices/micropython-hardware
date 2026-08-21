@@ -83,6 +83,35 @@ class TestSyncTimers(unittest.TestCase):
         self.assertTrue(len(ticks) >= 3)
 
 
+class TestDeferredSyncArm(unittest.TestCase):
+    """``_defer_sync_arm`` defers the *refresh subscription*, not every timer.
+
+    Folding that flag into the general "can I arm?" predicate left ``app._timer``
+    None all the way through UI construction on sdl2 (CircuitPython desktop),
+    which broke callers that inspect it.
+    """
+
+    def _app(self, defer):
+        name = "_sync_refresh_needs_deferred_arm"
+        real = App.__dict__[name]
+        App._sync_refresh_needs_deferred_arm = staticmethod(lambda: defer)
+        self.addCleanup(setattr, App, name, real)
+        app = App(displays=[_FakeDisplay(needs_refresh=True)], timer_async=False)
+        self.addCleanup(app._perform_teardown)
+        return app
+
+    def test_sync_timer_arms_immediately_even_when_refresh_defers(self):
+        app = self._app(defer=True)
+        app.every(20, lambda t: None)
+        self.assertIsNotNone(app._timer, "sync timers must not wait for the loop")
+        self.assertTrue(app._refresh_pending, "the refresh subscription still defers")
+
+    def test_refresh_arms_immediately_without_the_flag(self):
+        app = self._app(defer=False)
+        self.assertIsNotNone(app._timer)
+        self.assertFalse(app._refresh_pending)
+
+
 class TestAsyncTimers(unittest.TestCase):
     """Tests for asynchronous timer backends (AsyncTimer / asyncio)."""
 
