@@ -400,15 +400,21 @@ class App:
     def _arm_ready(self):
         """True when a timer can be created right now.
 
-        Async timers need a running event loop (the browser is the exception --
-        it owns the loop for the whole program, including import). Some sync
-        providers ask to be armed from inside the loop instead of at import.
+        Only async timers have to wait: they need a running event loop. The
+        browser is the exception even there -- it owns the loop for the whole
+        program, including import.
+
+        Deliberately *not* consulting ``_defer_sync_arm``. That flag asks for
+        the display refresh subscription to be armed from inside the loop; it
+        does not mean sync timers cannot be created, and gating every timer on
+        it would leave ``app._timer`` None all the way through UI construction
+        on those providers.
         """
-        if self._timer_async:
-            if sys.platform in ("emscripten", "webassembly"):
-                return True
-            return self._event_loop_running()
-        return not self._sync_refresh_needs_deferred_arm()
+        if not self._timer_async:
+            return True
+        if sys.platform in ("emscripten", "webassembly"):
+            return True
+        return self._event_loop_running()
 
     def _defer(self, fn):
         """Run ``fn`` now if the app can arm, else at the moment the loop starts."""
@@ -611,7 +617,13 @@ class App:
                     display.show(timer_obj)
 
         self._refresh_pending = True
-        self._defer(lambda: self._subscribe_refresh(_show, period))
+        arm = lambda: self._subscribe_refresh(_show, period)  # noqa: E731
+        if self._sync_refresh_needs_deferred_arm() and not self._timer_async:
+            # This provider wants the refresh subscription armed from inside the
+            # loop, so queue it unconditionally rather than asking _defer.
+            self._deferred.append(arm)
+        else:
+            self._defer(arm)
 
     @staticmethod
     def _sync_refresh_needs_deferred_arm():
