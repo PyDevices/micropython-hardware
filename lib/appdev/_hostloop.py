@@ -60,6 +60,19 @@ def _impl():
     return getattr(sys.implementation, "name", "")
 
 
+def _mcu():
+    """True on microcontroller firmware, as opposed to a desktop OS build.
+
+    Both MicroPython and CircuitPython also build for linux/win32/darwin, and
+    those builds behave like CPython for lifecycle purposes.
+    """
+    return _impl() in ("micropython", "circuitpython") and sys.platform not in (
+        "linux",
+        "win32",
+        "darwin",
+    )
+
+
 def _main_file():
     """``__main__.__file__``, or None at a bare REPL."""
     m = sys.modules.get("__main__")
@@ -160,13 +173,14 @@ def ambient():
         return True
     except Exception:
         pass
-    # MCU firmware: not a desktop OS, and no filesystem-hosted __main__ to
-    # return from. The boot.py/main.py sequence always lands in the REPL.
-    if _impl() in ("micropython", "circuitpython") and sys.platform not in (
-        "linux",
-        "win32",
-        "darwin",
-    ):
+    # MicroPython firmware: boot.py/main.py always lands in the REPL, and
+    # hardware timers keep delivering there, so the REPL is a real ambient loop.
+    #
+    # CircuitPython is deliberately excluded. Its supervisor resets the port
+    # after code.py returns -- peripherals are deinitialised and nothing keeps
+    # pumping -- so an app that returns from run() is simply dead. CircuitPython
+    # must drive its own loop inside run().
+    if _mcu() and _impl() == "micropython":
         return True
     return False
 
@@ -182,6 +196,15 @@ def interactive():
         if getattr(flags, "interactive", 0):
             return True
         return _main_file() is None
+    if _mcu() and _impl() == "circuitpython":
+        # CircuitPython offers no way to tell code.py from the REPL: __main__
+        # carries neither __file__ nor __name__ in either case, and
+        # supervisor.runtime.run_reason reports what triggered the last code.py
+        # run -- REPL_RELOAD after a Ctrl-D -- not whether one is in progress.
+        # The distinction does not matter here. CircuitPython delivers no timers
+        # in the background, so an app has to hold the VM whichever way it was
+        # started, and the exit hook is the only thing that can hold it.
+        return False
     toks = _cmdline_tokens()
     if toks:
         if "-i" in toks:
@@ -324,13 +347,68 @@ def _stop():
             pass
 
 
+def _cp_break_watch():
+    """Zero-arg "did the user press Ctrl-C" probe for CircuitPython, else None.
+
+    CircuitPython does not arm Ctrl-C as an interrupt character while an atexit
+    handler is running: it arrives as ordinary stdin data instead of raising
+    KeyboardInterrupt. A pump loop never reads stdin, so the USB CDC receive
+    ring fills, the host's writes start timing out, and the board stops
+    answering every tool that could recover it -- a hard reset or a 1200-baud
+    bootloader touch becomes the only way back. Draining the ring each pass
+    fixes both halves at once: writes keep flowing, and Ctrl-C means quit again.
+
+    Returns None off MCU CircuitPython, where the interpreter handles Ctrl-C
+    itself and stdin must be left alone.
+    """
+    if _impl() != "circuitpython" or not _mcu():
+        return None
+    try:
+        import supervisor
+
+        rt = supervisor.runtime
+    except Exception:
+        return None
+
+    # Anything already buffered predates this loop and cannot be a request to
+    # stop it -- it is typically the Ctrl-C/Ctrl-D a host tool used to start the
+    # run in the first place. Drop that backlog once, or the app quits the
+    # instant it starts.
+    try:
+        backlog = rt.serial_bytes_available
+        if backlog:
+            sys.stdin.read(backlog)
+    except Exception:
+        pass
+
+    def pressed():
+        try:
+            waiting = rt.serial_bytes_available
+            if not waiting:
+                return False
+            return "\x03" in sys.stdin.read(waiting)
+        except Exception:
+            return False
+
+    return pressed
+
+
 def _run_loop():
     pump = _state["pump"]
     alive = _state["alive"]
     if pump is None or alive is None:
         return
+    # Note: the drive() path (asyncio-backed apps) does not get this treatment;
+    # it owns its own event loop and would need the equivalent drain in there.
+    interrupted = _cp_break_watch()
+    if interrupted is None:
+        while alive():
+            pump()
+        return
     while alive():
         pump()
+        if interrupted():
+            break
 
 
 def _exit_hook():
