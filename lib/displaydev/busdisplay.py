@@ -34,7 +34,16 @@ elif sys.implementation.name == "circuitpython":
     def sleep_ms(ms):
         return sleep(ms / 1000)
 else:
-    raise ImportError("BusDisplay is not supported on this platform.")
+    # Any other host, CPython on the desktop above all. There is no GPIO here,
+    # but BusDisplay is portable logic driving a caller-supplied bus object, and
+    # keeping it importable is what makes that logic testable off-device. Not
+    # having that is why a silently skipped init sequence shipped: the panel
+    # bring-up path had no unit test anywhere. Pin configuration stays
+    # unavailable and says so (see _config_output_pin).
+    from time import sleep
+
+    def sleep_ms(ms):
+        return sleep(ms / 1000)
 
 
 # MIPI DCS (Display Command Set) Command Constants
@@ -165,6 +174,9 @@ class BusDisplay(DisplayDriver):
         self._data_as_commands = data_as_commands  # not implemented
         self._single_byte_bounds = single_byte_bounds  # not implemented
 
+        # CircuitPython's fourwire.FourWire.send requires ``data`` positionally;
+        # the MicroPython bus defaults it. Parameterless commands (INVON, SWRESET,
+        # SLPIN/SLPOUT) therefore pass an explicit b"" rather than omitting it.
         self.send = display_bus.send
         self.send_color = (
             display_bus.send if not hasattr(display_bus, "send_color") else display_bus.send_color
@@ -198,11 +210,29 @@ class BusDisplay(DisplayDriver):
                 # PWM not implemented on this platform or Pin
                 self._backlight_is_pwm = False
 
+        # Panels whose init sequence sets COLMOD itself must keep that value:
+        # GC9A01A needs 0x05 where the generic 16-bit code is 0x55, and driving
+        # it through the wrong format and back leaves some panels washed out or
+        # blank. See the guarded COLMOD send below.
+        self._init_set_color_mode = False
+
         # Run the display driver init_sequence.
-        if isinstance(init_sequence, bytes):
+        #
+        # bytearray and memoryview must be accepted alongside bytes: bytearray is
+        # NOT a subclass of bytes, and drivers write their sequences either way
+        # (gc9a01 uses bytearray). Dispatching on bytes alone silently skipped
+        # the entire panel bring-up -- no error, no output, just a display that
+        # never initialised and looked intermittently blank or washed out.
+        # Hence the explicit else: an unusable init_sequence must be loud.
+        if isinstance(init_sequence, (bytes, bytearray, memoryview)):
             self._init_bytes(init_sequence)
-        elif isinstance(init_sequence, list) or isinstance(init_sequence, tuple):
+        elif isinstance(init_sequence, (list, tuple)):
             self._init_list(init_sequence)
+        elif init_sequence is not None:
+            raise TypeError(
+                "init_sequence must be bytes/bytearray/memoryview or list/tuple, got "
+                + type(init_sequence).__name__
+            )
 
         # Run the display driver init() method, which also gets called by rotation.setter
         # This should run immediately after _init_bytes() or _init_list() but before
@@ -212,10 +242,13 @@ class BusDisplay(DisplayDriver):
         if not self._initialized:
             raise RuntimeError("Display driver init() must call super().init()")
 
-        # Set COLMOD (color mode) based on color_depth
-        pixel_formats = {3: 0x11, 8: 0x22, 12: 0x33, 16: 0x55, 18: 0x66, 24: 0x77}
-        self._param_buf[0] = pixel_formats[self.color_depth]
-        self.send(_COLMOD, self._param_mv[:1])
+        # Set COLMOD (color mode) based on color_depth, unless the init
+        # sequence already chose one -- the driver knows its panel better than
+        # this generic table does.
+        if not self._init_set_color_mode:
+            pixel_formats = {3: 0x11, 8: 0x22, 12: 0x33, 16: 0x55, 18: 0x66, 24: 0x77}
+            self._param_buf[0] = pixel_formats[self.color_depth]
+            self.send(_COLMOD, self._param_mv[:1])
 
         self.brightness = brightness
 
@@ -507,9 +540,9 @@ class BusDisplay(DisplayDriver):
             value (bool): If True, invert the colors of the display.
         """
         if value:
-            self.send(_INVON)
+            self.send(_INVON, b"")
         else:
-            self.send(_INVOFF)
+            self.send(_INVOFF, b"")
 
     def reset(self) -> None:
         """
@@ -536,7 +569,7 @@ class BusDisplay(DisplayDriver):
         """
         Soft reset display.
         """
-        self.send(_SWRESET)
+        self.send(_SWRESET, b"")
         sleep_ms(150)
 
     def sleep_mode(self, value: bool) -> None:
@@ -546,7 +579,7 @@ class BusDisplay(DisplayDriver):
         Args:
             value (bool): If True, enable sleep mode. If False, disable sleep mode.
         """
-        self.send(_SLPIN if value else _SLPOUT)
+        self.send(_SLPIN if value else _SLPOUT, b"")
 
     def _deinit(self) -> None:
         """Best-effort hardware teardown."""
@@ -615,6 +648,8 @@ class BusDisplay(DisplayDriver):
             delay = (data_size & DELAY) != 0
             data_size &= ~DELAY
 
+            if command == _COLMOD:
+                self._init_set_color_mode = True
             self.send(command, init_sequence[i + 2 : i + 2 + data_size])
 
             delay_time_ms = 10
@@ -643,6 +678,8 @@ class BusDisplay(DisplayDriver):
             init_sequence (list): The initialization sequence to send to the display
         """
         for line in init_sequence:
+            if line[0] == _COLMOD:
+                self._init_set_color_mode = True
             self.send(line[0], line[1])
             if line[2] != 0:
                 sleep_ms(line[2])
@@ -660,4 +697,8 @@ class BusDisplay(DisplayDriver):
             p.direction = digitalio.Direction.OUTPUT
             if value is not None:
                 p.value = value
+        else:
+            raise NotImplementedError(
+                "BusDisplay cannot configure GPIO on " + sys.implementation.name
+            )
         return p
