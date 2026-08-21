@@ -121,6 +121,87 @@ class TestHostloop(unittest.TestCase):
         _hostloop.quit()
         self.assertEqual(1, h.stopped)
 
+    # -- MCU firmware lifecycle ------------------------------------------------
+    #
+    # These probes decide whether an app that never calls run() stays alive on a
+    # board. The example matrix cannot reach them: it exercises CircuitPython
+    # only through the unix build, where sys.platform is "linux" and _mcu() is
+    # False, so the real firmware path went untested until it failed on an
+    # RP2040.
+
+    def _fake_impl(self, name, platform):
+        self._patch(_hostloop, "_impl", lambda: name)
+        self._patch(_hostloop.sys, "platform", platform)
+
+    def _patch(self, obj, name, value):
+        original = getattr(obj, name)
+        setattr(obj, name, value)
+        self.addCleanup(setattr, obj, name, original)
+
+    def test_mcu_is_false_for_desktop_builds(self):
+        for impl in ("micropython", "circuitpython"):
+            for platform in ("linux", "win32", "darwin"):
+                with self.subTest(impl=impl, platform=platform):
+                    self._fake_impl(impl, platform)
+                    self.assertFalse(_hostloop._mcu())
+
+    def test_micropython_firmware_is_ambient(self):
+        # After main.py MicroPython drops to a REPL that keeps hardware timers
+        # delivering, so returning from the script body is survivable.
+        self._fake_impl("micropython", "rp2")
+        self.assertTrue(_hostloop.ambient())
+
+    def test_circuitpython_firmware_is_not_ambient(self):
+        # CircuitPython's supervisor resets the port after code.py returns, so
+        # there is no ambient loop to inherit -- it must drive its own.
+        self._fake_impl("circuitpython", "rp2")
+        self.assertFalse(_hostloop.ambient())
+
+    def test_circuitpython_firmware_is_never_interactive(self):
+        # CircuitPython cannot distinguish code.py from the REPL -- __main__ has
+        # neither __file__ nor __name__ in either, and run_reason describes what
+        # triggered the last code.py run, not what is running now. Since no
+        # timers are delivered in the background either way, the exit hook has
+        # to own the loop in both cases.
+        self._fake_impl("circuitpython", "rp2")
+        self.assertFalse(_hostloop.interactive())
+
+    def test_circuitpython_firmware_takes_the_exit_hook(self):
+        # The whole point: an app that never calls run() has to be driven by
+        # something. On CircuitPython that is the atexit hook.
+        self._fake_impl("circuitpython", "rp2")
+        self._patch(_hostloop, "_cmdline_tokens", lambda: ())
+        self._patch(_hostloop, "on_exit", lambda fn: True)
+        self.assertEqual(_hostloop.EXIT_HOOK, _Harness().install())
+
+    def test_pump_loop_stops_on_circuitpython_ctrl_c(self):
+        # Without this the board wedges: nothing drains CircuitPython's serial
+        # ring inside an atexit handler, so host writes block and Ctrl-C -- which
+        # is plain stdin data there, not an interrupt -- can never land.
+        h = _Harness(ticks=10_000)
+        self._patch(_hostloop, "_state", dict(_hostloop._state))
+        _hostloop._state["pump"] = h.pump
+        _hostloop._state["alive"] = h.alive
+        presses = [False, False, True]
+        self._patch(_hostloop, "_cp_break_watch", lambda: lambda: presses.pop(0))
+        _hostloop._run_loop()
+        self.assertEqual(3, h.pumped, "loop must stop on the press, not run to alive()")
+
+    def test_pump_loop_untouched_without_a_break_watch(self):
+        h = _Harness(ticks=3)
+        self._patch(_hostloop, "_state", dict(_hostloop._state))
+        _hostloop._state["pump"] = h.pump
+        _hostloop._state["alive"] = h.alive
+        self._patch(_hostloop, "_cp_break_watch", lambda: None)
+        _hostloop._run_loop()
+        self.assertEqual(3, h.pumped)
+
+    def test_break_watch_is_none_off_circuitpython_firmware(self):
+        self._fake_impl("micropython", "rp2")
+        self.assertIsNone(_hostloop._cp_break_watch())
+        self._fake_impl("circuitpython", "linux")
+        self.assertIsNone(_hostloop._cp_break_watch())
+
     def test_split_cmdline_handles_quotes(self):
         self.assertEqual(
             ["mp.exe", "-i", "C:\\Program Files\\app.py"],
