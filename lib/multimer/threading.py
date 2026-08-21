@@ -61,6 +61,11 @@ class Timer(_TimerCore):
         super().__init__(id, **kwargs)
 
     def _wait_idle(self):
+        # Same reentrancy rule as ``_TimerCore._wait_idle``: ``schedule()`` can
+        # deliver on the pumping thread, so a self-deinit would spin on the
+        # ``_busy`` flag its own callback holds.
+        if self._delivering:
+            return
         while self._busy:
             _sleep_ms(1)
 

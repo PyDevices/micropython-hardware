@@ -388,6 +388,91 @@ class TestTimerSemantics(unittest.TestCase):
         self.assertLessEqual(len(hits), 8)
 
 
+class TestSelfDeinit(unittest.TestCase):
+    """``deinit()`` from inside a timer's own callback must return, not deadlock.
+
+    ``_deliver()`` holds ``_busy`` for the duration of the callback, and
+    ``deinit()`` -> ``_wait_idle()`` used to spin on it, so the delivering thread
+    waited on itself forever. ``machine.Timer`` permits self-deinit from an ISR,
+    so the software providers must too.
+
+    Delivery is forced onto the ``threading`` provider's worker thread so a
+    regression surfaces as a failed deadline rather than hanging the suite.
+    """
+
+    def _self_deinit(self, hard):
+        try:
+            from multimer import threading as thread_timer
+        except ImportError:
+            self.skipTest("threading backend unavailable")
+        done = []
+        t = thread_timer.Timer(-1)
+
+        def cb(tim):
+            tim.deinit()
+            done.append(1)
+
+        t.init(period=10, callback=cb, hard=hard)
+        deadline = time.monotonic() + 2.0
+        while not done and time.monotonic() < deadline:
+            thread_timer.sleep_ms(10)
+        self.assertTrue(done, "deinit() from inside the timer's own callback did not return")
+
+    def test_self_deinit_hard(self):
+        self._self_deinit(True)
+
+    def test_self_deinit_soft(self):
+        self._self_deinit(False)
+
+    def test_wait_idle_returns_while_delivering(self):
+        """The reentrancy marker, unit-tested without a live timer."""
+        from multimer._core import _TimerCore
+
+        core = _TimerCore.__new__(_TimerCore)
+        core._busy = True
+        core._delivering = True
+        core._wait_idle()  # must return immediately
+
+
+class TestMpAsyncioShim(unittest.TestCase):
+    """``_mpasyncio`` must match the interpreter it borrows ``_asyncio`` from.
+
+    Awaitables: CircuitPython requires ``__await__`` on the operand where
+    MicroPython accepts any iterator, and the shim is shared.
+
+    Ticks: due-times land in ``_asyncio.TaskQueue``, a C pairing heap that
+    orders them in the interpreter's own ticks domain.
+    """
+
+    def setUp(self):
+        try:
+            from multimer import _mpasyncio
+        except ImportError:
+            self.skipTest("_mpasyncio unavailable (build ships a real asyncio)")
+        self.mod = _mpasyncio
+
+    def test_sleep_is_awaitable(self):
+        self.assertTrue(hasattr(self.mod.sleep(0), "__await__"))
+        self.mod._sleep_ms_sgen.state = None
+        self.assertTrue(hasattr(self.mod.sleep_ms(0), "__await__"))
+        self.mod._sleep_ms_sgen.state = None
+
+    def test_event_wait_is_awaitable(self):
+        self.assertTrue(hasattr(self.mod.Event().wait(), "__await__"))
+
+    def test_ticks_domain_matches_the_task_queue(self):
+        """multimer's ticks_ms masks to 29 bits; time.ticks_ms is 30-bit.
+
+        Handing the C task queue the masked value made every key sort half a
+        period away, so tasks were never popped and an AsyncTimer armed under
+        this shim never fired.
+        """
+        native = getattr(time, "ticks_ms", None)
+        if native is None:
+            self.skipTest("interpreter has no time.ticks_ms")
+        self.assertIs(native, self.mod.ticks)
+
+
 class TestAsyncTimer(unittest.TestCase):
     def test_requires_running_loop(self):
         t = AsyncTimer(-1)

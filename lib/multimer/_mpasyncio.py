@@ -10,8 +10,20 @@
 from _asyncio import Task, TaskQueue
 import sys
 
-from ._ticks import ticks_add, ticks_diff
-from ._ticks import ticks_ms as ticks
+# Task due-times are stored in ``_asyncio.TaskQueue``, a C pairing heap that
+# orders them with the interpreter's *own* ticks domain. multimer's ticks_ms
+# masks to 29 bits, while MicroPython's ``time.ticks_ms`` is 30-bit, so feeding
+# it multimer's values made every key look half a period away: tasks sorted as
+# far-future and were never popped -- an AsyncTimer armed under this shim simply
+# never fired. Use the interpreter's own functions wherever they exist, and fall
+# back to multimer's only when they do not (CircuitPython, where
+# ``supervisor.ticks_ms`` is already the domain the queue uses).
+try:
+    from time import ticks_add, ticks_diff
+    from time import ticks_ms as ticks
+except ImportError:
+    from ._ticks import ticks_add, ticks_diff
+    from ._ticks import ticks_ms as ticks
 
 try:
     import select
@@ -38,6 +50,11 @@ class SingletonGenerator:
     def __iter__(self):
         return self
 
+    # CircuitPython's ``await`` requires ``__await__``; MicroPython accepts a
+    # bare iterator. Providing both keeps one implementation for all hosts.
+    def __await__(self):
+        return self
+
     def __next__(self):
         if self.state is not None:
             _task_queue.push(cur_task, self.state)
@@ -48,6 +65,25 @@ class SingletonGenerator:
 
 
 _sleep_ms_sgen = SingletonGenerator()
+
+
+class _Awaitable:
+    """Wrap a bare generator so ``await`` accepts it on CircuitPython too."""
+
+    def __init__(self, gen):
+        self.gen = gen
+
+    def __iter__(self):
+        return self.gen
+
+    def __await__(self):
+        return self.gen
+
+    def send(self, v):
+        return self.gen.send(v)
+
+    def throw(self, *args):
+        return self.gen.throw(*args)
 
 
 class Event:
@@ -66,12 +102,15 @@ class Event:
     def clear(self):
         self.state = False
 
-    def wait(self):
+    def _wait(self):
         if not self.state:
             self.waiting.push(cur_task)
             cur_task.data = self.waiting
             yield
         return True
+
+    def wait(self):
+        return _Awaitable(self._wait())
 
 
 def sleep_ms(t, sgen=_sleep_ms_sgen):

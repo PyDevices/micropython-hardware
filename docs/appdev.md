@@ -62,8 +62,34 @@ Or subscribe and let the auto-service drive the app:
 
 ```python
 app.on(app.events.MOUSEBUTTONDOWN, handle)
-app.run()
 ```
+
+## Application lifecycle
+
+An app keeps itself alive past the end of the script body, so a trailing
+`app.run()` is **optional**:
+
+```python
+app = appdev.App(board_config)
+
+@app.every(20)
+def on_frame(timer=None):
+    ...
+
+# no app.run() -- the app keeps running until it quits
+```
+
+`App` picks one of three strategies at construction, readable as `app.strategy`:
+
+| `app.strategy` | Where | What happens |
+|---|---|---|
+| `"ambient"` | browser/PyScript, Jupyter, `python -i`, MCU REPL | The host already runs a loop that outlives the script. Timers arm immediately. |
+| `"exit_hook"` | script mode on CPython / MicroPython / CircuitPython | An interpreter exit hook takes the main thread when the script ends and pumps until the app quits. |
+| `"none"` | `-m` / `-c` entry points, or no hook available | Nothing will drive the app. `app.run()` is required. |
+
+Call `app.run()` when you want the script to **block** at that point, or when
+you need a nonzero process exit code — an exit-hook-driven app always exits 0,
+because `SystemExit` cannot be raised usefully from an interpreter exit hook.
 
 ## Poll vs subscribe
 

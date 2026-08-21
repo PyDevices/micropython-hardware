@@ -3,6 +3,7 @@
 
 [files]
 "https://raw.githubusercontent.com/PyDevices/pydevices/main/lib/appdev/__init__.py" = "/lib/appdev/__init__.py"
+"https://raw.githubusercontent.com/PyDevices/pydevices/main/lib/appdev/_hostloop.py" = "/lib/appdev/_hostloop.py"
 "https://raw.githubusercontent.com/PyDevices/pydevices/main/lib/appdev/app.py" = "/lib/appdev/app.py"
 "https://raw.githubusercontent.com/PyDevices/pydevices/main/lib/appdev/devices.py" = "/lib/appdev/devices.py"
 "https://raw.githubusercontent.com/PyDevices/pydevices/main/lib/audiodev/__init__.py" = "/lib/audiodev/__init__.py"

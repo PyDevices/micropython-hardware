@@ -57,7 +57,8 @@ The kernel already runs an `asyncio` loop, so a blocking poll loop would starve 
 and never receive widget events. The Jupyter board config therefore exports
 `timer_async=True` and the application coordinator consumes that preference.
 
-Keep an app alive with **`app.run()`** — subscribe callbacks, then run.
+Subscribe callbacks and the app keeps itself alive — the kernel's loop is the
+host loop (`app.strategy == "ambient"`), so no trailing `app.run()` is needed.
 For a custom async `main()`, use **`app.run_async(main)`**, not
 `asyncio.run(main())`: in a notebook the latter raises
 `RuntimeError: asyncio.run() cannot be called from a running event loop`. On
