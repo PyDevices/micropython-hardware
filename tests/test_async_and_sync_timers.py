@@ -112,6 +112,40 @@ class TestDeferredSyncArm(unittest.TestCase):
         self.assertFalse(app._refresh_pending)
 
 
+class TestQuitFromCallback(unittest.TestCase):
+    """Quitting inside a tick callback must still tear down.
+
+    Teardown is deferred only when a loop is actually running. MicroPython's
+    create_task succeeds with no loop running (verified on an ESP32-P4), so
+    using it as the probe queued teardown onto a queue nothing serviced and the
+    app never tore down.
+    """
+
+    def test_no_running_loop_tears_down_immediately(self):
+        app = App(displays=[_FakeDisplay()], timer_async=False)
+        self.addCleanup(app._perform_teardown)
+        self.assertFalse(app._event_loop_running(), "no loop in this test")
+        self.assertFalse(
+            app._schedule_async_teardown(),
+            "must not defer when no loop will ever run it",
+        )
+
+    def test_quit_inside_tick_callback_completes_teardown(self):
+        disp = _FakeDisplay(needs_refresh=True)
+        app = App(displays=[disp], timer_async=False)
+        self.addCleanup(app._perform_teardown)
+        hits = []
+
+        @app.every(10)
+        def _tick(_t):
+            hits.append(1)
+            if len(hits) == 2:
+                app.request_quit()
+
+        self.assertTrue(_wait(lambda: app._teardown_done, 2.0), "teardown never ran")
+        self.assertTrue(disp.quitted, "display was never released")
+
+
 class TestAsyncTimers(unittest.TestCase):
     """Tests for asynchronous timer backends (AsyncTimer / asyncio)."""
 

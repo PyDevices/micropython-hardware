@@ -803,9 +803,16 @@ class App:
         Not gated on ``timer_async``: ``multimer.auto`` resolves to an async
         provider in the browser even for an app that never asked for one, and
         deinitialising an async-backed timer from inside its own callback fails
-        with "can't cancel self". Whether a loop is running is the question, and
-        ``create_task`` answers it.
+        with "can't cancel self".
+
+        ``create_task`` cannot answer "is a loop running?" -- MicroPython
+        happily creates a task with no loop running (verified on ESP32), which
+        would queue teardown onto a queue nothing services, so the app would
+        never tear down at all. ``loop_running()`` is the probe that answers
+        correctly on every interpreter.
         """
+        if not self._event_loop_running():
+            return False
         try:
             from multimer import asyncio
 
