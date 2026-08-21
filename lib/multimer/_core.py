@@ -47,6 +47,10 @@ class _TimerCore:
         self._callback = None
         self._hard = True
         self._busy = False
+        # True only while this thread is inside this timer's own callback.
+        # Distinguishes "busy elsewhere" (wait) from "busy because I am the
+        # delivery" (must not wait -- see _wait_idle).
+        self._delivering = False
         self._armed = False
         # Soft path: at most one ``schedule`` entry (or in-flight callback) so a
         # slow tick cannot flood ``micropython.schedule`` under librt signals.
@@ -137,6 +141,12 @@ class _TimerCore:
         self._soft_gap_ms = 0
 
     def _wait_idle(self):
+        # deinit() called from inside this timer's own callback must not wait:
+        # _deliver() holds _busy for the duration of that callback, so spinning
+        # here would deadlock the delivering thread against itself. machine.Timer
+        # allows self-deinit from an ISR, so the software providers must too.
+        if self._delivering:
+            return
         while self._busy:
             _sleep_ms(1)
 
@@ -201,6 +211,7 @@ class _TimerCore:
                 return
 
         self._busy = True
+        self._delivering = True
         try:
             if self._hard:
                 self._invoke_callback(self)
@@ -212,6 +223,7 @@ class _TimerCore:
                     # ``schedule queue full`` — drop this tick; next signal retries.
                     self._sched_pending = False
         finally:
+            self._delivering = False
             self._busy = False
 
         if self._mode == self.ONE_SHOT:

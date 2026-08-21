@@ -38,6 +38,11 @@ class SingletonGenerator:
     def __iter__(self):
         return self
 
+    # CircuitPython's ``await`` requires ``__await__``; MicroPython accepts a
+    # bare iterator. Providing both keeps one implementation for all hosts.
+    def __await__(self):
+        return self
+
     def __next__(self):
         if self.state is not None:
             _task_queue.push(cur_task, self.state)
@@ -48,6 +53,25 @@ class SingletonGenerator:
 
 
 _sleep_ms_sgen = SingletonGenerator()
+
+
+class _Awaitable:
+    """Wrap a bare generator so ``await`` accepts it on CircuitPython too."""
+
+    def __init__(self, gen):
+        self.gen = gen
+
+    def __iter__(self):
+        return self.gen
+
+    def __await__(self):
+        return self.gen
+
+    def send(self, v):
+        return self.gen.send(v)
+
+    def throw(self, *args):
+        return self.gen.throw(*args)
 
 
 class Event:
@@ -66,12 +90,15 @@ class Event:
     def clear(self):
         self.state = False
 
-    def wait(self):
+    def _wait(self):
         if not self.state:
             self.waiting.push(cur_task)
             cur_task.data = self.waiting
             yield
         return True
+
+    def wait(self):
+        return _Awaitable(self._wait())
 
 
 def sleep_ms(t, sgen=_sleep_ms_sgen):

@@ -88,9 +88,11 @@ class Timer(_TimerCore):
         if self._busy:
             return
         self._busy = True
+        self._delivering = True
         try:
             self._invoke_callback(self)
         finally:
+            self._delivering = False
             self._busy = False
         if self._mode == self.ONE_SHOT:
             self.deinit()
