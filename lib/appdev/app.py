@@ -7,6 +7,7 @@ import sys
 import events
 import keys
 
+from . import _hostloop
 from .devices import (
     ENCODER,
     HOST,
@@ -22,48 +23,6 @@ from .devices import (
 
 DEFAULT_REFRESH_MS = 33
 SERVICE_TICK_MS = 10
-
-
-def _main_file():
-    """Return __main__.__file__, or None at a bare REPL."""
-    m = sys.modules.get("__main__")
-    if m is None:
-        try:
-            import __main__ as m
-        except Exception:
-            return None
-    return getattr(m, "__file__", None)
-
-
-def _cmdline_tokens(cmdline_path="/proc/self/cmdline"):
-    """Null-separated tokens from /proc/self/cmdline, or () if unavailable."""
-    try:
-        with open(cmdline_path, "rb") as f:
-            return tuple(t for t in f.read().split(b"\0") if t)
-    except Exception:
-        return ()
-
-
-def _cmdline_has_dash_i(cmdline_path="/proc/self/cmdline"):
-    return b"-i" in _cmdline_tokens(cmdline_path)
-
-
-def _cmdline_has_batch_flag(cmdline_path="/proc/self/cmdline"):
-    toks = _cmdline_tokens(cmdline_path)
-    return b"-m" in toks or b"-c" in toks
-
-
-def _is_interactive_session():
-    """True when a REPL prompt will remain after current top-level work."""
-    if getattr(sys.implementation, "name", "") == "cpython":
-        flags = getattr(sys, "flags", None)
-        return bool(getattr(flags, "interactive", 0)) or (_main_file() is None)
-    if _cmdline_has_dash_i():
-        return True
-    if _cmdline_has_batch_flag():
-        return False
-    main = _main_file()
-    return main is None or main in ("<stdin>", "<string>")
 
 
 class _TimerSubscription:
@@ -155,15 +114,19 @@ class App:
                 pass
         App._current_app = self
 
-        self._pending_timer_async = False
+        # Work that cannot be armed yet, flushed the moment the loop starts.
+        # Replaces the several _pending_* flags that each approximated that
+        # moment separately; _hostloop supplies it exactly once.
+        self._deferred = []
+        self._loop_started = False
+        self._strategy = None
         self._refresh_subscription = None
         self._refresh_paused = False
         self._refresh_claim = None
-        self._pending_async_refresh = None
-        self._pending_sync_refresh = None
+        self._refresh_pending = False
         self._refresh_period = refresh_period
         self._service_subscription = None
-        self._pending_service = None
+        self._service_pending = False
         self._app_drives_poll = False
         self._in_service_poll = False
         self._pending_teardown = False
@@ -264,7 +227,17 @@ class App:
 
         if self._displays:
             self._wire_display_refresh(self._refresh_period)
-            self._register_atexit()
+            self._install_hostloop()
+
+    @property
+    def strategy(self):
+        """How this app stays alive past the end of the script body.
+
+        One of ``"ambient"`` (the host runs a loop of its own), ``"exit_hook"``
+        (an interpreter exit hook takes the main thread), ``"none"`` (nothing
+        available -- :meth:`run` is required), or None before wiring.
+        """
+        return self._strategy
 
     @property
     def timer_async(self):
@@ -305,12 +278,11 @@ class App:
             pass
         if first:
             self._wire_display_refresh(self._refresh_period)
-            self._register_atexit()
+            self._install_hostloop()
         elif (
             getattr(drv, "needs_refresh", False)
             and self._refresh_subscription is None
-            and self._pending_async_refresh is None
-            and self._pending_sync_refresh is None
+            and not self._refresh_pending
         ):
             self._wire_display_refresh(self._refresh_period)
         return drv
@@ -425,6 +397,73 @@ class App:
         except ImportError:
             return False
 
+    def _arm_ready(self):
+        """True when a timer can be created right now.
+
+        Async timers need a running event loop (the browser is the exception --
+        it owns the loop for the whole program, including import). Some sync
+        providers ask to be armed from inside the loop instead of at import.
+        """
+        if self._timer_async:
+            if sys.platform in ("emscripten", "webassembly"):
+                return True
+            return self._event_loop_running()
+        return not self._sync_refresh_needs_deferred_arm()
+
+    def _defer(self, fn):
+        """Run ``fn`` now if the app can arm, else at the moment the loop starts."""
+        if self._arm_ready():
+            fn()
+        else:
+            self._deferred.append(fn)
+
+    def on_start(self, fn):
+        """Register ``fn()`` to run when the app's loop starts.
+
+        Runs immediately if the loop is already able to arm timers. This is the
+        single coordination point callers such as ``display_driver`` need in
+        place of probing for a running event loop themselves.
+        """
+        if not callable(fn):
+            raise ValueError("fn must be callable")
+        self._defer(fn)
+        return fn
+
+    def _flush_deferred(self):
+        """Arm everything that was waiting for the loop. Called at loop start.
+
+        Only the async gate applies here. A sync provider that sets
+        ``_defer_sync_arm`` is asking to be armed *from inside* the loop, which
+        is exactly where this runs -- consulting :meth:`_arm_ready` would keep
+        deferring forever, since that flag never clears.
+        """
+        if self._timer_async and not self._arm_ready():
+            return
+        self._loop_started = True
+        while self._deferred:
+            self._deferred.pop(0)()
+
+    def _install_hostloop(self):
+        """Arrange for the app to outlive the script body. See ``_hostloop``."""
+        self._strategy = _hostloop.install(
+            pump=self._pump,
+            alive=lambda: not self._quit_requested and not self._teardown_done,
+            on_start=self._flush_deferred,
+            on_stop=self._teardown_from_loop,
+            drive=self._drive_async if self._timer_async else None,
+        )
+        return self._strategy
+
+    def _pump(self):
+        from multimer import auto as timer
+
+        timer.sleep_ms(SERVICE_TICK_MS)
+
+    def _drive_async(self):
+        from multimer import asyncio
+
+        asyncio.run(self._run_async())
+
     def every(self, ms=None, callback=None, *, period=None, async_=None):
         """Schedule a periodic callback every ms milliseconds, or use as decorator."""
         if period is not None:
@@ -443,10 +482,7 @@ class App:
             raise ValueError("callback must be callable")
         self._ensure_ticks()
         if self._timer is None:
-            if self._timer_async and not self._event_loop_running():
-                self._pending_timer_async = True
-            else:
-                self._start_timer(async_=self._timer_async)
+            self._defer(lambda: self._start_timer(async_=self._timer_async))
         entry = [callback, int(ms), self._ticks_add(self._ticks_ms(), int(ms)), False]
         self._tick_callbacks.append(entry)
         return _TimerSubscription(self, entry)
@@ -458,11 +494,13 @@ class App:
     def _start_timer(self, *, async_=False, tick_ms=10):
         if self._timer is not None:
             return self._timer
+        # A timer is the other reason an app must outlive the script body, so a
+        # display-less app that only schedules callbacks still gets a host loop.
+        self._install_hostloop()
         from multimer import AsyncTimer
         from multimer import auto as timer
 
         self._ensure_ticks()
-        self._pending_timer_async = False
         timer_class = AsyncTimer if async_ else timer.Timer
         timer_inst = None
         last_err = None
@@ -491,10 +529,10 @@ class App:
         self._refresh_subscription = None
         self._refresh_paused = False
         self._refresh_claim = None
-        self._pending_async_refresh = None
-        self._pending_sync_refresh = None
+        self._refresh_pending = False
         self._service_subscription = None
-        self._pending_service = None
+        self._service_pending = False
+        self._deferred.clear()
         if timer_inst is not None:
             timer_inst.deinit()
 
@@ -567,15 +605,8 @@ class App:
                 ):
                     display.show(timer_obj)
 
-        if self._timer_async and not self._event_loop_running():
-            self._pending_async_refresh = (_show, period)
-            return
-
-        if self._sync_refresh_needs_deferred_arm():
-            self._pending_sync_refresh = (_show, period)
-            return
-
-        self._refresh_subscription = self.every(period, _show)
+        self._refresh_pending = True
+        self._defer(lambda: self._subscribe_refresh(_show, period))
 
     @staticmethod
     def _sync_refresh_needs_deferred_arm():
@@ -586,20 +617,18 @@ class App:
         except ImportError:
             return False
 
-    def _maybe_arm_pending_sync_refresh(self):
-        pending = self._pending_sync_refresh
-        if pending is None:
-            return
-        show_fn, period = pending
-        self._pending_sync_refresh = None
+    def _subscribe_refresh(self, show_fn, period):
+        self._refresh_pending = False
         self._refresh_subscription = self.every(period, show_fn)
 
     def _arm_service(self):
-        if self._service_subscription is not None or self._pending_service:
+        if self._service_subscription is not None or self._service_pending:
             return
-        if self._timer_async and not self._event_loop_running():
-            self._pending_service = True
-            return
+        self._service_pending = True
+        self._defer(self._subscribe_service)
+
+    def _subscribe_service(self):
+        self._service_pending = False
         self._service_subscription = self.every(SERVICE_TICK_MS, self._service_tick)
 
     def _service_tick(self, timer_obj):
@@ -627,7 +656,7 @@ class App:
             timer.pump()
         except ImportError:
             pass
-        self._maybe_arm_pending_sync_refresh()
+        self._flush_deferred()
 
         eventlist = []
         for device in self.devices:
@@ -644,22 +673,17 @@ class App:
         return eventlist
 
     def arm_async_refresh(self):
-        """Wire deferred async refresh and auto-service once the loop is running."""
-        pending = self._pending_async_refresh
-        if pending is not None:
-            self._pending_async_refresh = None
-            show_fn, period = pending
-            self._refresh_subscription = self.every(period, show_fn)
-        if self._pending_service:
-            self._pending_service = False
-            self._service_subscription = self.every(SERVICE_TICK_MS, self._service_tick)
-        if self._pending_timer_async and self._timer is None:
-            self._start_timer(async_=True)
+        """Deprecated alias for flushing deferred arming; prefer :meth:`on_start`.
+
+        Kept because it is public API and callers may still invoke it from
+        inside a running loop.
+        """
+        self._flush_deferred()
 
     async def _run_async(self, tick_ms=SERVICE_TICK_MS):
         from multimer import asyncio
 
-        self.arm_async_refresh()
+        self._flush_deferred()
         self._blocking_run = True
         try:
             while not self._quit_requested:
@@ -678,9 +702,11 @@ class App:
         """Start the application and run until quit."""
         from multimer import auto as timer
 
+        _hostloop.claim()
+
         if self._timer_async:
             if self._event_loop_running():
-                self.arm_async_refresh()
+                self._flush_deferred()
                 return
             from multimer import asyncio
 
@@ -688,8 +714,11 @@ class App:
             self._raise_exit_code()
             return
 
-        if _is_interactive_session() and getattr(timer, "uses_interrupts", False):
+        if _hostloop.interactive() and getattr(timer, "uses_interrupts", False):
+            self._flush_deferred()
             return
+
+        self._flush_deferred()
 
         self._blocking_run = True
         try:
@@ -708,7 +737,7 @@ class App:
             raise RuntimeError("asyncio is not available")
 
         async def runner():
-            self.arm_async_refresh()
+            self._flush_deferred()
             coro = coro_or_fn() if callable(coro_or_fn) else coro_or_fn
             return await coro
 
@@ -728,24 +757,36 @@ class App:
         self._quit_requested = True
         self._refresh_paused = True
         self._pending_teardown = True
+        # Single quit choke point. Under ``exit_hook`` the loop notices via
+        # ``alive()``; under ``ambient`` nothing of ours would ever notice, so
+        # ``quit()`` performs teardown there. Both land on _teardown_from_loop.
+        _hostloop.quit()
         if self._in_service_poll:
-            self._schedule_deferred_teardown()
+            self._teardown_from_loop()
 
-    def _schedule_deferred_teardown(self):
+    def _teardown_from_loop(self):
+        """Tear down, deferring one turn if we are inside a callback."""
         if self._teardown_done:
             return
-        if self._timer_async:
-            try:
-                from multimer import asyncio
+        if (self._in_service_poll or self._in_tick_dispatch) and self._schedule_async_teardown():
+            return
+        self._perform_teardown()
 
-                async def _later():
-                    await asyncio.sleep(0)
-                    self._perform_teardown()
+    def _schedule_async_teardown(self):
+        """Defer teardown to the next loop turn. True when scheduled."""
+        if not self._timer_async:
+            return False
+        try:
+            from multimer import asyncio
 
-                asyncio.create_task(_later())
-                return
-            except Exception:
-                pass
+            async def _later():
+                await asyncio.sleep(0)
+                self._perform_teardown()
+
+            asyncio.create_task(_later())
+            return True
+        except Exception:
+            return False
 
     def _try_perform_teardown(self):
         if self._teardown_done:
@@ -779,14 +820,3 @@ class App:
         if code is not None:
             self._exit_code = None
             raise SystemExit(code)
-
-    def _register_atexit(self):
-        try:
-            import atexit
-
-            atexit.register(self._perform_teardown)
-            return
-        except ImportError:
-            pass
-        if hasattr(sys, "atexit"):
-            sys.atexit(self._perform_teardown)

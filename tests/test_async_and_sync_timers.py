@@ -3,25 +3,10 @@
 # SPDX-License-Identifier: MIT
 """Dedicated test suite validating async and synchronous timer backends in appdev."""
 
-import sys
 import time
 import unittest
-import _env
 
-scratch_dir = "/home/brad/.gemini/antigravity-ide/brain/9ca712e9-4cd0-4923-98a7-25348581154c/scratch"
-lib_dir = "/home/brad/gh/pydevices/pydevices/lib"
-if sys.platform == "win32":
-    if not scratch_dir.startswith("//wsl"):
-        scratch_dir = "//wsl.localhost/Ubuntu" + scratch_dir
-    if not lib_dir.startswith("//wsl"):
-        lib_dir = "//wsl.localhost/Ubuntu" + lib_dir
-
-if lib_dir in sys.path:
-    sys.path.remove(lib_dir)
-sys.path.insert(0, lib_dir)
-if scratch_dir in sys.path:
-    sys.path.remove(scratch_dir)
-sys.path.insert(0, scratch_dir)
+import _env  # noqa: F401
 
 import events
 import keys
@@ -110,13 +95,13 @@ class TestAsyncTimers(unittest.TestCase):
         app.every(20, hits.append)
         # Timer creation is deferred because event loop is not running yet
         self.assertIsNone(app._timer)
-        self.assertTrue(app._pending_timer_async)
+        self.assertTrue(app._deferred)
 
-        # Once arm_async_refresh() runs inside an event loop, timer starts
+        # Once the deferred work flushes inside an event loop, the timer starts
         import asyncio
 
         async def _test():
-            app.arm_async_refresh()
+            app._flush_deferred()
             self.assertIsNotNone(app._timer)
             self.assertIsInstance(app._timer, AsyncTimer)
             # Wait for hits
@@ -134,12 +119,12 @@ class TestAsyncTimers(unittest.TestCase):
         disp = _FakeDisplay(needs_refresh=True)
         app = App(displays=[disp], timer_async=True)
         self.assertIsNone(app._timer)
-        self.assertIsNotNone(app._pending_async_refresh)
+        self.assertTrue(app._refresh_pending)
 
         import asyncio
 
         async def _test():
-            app.arm_async_refresh()
+            app._flush_deferred()
             deadline = time.monotonic() + 1.0
             while time.monotonic() < deadline:
                 if disp.shows >= 1:
