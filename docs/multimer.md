@@ -267,7 +267,14 @@ capability together. Async mode uses `AsyncTimer` and `multimer.asyncio`.
 
 Applications using those coordinators normally call `app.poll()`,
 `app.run()`, or `app.run_async()` rather than allocating a
-second refresh timer.
+second refresh timer. Most need none of them: `appdev.App` keeps itself alive
+past the end of the script body.
+
+`uses_interrupts` describes how callbacks are *delivered*, not who owns the main
+thread — no timer backend can keep a process alive on its own. Note that the
+`win32` provider delivers through APCs, so it needs an alertable wait
+(`SleepEx(ms, TRUE)`); the app's own loop provides one, a bare REPL prompt does
+not.
 
 ## Next
 

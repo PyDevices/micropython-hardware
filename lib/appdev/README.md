@@ -23,9 +23,10 @@ def on_key(e):
 def on_frame(timer=None):
     # Render animation or update physics every 20ms
     pass
-
-app.run()
 ```
+
+No `app.run()` is needed: the app keeps itself alive past the end of the
+script body. See [Application lifecycle](../../docs/appdev.md#application-lifecycle).
 
 ---
 
@@ -143,7 +144,7 @@ Attach or detach secondary display drivers.
 ### 5. Input Devices & Manual Polling
 
 #### `app.poll()`
-Polls all registered devices, pumps timer queues, dispatches pending events to listeners, and returns a list of polled `events.*` namedtuples. (Normally driven automatically by `app.run()`).
+Polls all registered devices, pumps timer queues, dispatches pending events to listeners, and returns a list of polled `events.*` namedtuples. (Normally driven automatically by the app's own loop).
 
 #### Manual Device Registration:
 * **`app.add_touch(read, *, display=None, rotation_table=None)`** &rarr; returns `Touch`
