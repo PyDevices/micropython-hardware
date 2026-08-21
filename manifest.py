@@ -1,4 +1,23 @@
-"""Freeze the core PyDevices packages from their canonical source tree."""
+"""Package the PyDevices source tree for installation.
+
+Target paths are ``lib/...`` and ``utils/...``, so installing with ``target="."``
+lays the tree out the way the documented search paths expect::
+
+    MICROPYPATH=".:.frozen:lib:utils:~/.micropython/lib:/usr/lib/micropython"
+    PYTHONPATH=".:lib:utils"
+
+``lib`` holds the importable packages (``appdev``, ``audiodev``, ``displaydev``,
+``multimer``) and the flat modules beside them; ``utils`` holds the host-side
+helpers, including the portable ``mip.py`` that stands in for firmware ``mip``
+on CPython, CircuitPython and Pyodide. Keeping ``utils`` *after* ``.frozen``
+matters: MicroPython ships ``mip`` in firmware, and ``utils/mip.py`` raises
+ImportError if the search order ever lets it shadow that.
+
+Note this is not a freeze manifest -- the target paths are prefixed, so frozen
+modules would import as ``lib.appdev`` rather than ``appdev``. Freezing the same
+tree is what ``cmods/manifest-micropython.py`` does, via each component repo's
+own ``manifest.py``.
+"""
 
 if 0:
 
@@ -9,9 +28,5 @@ if 0:
         pass
 
 
-package("displaydev", base_path="./drivers/display", opt=3)  # type: ignore[name-defined]  # noqa: PGH003
-package("audiodev", base_path="./drivers/audio", opt=3)  # type: ignore[name-defined]  # noqa: PGH003
-package("appdev", base_path="./lib", opt=3)  # type: ignore[name-defined]  # noqa: PGH003
-package("multimer", base_path="./lib", opt=3)  # type: ignore[name-defined]  # noqa: PGH003
-module("events.py", base_path="./lib", opt=3)  # type: ignore[name-defined]  # noqa: PGH003
-module("keys.py", base_path="./lib", opt=3)  # type: ignore[name-defined]  # noqa: PGH003
+package("lib", base_path=".", opt=3)  # type: ignore[name-defined]  # noqa: PGH003
+package("utils", base_path=".", opt=3)  # type: ignore[name-defined]  # noqa: PGH003
