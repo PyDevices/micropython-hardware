@@ -10,8 +10,20 @@
 from _asyncio import Task, TaskQueue
 import sys
 
-from ._ticks import ticks_add, ticks_diff
-from ._ticks import ticks_ms as ticks
+# Task due-times are stored in ``_asyncio.TaskQueue``, a C pairing heap that
+# orders them with the interpreter's *own* ticks domain. multimer's ticks_ms
+# masks to 29 bits, while MicroPython's ``time.ticks_ms`` is 30-bit, so feeding
+# it multimer's values made every key look half a period away: tasks sorted as
+# far-future and were never popped -- an AsyncTimer armed under this shim simply
+# never fired. Use the interpreter's own functions wherever they exist, and fall
+# back to multimer's only when they do not (CircuitPython, where
+# ``supervisor.ticks_ms`` is already the domain the queue uses).
+try:
+    from time import ticks_add, ticks_diff
+    from time import ticks_ms as ticks
+except ImportError:
+    from ._ticks import ticks_add, ticks_diff
+    from ._ticks import ticks_ms as ticks
 
 try:
     import select

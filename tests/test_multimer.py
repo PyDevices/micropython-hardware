@@ -434,11 +434,14 @@ class TestSelfDeinit(unittest.TestCase):
         core._wait_idle()  # must return immediately
 
 
-class TestMpAsyncioAwaitable(unittest.TestCase):
-    """``_mpasyncio`` must yield objects CircuitPython's ``await`` accepts.
+class TestMpAsyncioShim(unittest.TestCase):
+    """``_mpasyncio`` must match the interpreter it borrows ``_asyncio`` from.
 
-    CircuitPython requires ``__await__`` on the operand; MicroPython accepts any
-    iterator. The shim is shared, so it has to satisfy the stricter host.
+    Awaitables: CircuitPython requires ``__await__`` on the operand where
+    MicroPython accepts any iterator, and the shim is shared.
+
+    Ticks: due-times land in ``_asyncio.TaskQueue``, a C pairing heap that
+    orders them in the interpreter's own ticks domain.
     """
 
     def setUp(self):
@@ -456,6 +459,18 @@ class TestMpAsyncioAwaitable(unittest.TestCase):
 
     def test_event_wait_is_awaitable(self):
         self.assertTrue(hasattr(self.mod.Event().wait(), "__await__"))
+
+    def test_ticks_domain_matches_the_task_queue(self):
+        """multimer's ticks_ms masks to 29 bits; time.ticks_ms is 30-bit.
+
+        Handing the C task queue the masked value made every key sort half a
+        period away, so tasks were never popped and an AsyncTimer armed under
+        this shim never fired.
+        """
+        native = getattr(time, "ticks_ms", None)
+        if native is None:
+            self.skipTest("interpreter has no time.ticks_ms")
+        self.assertIs(native, self.mod.ticks)
 
 
 class TestAsyncTimer(unittest.TestCase):
