@@ -534,7 +534,12 @@ class App:
         self._service_pending = False
         self._deferred.clear()
         if timer_inst is not None:
-            timer_inst.deinit()
+            try:
+                timer_inst.deinit()
+            except Exception:
+                # Never let a provider's disarm abort the rest of teardown --
+                # displays still have to be released.
+                pass
 
     def _dispatch_tick(self, timer_obj):
         if self._timer_thread_ident is not None:
@@ -702,6 +707,7 @@ class App:
         """Start the application and run until quit."""
         from multimer import auto as timer
 
+        self._install_hostloop()
         _hostloop.claim()
 
         if self._timer_async:
@@ -714,7 +720,14 @@ class App:
             self._raise_exit_code()
             return
 
-        if _hostloop.interactive() and getattr(timer, "uses_interrupts", False):
+        # Nothing to block for when the host already runs a loop and the timer
+        # drives itself: an interactive REPL keeps the prompt, and a browser
+        # page would deadlock its own event loop if we slept here.
+        self_driving = getattr(timer, "uses_interrupts", False) or sys.platform in (
+            "emscripten",
+            "webassembly",
+        )
+        if _hostloop.strategy() == _hostloop.AMBIENT and self_driving:
             self._flush_deferred()
             return
 
@@ -773,9 +786,14 @@ class App:
         self._perform_teardown()
 
     def _schedule_async_teardown(self):
-        """Defer teardown to the next loop turn. True when scheduled."""
-        if not self._timer_async:
-            return False
+        """Defer teardown to the next loop turn. True when scheduled.
+
+        Not gated on ``timer_async``: ``multimer.auto`` resolves to an async
+        provider in the browser even for an app that never asked for one, and
+        deinitialising an async-backed timer from inside its own callback fails
+        with "can't cancel self". Whether a loop is running is the question, and
+        ``create_task`` answers it.
+        """
         try:
             from multimer import asyncio
 
@@ -789,9 +807,10 @@ class App:
             return False
 
     def _try_perform_teardown(self):
-        if self._teardown_done:
-            return
-        self._perform_teardown()
+        # Reached from inside _dispatch_tick, so it must take the deferring
+        # path: tearing down there cancels the very task/timer delivering the
+        # callback ("can't cancel self" on an AsyncTimer).
+        self._teardown_from_loop()
 
     def _perform_teardown(self):
         if self._teardown_done:
